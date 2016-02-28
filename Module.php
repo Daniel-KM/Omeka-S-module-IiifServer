@@ -38,6 +38,7 @@ use Zend\Mvc\Controller\AbstractController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 use Zend\Mvc\MvcEvent;
+use Omeka\Mvc\Controller\Plugin\Messenger;
 
 class Module extends AbstractModule {
     protected $_settings = array(
@@ -69,7 +70,7 @@ class Module extends AbstractModule {
 
         $processors = $this->_getProcessors($serviceLocator);
         if (count($processors) == 1) {
-            throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the UniversalViewer.'));
+            throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the UniversalViewer.')); // @translate
         }
 
         $js = dirname(__FILE__)
@@ -80,7 +81,7 @@ class Module extends AbstractModule {
             . DIRECTORY_SEPARATOR . 'lib'
             . DIRECTORY_SEPARATOR . 'embed.js';
         if (!file_exists($js)) {
-            throw new ModuleCannotInstallException($t->translate("UniversalViewer library should be installed. See module's installation documentation."));
+            throw new ModuleCannotInstallException($t->translate('UniversalViewer library should be installed. See module’s installation documentation.')); // @translate
         }
 
         $settings = $serviceLocator->get('Omeka\Settings');
@@ -115,10 +116,21 @@ class Module extends AbstractModule {
         $settings = $serviceLocator->get('Omeka\Settings');
         $translator = $serviceLocator->get('MvcTranslator');
 
+        $messenger = new Messenger();
+        $processors = $this->_getProcessors();
+
+        if (count($processors) == 1) {
+            $messenger->addError($translator->translate('Warning: No graphic library is installed: Universaliewer can’t work.')); // @translate
+        }
+
+        if (!isset($processors['Imagick'])) {
+            $messenger->addWarning($translator->translate('Warning: Imagick is not installed: Only standard images (jpg, png, gif and webp) will be processed.')); // @translate
+        }
+
         $vars = array(
             'settings' => $settings,
             't' => $translator,
-            'processors' => $this->_getProcessors(),
+            'processors' => $processors,
         );
         return $renderer->render('config-form', $vars);
     }
