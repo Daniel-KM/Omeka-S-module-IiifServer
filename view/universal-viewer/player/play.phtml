@@ -1,0 +1,15 @@
+<?php
+    $this->htmlElement('body')->appendAttribute('class', 'universal-viewer play');
+    $title = $resource->displayTitle();
+    $creator = $resource->value('dcterms:creator', array('type' => 'literal'));
+    if ($creator) {
+        $title .= ' - ' . $creator;
+    }
+
+    echo $this->pageTitle($title);
+?>
+<?php
+    echo $this->universalViewer($resource, array(
+        'width' => '100%',
+        'height' => '700px',
+    ));
