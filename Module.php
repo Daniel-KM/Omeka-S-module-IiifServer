@@ -22,6 +22,17 @@ class Module extends AbstractModule {
         'universalviewer_iiif_creator' => 'Auto',
     );
 
+    public function onBootstrap(MvcEvent $event)
+    {
+        parent::onBootstrap($event);
+
+        $acl = $this->getServiceLocator()->get('Omeka\Acl');
+        $acl->allow(null, 'UniversalViewer\Controller\Player');
+        $acl->allow(null, 'UniversalViewer\Controller\Presentation');
+        $acl->allow(null, 'UniversalViewer\Controller\Image');
+        $acl->allow(null, 'UniversalViewer\Controller\Media');
+    }
+
     public function install(ServiceLocatorInterface $serviceLocator) {
         $t = $serviceLocator->get('MvcTranslator');
 
