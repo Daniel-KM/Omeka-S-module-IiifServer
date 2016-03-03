@@ -7,16 +7,6 @@ use Zend\View\Model\ViewModel;
 
 class PresentationController extends AbstractActionController
 {
-    /**
-     * Forward to the 'play' action
-     *
-     * @see self::playAction()
-     */
-    public function indexAction()
-    {
-        $this->forward('manifest');
-    }
-
     public function manifestAction()
     {
         $id = $this->params('id');
