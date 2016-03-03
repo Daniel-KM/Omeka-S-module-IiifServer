@@ -1,0 +1,267 @@
+# Translation for the UniversalViewer module for Omeka S
+# Copyright (C) 2016 BibLibre
+# This file is distributed under the same license as the Omeka S package.
+# Julian Maurice <julian.maurice@biblibre.com>, 2016.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: UniversalViewer\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-03-03 15:53+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: Module.php:43
+msgid ""
+"At least one graphic processor (GD or ImageMagick) is required to use the "
+"UniversalViewer."
+msgstr ""
+
+#: Module.php:54
+msgid ""
+"UniversalViewer library should be installed. See module's installation "
+"documentation."
+msgstr ""
+
+#: Module.php:131
+msgid "Automatic"
+msgstr ""
+
+#: view/config-form.phtml:2
+msgid "General parameters"
+msgstr ""
+
+#: view/config-form.phtml:5
+msgid ""
+"If checked, the viewer will be automatically appended to the collections or "
+"items show page."
+msgstr ""
+
+#: view/config-form.phtml:6
+msgid ""
+"Else, the viewer can be added via the helper in the theme or the shortcode "
+"in any page."
+msgstr ""
+
+#: view/config-form.phtml:11
+msgid "Append to \"Item set show\""
+msgstr ""
+
+#: view/config-form.phtml:25
+msgid "Append to \"Item show\""
+msgstr ""
+
+#: view/config-form.phtml:39
+msgid "Max dynamic size for images"
+msgstr ""
+
+#: view/config-form.phtml:48
+msgid "Set the maximum size in bytes for the dynamic processing of images."
+msgstr ""
+
+#: view/config-form.phtml:49
+msgid ""
+"Beyond this limit, the plugin will require a tiled image, for example made "
+"by OpenLayersZoom."
+msgstr ""
+
+#: view/config-form.phtml:50
+msgid "Let empty to allow processing of any image."
+msgstr ""
+
+#: view/config-form.phtml:60
+msgid "Common infos"
+msgstr ""
+
+#: view/config-form.phtml:64
+msgid "Licence"
+msgstr ""
+
+#: view/config-form.phtml:73
+msgid ""
+"If any, this link will be added in all manifests and viewers to indicate the "
+"rights."
+msgstr ""
+
+#: view/config-form.phtml:84
+msgid "Attribution"
+msgstr ""
+
+#: view/config-form.phtml:93
+msgid "If any, this text will be added in all manifests and viewers."
+msgstr ""
+
+#: view/config-form.phtml:103
+msgid "Integration of the viewer"
+msgstr ""
+
+#: view/config-form.phtml:105
+msgid ""
+"These values allows to parameter the integration of the viewer in Omeka "
+"pages."
+msgstr ""
+
+#: view/config-form.phtml:106
+msgid ""
+"The viewer itself can be configured via the file \"config.json\" and the "
+"helper."
+msgstr ""
+
+#: view/config-form.phtml:112
+msgid "Class of inline frame"
+msgstr ""
+
+#: view/config-form.phtml:121
+msgid "Class to add to the inline frame."
+msgstr ""
+
+#: view/config-form.phtml:133
+msgid "Width of inline frame"
+msgstr ""
+
+#: view/config-form.phtml:148
+msgid "Height of inline frame"
+msgstr ""
+
+#: view/config-form.phtml:163
+msgid "Locales of the viewer"
+msgstr ""
+
+#: view/config-form.phtml:177
+msgid "Background parameters"
+msgstr ""
+
+#: view/config-form.phtml:182
+msgid "Image processor"
+msgstr ""
+
+#: view/config-form.phtml:184
+msgid "Automatic (GD when possible, else ImageMagick)"
+msgstr ""
+
+#: view/config-form.phtml:193
+msgid "Images may be processed internally before to be sent to browser."
+msgstr ""
+
+#: view/config-form.phtml:194
+msgid "Select the one to use."
+msgstr ""
+
+#: view/config-form.phtml:195
+msgid ""
+"Generally, GD is quicker than ImageMagick, but ImageMagick manages more "
+"formats."
+msgstr ""
+
+#: view/config-form.phtml:196
+msgid ""
+"Nevertheless, the performance depends on your installation and your server."
+msgstr ""
+
+#: src/Controller/MediaController.php:62 src/Controller/ImageController.php:42
+msgid ""
+"The IIIF server cannot fulfill the request: the arguments are incorrect."
+msgstr ""
+
+#: src/Controller/MediaController.php:90
+msgid ""
+"The IXIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the requested format is not supported."
+msgstr ""
+
+#: src/Controller/MediaController.php:106
+msgid ""
+"The IXIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the resulting file is not found."
+msgstr ""
+
+#: src/Controller/ImageController.php:92
+msgid "The source file is not an image."
+msgstr ""
+
+#: src/Controller/ImageController.php:188
+msgid ""
+"The IIIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the file is not tiled for dynamic processing."
+msgstr ""
+
+#: src/Controller/ImageController.php:218
+#: src/Controller/ImageController.php:237
+msgid ""
+"The IIIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the resulting file is not found or empty."
+msgstr ""
+
+#: src/Controller/ImageController.php:307
+#: src/Controller/ImageController.php:338
+#, php-format
+msgid ""
+"The IIIF server cannot fulfill the request: the region \"%s\" is incorrect."
+msgstr ""
+
+#: src/Controller/ImageController.php:376
+#: src/Controller/ImageController.php:396
+#: src/Controller/ImageController.php:419
+#, php-format
+msgid ""
+"The IIIF server cannot fulfill the request: the size \"%s\" is incorrect."
+msgstr ""
+
+#: src/Controller/ImageController.php:468
+#: src/Controller/ImageController.php:476
+#, php-format
+msgid ""
+"The IIIF server cannot fulfill the request: the size \"%s\" is not supported."
+msgstr ""
+
+#: src/Controller/ImageController.php:499
+#, php-format
+msgid ""
+"The IIIF server cannot fulfill the request: the rotation \"%s\" is not "
+"supported."
+msgstr ""
+
+#: src/IiifCreator/Imagick.php:37
+msgid ""
+"The transformation of images via ImageMagick requires the PHP extension "
+"\"imagick\"."
+msgstr ""
+
+#: src/IiifCreator/Imagick.php:183
+#, php-format
+msgid ""
+"Imagick failed to open the file \"%s\". Details:\n"
+"%s"
+msgstr ""
+
+#: src/IiifCreator/GD.php:241
+#, php-format
+msgid ""
+"GD failed to open the file \"%s\". Details:\n"
+"%s"
+msgstr ""
+
+#: src/View/Helper/IiifManifest.php:171
+msgid "Download as PDF"
+msgstr ""
+
+#: src/View/Helper/IiifManifest.php:633
+msgid "Placeholder image"
+msgstr ""
+
+#: src/View/Helper/IiifManifest.php:678
+msgid ""
+"Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
+"content (e.g., audio, video) and is unfortunately incompatible with IIIF "
+"viewers."
+msgstr ""
+
+#: src/View/Helper/IiifItemSet.php:105
+msgid "[Untitled]"
+msgstr ""
