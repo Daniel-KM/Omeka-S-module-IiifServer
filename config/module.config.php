@@ -8,6 +8,11 @@ return array(
             'UniversalViewer\Controller\Media' => 'UniversalViewer\Controller\MediaController',
         ),
     ),
+    'controller_plugins' => array(
+        'invokables' => array(
+            'jsonLd' => 'UniversalViewer\Mvc\Controller\Plugin\JsonLd',
+        )
+    ),
     'router' => array(
         'routes' => array(
             'universalviewer_player' => array(
