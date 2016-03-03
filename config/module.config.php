@@ -157,7 +157,7 @@ return array(
             'universalviewer_media_bad' => array(
                 'type' => 'segment',
                 'options' => array(
-                    'route' => '/media/:id.:format',
+                    'route' => '/media/:id:.:format',
                     'constraints' => array(
                         'id' => '\d+',
                         'format' => '.+',
@@ -172,7 +172,7 @@ return array(
             'universalviewer_media_url' => array(
                 'type' => 'segment',
                 'options' => array(
-                    'route' => '/media/:id.:format',
+                    'route' => '/media/:id:.:format',
                     'constraints' => array(
                         'id' => '\d+',
                         'format' => 'pdf|mp3|ogg|mp4|webm|ogv',
