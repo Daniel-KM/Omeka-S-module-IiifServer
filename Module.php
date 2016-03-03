@@ -3,6 +3,8 @@ namespace UniversalViewer;
 
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
+use Zend\EventManager\Event;
+use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
@@ -67,6 +69,14 @@ class Module extends AbstractModule {
         }
     }
 
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    {
+        $sharedEventManager->attach('Omeka\Controller\Site\Item',
+            'view.show.after', array($this, 'displayUniversalViewer'));
+        $sharedEventManager->attach('Omeka\Controller\Site\Item',
+            'view.browse.after', array($this, 'displayUniversalViewer'));
+    }
+
     public function getConfig() {
         return include __DIR__ . '/config/module.config.php';
     }
@@ -92,6 +102,16 @@ class Module extends AbstractModule {
         $params = $controller->getRequest()->getPost();
         foreach ($params as $name => $value) {
             $settings->set($name, $value);
+        }
+    }
+
+    public function displayUniversalViewer(Event $event)
+    {
+        $view = $event->getTarget();
+        if (isset($view->item)) {
+            echo $view->universalViewer($view->item);
+        } elseif (isset($view->itemSet)) {
+            echo $view->universalViewer($view->itemSet);
         }
     }
 

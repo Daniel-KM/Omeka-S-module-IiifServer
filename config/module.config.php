@@ -20,7 +20,7 @@ return array(
                 'options' => array(
                     'route' => '/:recordtype/play/:id',
                     'constraints' => array(
-                        'recordtype' => 'collections|items',
+                        'recordtype' => 'item_sets|items',
                         'id' => '\d+',
                     ),
                     'defaults' => array(
@@ -35,7 +35,7 @@ return array(
                 'options' => array(
                     'route' => '/:recordtype/presentation/:id',
                     'constraints' => array(
-                        'recordtype' => 'itemsets|items',
+                        'recordtype' => 'item_sets|items',
                         'id' => '\d+',
                     ),
                     'defaults' => array(
@@ -50,7 +50,7 @@ return array(
                 'options' => array(
                     'route' => '/:recordtype/presentation/:id/manifest',
                     'constraints' => array(
-                        'recordtype' => 'itemsets|items',
+                        'recordtype' => 'item_sets|items',
                         'id' => '\d+',
                     ),
                     'defaults' => array(
@@ -196,6 +196,7 @@ return array(
             'universalViewer' => 'UniversalViewer\View\Helper\UniversalViewer',
             'iiifManifest' => 'UniversalViewer\View\Helper\IiifManifest',
             'iiifInfo' => 'UniversalViewer\View\Helper\IiifInfo',
+            'iiifItemSet' => 'UniversalViewer\View\Helper\IiifItemSet',
         ),
     ),
 );

@@ -17,8 +17,8 @@ class IiifManifest extends AbstractHelper
         if ($resourceName == 'items') {
             $result = $this->_buildManifestItem($resource);
         }
-        elseif ($resourceName == 'itemsets') {
-            return $this->view->iiifItemsets($resource, $asJson);
+        elseif ($resourceName == 'item_sets') {
+            return $this->view->iiifItemSet($resource, $asJson);
         }
         else {
             return null;
@@ -42,23 +42,19 @@ class IiifManifest extends AbstractHelper
      * @param $resource Item
      * @return Object|null. The object corresponding to the manifest.
      */
-    protected function _buildManifestItem(ItemRepresentation $resource)
+    protected function _buildManifestItem(ItemRepresentation $item)
     {
         // Prepare all values needed for manifest.
         $url = $this->view->url('universalviewer_presentation_manifest', array(
             'recordtype' => 'items',
-            'id' => $resource->id(),
+            'id' => $item->id(),
         ));
 
         // The base url for some other ids.
         $this->_baseUrl = dirname($url);
 
-
-
-        $values = $resource->values();
-
         $metadata = array();
-        foreach ($resource->values() as $name => $term) {
+        foreach ($item->values() as $name => $term) {
             $metadata[] = (object) array(
                 'label' => $term,
                 'value' => count($term['values']) > 1
@@ -67,9 +63,9 @@ class IiifManifest extends AbstractHelper
             );
         }
 
-        $title = $resource->displayTitle();
+        $title = $item->displayTitle();
 
-        $description = $resource->value('dcterms:citation', array('type' => 'literal'));
+        $description = $item->value('dcterms:citation', array('type' => 'literal'));
 
         // Thumbnail of the whole work.
         // TODO Use index of the true representative file.
@@ -102,19 +98,26 @@ class IiifManifest extends AbstractHelper
         );
         */
 
-        // TODO Possibly multiple item sets, what to do here ?
         $within = '';
-        //if ($resource->collection_id) {
-        //    $within = absolute_url(array(
-        //            'recordtype' => 'collections',
-        //            'id' => $record->collection_id,
-        //        ), 'universalviewer_presentation_manifest');
-        //}
+        $withins = array();
+        foreach ($item->itemSets() as $itemSet) {
+            $withins[] = $this->view->url('universalviewer_presentation_manifest', array(
+                'recordtype' => 'item_sets',
+                'id' => $itemSet->id(),
+            ));
+        }
+        if (!empty($withins)) {
+            if (count($withins) == 1) {
+                $within = $withins[0];
+            } else {
+                $within = $withins;
+            }
+        }
 
         $canvases = array();
 
         // Get all images and non-images.
-        $medias = $resource->media();
+        $medias = $item->media();
         $images = array();
         $nonImages = array();
         foreach ($medias as $media) {
@@ -278,7 +281,7 @@ class IiifManifest extends AbstractHelper
                         // one file.
                         $mediaSequenceElement['label'] = $title;
                         $mediaSequenceElement['metadata'] = $metadata;
-                        if ($media->hasThumbnail()) {
+                        if ($media->hasThumbnails()) {
                             $mseThumbnail = $file->thumbnailUrl('square');
                             if ($mseThumbnail) {
                                 $mediaSequenceElement['thumbnail'] = $mseThumbnail;
@@ -622,10 +625,12 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifCanvasPlaceholder()
     {
+        $translate = $this->getView()->plugin('translate');
+
         $canvas = array();
         $canvas['@id'] = $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $canvas['@type'] = 'sc:Canvas';
-        $canvas['label'] = __('Placeholder image');
+        $canvas['label'] = $translate('Placeholder image');
 
         $placeholder = 'images/placeholder.jpg';
         $canvas['thumbnail'] = $this->view->assetUrl($placeholder, 'UniversalViewer');
