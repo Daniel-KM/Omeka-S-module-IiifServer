@@ -114,7 +114,6 @@ class Module extends AbstractModule {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
         $translator = $serviceLocator->get('MvcTranslator');
-        $test = $settings->get('UniversalViewerTest');
 
         $vars = array(
             'settings' => $settings,
