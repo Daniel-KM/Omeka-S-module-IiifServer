@@ -694,7 +694,9 @@ class ImageController extends AbstractActionController
 
             // Set the image path.
             $olz = new OpenLayersZoom_Creator();
-            $dirWeb = $olz->getZDataWeb($media);
+            // The use of a full url avoids some complexity when Omeka is not
+            // the root of the server.
+            $dirWeb = $olz->getZDataWeb($media, true);
             $dirpath = $olz->useIIPImageServer()
                 ? $dirWeb
                 : $olz->getZDataDir($media);
@@ -706,7 +708,8 @@ class ImageController extends AbstractActionController
             $derivativeType = 'zoom_tiles';
 
             list($tileWidth, $tileHeight) = array_values($this-> _getWidthAndHeight($imagePath));
-            return array(
+
+            $return = array(
                 'fileurl' => $imageUrl,
                 'filepath' => $imagePath,
                 'derivativeType' => $derivativeType,
@@ -714,6 +717,7 @@ class ImageController extends AbstractActionController
                 'width' => $tileWidth,
                 'height' => $tileHeight,
             );
+            return $return;
         }
     }
 
