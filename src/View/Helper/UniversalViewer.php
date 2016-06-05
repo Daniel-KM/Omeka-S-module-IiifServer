@@ -45,7 +45,7 @@ class UniversalViewer extends AbstractHelper
      *   - (string) width
      *   - (string) height
      *   - (string) locale
-     *
+     *   - (string) config
      * @return string. The html string corresponding to the UniversalViewer.
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource, $options = array())
@@ -95,7 +95,10 @@ class UniversalViewer extends AbstractHelper
             'id' => $resource->id(),
         ));
 
-        $config = $this->view->basePath('/modules/UniversalViewer/view/public/universal-viewer/config.json');
+        // Default configuration file.
+        $config = empty($args['config'])
+            ? $this->view->basePath('/modules/UniversalViewer/view/public/universal-viewer/config.json')
+            : $args['config'];
         $urlJs = $this->view->basePath('/modules/UniversalViewer/view/shared/javascripts/uv/lib/embed.js');
 
         $html = sprintf('<div class="uv%s" data-config="%s" data-uri="%s"%s style="background-color: #000;%s%s"></div>',
