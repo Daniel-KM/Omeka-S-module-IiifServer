@@ -82,14 +82,13 @@ class IiifManifest extends AbstractHelper
         // The base url for some other ids.
         $this->_baseUrl = dirname($url);
 
-        $metadata = array();
+        $metadata = [];
         foreach ($item->values() as $name => $term) {
-            $metadata[] = (object) array(
-                'label' => $term,
-                'value' => count($term['values']) > 1
-                   ? $term['values']
-                   :  reset($term['values']),
-            );
+            $value = reset($term['values']);
+            $metadata[] = (object) [
+                'label' => $value->property()->localName(),
+                'value' => (string) $value,
+            ];
         }
 
         $title = $item->displayTitle();
