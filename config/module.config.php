@@ -200,7 +200,6 @@ return array(
         ),
     ),
     'translator' => array(
-        'locale' => 'fr',
         'translation_file_patterns' => array(
             array(
                 'type' => 'gettext',
