@@ -245,7 +245,7 @@ class IiifManifest extends AbstractHelper
                     // case 'audio/ogg':
                     // case 'audio/mp3':
                         $mediaSequenceElement = array();
-                        $mediaSequenceElement['@id'] = $file->originalUrl() . '/element/e0';
+                        $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
                         $mediaSequenceElement['@type'] = 'dctypes:Sound';
                         // The format is not be set here (see rendering).
                         // $mediaSequenceElement['format'] = $file->mime_type;
@@ -255,7 +255,7 @@ class IiifManifest extends AbstractHelper
                         // one file.
                         $mediaSequenceElement['label'] = $title;
                         $mediaSequenceElement['metadata'] = $metadata;
-                        if ($media->hasThumbnail()) {
+                        if ($media->hasThumbnails()) {
                             $mseThumbnail = $media->thumbnailUrl('square');
                             if ($mseThumbnail) {
                                 $mediaSequenceElement['thumbnail'] = $mseThumbnail;
