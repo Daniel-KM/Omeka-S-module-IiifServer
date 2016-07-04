@@ -1,0 +1,33 @@
+language: php
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+install:
+  - cd ../..
+  - git clone --depth 1 https://github.com/omeka/omeka-s.git
+  - cp -a $(readlink -e $(cd -)) omeka-s/modules/UniversalViewer
+  - cd omeka-s
+  - ant init
+
+before_script:
+  - mysql -e "create database IF NOT EXISTS omeka_test;" -uroot
+  - sed -i 's/^host.*/host = "localhost"/' application/test/config/database.ini
+  - sed -i 's/^user.*/user = "root"/' application/test/config/database.ini
+  - sed -i 's/^dbname.*/dbname = "omeka_test"/' application/test/config/database.ini
+  - mkdir modules/UniversalViewer/view/shared/javascripts/uv
+  - cd modules/UniversalViewer/view/shared/javascripts/uv
+  - wget https://github.com/UniversalViewer/universalviewer/releases/download/v1.6.14/uv-1.6.14.zip
+  - unzip uv-1.6.14.zip
+  - rm uv-1.6.14.zip
+  - cd ../../../../test
+
+script: phpunit
