@@ -23,8 +23,10 @@ before_script:
   - sed -i 's/^host.*/host = "localhost"/' application/test/config/database.ini
   - sed -i 's/^user.*/user = "root"/' application/test/config/database.ini
   - sed -i 's/^dbname.*/dbname = "omeka_test"/' application/test/config/database.ini
-  - mkdir modules/UniversalViewer/view/shared/javascripts/uv
-  - cd modules/UniversalViewer/view/shared/javascripts/uv
+  - cd modules/UniversalViewer
+  - composer install
+  - mkdir view/shared/javascripts/uv
+  - cd view/shared/javascripts/uv
   - wget https://github.com/UniversalViewer/universalviewer/releases/download/v1.6.14/uv-1.6.14.zip
   - unzip uv-1.6.14.zip
   - rm uv-1.6.14.zip

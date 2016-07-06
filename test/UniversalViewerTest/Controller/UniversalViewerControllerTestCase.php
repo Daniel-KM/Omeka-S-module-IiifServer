@@ -2,9 +2,9 @@
 
 namespace UniversalViewerTest\Controller;
 
-use Omeka\Test\AbstractHttpControllerTestCase;
+use OmekaTestHelper\Controller\OmekaControllerTestCase;
 
-abstract class UniversalViewerControllerTestCase extends AbstractHttpControllerTestCase
+abstract class UniversalViewerControllerTestCase extends OmekaControllerTestCase
 {
     protected $item;
 
@@ -19,22 +19,5 @@ abstract class UniversalViewerControllerTestCase extends AbstractHttpControllerT
     public function tearDown()
     {
         $this->api()->delete('items', $this->item->id());
-    }
-
-    protected function loginAsAdmin()
-    {
-        $application = $this->getApplication();
-        $serviceLocator = $application->getServiceManager();
-        $auth = $serviceLocator->get('Omeka\AuthenticationService');
-        $adapter = $auth->getAdapter();
-        $adapter->setIdentity('admin@example.com');
-        $adapter->setCredential('root');
-        $auth->authenticate();
-    }
-
-    protected function api()
-    {
-        $serviceLocator = $this->getApplication()->getServiceManager();
-        return $serviceLocator->get('Omeka\ApiManager');
     }
 }

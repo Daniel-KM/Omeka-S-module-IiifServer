@@ -1,0 +1,10 @@
+{
+    "require-dev": {
+        "biblibre/omeka-s-test-helper": "dev-master"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "UniversalViewerTest\\": "test/UniversalViewerTest/"
+        }
+    }
+}
