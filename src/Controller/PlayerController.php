@@ -60,8 +60,6 @@ class PlayerController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $this->layout('layout/minimal');
-
         $view = new ViewModel;
         $view->setVariable('resource', $resource);
 
