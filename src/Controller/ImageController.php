@@ -981,7 +981,7 @@ class ImageController extends AbstractActionController
         $dirpath = $olz->useIIPImageServer()
             ? $olz->getZDataWeb($media)
             : $olz->getZDataDir($media);
-        $properties = simplexml_load_file($dirpath . '/ImageProperties.xml');
+        $properties = simplexml_load_file($dirpath . '/ImageProperties.xml', 'SimpleXMLElement', LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_PARSEHUGE);
         if ($properties === false) {
             return;
         }
