@@ -33,13 +33,19 @@ namespace UniversalViewer\View\Helper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Module\Manager as ModuleManager;
 use Omeka\File\Manager as FileManager;
 use Zend\View\Helper\AbstractHelper;
 use \Exception;
 
 class IiifManifest extends AbstractHelper
 {
+    protected $fileManager;
+
+    public function __construct(FileManager $fileManager)
+    {
+        $this->fileManager = $fileManager;
+    }
+
     public function __invoke(AbstractResourceEntityRepresentation $resource, $asJson = true)
     {
         $resourceName = $resource->resourceName();
@@ -97,15 +103,12 @@ class IiifManifest extends AbstractHelper
 
         // Thumbnail of the whole work.
         // TODO Use index of the true representative file.
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-        $api = $serviceLocator->get('Omeka\ApiManager');
-        $response = $api->search('media', array('has_thumbnails' => 1, 'limit' => 1));
+        $response = $this->view->api()->search('media', array('has_thumbnails' => 1, 'limit' => 1));
         $medias = $response->getContent();
         $thumbnail = $this->_iiifThumbnail($medias[0]);
 
-        $settings = $serviceLocator->get('Omeka\Settings');
-        $licence = $settings->get('universalviewer_licence');
-        $attribution = $settings->get('universalviewer_attribution');
+        $licence = $this->view->setting('universalviewer_licence');
+        $attribution = $this->view->setting('universalviewer_attribution');
 
         // TODO To parameter or to extract from metadata.
         $service = '';
@@ -534,72 +537,26 @@ class IiifManifest extends AbstractHelper
 
         // There is only one image (parallel is not managed currently).
         $imageResource = array();
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-        $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
-        $module = $moduleManager->getModule('OpenLayersZoom');
-        if ($module && $module->getState() == ModuleManager::STATE_ACTIVE
-            && $this->view->openLayersZoom()->isZoomed($media))
-        {
-            $sizeFile = $this->_getImageSize($media, 'fullsize');
-            list($widthFullsize, $heightFullsize) = array_values($sizeFile);
-            $imageUrl = $this->view->url('universalviewer_image_url', array(
-                'id' => $media->id(),
-                'region' => 'full',
-                'size' => $width . ',' . $height,
-                'rotation' => 0,
-                'quality' => 'default',
-                'format' => 'jpg',
-            ));
-            $imageResource['@id'] = $imageUrl;
-            $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
-            $imageResource['width'] = $widthFullsize;
-            $imageResource['height'] = $heightFullsize;
-
-            $imageResourceService = array();
-            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
-
-            $imageUrl = $this->view->url('universalviewer_image', array(
-                'id' => $media->id(),
-            ));
-            $imageResourceService['@id'] = $imageUrl;
-            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-            $imageResourceService['width'] = $width;
-            $imageResourceService['height'] = $height;
-
-            $tile = $this->_iiifTile($media);
-            if ($tile) {
-                $tiles = array();
-                $tiles[] = $tile;
-                $imageResourceService['tiles'] = $tiles;
-            }
-            $imageResourceService = (object) $imageResourceService;
-
-            $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
-        }
 
         // Simple light image.
-        else {
-            $imageResource['@id'] = $media->originalUrl();
-            $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
-            $imageResource['width'] = $width;
-            $imageResource['height'] = $height;
+        $imageResource['@id'] = $media->originalUrl();
+        $imageResource['@type'] = 'dctypes:Image';
+        $imageResource['format'] = $media->mediaType();
+        $imageResource['width'] = $width;
+        $imageResource['height'] = $height;
 
-            $imageResourceService = array();
-            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
+        $imageResourceService = array();
+        $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
 
-            $imageUrl = $this->view->url('universalviewer_image', array(
-                'id' => $media->id(),
-            ));
-            $imageResourceService['@id'] = $imageUrl;
-            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-            $imageResourceService = (object) $imageResourceService;
+        $imageUrl = $this->view->url('universalviewer_image', array(
+            'id' => $media->id(),
+        ));
+        $imageResourceService['@id'] = $imageUrl;
+        $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
+        $imageResourceService = (object) $imageResourceService;
 
-            $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
-        }
+        $imageResource['service'] = $imageResourceService;
+        $imageResource = (object) $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;
@@ -800,8 +757,6 @@ class IiifManifest extends AbstractHelper
      */
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
     {
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
             return array('width' => null, 'height' => null);
@@ -810,12 +765,11 @@ class IiifManifest extends AbstractHelper
         // This is an image.
         // Get the resolution directly.
         // The storage adapter should be checked for external storage.
-        $fileManager = $serviceLocator->get('Omeka\File\Manager');
         if ($imageType == 'original') {
-            $storagePath = $fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $fileManager->getBasename($media->filename());
-            $storagePath = $fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $basename = $this->fileManager->getBasename($media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
         }
         $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);

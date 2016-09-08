@@ -50,8 +50,7 @@ class PresentationController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $viewHelperManager = $this->getServiceLocator()->get('ViewHelperManager');
-        $iiifManifest = $viewHelperManager->get('iiifManifest');
+        $iiifManifest = $this->viewHelpers()->get('iiifManifest');
         $manifest = $iiifManifest($resource, false);
 
         return $this->jsonLd($manifest);

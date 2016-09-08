@@ -30,8 +30,9 @@
 
 namespace UniversalViewer\IiifCreator;
 
-use UniversalViewer\AbstractIiifCreator;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Omeka\File\Manager as FileManager;
+use UniversalViewer\AbstractIiifCreator;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -43,12 +44,14 @@ class Auto extends AbstractIiifCreator
     protected $_gdMimeTypes = array();
     protected $_imagickMimeTypes = array();
 
+    protected $fileManager;
+
     /**
      * Check for the imagick extension at creation.
      *
      * @throws Exception
      */
-    public function __construct(ServiceLocatorInterface $serviceLocator)
+    public function __construct(FileManager $fileManager)
     {
         // For simplicity, the check is prepared here, without load of classes.
 
@@ -85,7 +88,7 @@ class Auto extends AbstractIiifCreator
             $this->_imagickMimeTypes = array_intersect($iiifMimeTypes, \Imagick::queryFormats());
         }
 
-        $this->_serviceLocator = $serviceLocator;
+        $this->fileManager = $fileManager;
     }
 
     /**
@@ -104,7 +107,7 @@ class Auto extends AbstractIiifCreator
                 // The arbitrary rotation is not managed currently.
                 && $args['rotation']['feature'] != 'rotationArbitrary'
             ) {
-            $processor = new GD($this->_serviceLocator);
+            $processor = new GD($this->fileManager);
             return $processor->transform($args);
         }
 
@@ -112,7 +115,7 @@ class Auto extends AbstractIiifCreator
         if (!empty($this->_imagickMimeTypes[$args['source']['mime_type']])
                 && !empty($this->_imagickMimeTypes[$args['format']['feature']])
             ) {
-            $processor = new Imagick($this->_serviceLocator);
+            $processor = new Imagick($this->fileManager);
             return $processor->transform($args);
         }
     }

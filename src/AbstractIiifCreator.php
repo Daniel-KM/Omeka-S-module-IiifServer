@@ -30,13 +30,20 @@
 
 namespace UniversalViewer;
 
+use Zend\Log\LoggerAwareInterface;
+use Zend\Log\LoggerAwareTrait;
+use Zend\I18n\Translator\TranslatorAwareInterface;
+use Zend\I18n\Translator\TranslatorAwareTrait;
+
 /**
  * Abstract  to manage strategies used to create an image.
  *
  * @package UniversalViewer
  */
-abstract class AbstractIiifCreator
+abstract class AbstractIiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
 {
+    use LoggerAwareTrait, TranslatorAwareTrait;
+
     // List of managed IIIF media types.
     protected $_supportedFormats = array();
 

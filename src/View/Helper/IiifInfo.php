@@ -31,7 +31,6 @@
 namespace UniversalViewer\View\Helper;
 
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Module\Manager as ModuleManager;
 use Omeka\File\Manager as FileManager;
 use Zend\View\Helper\AbstractHelper;
 
@@ -40,6 +39,13 @@ use Zend\View\Helper\AbstractHelper;
  */
 class IiifInfo extends AbstractHelper
 {
+    protected $fileManager;
+
+    public function __construct(FileManager $fileManager)
+    {
+        $this->fileManager = $fileManager;
+    }
+
     /**
      * Get the IIIF info for the specified record.
      *
@@ -75,22 +81,6 @@ class IiifInfo extends AbstractHelper
                 'id' => $media->id(),
             ));
 
-            $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-            $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
-            $viewHelperManager = $serviceLocator->get('ViewHelperManager');
-
-            $module = $moduleManager->getModule('OpenLayersZoom');
-            $tiles = array();
-            if ($module && $module->getState() == ModuleManager::STATE_ACTIVE
-                    && $openLayersZoom = $viewHelperManager->get('openLayersZoom')
-                    && $openLayersZoom()->isZoomed($media)
-                ) {
-                $tile = $this->_iiifTile($media);
-                if ($tile) {
-                    $tiles[] = $tile;
-                }
-            }
-
             $profile = array();
             $profile[] = 'http://iiif.io/api/image/2/level2.json';
             // According to specifications, the profile details should be omitted,
@@ -122,9 +112,6 @@ class IiifInfo extends AbstractHelper
             $info['width'] = $width;
             $info['height'] = $height;
             $info['sizes'] = $sizes;
-            if ($tiles) {
-                $info['tiles'] = $tiles;
-            }
             $info['profile'] = $profile;
             // Useless currently.
             // $info['service'] = $service;
@@ -238,8 +225,6 @@ class IiifInfo extends AbstractHelper
      */
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
     {
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
             return array('width' => null, 'height' => null);
@@ -248,12 +233,11 @@ class IiifInfo extends AbstractHelper
         // This is an image.
         // Get the resolution directly.
         // The storage adapter should be checked for external storage.
-        $fileManager = $serviceLocator->get('Omeka\File\Manager');
         if ($imageType == 'original') {
-            $storagePath = $fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $fileManager->getBasename($media->filename());
-            $storagePath = $fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $basename = $this->fileManager->getBasename($media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
         }
         $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);

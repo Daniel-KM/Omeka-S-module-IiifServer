@@ -65,30 +65,27 @@ class UniversalViewer extends AbstractHelper
                 break;
         }
 
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-        $settings = $serviceLocator->get('Omeka\Settings');
-
         $class = isset($options['class'])
             ? $options['class']
-            : $settings->get('universalviewer_class');
+            : $this->view->setting('universalviewer_class');
         if (!empty($class)) {
             $class = ' ' . $class;
         }
         $width = isset($options['width'])
             ? $options['width']
-            : $settings->get('universalviewer_width');
+            : $this->view->setting('universalviewer_width');
         if (!empty($width)) {
             $width = ' width:' . $width . ';';
         }
         $height = isset($options['height'])
             ? $options['height']
-            : $settings->get('universalviewer_height');
+            : $this->view->setting('universalviewer_height');
         if (!empty($height)) {
             $height = ' height:' . $height . ';';
         }
         $locale = isset($options['locale'])
             ? $options['locale']
-            : $settings->get('universalviewer_locale');
+            : $this->view->setting('universalviewer_locale');
         if (!empty($locale)) {
             $locale = ' data-locale="' . $locale . '"';
         }

@@ -30,13 +30,15 @@
 
 namespace UniversalViewer\Controller;
 
-use UniversalViewer\IiifCreator;
-use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\File\Manager as FileManager;
-use Omeka\Mvc\Exception\NotFoundException;
+use \Exception;
+use Zend\I18n\Translator\TranslatorInterface;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use \Exception;
+use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\File\Manager as FileManager;
+use Omeka\Module\Manager as ModuleManager;
+use Omeka\Mvc\Exception\NotFoundException;
+use UniversalViewer\IiifCreator;
 
 /**
  * The Image controller class.
@@ -47,6 +49,17 @@ use \Exception;
  */
 class ImageController extends AbstractActionController
 {
+    protected $fileManager;
+    protected $moduleManager;
+    protected $translator;
+
+    public function __construct(FileManager $fileManager, ModuleManager $moduleManager, TranslatorInterface $translator)
+    {
+        $this->fileManager = $fileManager;
+        $this->moduleManager = $moduleManager;
+        $this->translator = $translator;
+    }
+
     /**
      * Redirect to the 'info' action, required by the feature "baseUriRedirect".
      *
@@ -93,8 +106,7 @@ class ImageController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $viewHelperManager = $this->getServiceLocator()->get('ViewHelperManager');
-        $iiifInfo = $viewHelperManager->get('iiifInfo');
+        $iiifInfo = $this->viewHelpers()->get('iiifInfo');
         $info = $iiifInfo($media, false);
 
         return $this->jsonLd($info);
@@ -133,7 +145,7 @@ class ImageController extends AbstractActionController
             return $this->_view;
         }
 
-        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings = $this->settings();
 
         // Now, process the requested transformation if needed.
         $imageUrl = '';
@@ -277,12 +289,11 @@ class ImageController extends AbstractActionController
 
     protected function _mediaFilePath(MediaRepresentation $media, $imageType = 'original')
     {
-        $fileManager = $this->getServiceLocator()->get('Omeka\File\Manager');
         if ($imageType == 'original') {
-            $storagePath = $fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $fileManager->getBasename($media->filename());
-            $storagePath = $fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $basename = $this->fileManager->getBasename($media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
         }
         $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
 
@@ -661,14 +672,10 @@ class ImageController extends AbstractActionController
             return;
         }
 
-        $serviceLocator = $this->getServiceLocator();
-        $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
-        $viewHelperManager = $serviceLocator->get('ViewHelperManager');
-
         // Check if the file is pretiled with the OpenLayersZoom.
-        $module = $moduleManager->getModule('OpenLayersZoom');
+        $module = $this->moduleManager->getModule('OpenLayersZoom');
         if ($module && $module->getState() == ModuleManager::STATE_ACTIVE
-               && $openLayersZoom = $viewHelperManager->get('openLayersZoom')
+               && $openLayersZoom = $this->viewHelpers()->get('openLayersZoom')
                && $openLayersZoom()->isZoomed($media)
             ) {
             // Get the level and position x and y of the tile.
@@ -1016,7 +1023,10 @@ class ImageController extends AbstractActionController
      */
     protected function _transformImage($args)
     {
-        $creator = new IiifCreator($this->getServiceLocator());
+        $creator = new IiifCreator($this->fileManager, $this->settings());
+        $creator->setLogger($this->logger());
+        $creator->setTranslator($this->translator);
+
         return $creator->transform($args);
     }
 
@@ -1043,12 +1053,11 @@ class ImageController extends AbstractActionController
         // This is an image.
         // Get the resolution directly.
         // The storage adapter should be checked for external storage.
-        $fileManager = $this->getServiceLocator()->get('Omeka\File\Manager');
         if ($imageType == 'original') {
-            $storagePath = $fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $fileManager->getBasename($media->filename());
-            $storagePath = $fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $basename = $this->fileManager->getBasename($media->filename());
+            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
         }
         $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);

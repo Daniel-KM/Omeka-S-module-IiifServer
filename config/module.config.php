@@ -4,9 +4,11 @@ return array(
         'invokables' => array(
             'UniversalViewer\Controller\Player' => 'UniversalViewer\Controller\PlayerController',
             'UniversalViewer\Controller\Presentation' => 'UniversalViewer\Controller\PresentationController',
-            'UniversalViewer\Controller\Image' => 'UniversalViewer\Controller\ImageController',
-            'UniversalViewer\Controller\Media' => 'UniversalViewer\Controller\MediaController',
         ),
+        'factories' => [
+            'UniversalViewer\Controller\Image' => 'UniversalViewer\Service\Controller\ImageControllerFactory',
+            'UniversalViewer\Controller\Media' => 'UniversalViewer\Service\Controller\MediaControllerFactory',
+        ],
     ),
     'controller_plugins' => array(
         'invokables' => array(
@@ -194,10 +196,12 @@ return array(
     'view_helpers' => array(
         'invokables' => array(
             'universalViewer' => 'UniversalViewer\View\Helper\UniversalViewer',
-            'iiifManifest' => 'UniversalViewer\View\Helper\IiifManifest',
-            'iiifInfo' => 'UniversalViewer\View\Helper\IiifInfo',
             'iiifItemSet' => 'UniversalViewer\View\Helper\IiifItemSet',
         ),
+        'factories' => [
+            'iiifInfo' => 'UniversalViewer\Service\ViewHelper\IiifInfoFactory',
+            'iiifManifest' => 'UniversalViewer\Service\ViewHelper\IiifManifestFactory',
+        ],
     ),
     'translator' => array(
         'translation_file_patterns' => array(

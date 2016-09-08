@@ -68,12 +68,9 @@ class IiifItemSet extends AbstractHelper
      */
     protected function _buildManifestItemSet(ItemSetRepresentation $itemSet)
     {
-        $serviceLocator = $this->view->getHelperPluginManager()->getServiceLocator();
-        $settings = $serviceLocator->get('Omeka\Settings');
-
         $description = strip_tags($itemSet->value('dcterms:description', array('type' => 'literal')));
-        $licence = $settings->get('universalviewer_licence');
-        $attribution = $settings->get('universalviewer_attribution');
+        $licence = $this->view->setting('universalviewer_licence');
+        $attribution = $this->view->setting('universalviewer_attribution');
 
         $metadata = array();
         foreach ($itemSet->values() as $name => $term) {
@@ -87,8 +84,7 @@ class IiifItemSet extends AbstractHelper
 
         // List of manifests inside the item set.
         $manifests = array();
-        $api = $serviceLocator->get('Omeka\ApiManager');
-        $response = $api->search('items', array('item_set_id' => $itemSet->id()));
+        $response = $this->view->api()->search('items', array('item_set_id' => $itemSet->id()));
         $items = $response->getContent();
         foreach ($items as $item) {
             $manifests[] = $this->_buildManifestBase($item);

@@ -41,6 +41,13 @@ use Zend\View\Model\ViewModel;
  */
 class MediaController extends AbstractActionController
 {
+    protected $fileManager;
+
+    public function __construct(FileManager $fileManager)
+    {
+        $this->fileManager = $fileManager;
+    }
+
     /**
      * Redirect to the 'info' action, required by the feature "baseUriRedirect".
      *
@@ -71,8 +78,7 @@ class MediaController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $viewHelperManager = $this->getServiceLocator()->get('ViewHelperManager');
-        $iiifInfo = $viewHelperManager->get('iiifInfo');
+        $iiifInfo = $this->viewHelpers()->get('iiifInfo');
         $info = $iiifInfo($media, false);
 
         return $this->jsonLd($info);
@@ -124,10 +130,9 @@ class MediaController extends AbstractActionController
 
         // The source can be a local file or an external one (Amazon S3).
         // A check can be added if the file is local.
-        $fileManager = $this->getServiceLocator()->get('Omeka\File\Manager');
-        $store = $fileManager->getStore();
+        $store = $this->fileManager->getStore();
         if (get_class($store) == 'LocalStore') {
-            $filepath = $fileManager->getStoragePath('original', $media->filename());
+            $filepath = $this->fileManager->getStoragePath('original', $media->filename());
             if (!file_exists($filepath) || filesize($filepath) == 0) {
                 $response->setStatusCode(500);
 

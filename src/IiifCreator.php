@@ -30,22 +30,30 @@
 
 namespace UniversalViewer;
 
+use Zend\Log\LoggerAwareInterface;
+use Zend\Log\LoggerAwareTrait;
+use Zend\I18n\Translator\TranslatorAwareInterface;
+use Zend\I18n\Translator\TranslatorAwareTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Omeka\File\Manager as FileManager;
+use Omeka\Settings\Settings;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
  *
  * @package UniversalViewer
  */
-class IiifCreator
+class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
 {
+    use LoggerAwareTrait, TranslatorAwareTrait;
+
     protected $_creator;
     protected $_args = array();
+    protected $fileManager;
 
-    public function __construct(ServiceLocatorInterface $serviceLocator)
+    public function __construct(FileManager $fileManager, Settings $settings)
     {
-        $this->_serviceLocator = $serviceLocator;
-        $settings = $this->_serviceLocator->get('Omeka\Settings');
+        $this->fileManager = $fileManager;
         $creatorClass = $settings->get('universalviewer_iiif_creator', 'Auto');
         $this->setCreator("\\UniversalViewer\\IiifCreator\\" . $creatorClass);
     }
@@ -53,7 +61,7 @@ class IiifCreator
     public function setCreator($creatorClass)
     {
         try {
-            $this->_creator = new $creatorClass($this->_serviceLocator);
+            $this->_creator = new $creatorClass($this->fileManager);
         } catch (Exception $e) {
             throw $e;
         }
@@ -77,6 +85,9 @@ class IiifCreator
         if (!empty($args)) {
             $this->setArgs($args);
         }
+
+        $this->_creator->setLogger($this->getLogger());
+        $this->_creator->setTranslator($this->getTranslator());
         return $this->_creator->transform($this->_args);
     }
 }

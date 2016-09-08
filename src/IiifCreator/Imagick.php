@@ -30,9 +30,10 @@
 
 namespace UniversalViewer\IiifCreator;
 
-use UniversalViewer\AbstractIiifCreator;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use \Exception;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use Omeka\File\Manager as FileManager;
+use UniversalViewer\AbstractIiifCreator;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -52,16 +53,18 @@ class Imagick extends AbstractIiifCreator
         'image/webp' => 'WEBP',
     );
 
+    protected $fileManager;
+
     /**
      * Check for the php extension.
      *
      * @throws Exception
      */
-    public function __construct(ServiceLocatorInterface $serviceLocator)
+    public function __construct(FileManager $fileManager)
     {
-        $this->_serviceLocator = $serviceLocator;
+        $this->fileManager = $fileManager;
 
-        $t = $this->_serviceLocator->get('MvcTranslator');
+        $t = $this->getTranslator();
         if (!extension_loaded('imagick')) {
             throw new Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
         }
@@ -188,8 +191,7 @@ class Imagick extends AbstractIiifCreator
 
         try {
             // The source can be a local file or an external one.
-            $fileManager = $this->_serviceLocator->get('Omeka\File\Manager');
-            $store = $fileManager->getStore();
+            $store = $this->fileManager->getStore();
             if (get_class($store) == 'LocalStore') {
                 if (!is_readable($source)) {
                     return false;
@@ -207,8 +209,8 @@ class Imagick extends AbstractIiifCreator
                 unlink($tempPath);
             }
         } catch (Exception $e) {
-            $logger = $this->_serviceLocator->get('Omeka\Logger');
-            $t = $this->_serviceLocator->get('MvcTranslator');
+            $logger = $this->getLogger();
+            $t = $this->getTranslator();
             $logger->log(Logger::ERR, sprintf($t->translate("Imagick failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
             return false;
         }
