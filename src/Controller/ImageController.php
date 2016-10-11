@@ -840,7 +840,7 @@ class ImageController extends AbstractActionController
             // If level is set, count is not set and useless.
             $level = isset($level) ? $level : 0;
             $count = isset($count) ? $count : 0;
-            while ($factor / 2 <= $total) {
+            while ($factor / 2 < $total) {
                 // This allows to determine the level for normal regions.
                 if ($factor < $count) {
                     $level++;
