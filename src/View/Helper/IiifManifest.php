@@ -101,12 +101,6 @@ class IiifManifest extends AbstractHelper
 
         $description = $item->value('dcterms:citation', array('type' => 'literal'));
 
-        // Thumbnail of the whole work.
-        // TODO Use index of the true representative file.
-        $response = $this->view->api()->search('media', array('has_thumbnails' => 1, 'limit' => 1));
-        $medias = $response->getContent();
-        $thumbnail = $this->_iiifThumbnail($medias[0]);
-
         $licence = $this->view->setting('universalviewer_licence');
         $attribution = $this->view->setting('universalviewer_attribution');
 
@@ -147,38 +141,58 @@ class IiifManifest extends AbstractHelper
 
         $canvases = array();
 
-        // Get all images and non-images.
+        // Get all images and non-images and detect json files (for 3D model).
         $medias = $item->media();
         $images = array();
         $nonImages = array();
+        $jsonFiles = array();
         foreach ($medias as $media) {
+            $mediaType = $media->mediaType();
             // Images files.
             // Internal: has_derivative is not only for images.
-            if (strpos($media->mediaType(), 'image/') === 0) {
+            if (strpos($mediaType, 'image/') === 0) {
                 $images[] = $media;
             }
             // Non-images files.
             else {
                   $nonImages[] = $media;
-            }
+                  if ($mediaType == 'application/json') {
+                      $jsonFiles[] = $media;
+                  }
+                  // Check if this is a json file for old Omeka or old imports.
+                  elseif ($mediaType == 'text/plain') {
+                      switch (strtolower($media->extension())) {
+                          case 'json':
+                              $jsonFiles[] = $media;
+                              break;
+                      }
+                  }
+              }
         }
         unset ($medias);
         $totalImages = count($images);
+        $totalJsonFiles = count($jsonFiles);
 
-        // Process images.
-        $imageNumber = 0;
-        foreach ($images as $media) {
-            $canvas = $this->_iiifCanvasImage($media, ++$imageNumber);
+        // Prepare an exception.
+        // TODO Check if this is really a 3D model for three.js (see https://threejs.org).
+        $isThreejs = $totalJsonFiles == 1;
 
-            // TODO Add other content.
-            /*
-            $otherContent = array();
-            $otherContent = (object) $otherContent;
+        // Process images, except if they belong to a 3D model.
+        if (!$isThreejs) {
+            $imageNumber = 0;
+            foreach ($images as $media) {
+                $canvas = $this->_iiifCanvasImage($media, ++$imageNumber);
 
-            $canvas->otherContent = $otherContent;
-            */
+                // TODO Add other content.
+                /*
+                $otherContent = array();
+                $otherContent = (object) $otherContent;
 
-            $canvases[] = $canvas;
+                $canvas->otherContent = $otherContent;
+                */
+
+                $canvases[] = $canvas;
+            }
         }
 
         // Process non images.
@@ -192,8 +206,9 @@ class IiifManifest extends AbstractHelper
         // is only a quick view. So a main file should be set, that is not the
         // representative file.
 
-        // When there are images, other files may be added to download section.
-        if ($totalImages > 0) {
+        // When there are images or one json file, other files may be added to
+        // download section.
+        if ($totalImages || $isThreejs) {
             foreach ($nonImages as $media) {
                 switch ($media->mediaType()) {
                     case 'application/pdf':
@@ -207,6 +222,15 @@ class IiifManifest extends AbstractHelper
                 }
                 // TODO Add alto files and search.
                 // TODO Add other content.
+            }
+
+            // Prepare the media sequence for threejs.
+            if ($isThreejs) {
+                $mediaSequenceElement = $this->_iiifMediaSequenceThreejs(
+                    $media,
+                    array('label' => $title, 'metadata' => $metadata, 'files' => $images)
+                    );
+                $mediaSequencesElements[] = $mediaSequenceElement;
             }
         }
 
@@ -255,10 +279,24 @@ class IiifManifest extends AbstractHelper
             }
         }
 
+        // Thumbnail of the whole work.
+        $thumbnail = $this->_mainThumbnail($item, $isThreejs);
+
+        // Prepare sequences.
         $sequences = array();
 
+        // Manage the exception: the media sequence with threejs 3D model.
+        if ($isThreejs && $mediaSequencesElements) {
+            $mediaSequence = array();
+            $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
+            $mediaSequence['@type'] = 'ixif:MediaSequence';
+            $mediaSequence['label'] = 'XSequence 0';
+            $mediaSequence['elements'] = $mediaSequencesElements;
+            $mediaSequence = (object) $mediaSequence;
+            $mediaSequences[] = $mediaSequence;
+        }
         // When there are images.
-        if ($totalImages) {
+        elseif ($totalImages) {
             $sequence = array();
             $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
             $sequence['@type'] = 'sc:Sequence';
@@ -310,14 +348,25 @@ class IiifManifest extends AbstractHelper
 
         // Prepare manifest.
         $manifest = array();
-        $manifest['@context'] = $totalImages > 0
-            ? 'http://iiif.io/api/presentation/2/context.json'
-            : array(
+        if ($isThreejs) {
+            $manifest['@context'] = array(
+                'http://iiif.io/api/presentation/2/context.json',
+                'http://files.universalviewer.io/ld/ixif/0/context.json',
+            );
+        }
+        // For images, the normalized context.
+        elseif($totalImages) {
+            $manifest['@context'] = 'http://iiif.io/api/presentation/2/context.json';
+        }
+        // For other non standard iiif files.
+        else {
+            $manifest['@context'] = array(
                 'http://iiif.io/api/presentation/2/context.json',
                 // See MediaController::contextAction()
                 'http://wellcomelibrary.org/ld/ixif/0/context.json',
                 // WEB_ROOT . '/ld/ixif/0/context.json',
             );
+        }
         $manifest['@id'] = $url;
         $manifest['@type'] = 'sc:Manifest';
         $manifest['label'] = $title;
@@ -700,6 +749,42 @@ class IiifManifest extends AbstractHelper
     }
 
     /**
+     * Create an IIIF media sequence object for a threejs 3D model.
+     *
+     * @param MediaRepresentation $media
+     * @param array $values
+     * @return Standard object|null
+     */
+    protected function _iiifMediaSequenceThreejs(MediaRepresentation $media, $values)
+    {
+        $mediaSequenceElement = array();
+        $mediaSequenceElement['@id'] = $media->originalUrl();
+        $mediaSequenceElement['@type'] = 'dctypes:PhysicalObject';
+        $mediaSequenceElement['format'] = 'application/vnd.threejs+json';
+        // TODO If no file metadata, then item ones.
+        // TODO Currently, the main title and metadata are used,
+        // because in Omeka, a 3D model is normally the only one
+        // file.
+        $mediaSequenceElement['label'] = $values['label'];
+        // Metadata are already set at record level.
+        // $mediaSequenceElement['metadata'] = $values['metadata'];
+        // Check if there is a "thumb.jpg" that can be managed as a thumbnail.
+        foreach ($values['files'] as $imageFile) {
+            if ($imageFile->filename() == 'thumb.jpg') {
+                // The original is used, because this is already a thumbnail.
+                $thumbnailUrl = $imageFile->originalUrl();
+                if ($thumbnailUrl) {
+                    $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
+                }
+                break;
+            }
+        }
+        // No media sequence service and no sequences.
+        $mediaSequenceElement = (object) $mediaSequenceElement;
+        return $mediaSequenceElement;
+    }
+
+    /**
      * Create an IIIF sequence object for an unsupported format.
      *
      * @param array $rendering
@@ -725,6 +810,53 @@ class IiifManifest extends AbstractHelper
         $sequence = (object) $sequence;
 
         return $sequence;
+    }
+
+    /**
+     * Get the representative thumbnail of the whole work.
+     *
+     * @param Record $record
+     * @param boolean $isThreejs Manage an exception.
+     * @return object The iiif thumbnail.
+     */
+    protected function _mainThumbnail($record, $isThreejs)
+    {
+        $media = null;
+        // Threejs is an exception, because the thumbnail may be a true file
+        // named "thumb.js".
+        if ($isThreejs) {
+            $response = $this->view->api()->search(
+                'media',
+                [
+                    'item_id' => $record->id(),
+                    'has_thumbnails' => 1,
+                    // TODO Check only the base name for imported records.
+                    'source' => 'thumb.jpg',
+                    'limit' => 1,
+                ]
+                );
+            $medias = $response->getContent();
+            if ($medias) {
+                $media = reset($medias);
+            }
+        }
+
+        // Standard record.
+        if (empty($media)) {
+            // TODO Use index of the true Omeka representative file.
+            $response = $this->view->api()->search(
+                'media',
+                [
+                    'item_id' => $record->id(),
+                    'has_thumbnails' => 1,
+                    'limit' => 1,
+                ]
+                );
+            $medias = $response->getContent();
+            $media = reset($medias);
+        }
+
+        return $this->_iiifThumbnail($media);
     }
 
     /**
