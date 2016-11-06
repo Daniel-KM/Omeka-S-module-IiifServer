@@ -135,6 +135,12 @@
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('Keep this field blank to avoid an issue with some themes.'); ?>
+                </div>
+            </div>
         </div>
         <div class="inputs">
             <?php echo $this->formText($text); ?>
