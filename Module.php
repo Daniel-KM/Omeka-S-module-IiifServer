@@ -47,6 +47,7 @@ class Module extends AbstractModule {
         'universalviewer_max_dynamic_size' => 50000000,
         'universalviewer_licence' => 'http://www.example.org/license.html',
         'universalviewer_attribution' => 'Provided by Example Organization',
+        'universalviewer_alternative_manifest_property' => '',
         'universalviewer_class' => '',
         'universalviewer_width' => '95%',
         'universalviewer_height' => '600px',

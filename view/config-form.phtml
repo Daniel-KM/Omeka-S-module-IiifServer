@@ -97,6 +97,43 @@
             <?php echo $this->formText($text); ?>
         </div>
     </div>
+    <div class="field">
+        <?php
+        // Use the true property, not its internal id (see PropertySelect).
+        $valueOptions = [];
+        $response = $this->api()->search('vocabularies');
+        foreach ($response->getContent() as $vocabulary) {
+            $options = [];
+            foreach ($vocabulary->properties() as $property) {
+                $options[] = [
+                    'label' => $property->label(),
+                    'value' => $property->term(),
+                ];
+            }
+            if (!$options) {
+                continue;
+            }
+            $valueOptions[] = [
+                'label' => $vocabulary->label(),
+                'options' => $options,
+            ];
+        }
+
+        $select = new Zend\Form\Element\Select('universalviewer_alternative_manifest_property');
+        $select
+            ->setLabel($t->translate('Alternative Manifest Property'))
+            ->setAttribute('id', 'universalviewer_alternative_manifest_property')
+            ->setValue($settings->get('universalviewer_alternative_manifest_property'))
+            ->setEmptyOption($t->translate('Select a property...'))
+            ->setValueOptions($valueOptions);
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($select); ?>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formSelect($select); ?>
+        </div>
+    </div>
 </fieldset>
 <fieldset id="fieldset-universalviewer-embed">
     <legend><?php echo $t->translate('Integration of the viewer'); ?></legend>

@@ -50,19 +50,37 @@ class UniversalViewer extends AbstractHelper
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource, $options = array())
     {
+        // Determine if we should get the manifest from a field in the metadata.
+        $urlManifest = '';
+        $manifestProperty = $this->view->setting('universalviewer_alternative_manifest_property');
+        if ($manifestProperty) {
+            $urlManifest = $resource->value($manifestProperty);
+        }
+
         // Some specific checks.
         switch ($resource->resourceName()) {
-            case 'Item':
-                // Currently, item without files is unprocessable.
-                if ($resource->fileCount() == 0) {
-                    return __('This item has no files and is not displayable.');
+            case 'items':
+                // Currently, an item without files is unprocessable.
+                if (count($resource->media()) == 0 && $urlManifest == '') {
+                    // return $this->view->translate('This item has no files and is not displayable.');
+                    return '';
                 }
                 break;
-            case 'Collection':
-                if ($resource->totalItems() == 0) {
-                    return __('This collection has no item and is not displayable.');
+            case 'item_sets':
+                if ($resource->itemCount() == 0 && $urlManifest == '') {
+                    // return $this->view->translate('This collection has no item and is not displayable.');
+                    return '';
                 }
                 break;
+        }
+
+        // If manifest not provided in metadata, point to manifest created from
+        // Omeka files.
+        if (empty($urlManifest)) {
+            $urlManifest = $this->view->url('universalviewer_presentation_manifest', array(
+                'recordtype' => $resource->resourceName(),
+                'id' => $resource->id(),
+            ));
         }
 
         $class = isset($options['class'])
@@ -89,11 +107,6 @@ class UniversalViewer extends AbstractHelper
         if (!empty($locale)) {
             $locale = ' data-locale="' . $locale . '"';
         }
-
-        $urlManifest = $this->view->url('universalviewer_presentation_manifest', array(
-            'recordtype' => $resource->resourceName(),
-            'id' => $resource->id(),
-        ));
 
         // Default configuration file.
         $config = empty($args['config'])
