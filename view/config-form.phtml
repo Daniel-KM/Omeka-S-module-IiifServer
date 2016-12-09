@@ -129,6 +129,12 @@
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($select); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('The property supplying the alternative manifest URL for the viewer, for example "Dublin Core:Has Format".'); ?>
+                </div>
+            </div>
         </div>
         <div class="inputs">
             <?php echo $this->formSelect($select); ?>
