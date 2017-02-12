@@ -81,6 +81,7 @@ class UniversalViewer extends AbstractHelper
                 'recordtype' => $resource->resourceName(),
                 'id' => $resource->id(),
             ));
+            $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);
         }
 
         $class = isset($options['class'])

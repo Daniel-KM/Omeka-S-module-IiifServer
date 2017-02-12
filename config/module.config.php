@@ -197,6 +197,7 @@ return array(
         'invokables' => array(
             'universalViewer' => 'UniversalViewer\View\Helper\UniversalViewer',
             'iiifItemSet' => 'UniversalViewer\View\Helper\IiifItemSet',
+            'uvForceHttpsIfRequired' => 'UniversalViewer\View\Helper\UvForceHttpsIfRequired',
         ),
         'factories' => [
             'iiifInfo' => 'UniversalViewer\Service\ViewHelper\IiifInfoFactory',

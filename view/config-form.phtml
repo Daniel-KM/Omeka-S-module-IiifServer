@@ -250,3 +250,28 @@
         </div>
     </div>
 </fieldset>
+<fieldset id="fieldset-universalviewer-various">
+    <legend><?php echo $t->translate('Various parameters'); ?></legend>
+    <div class="field">
+        <?php
+            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_force_https');
+            $checkbox->setLabel($t->translate('Force https'));
+            $checkbox->setAttribute('id', 'universalviewer_force_https');
+            $checkbox->setValue($settings->get('universalviewer_force_https'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($checkbox); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('In some cases, the json files (manifest and info) on a secured site (https) contains some urls with the scheme "http".'); ?>
+                    <?php echo $t->translate('This option forces all Omeka absolute urls in these files to start with the scheme "https".'); ?>
+                    <?php echo $t->translate('Of course, this should be unchecked on a http-only site.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formCheckbox($checkbox); ?>
+        </div>
+    </div>
+</fieldset>

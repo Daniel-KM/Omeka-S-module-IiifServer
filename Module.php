@@ -53,6 +53,7 @@ class Module extends AbstractModule {
         'universalviewer_height' => '600px',
         'universalviewer_locale' => 'en-GB:English (GB),fr-FR:French',
         'universalviewer_iiif_creator' => 'Auto',
+        'universalviewer_force_https' => false,
     );
 
     public function onBootstrap(MvcEvent $event)

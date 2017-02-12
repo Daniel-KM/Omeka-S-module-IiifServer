@@ -122,10 +122,12 @@ class IiifItemSet extends AbstractHelper
     {
         $resourceName = $resource->resourceName();
         $manifest = array();
-        $manifest['@id'] = $this->view->url('universalviewer_presentation_manifest', array(
+        $url = $this->view->url('universalviewer_presentation_manifest', array(
             'recordtype' => $resourceName,
             'id' => $resource->id(),
         ));
+        $url = $this->view->uvForceHttpsIfRequired($url);
+        $manifest['@id'] = $url;
         $manifest['@type'] = $resourceName == 'item_sets' ? 'sc:Collection' : 'sc:Manifest';
         $manifest['label'] = strip_tags($resource->value('dcterms:title', array('type' => 'literal'))) ?: $this->view->translate('[Untitled]');
 
