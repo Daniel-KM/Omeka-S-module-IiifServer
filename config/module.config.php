@@ -1,5 +1,10 @@
 <?php
 return array(
+    'block_layouts' => [
+        'invokables' => [
+            'universalViewer' => 'UniversalViewer\Site\BlockLayout\UniversalViewer',
+        ],
+    ],
     'controllers' => array(
         'invokables' => array(
             'UniversalViewer\Controller\Player' => 'UniversalViewer\Controller\PlayerController',

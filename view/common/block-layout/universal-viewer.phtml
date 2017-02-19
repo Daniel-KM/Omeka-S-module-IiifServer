@@ -1,0 +1,6 @@
+<?php
+// TODO Only one attachment is managed in block currently.
+$attachment = reset($attachments);
+$item = $attachment->item();
+// Display the viewer with the specified item and specified config.
+echo $this->universalViewer($item);
