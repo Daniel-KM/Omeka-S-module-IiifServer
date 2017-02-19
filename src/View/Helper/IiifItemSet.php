@@ -42,6 +42,11 @@ class IiifItemSet extends AbstractHelper
     /**
      * Get the IIIF manifest for the specified item set.
      *
+     * @todo Use a representation/context with a getResource(), a toString()
+     * that removes empty values, a standard json() without ld and attach it to
+     * event in order to modify it if needed.
+     * @see IiifManifest
+     *
      * @param ItemSetRepresentation $itemSet Item set
      * @param boolean $asJson Return manifest as object or as a json string.
      * @return Object|string|null. The object or the json string corresponding to the
@@ -68,6 +73,27 @@ class IiifItemSet extends AbstractHelper
      */
     protected function _buildManifestItemSet(ItemSetRepresentation $itemSet)
     {
+        // Prepare values needed for the manifest. Empty values will be removed.
+        // Some are required.
+        $manifest = array(
+            '@context' => 'http://iiif.io/api/presentation/2/context.json',
+            '@id' => '',
+            '@type' => 'sc:Collection',
+            'label' => '',
+            'description' => '',
+            'thumbnail' => '',
+            'license' => '',
+            'attribution' => '',
+            'service' => '',
+            'seeAlso' => '',
+            'within' => '',
+            'metadata' => array(),
+            'collections' => array(),
+            'manifests' => array(),
+        );
+
+        $manifest = array_merge($manifest, $this->_buildManifestBase($itemSet, false));
+
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
         $metadata = array();
@@ -78,11 +104,13 @@ class IiifItemSet extends AbstractHelper
                 'value' => (string) $value,
             ];
         }
+        $manifest['metadata'] = $metadata;
 
         $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags($itemSet->value($descriptionProperty, array('type' => 'literal')));
         }
+        $manifest['description'] = $description;
 
         $licenseProperty = $this->view->setting('universalviewer_license_property');
         if ($licenseProperty) {
@@ -91,6 +119,7 @@ class IiifItemSet extends AbstractHelper
         if (empty($license)) {
             $license = $this->view->setting('universalviewer_manifest_license_default');
         }
+        $manifest['license'] = $license;
 
         $attributionProperty = $this->view->setting('universalviewer_attribution_property');
         if ($attributionProperty) {
@@ -99,6 +128,14 @@ class IiifItemSet extends AbstractHelper
         if (empty($attribution)) {
             $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
         }
+        $manifest['attribution'] = $attribution;
+
+        // $manifest['thumbnail'] = $thumbnail;
+        // $manifest['service'] = $service;
+        // TODO To parameter or to extract from metadata (Dublin Core Relation).
+        // $manifest['seeAlso'] = $seeAlso;
+        // TODO Use within with collection tree.
+        // $manifest['within'] = $within;
 
         // List of manifests inside the item set.
         $manifests = array();
@@ -107,32 +144,12 @@ class IiifItemSet extends AbstractHelper
         foreach ($items as $item) {
             $manifests[] = $this->_buildManifestBase($item);
         }
+        $manifest['manifests'] = $manifests;
 
-        // Prepare manifest.
-        $manifest = array();
-        $manifest['@context'] = 'http://iiif.io/api/presentation/2/context.json';
-        $manifest = array_merge($manifest, $this->_buildManifestBase($itemSet, false));
-        if ($metadata) {
-            $manifest['metadata'] = $metadata;
-        }
-        if ($description) {
-           $manifest['description'] = $description;
-        }
-        if ($license) {
-            $manifest['license'] = $license;
-        }
-        if ($attribution) {
-            $manifest['attribution'] = $attribution;
-        }
-        // $manifest['service'] = $service;
-        // $manifest['seeAlso'] = $seeAlso;
-        // $manifest['within'] = $within;
+        // Remove all empty values (there is no "0" or "null" at first level).
+        $manifest = array_filter($manifest);
 
-        if ($manifests) {
-            $manifest['manifests'] = $manifests;
-        }
         $manifest = (object) $manifest;
-
         return $manifest;
     }
 
@@ -140,13 +157,16 @@ class IiifItemSet extends AbstractHelper
     {
         $resourceName = $resource->resourceName();
         $manifest = array();
+
         $url = $this->view->url('universalviewer_presentation_manifest', array(
             'recordtype' => $resourceName,
             'id' => $resource->id(),
         ));
         $url = $this->view->uvForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
+
         $manifest['@type'] = $resourceName == 'item_sets' ? 'sc:Collection' : 'sc:Manifest';
+
         $manifest['label'] = $resource->displayTitle();
 
         return $asObject

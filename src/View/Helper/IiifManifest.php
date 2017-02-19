@@ -71,6 +71,9 @@ class IiifManifest extends AbstractHelper
     /**
      * Get the IIIF manifest for the specified item.
      *
+     * @todo Use a representation/context with a getResource(), a toString()
+     * that removes empty values, a standard json() without ld and attach it to
+     * event in order to modify it if needed.
      * @todo Replace all data by standard classes.
      * @todo Replace web root by routes, even if main ones are only urn.
      *
@@ -79,12 +82,31 @@ class IiifManifest extends AbstractHelper
      */
     protected function _buildManifestItem(ItemRepresentation $item)
     {
-        // Prepare all values needed for manifest.
+        // Prepare values needed for the manifest. Empty values will be removed.
+        // Some are required.
+        $manifest = array(
+            '@context' => '',
+            '@id' => '',
+            '@type' => 'sc:Manifest',
+            'label' => '',
+            'description' => '',
+            'thumbnail' => '',
+            'license' => '',
+            'attribution' => '',
+            'service' => '',
+            'seeAlso' => '',
+            'within' => '',
+            'metadata' => array(),
+            'mediaSequences' => array(),
+            'sequences' => array(),
+        );
+
         $url = $this->view->url('universalviewer_presentation_manifest', array(
             'recordtype' => 'items',
             'id' => $item->id(),
         ));
         $url = $this->view->uvForceHttpsIfRequired($url);
+        $manifest['@id'] = $url;
 
         // The base url for some other ids.
         $this->_baseUrl = dirname($url);
@@ -99,13 +121,16 @@ class IiifManifest extends AbstractHelper
                 'value' => (string) $value,
             ];
         }
+        $manifest['metadata'] = $metadata;
 
-        $title = $item->displayTitle();
+        $label = $item->displayTitle();
+        $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags($item->value($descriptionProperty, array('type' => 'literal')));
         }
+        $manifest['description'] = $description;
 
         $licenseProperty = $this->view->setting('universalviewer_license_property');
         if ($licenseProperty) {
@@ -114,6 +139,7 @@ class IiifManifest extends AbstractHelper
         if (empty($license)) {
             $license = $this->view->setting('universalviewer_manifest_license_default');
         }
+        $manifest['license'] = $license;
 
         $attributionProperty = $this->view->setting('universalviewer_attribution_property');
         if ($attributionProperty) {
@@ -122,27 +148,25 @@ class IiifManifest extends AbstractHelper
         if (empty($attribution)) {
             $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
         }
+        $manifest['attribution'] = $attribution;
 
         // TODO To parameter or to extract from metadata.
-        $service = '';
         /*
-        $service = (object) array(
+        $metadata['service'] = array(
             '@context' =>'http://example.org/ns/jsonld/context.json',
             '@id' => 'http://example.org/service/example',
             'profile' => 'http://example.org/docs/example-service.html',
         );
         */
 
-        // TODO To parameter or to extract from metadata.
-        $seeAlso = '';
+        // TODO To parameter or to extract from metadata (Dublin Core Relation).
         /*
-        $seeAlso = (object) array(
+        $metadata['seeAlso'] = array(
             '@id' => 'http://www.example.org/library/catalog/book1.marc',
             'format' =>'application/marc',
         );
         */
 
-        $within = '';
         $withins = array();
         foreach ($item->itemSets() as $itemSet) {
             $within = $this->view->url('universalviewer_presentation_manifest', array(
@@ -153,11 +177,10 @@ class IiifManifest extends AbstractHelper
             $withins[] = $within;
         }
         if (!empty($withins)) {
-            if (count($withins) == 1) {
-                $within = $withins[0];
-            } else {
-                $within = $withins;
-            }
+            $within = count($withins) > 1
+                ? $withins
+                : reset($withins);
+            $metadata['within'] = $within;
         }
 
         $canvases = array();
@@ -249,7 +272,7 @@ class IiifManifest extends AbstractHelper
             if ($isThreejs) {
                 $mediaSequenceElement = $this->_iiifMediaSequenceThreejs(
                     $media,
-                    array('label' => $title, 'metadata' => $metadata, 'files' => $images)
+                    array('label' => $label, 'metadata' => $metadata, 'files' => $images)
                     );
                 $mediaSequencesElements[] = $mediaSequenceElement;
             }
@@ -262,7 +285,7 @@ class IiifManifest extends AbstractHelper
                     case 'application/pdf':
                         $mediaSequenceElement = $this->_iiifMediaSequencePdf(
                             $file,
-                            array('label' => $title, 'metadata' => $metadata)
+                            array('label' => $label, 'metadata' => $metadata)
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // TODO Add the file for download (no rendering)? The
@@ -274,7 +297,7 @@ class IiifManifest extends AbstractHelper
                     // case 'audio/mp3':
                         $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
                             $file,
-                            array('label' => $title, 'metadata' => $metadata)
+                            array('label' => $label, 'metadata' => $metadata)
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // Rendering files are automatically added for download.
@@ -286,7 +309,7 @@ class IiifManifest extends AbstractHelper
                     // case 'video/webm':
                         $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
                             $file,
-                            array('label' => $title, 'metadata' => $metadata)
+                            array('label' => $label, 'metadata' => $metadata)
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // Rendering files are automatically added for download.
@@ -301,7 +324,7 @@ class IiifManifest extends AbstractHelper
         }
 
         // Thumbnail of the whole work.
-        $thumbnail = $this->_mainThumbnail($item, $isThreejs);
+        $manifest['thumbnail'] = $this->_mainThumbnail($item, $isThreejs);
 
         // Prepare sequences.
         $sequences = array();
@@ -367,8 +390,14 @@ class IiifManifest extends AbstractHelper
             $sequences[] = $sequence;
         }
 
-        // Prepare manifest.
-        $manifest = array();
+        if ($mediaSequences) {
+            $manifest['mediaSequences'] = $mediaSequences;
+        }
+
+        if ($sequences) {
+            $manifest['sequences'] = $sequences;
+        }
+
         if ($isThreejs) {
             $manifest['@context'] = array(
                 'http://iiif.io/api/presentation/2/context.json',
@@ -388,41 +417,11 @@ class IiifManifest extends AbstractHelper
                 // WEB_ROOT . '/ld/ixif/0/context.json',
             );
         }
-        $manifest['@id'] = $url;
-        $manifest['@type'] = 'sc:Manifest';
-        $manifest['label'] = $title;
-        if ($description) {
-            $manifest['description'] = $description;
-        }
-        if ($thumbnail) {
-            $manifest['thumbnail'] = $thumbnail;
-        }
-        if ($license) {
-            $manifest['license'] = $license;
-        }
-        if ($attribution) {
-            $manifest['attribution'] = $attribution;
-        }
-        if ($service) {
-            $manifest['service'] = $service;
-        }
-        if ($seeAlso) {
-            $manifest['seeAlso'] = $seeAlso;
-        }
-        if ($within) {
-            $manifest['within'] = $within;
-        }
-        if ($metadata) {
-            $manifest['metadata'] = $metadata;
-        }
-        if ($mediaSequences) {
-            $manifest['mediaSequences'] = $mediaSequences;
-        }
-        if ($sequences) {
-            $manifest['sequences'] = $sequences;
-        }
-        $manifest = (object) $manifest;
 
+        // Remove all empty values (there is no "0" or "null" at first level).
+        $manifest = array_filter($manifest);
+
+        $manifest = (object) $manifest;
         return $manifest;
     }
 

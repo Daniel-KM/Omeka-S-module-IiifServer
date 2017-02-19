@@ -24,6 +24,8 @@ foreach ($response->getContent() as $vocabulary) {
     <p class="explanation">
         <?php echo $t->translate('The plugin creates a manifest for the viewer with elements from each resource (item or item set).'); ?>
         <?php echo $t->translate('The elements below are used when some metadata are missing.'); ?>
+        <?php echo $t->translate('In all cases, empty elements are not displayed.'); ?>
+        <?php // echo $t->translate('Futhermore, the filter "uv.manifest" is available to change any data.'); ?>
     </p>
     <div class="field">
         <?php
