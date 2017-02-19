@@ -47,6 +47,7 @@ class Module extends AbstractModule {
         'universalviewer_manifest_attribution_default' => 'Provided by Example Organization',
         'universalviewer_manifest_license_property' => 'dcterms:license',
         'universalviewer_manifest_license_default' => 'http://www.example.org/license.html',
+        'universalviewer_manifest_logo_default' => '',
         'universalviewer_alternative_manifest_property' => '',
         'universalviewer_append_item_set_show' => true,
         'universalviewer_append_item_show' => true,
@@ -126,6 +127,9 @@ class Module extends AbstractModule {
             $settings->set('universalviewer_manifest_license_default',
                 $settings->get('universalviewer_licence'));
             $settings->delete('universalviewer_licence');
+
+            $settings->set('universalviewer_manifest_logo_default',
+                $this->_settings['universalviewer_manifest_logo_default']);
 
             $settings->set('universalviewer_append_item_show',
                 $settings->get('universalviewer_append_items_show'));

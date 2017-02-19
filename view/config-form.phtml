@@ -141,6 +141,26 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
+            $text = new Zend\Form\Element\Text('universalviewer_manifest_logo_default');
+            $text->setLabel($t->translate('Logo'));
+            $text->setAttribute('id', 'universalviewer_manifest_logo_default');
+            $text->setValue($settings->get('universalviewer_manifest_logo_default'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($text); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('If any, this url to an image will be used as logo and displayed in the right panel.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formText($text); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
         $select = new Zend\Form\Element\Select('universalviewer_alternative_manifest_property');
         $select
             ->setLabel($t->translate('Alternative Manifest Property'))

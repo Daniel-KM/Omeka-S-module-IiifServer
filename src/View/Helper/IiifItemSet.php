@@ -135,6 +135,8 @@ class IiifItemSet extends AbstractHelper
         }
         $manifest['attribution'] = $attribution;
 
+        $manifest['logo'] = $this->view->setting('universalviewer_manifest_logo_default');
+
         // $manifest['thumbnail'] = $thumbnail;
         // $manifest['service'] = $service;
         // TODO To parameter or to extract from metadata (Dublin Core Relation).

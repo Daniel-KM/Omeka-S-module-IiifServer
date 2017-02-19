@@ -155,6 +155,8 @@ class IiifManifest extends AbstractHelper
         }
         $manifest['attribution'] = $attribution;
 
+        $manifest['logo'] = $this->view->setting('universalviewer_manifest_logo_default');
+
         // TODO To parameter or to extract from metadata.
         /*
         $metadata['service'] = array(
