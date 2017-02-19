@@ -42,6 +42,7 @@ use Omeka\Mvc\Controller\Plugin\Messenger;
 
 class Module extends AbstractModule {
     protected $_settings = array(
+        'universalviewer_manifest_description_property' => 'dcterms:bibliographicCitation',
         'universalviewer_manifest_attribution_property' => '',
         'universalviewer_manifest_attribution_default' => 'Provided by Example Organization',
         'universalviewer_manifest_license_property' => 'dcterms:license',
@@ -108,6 +109,9 @@ class Module extends AbstractModule {
         //fix the double json encoding that was stored
         if (version_compare($oldVersion, '3.4.1', '<')) {
             $settings = $serviceLocator->get('Omeka\Settings');
+
+            $settings->set('universalviewer_manifest_description_property',
+                $this->_settings['universalviewer_manifest_description_property']);
 
             $settings->set('universalviewer_manifest_attribution_property',
                 $this->_settings['universalviewer_manifest_attribution_property']);

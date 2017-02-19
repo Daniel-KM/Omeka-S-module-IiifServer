@@ -79,11 +79,14 @@ class IiifItemSet extends AbstractHelper
             ];
         }
 
-        $description = strip_tags($itemSet->value('dcterms:description', array('type' => 'literal')));
+        $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
+        if ($descriptionProperty) {
+            $description = strip_tags($itemSet->value($descriptionProperty, array('type' => 'literal')));
+        }
 
         $licenseProperty = $this->view->setting('universalviewer_license_property');
         if ($licenseProperty) {
-            $license = $item->value($licenseProperty);
+            $license = $itemSet->value($licenseProperty);
         }
         if (empty($license)) {
             $license = $this->view->setting('universalviewer_manifest_license_default');

@@ -102,7 +102,10 @@ class IiifManifest extends AbstractHelper
 
         $title = $item->displayTitle();
 
-        $description = $item->value('dcterms:citation', array('type' => 'literal'));
+        $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
+        if ($descriptionProperty) {
+            $description = strip_tags($item->value($descriptionProperty, array('type' => 'literal')));
+        }
 
         $licenseProperty = $this->view->setting('universalviewer_license_property');
         if ($licenseProperty) {
@@ -114,7 +117,7 @@ class IiifManifest extends AbstractHelper
 
         $attributionProperty = $this->view->setting('universalviewer_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags($itemSet->value($attributionProperty, array('type' => 'literal')));
+            $attribution = strip_tags($item->value($attributionProperty, array('type' => 'literal')));
         }
         if (empty($attribution)) {
             $attribution = $this->view->setting('universalviewer_manifest_attribution_default');

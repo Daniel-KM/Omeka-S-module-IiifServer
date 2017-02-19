@@ -27,6 +27,30 @@ foreach ($response->getContent() as $vocabulary) {
     </p>
     <div class="field">
         <?php
+        $select = new Zend\Form\Element\Select('universalviewer_manifest_description_property');
+        $select
+            ->setLabel($t->translate('Property to use for Attribution'))
+            ->setAttribute('id', 'universalviewer_manifest_description_property')
+            ->setValue($settings->get('universalviewer_manifest_description_property'))
+            ->setEmptyOption($t->translate('Select a property...'))
+            ->setValueOptions($properties);
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($select); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('If any, the first metadata of the record will be added in all manifests and viewers for main description.'); ?>
+                    <?php echo $t->translate('It’s recommended to use "Dublin Core:Bibliographic Citation".'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formSelect($select); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
         $select = new Zend\Form\Element\Select('universalviewer_manifest_attribution_property');
         $select
             ->setLabel($t->translate('Property to use for Attribution'))
