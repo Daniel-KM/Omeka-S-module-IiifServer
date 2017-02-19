@@ -68,18 +68,33 @@ class IiifItemSet extends AbstractHelper
      */
     protected function _buildManifestItemSet(ItemSetRepresentation $itemSet)
     {
-        $description = strip_tags($itemSet->value('dcterms:description', array('type' => 'literal')));
-        $licence = $this->view->setting('universalviewer_licence');
-        $attribution = $this->view->setting('universalviewer_attribution');
-
+        // Prepare the metadata of the record.
+        // TODO Manage filter and escape?
         $metadata = array();
         foreach ($itemSet->values() as $name => $term) {
-            $metadata[] = (object) array(
-                'label' => $term,
-                'value' => count($term['values']) > 1
-                   ? $term['values']
-                   :  reset($term['values']),
-            );
+            $value = reset($term['values']);
+            $metadata[] = (object) [
+                'label' => $value->property()->localName(),
+                'value' => (string) $value,
+            ];
+        }
+
+        $description = strip_tags($itemSet->value('dcterms:description', array('type' => 'literal')));
+
+        $licenseProperty = $this->view->setting('universalviewer_license_property');
+        if ($licenseProperty) {
+            $license = $item->value($licenseProperty);
+        }
+        if (empty($license)) {
+            $license = $this->view->setting('universalviewer_manifest_license_default');
+        }
+
+        $attributionProperty = $this->view->setting('universalviewer_attribution_property');
+        if ($attributionProperty) {
+            $attribution = strip_tags($itemSet->value($attributionProperty, array('type' => 'literal')));
+        }
+        if (empty($attribution)) {
+            $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
         }
 
         // List of manifests inside the item set.
@@ -100,8 +115,8 @@ class IiifItemSet extends AbstractHelper
         if ($description) {
            $manifest['description'] = $description;
         }
-        if ($licence) {
-            $manifest['license'] = $licence;
+        if ($license) {
+            $manifest['license'] = $license;
         }
         if ($attribution) {
             $manifest['attribution'] = $attribution;
@@ -129,7 +144,7 @@ class IiifItemSet extends AbstractHelper
         $url = $this->view->uvForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
         $manifest['@type'] = $resourceName == 'item_sets' ? 'sc:Collection' : 'sc:Manifest';
-        $manifest['label'] = strip_tags($resource->value('dcterms:title', array('type' => 'literal'))) ?: $this->view->translate('[Untitled]');
+        $manifest['label'] = $resource->displayTitle();
 
         return $asObject
             ? (object) $manifest

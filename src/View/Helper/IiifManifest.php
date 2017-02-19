@@ -89,6 +89,8 @@ class IiifManifest extends AbstractHelper
         // The base url for some other ids.
         $this->_baseUrl = dirname($url);
 
+        // Prepare the metadata of the record.
+        // TODO Manage filter and escape?
         $metadata = [];
         foreach ($item->values() as $name => $term) {
             $value = reset($term['values']);
@@ -102,8 +104,21 @@ class IiifManifest extends AbstractHelper
 
         $description = $item->value('dcterms:citation', array('type' => 'literal'));
 
-        $licence = $this->view->setting('universalviewer_licence');
-        $attribution = $this->view->setting('universalviewer_attribution');
+        $licenseProperty = $this->view->setting('universalviewer_license_property');
+        if ($licenseProperty) {
+            $license = $item->value($licenseProperty);
+        }
+        if (empty($license)) {
+            $license = $this->view->setting('universalviewer_manifest_license_default');
+        }
+
+        $attributionProperty = $this->view->setting('universalviewer_attribution_property');
+        if ($attributionProperty) {
+            $attribution = strip_tags($itemSet->value($attributionProperty, array('type' => 'literal')));
+        }
+        if (empty($attribution)) {
+            $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
+        }
 
         // TODO To parameter or to extract from metadata.
         $service = '';
@@ -379,8 +394,8 @@ class IiifManifest extends AbstractHelper
         if ($thumbnail) {
             $manifest['thumbnail'] = $thumbnail;
         }
-        if ($licence) {
-            $manifest['license'] = $licence;
+        if ($license) {
+            $manifest['license'] = $license;
         }
         if ($attribution) {
             $manifest['attribution'] = $attribution;

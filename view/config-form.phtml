@@ -1,138 +1,134 @@
-<fieldset id="fieldset-universalviewer-general">
-    <legend><?php echo $t->translate('General parameters'); ?></legend>
+<?php
+// Use the true property, not its internal id (see PropertySelect()).
+$properties = [];
+$response = $this->api()->search('vocabularies');
+foreach ($response->getContent() as $vocabulary) {
+    $options = [];
+    foreach ($vocabulary->properties() as $property) {
+        $options[] = [
+            'label' => $property->label(),
+            'value' => $property->term(),
+        ];
+    }
+    if (!$options) {
+        continue;
+    }
+    $properties[] = [
+        'label' => $vocabulary->label(),
+        'options' => $options,
+    ];
+}
+?>
+<fieldset id="fieldset-universalviewer-manifest">
+    <legend><?php echo $t->translate('Manifest'); ?></legend>
     <p class="explanation">
-        <?php echo $t->translate('If checked, the viewer will be automatically appended to the collections or items show page.'); ?>
-        <?php echo $t->translate('Else, the viewer can be added via the helper in the theme or the shortcode in any page.'); ?>
+        <?php echo $t->translate('The plugin creates a manifest for the viewer with elements from each resource (item or item set).'); ?>
+        <?php echo $t->translate('The elements below are used when some metadata are missing.'); ?>
     </p>
     <div class="field">
         <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_collections_show');
-            $checkbox->setLabel($t->translate('Append to "Item set show"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_collections_show');
-            $checkbox->setValue($settings->get('universalviewer_append_collections_show'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_items_show');
-            $checkbox->setLabel($t->translate('Append to "Item show"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_items_show');
-            $checkbox->setValue($settings->get('universalviewer_append_items_show'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_max_dynamic_size');
-            $text->setLabel($t->translate('Max dynamic size for images'));
-            $text->setAttribute('id', 'universalviewer_max_dynamic_size');
-            $text->setValue($settings->get('universalviewer_max_dynamic_size'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('Set the maximum size in bytes for the dynamic processing of images.'); ?>
-                    <?php echo $t->translate('Beyond this limit, the plugin will require a tiled image, for example made by OpenLayersZoom.'); ?>
-                    <?php echo $t->translate('Let empty to allow processing of any image.'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-</fieldset>
-<fieldset id="fieldset-universalviewer-info">
-    <legend><?php echo $t->translate('Common infos'); ?></legend>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_licence');
-            $text->setLabel($t->translate('Licence'));
-            $text->setAttribute('id', 'universalviewer_licence');
-            $text->setValue($settings->get('universalviewer_licence'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('If any, this link will be added in all manifests and viewers to indicate the rights.'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_attribution');
-            $text->setLabel($t->translate('Attribution'));
-            $text->setAttribute('id', 'universalviewer_attribution');
-            $text->setValue($settings->get('universalviewer_attribution'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('If any, this text will be added in all manifests and viewers.'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-        // Use the true property, not its internal id (see PropertySelect).
-        $valueOptions = [];
-        $response = $this->api()->search('vocabularies');
-        foreach ($response->getContent() as $vocabulary) {
-            $options = [];
-            foreach ($vocabulary->properties() as $property) {
-                $options[] = [
-                    'label' => $property->label(),
-                    'value' => $property->term(),
-                ];
-            }
-            if (!$options) {
-                continue;
-            }
-            $valueOptions[] = [
-                'label' => $vocabulary->label(),
-                'options' => $options,
-            ];
-        }
-
-        $select = new Zend\Form\Element\Select('universalviewer_alternative_manifest_property');
+        $select = new Zend\Form\Element\Select('universalviewer_manifest_attribution_property');
         $select
-            ->setLabel($t->translate('Alternative Manifest Property'))
-            ->setAttribute('id', 'universalviewer_alternative_manifest_property')
-            ->setValue($settings->get('universalviewer_alternative_manifest_property'))
+            ->setLabel($t->translate('Property to use for Attribution'))
+            ->setAttribute('id', 'universalviewer_manifest_attribution_property')
+            ->setValue($settings->get('universalviewer_manifest_attribution_property'))
             ->setEmptyOption($t->translate('Select a property...'))
-            ->setValueOptions($valueOptions);
+            ->setValueOptions($properties);
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($select); ?>
             <a class="expand" href="#"></a>
             <div class="collapsible">
                 <div class="field-description">
-                    <?php echo $t->translate('The property supplying the alternative manifest URL for the viewer, for example "Dublin Core:Has Format".'); ?>
+	                <?php echo $t->translate('If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formSelect($select); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $text = new Zend\Form\Element\Text('universalviewer_manifest_attribution_default');
+            $text->setLabel($t->translate('Default Attribution'));
+            $text->setAttribute('id', 'universalviewer_manifest_attribution_default');
+            $text->setValue($settings->get('universalviewer_manifest_attribution_default'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($text); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.'); ?>
+                    <?php echo $t->translate('It will be used as pop up in the viewer too, if enabled.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formText($text); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+        $select = new Zend\Form\Element\Select('universalviewer_manifest_license_property');
+        $select
+            ->setLabel($t->translate('Property to use for License'))
+            ->setAttribute('id', 'universalviewer_manifest_license_property')
+            ->setValue($settings->get('universalviewer_manifest_license_property'))
+            ->setEmptyOption($t->translate('Select a property...'))
+            ->setValueOptions($properties);
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($select); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('If any, the first metadata of the resource will be added in all manifests and viewers to indicate the rights.'); ?>
+                    <?php echo $t->translate('It’s recommended to use "dcterms:license".'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formSelect($select); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $text = new Zend\Form\Element\Text('universalviewer_manifest_license_default');
+            $text->setLabel($t->translate('Default License'));
+            $text->setAttribute('id', 'universalviewer_manifest_license_default');
+            $text->setValue($settings->get('universalviewer_manifest_license_default'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($text); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('If any, and if there is no metadata for the element above, this text will be added in all manifests and viewers to indicate the license.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formText($text); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+        $select = new Zend\Form\Element\Select('universalviewer_alternative_manifest_property');
+        $select
+            ->setLabel($t->translate('Alternative Manifest Property'))
+            ->setAttribute('id', 'universalviewer_alternative_manifest_property')
+            ->setValue($settings->get('universalviewer_alternative_manifest_property'))
+            ->setEmptyOption($t->translate('Select a property...'))
+            ->setValueOptions($properties);
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($select); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('The property supplying the alternative manifest URL for the viewer, for example "dcterms:hasFormat".'); ?>
                 </div>
             </div>
         </div>
@@ -143,11 +139,42 @@
 </fieldset>
 <fieldset id="fieldset-universalviewer-embed">
     <legend><?php echo $t->translate('Integration of the viewer'); ?></legend>
-    <p>
+    <p class="explanation">
+        <?php echo $t->translate('If checked, the viewer will be automatically appended to the item sets or items show page.'); ?>
+        <?php echo $t->translate('Else, the viewer can be added via the helper in the theme or the shortcode in any page.'); ?>
+    </p>
+    <div class="field">
+        <?php
+            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_set_show');
+            $checkbox->setLabel($t->translate('Append to "Item set show"'));
+            $checkbox->setAttribute('id', 'universalviewer_append_item_set_show');
+            $checkbox->setValue($settings->get('universalviewer_append_item_set_show'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($checkbox); ?>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formCheckbox($checkbox); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_show');
+            $checkbox->setLabel($t->translate('Append to "Item show"'));
+            $checkbox->setAttribute('id', 'universalviewer_append_item_show');
+            $checkbox->setValue($settings->get('universalviewer_append_item_show'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($checkbox); ?>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formCheckbox($checkbox); ?>
+        </div>
+    </div>
+    <p class="explanation">
         <?php echo $t->translate('These values allows to parameter the integration of the viewer in Omeka pages.'); ?>
         <?php echo $t->translate('The viewer itself can be configured via the file "config.json" and the helper.'); ?>
     </p>
-
     <div class="field">
         <?php
             $text = new Zend\Form\Element\Text('universalviewer_class');
@@ -168,7 +195,6 @@
             <?php echo $this->formText($text); ?>
         </div>
     </div>
-
     <div class="field">
         <?php
             $text = new Zend\Form\Element\Text('universalviewer_width');
@@ -189,7 +215,6 @@
             <?php echo $this->formText($text); ?>
         </div>
     </div>
-
     <div class="field">
         <?php
             $text = new Zend\Form\Element\Text('universalviewer_height');
@@ -204,7 +229,6 @@
             <?php echo $this->formText($text); ?>
         </div>
     </div>
-
     <div class="field">
         <?php
             $text = new Zend\Form\Element\Text('universalviewer_locale');
@@ -220,10 +244,8 @@
         </div>
     </div>
 </fieldset>
-
 <fieldset id="fieldset-universalviewer-background">
     <legend><?php echo $t->translate('Background parameters'); ?></legend>
-
     <div class="field">
         <?php
             $select = new Zend\Form\Element\Select('universalviewer_iiif_creator');
@@ -247,6 +269,28 @@
         </div>
         <div class="inputs">
             <?php echo $this->formSelect($select); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $text = new Zend\Form\Element\Text('universalviewer_iiif_max_size');
+            $text->setLabel($t->translate('Max dynamic size for images'));
+            $text->setAttribute('id', 'universalviewer_iiif_max_size');
+            $text->setValue($settings->get('universalviewer_iiif_max_size'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($text); ?>
+            <a class="expand" href="#"></a>
+            <div class="collapsible">
+                <div class="field-description">
+                    <?php echo $t->translate('Set the maximum size in bytes for the dynamic processing of images.'); ?>
+                    <?php echo $t->translate('Beyond this limit, the plugin will require a tiled image, for example made by OpenLayersZoom.'); ?>
+                    <?php echo $t->translate('Let empty to allow processing of any image.'); ?>
+                </div>
+            </div>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formText($text); ?>
         </div>
     </div>
 </fieldset>

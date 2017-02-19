@@ -42,17 +42,19 @@ use Omeka\Mvc\Controller\Plugin\Messenger;
 
 class Module extends AbstractModule {
     protected $_settings = array(
-        'universalviewer_append_collections_show' => true,
-        'universalviewer_append_items_show' => true,
-        'universalviewer_max_dynamic_size' => 50000000,
-        'universalviewer_licence' => 'http://www.example.org/license.html',
-        'universalviewer_attribution' => 'Provided by Example Organization',
+        'universalviewer_manifest_attribution_property' => '',
+        'universalviewer_manifest_attribution_default' => 'Provided by Example Organization',
+        'universalviewer_manifest_license_property' => 'dcterms:license',
+        'universalviewer_manifest_license_default' => 'http://www.example.org/license.html',
         'universalviewer_alternative_manifest_property' => '',
+        'universalviewer_append_item_set_show' => true,
+        'universalviewer_append_item_show' => true,
         'universalviewer_class' => '',
         'universalviewer_width' => '95%',
         'universalviewer_height' => '600px',
-        'universalviewer_locale' => 'en-GB:English (GB),fr-FR:French',
+        'universalviewer_locale' => 'en-GB:English (GB),fr:French',
         'universalviewer_iiif_creator' => 'Auto',
+        'universalviewer_iiif_max_size' => 10000000,
         'universalviewer_force_https' => false,
     );
 
@@ -98,6 +100,40 @@ class Module extends AbstractModule {
 
         foreach ($this->_settings as $name => $value) {
             $settings->delete($name);
+        }
+    }
+
+    public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
+    {
+        //fix the double json encoding that was stored
+        if (version_compare($oldVersion, '3.4.1', '<')) {
+            $settings = $serviceLocator->get('Omeka\Settings');
+
+            $settings->set('universalviewer_manifest_attribution_property',
+                $this->_settings['universalviewer_manifest_attribution_property']);
+
+            $settings->set('universalviewer_manifest_attribution_default',
+                $settings->get('universalviewer_attribution'));
+            $settings->delete('universalviewer_attribution');
+
+            $settings->set('universalviewer_manifest_license_property',
+                $this->_settings['universalviewer_manifest_license_property']);
+
+            $settings->set('universalviewer_manifest_license_default',
+                $settings->get('universalviewer_licence'));
+            $settings->delete('universalviewer_licence');
+
+            $settings->set('universalviewer_append_item_show',
+                $settings->get('universalviewer_append_items_show'));
+            $settings->delete('universalviewer_append_items_show');
+
+            $settings->set('universalviewer_append_item_set_show',
+                $settings->get('universalviewer_append_collections_show'));
+            $settings->delete('universalviewer_append_collections_show');
+
+            $settings->set('universalviewer_iiif_max_size',
+                $settings->get('universalviewer_max_dynamic_size'));
+            $settings->delete('universalviewer_max_dynamic_size');
         }
     }
 
