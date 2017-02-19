@@ -93,7 +93,12 @@ class IiifManifest extends AbstractHelper
             'thumbnail' => '',
             'license' => '',
             'attribution' => '',
+            // A logo to add at the end of the information panel.
+            'logo' => '',
             'service' => '',
+            // For example the web page of the item.
+            'related' => '',
+            // Other formats of the same data.
             'seeAlso' => '',
             'within' => '',
             'metadata' => array(),
