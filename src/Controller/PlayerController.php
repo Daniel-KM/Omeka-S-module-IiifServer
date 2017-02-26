@@ -53,8 +53,24 @@ class PlayerController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $recordtype = $this->params('recordtype');
-        $response = $this->api()->read($recordtype, $id);
+        // Map iiif resources with Omeka Classic and Omeka S records.
+        $matchingResources = array(
+            'item' => 'items',
+            'items' => 'items',
+            'item-set' => 'item_sets',
+            'item-sets' => 'item_sets',
+            'item_set' => 'item_sets',
+            'item_sets' => 'item_sets',
+            'collection' => 'item_sets',
+            'collections' => 'item_sets',
+        );
+        $resourceName = $this->params('resourcename');
+        if (!isset($matchingResources[$resourceName])) {
+            throw new NotFoundException;
+        }
+        $resourceName = $matchingResources[$resourceName];
+
+        $response = $this->api()->read($resourceName, $id);
         $resource = $response->getContent();
         if (empty($resource)) {
             throw new NotFoundException;

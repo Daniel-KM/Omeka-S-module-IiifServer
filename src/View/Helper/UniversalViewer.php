@@ -78,28 +78,31 @@ class UniversalViewer extends AbstractHelper
             $urlManifest = $resource->value($manifestProperty);
         }
 
+        $resourceName = $resource->resourceName();
+
         // Some specific checks.
-        switch ($resource->resourceName()) {
+        switch ($resourceName) {
             case 'items':
                 // Currently, an item without files is unprocessable.
                 if (count($resource->media()) == 0 && $urlManifest == '') {
                     // return $this->view->translate('This item has no files and is not displayable.');
                     return '';
                 }
+                $route = 'universalviewer_presentation_item';
                 break;
             case 'item_sets':
                 if ($resource->itemCount() == 0 && $urlManifest == '') {
                     // return $this->view->translate('This collection has no item and is not displayable.');
                     return '';
                 }
+                $route = 'universalviewer_presentation_collection';
                 break;
         }
 
         // If manifest not provided in metadata, point to manifest created from
         // Omeka files.
         if (empty($urlManifest)) {
-            $urlManifest = $this->view->url('universalviewer_presentation_manifest', array(
-                'recordtype' => $resource->resourceName(),
+            $urlManifest = $this->view->url($route, array(
                 'id' => $resource->id(),
             ));
             $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);

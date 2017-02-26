@@ -53,7 +53,7 @@ class IiifManifest extends AbstractHelper
             $result = $this->_buildManifestItem($resource);
         }
         elseif ($resourceName == 'item_sets') {
-            return $this->view->iiifItemSet($resource, $asJson);
+            return $this->view->iiifCollection($resource, $asJson);
         }
         else {
             return null;
@@ -106,8 +106,7 @@ class IiifManifest extends AbstractHelper
             'sequences' => array(),
         );
 
-        $url = $this->view->url('universalviewer_presentation_manifest', array(
-            'recordtype' => 'items',
+        $url = $this->view->url('universalviewer_presentation_item', array(
             'id' => $item->id(),
         ));
         $url = $this->view->uvForceHttpsIfRequired($url);
@@ -177,8 +176,7 @@ class IiifManifest extends AbstractHelper
 
         $withins = array();
         foreach ($item->itemSets() as $itemSet) {
-            $within = $this->view->url('universalviewer_presentation_manifest', array(
-                'recordtype' => 'item_sets',
+            $within = $this->view->url('universalviewer_presentation_collection', array(
                 'id' => $itemSet->id(),
             ));
             $within = $this->view->uvForceHttpsIfRequired($within);

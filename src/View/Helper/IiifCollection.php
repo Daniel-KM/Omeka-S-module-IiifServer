@@ -35,12 +35,12 @@ use Omeka\Api\Representation\ItemSetRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * Helper to get a IIIF manifest for an item set
+ * Helper to get a IIIF Collection manifest for an item set
  */
-class IiifItemSet extends AbstractHelper
+class IiifCollection extends AbstractHelper
 {
     /**
-     * Get the IIIF manifest for the specified item set.
+     * Get the IIIF Collection manifest for the specified item set.
      *
      * @todo Use a representation/context with a getResource(), a toString()
      * that removes empty values, a standard json() without ld and attach it to
@@ -166,14 +166,24 @@ class IiifItemSet extends AbstractHelper
         $resourceName = $resource->resourceName();
         $manifest = array();
 
-        $url = $this->view->url('universalviewer_presentation_manifest', array(
-            'recordtype' => $resourceName,
-            'id' => $resource->id(),
-        ));
+        if ($resourceName == 'item_sets') {
+            $url = $this->view->url('universalviewer_presentation_collection', array(
+                'id' => $resource->id(),
+            ));
+
+            $type = 'sc:Collection';
+        } else {
+            $url = $this->view->url('universalviewer_presentation_item', array(
+                'id' => $resource->id(),
+            ));
+
+            $type = 'sc:Manifest';
+        }
+
         $url = $this->view->uvForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
-        $manifest['@type'] = $resourceName == 'item_sets' ? 'sc:Collection' : 'sc:Manifest';
+        $manifest['@type'] = $type;
 
         $manifest['label'] = $resource->displayTitle();
 

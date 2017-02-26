@@ -36,6 +36,19 @@ use Zend\View\Model\ViewModel;
 
 class PresentationController extends AbstractActionController
 {
+
+    /**
+     * Forward to the 'manifest' action.
+     *
+     * @internal Unlike info.json, the redirect is not required.
+     *
+     * @see self::manifestAction()
+     */
+    public function indexAction()
+    {
+        $this->forward('manifest');
+    }
+
     public function manifestAction()
     {
         $id = $this->params('id');
@@ -43,8 +56,57 @@ class PresentationController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $recordtype = $this->params('recordtype');
-        $response = $this->api()->read($recordtype, $id);
+        // Map iiif resources with Omeka Classic and Omeka S records.
+        $matchingResources = array(
+            'item' => 'items',
+            'items' => 'items',
+            'item-set' => 'item_sets',
+            'item-sets' => 'item_sets',
+            'item_set' => 'item_sets',
+            'item_sets' => 'item_sets',
+            'collection' => 'item_sets',
+            'collections' => 'item_sets',
+        );
+        $resourceName = $this->params('resourcename');
+        if (!isset($matchingResources[$resourceName])) {
+            throw new NotFoundException;
+        }
+        $resourceName = $matchingResources[$resourceName];
+
+        if ($resource->resourceName() == 'item_sets') {
+            return $this->collectionAction();
+        } else {
+            return $this->itemAction();
+        }
+    }
+
+    public function collectionAction()
+    {
+        $id = $this->params('id');
+        if (empty($id)) {
+            throw new NotFoundException;
+        }
+
+        $response = $this->api()->read('item_sets', $id);
+        $resource = $response->getContent();
+        if (empty($resource)) {
+            throw new NotFoundException;
+        }
+
+        $iiifCollection = $this->viewHelpers()->get('iiifCollection');
+        $manifest = $iiifCollection($resource, false);
+
+        return $this->jsonLd($manifest);
+    }
+
+    public function itemAction()
+    {
+        $id = $this->params('id');
+        if (empty($id)) {
+            throw new NotFoundException;
+        }
+
+        $response = $this->api()->read('items', $id);
         $resource = $response->getContent();
         if (empty($resource)) {
             throw new NotFoundException;
