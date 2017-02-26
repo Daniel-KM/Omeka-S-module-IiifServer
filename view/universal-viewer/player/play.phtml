@@ -10,6 +10,5 @@
 ?>
 <?php
     echo $this->universalViewer($resource, array(
-        'width' => '100%',
-        'height' => '700px',
+        'style' => 'height: 600px;' . $this->setting('universalviewer_style'),
     ));

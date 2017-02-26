@@ -52,8 +52,7 @@ class Module extends AbstractModule {
         'universalviewer_append_item_set_show' => true,
         'universalviewer_append_item_show' => true,
         'universalviewer_class' => '',
-        'universalviewer_width' => '95%',
-        'universalviewer_height' => '600px',
+        'universalviewer_style' => 'background-color: #000; height: 600px;',
         'universalviewer_locale' => 'en-GB:English (GB),fr:French',
         'universalviewer_iiif_creator' => 'Auto',
         'universalviewer_iiif_max_size' => 10000000,
@@ -132,6 +131,20 @@ class Module extends AbstractModule {
             $settings->set('universalviewer_append_item_set_show',
                 $settings->get('universalviewer_append_collections_show'));
             $settings->delete('universalviewer_append_collections_show');
+
+            $style = $this->_settings['universalviewer_style'];
+            $width = $settings->get('universalviewer_width') ?: '';
+            if (!empty($width)) {
+                $width = ' width:' . $width . ';';
+            }
+            $height = $settings->get('universalviewer_height') ?: '';
+            if (!empty($height)) {
+                $style = strtok($style, ';');
+                $height = ' height:' . $height . ';';
+            }
+            $settings->set('universalviewer_style', $style . $width . $height);
+            $settings->delete('universalviewer_width');
+            $settings->delete('universalviewer_height');
 
             $settings->set('universalviewer_iiif_max_size',
                 $settings->get('universalviewer_max_dynamic_size'));

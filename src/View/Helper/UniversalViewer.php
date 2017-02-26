@@ -41,12 +41,11 @@ class UniversalViewer extends AbstractHelper
      *
      * Proxies to {@link render()}.
      *
-     * @param $resource Omeka resource
+     * @param AbstractResourceEntityRepresentation $resource
      * @param array $options Associative array of optional values:
      *   - (string) class
-     *   - (string) width
-     *   - (string) height
      *   - (string) locale
+     *   - (string) style
      *   - (string) config
      * @return string. The html string corresponding to the UniversalViewer.
      */
@@ -65,9 +64,8 @@ class UniversalViewer extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @param array $options Associative array of optional values:
      *   - (string) class
-     *   - (string) width
-     *   - (string) height
      *   - (string) locale
+     *   - (string) style
      *   - (string) config
      * @return string
      */
@@ -113,23 +111,17 @@ class UniversalViewer extends AbstractHelper
         if (!empty($class)) {
             $class = ' ' . $class;
         }
-        $width = isset($options['width'])
-            ? $options['width']
-            : $this->view->setting('universalviewer_width');
-        if (!empty($width)) {
-            $width = ' width:' . $width . ';';
-        }
-        $height = isset($options['height'])
-            ? $options['height']
-            : $this->view->setting('universalviewer_height');
-        if (!empty($height)) {
-            $height = ' height:' . $height . ';';
-        }
         $locale = isset($options['locale'])
             ? $options['locale']
             : $this->view->setting('universalviewer_locale');
         if (!empty($locale)) {
             $locale = ' data-locale="' . $locale . '"';
+        }
+        $style = isset($options['style'])
+            ? $options['style']
+            : $this->view->setting('universalviewer_style');
+        if (!empty($style)) {
+            $style = ' style="' . $style . '"';
         }
 
         // Default configuration file.
@@ -138,13 +130,12 @@ class UniversalViewer extends AbstractHelper
             : $args['config'];
         $urlJs = $this->view->assetUrl('js/uv/lib/embed.js', 'UniversalViewer');
 
-        $html = sprintf('<div class="uv%s" data-config="%s" data-uri="%s"%s style="background-color: #000;%s%s"></div>',
+        $html = sprintf('<div class="uv%s" data-config="%s" data-uri="%s"%s%s></div>',
             $class,
             $config,
             $urlManifest,
             $locale,
-            $width,
-            $height);
+            $style);
         $html .= sprintf('<script type="text/javascript" id="embedUV" src="%s"></script>', $urlJs);
         $html .= '<script type="text/javascript">/* wordpress fix */</script>';
         return $html;

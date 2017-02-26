@@ -224,7 +224,7 @@ foreach ($response->getContent() as $vocabulary) {
     <div class="field">
         <?php
             $text = new Zend\Form\Element\Text('universalviewer_class');
-            $text->setLabel($t->translate('Class of inline frame'));
+            $text->setLabel($t->translate('Class of main div'));
             $text->setAttribute('id', 'universalviewer_class');
             $text->setValue($settings->get('universalviewer_class'));
         ?>
@@ -233,7 +233,7 @@ foreach ($response->getContent() as $vocabulary) {
             <a class="expand" href="#"></a>
             <div class="collapsible">
                 <div class="field-description">
-                    <?php echo $t->translate('Class to add to the inline frame.'); ?>
+                    <?php echo $t->translate('Class to add to the main div.'); ?>
                 </div>
             </div>
         </div>
@@ -243,33 +243,20 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('universalviewer_width');
-            $text->setLabel($t->translate('Width of inline frame'));
-            $text->setAttribute('id', 'universalviewer_width');
-            $text->setValue($settings->get('universalviewer_width'));
+            $text = new Zend\Form\Element\Text('universalviewer_style');
+            $text->setLabel($t->translate('Inline style'));
+            $text->setAttribute('id', 'universalviewer_style');
+            $text->setValue($settings->get('universalviewer_style'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
             <a class="expand" href="#"></a>
             <div class="collapsible">
                 <div class="field-description">
-                    <?php echo $t->translate('Keep this field blank to avoid an issue with some themes.'); ?>
+                    <?php echo $t->translate('If any, this style will be added to the main div of the Universal Viewer.'); ?>
+                    <?php echo $t->translate('The height may be required.'); ?>
                 </div>
             </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_height');
-            $text->setLabel($t->translate('Height of inline frame'));
-            $text->setAttribute('id', 'universalviewer_height');
-            $text->setValue($settings->get('universalviewer_height'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
         </div>
         <div class="inputs">
             <?php echo $this->formText($text); ?>
