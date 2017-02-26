@@ -217,25 +217,26 @@ class IiifInfo extends AbstractHelper
     /**
      * Get an array of the width and height of the image file.
      *
-     * @internal The process uses the saved constraints. It they are changed but
-     * the derivative haven't been rebuilt, the return will be wrong (but
-     * generally without consequences for BookReader).
-     *
-     * @param MediaRepresentation $file
+     * @param MediaRepresentation $media
      * @param string $imageType
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
+     *
+     * @see UniversalViewer_View_Helper_IiifManifest::_getImageSize()
      * @see UniversalViewer_View_Helper_IiifInfo::_getImageSize()
+     * @see UniversalViewer_ImageController::_getImageSize()
+     * @todo Refactorize.
      */
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
     {
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
-            return array('width' => null, 'height' => null);
+            return array(
+                'width' => null,
+                'height' => null,
+            );
         }
 
-        // This is an image.
-        // Get the resolution directly.
         // The storage adapter should be checked for external storage.
         if ($imageType == 'original') {
             $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
