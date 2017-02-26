@@ -55,43 +55,36 @@ class UniversalViewer extends AbstractHelper
             return $this;
         }
 
-        return $this->render($resource, $options);
-    }
+        // Prepare the url for the manifest of a record after additional checks.
+        $resourceName = $resource->resourceName();
+        if (!in_array($resourceName, array('items', 'item_sets'))) {
+            return '';
+        }
 
-    /**
-     * Render a universal viewer from the provided resource.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param array $options Associative array of optional values:
-     *   - (string) class
-     *   - (string) locale
-     *   - (string) style
-     *   - (string) config
-     * @return string
-     */
-    public function render(AbstractResourceEntityRepresentation $resource, $options = array())
-    {
         // Determine if we should get the manifest from a field in the metadata.
         $urlManifest = '';
         $manifestProperty = $this->view->setting('universalviewer_alternative_manifest_property');
         if ($manifestProperty) {
             $urlManifest = $resource->value($manifestProperty);
+            if ($urlManifest) {
+                return $this->render($urlManifest, $options);
+            }
+            // If manifest not provided in metadata, point to manifest created
+            // from Omeka files.
         }
-
-        $resourceName = $resource->resourceName();
 
         // Some specific checks.
         switch ($resourceName) {
             case 'items':
                 // Currently, an item without files is unprocessable.
-                if (count($resource->media()) == 0 && $urlManifest == '') {
+                if (count($resource->media()) == 0) {
                     // return $this->view->translate('This item has no files and is not displayable.');
                     return '';
                 }
                 $route = 'universalviewer_presentation_item';
                 break;
             case 'item_sets':
-                if ($resource->itemCount() == 0 && $urlManifest == '') {
+                if ($resource->itemCount() == 0) {
                     // return $this->view->translate('This collection has no item and is not displayable.');
                     return '';
                 }
@@ -99,27 +92,37 @@ class UniversalViewer extends AbstractHelper
                 break;
         }
 
-        // If manifest not provided in metadata, point to manifest created from
-        // Omeka files.
-        if (empty($urlManifest)) {
-            $urlManifest = $this->view->url($route, array(
-                'id' => $resource->id(),
-            ));
-            $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);
-        }
+        $urlManifest = $this->view->url($route, array(
+            'id' => $resource->id(),
+        ));
+        $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);
 
+        return $this->render($urlManifest, $options);
+    }
+
+    /**
+     * Render a universal viewer for a url, according to options.
+     *
+     * @param string $urlManifest
+     * @param array $options
+     * @return string
+     */
+    protected function render($urlManifest, $options = array())
+    {
         $class = isset($options['class'])
             ? $options['class']
             : $this->view->setting('universalviewer_class');
         if (!empty($class)) {
             $class = ' ' . $class;
         }
+
         $locale = isset($options['locale'])
             ? $options['locale']
             : $this->view->setting('universalviewer_locale');
         if (!empty($locale)) {
             $locale = ' data-locale="' . $locale . '"';
         }
+
         $style = isset($options['style'])
             ? $options['style']
             : $this->view->setting('universalviewer_style');

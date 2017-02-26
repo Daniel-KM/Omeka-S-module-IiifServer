@@ -154,10 +154,19 @@ class Module extends AbstractModule {
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
-        $sharedEventManager->attach('Omeka\Controller\Site\Item',
-            'view.show.after', array($this, 'displayUniversalViewer'));
-        $sharedEventManager->attach('Omeka\Controller\Site\Item',
-            'view.browse.after', array($this, 'displayUniversalViewer'));
+        $serviceLocator = $this->getServiceLocator();
+        $settings = $serviceLocator->get('Omeka\Settings');
+
+        if ($settings->get('universalviewer_append_item_show')) {
+            $sharedEventManager->attach('Omeka\Controller\Site\Item',
+                'view.show.after', array($this, 'displayUniversalViewer'));
+        }
+
+        // Note: there is no item-set show, but a special case for items browse.
+        if ($settings->get('universalviewer_append_item_set_show')) {
+            $sharedEventManager->attach('Omeka\Controller\Site\Item',
+                'view.browse.after', array($this, 'displayUniversalViewer'));
+        }
     }
 
     public function getConfig() {
