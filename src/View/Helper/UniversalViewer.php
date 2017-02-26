@@ -37,7 +37,9 @@ class UniversalViewer extends AbstractHelper
 {
 
     /**
-     * Get the specified UniversalViewer.
+     * Get the Universal Viewer for the provided resource.
+     *
+     * Proxies to {@link render()}.
      *
      * @param $resource Omeka resource
      * @param array $options Associative array of optional values:
@@ -49,6 +51,27 @@ class UniversalViewer extends AbstractHelper
      * @return string. The html string corresponding to the UniversalViewer.
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource, $options = array())
+    {
+        if (empty($resource)) {
+            return $this;
+        }
+
+        return $this->render($resource, $options);
+    }
+
+    /**
+     * Render a universal viewer from the provided resource.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @param array $options Associative array of optional values:
+     *   - (string) class
+     *   - (string) width
+     *   - (string) height
+     *   - (string) locale
+     *   - (string) config
+     * @return string
+     */
+    public function render(AbstractResourceEntityRepresentation $resource, $options = array())
     {
         // Determine if we should get the manifest from a field in the metadata.
         $urlManifest = '';
@@ -113,7 +136,7 @@ class UniversalViewer extends AbstractHelper
         $config = empty($args['config'])
             ? $this->view->basePath('/modules/UniversalViewer/view/public/universal-viewer/config.json')
             : $args['config'];
-        $urlJs = $this->view->basePath('/modules/UniversalViewer/view/shared/javascripts/uv/lib/embed.js');
+        $urlJs = $this->view->assetUrl('js/uv/lib/embed.js', 'UniversalViewer');
 
         $html = sprintf('<div class="uv%s" data-config="%s" data-uri="%s"%s style="background-color: #000;%s%s"></div>',
             $class,

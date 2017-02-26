@@ -79,13 +79,7 @@ class Module extends AbstractModule {
             throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the UniversalViewer.')); // @translate
         }
 
-        $js = dirname(__FILE__)
-            . DIRECTORY_SEPARATOR . 'view'
-            . DIRECTORY_SEPARATOR . 'shared'
-            . DIRECTORY_SEPARATOR . 'javascripts'
-            . DIRECTORY_SEPARATOR . 'uv'
-            . DIRECTORY_SEPARATOR . 'lib'
-            . DIRECTORY_SEPARATOR . 'embed.js';
+        $js = __DIR__ . '/asset/js/uv/lib/embed.js';
         if (!file_exists($js)) {
             throw new ModuleCannotInstallException($t->translate('UniversalViewer library should be installed. See module’s installation documentation.')); // @translate
         }
