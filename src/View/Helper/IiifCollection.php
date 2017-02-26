@@ -157,6 +157,11 @@ class IiifCollection extends AbstractHelper
         // Remove all empty values (there is no "0" or "null" at first level).
         $manifest = array_filter($manifest);
 
+        // Keep at least "manifests", even if no member.
+        if (empty($manifest['collections']) && empty($manifest['manifests'])) {
+            $manifest['manifests'] = array();
+        }
+
         $manifest = (object) $manifest;
         return $manifest;
     }
