@@ -1,7 +1,7 @@
 Universal Viewer (module for Omeka S)
 =====================================
 
-[![Build Status](https://travis-ci.org/biblibre/omeka-s-module-UniversalViewer.svg?branch=master)](https://travis-ci.org/biblibre/omeka-s-module-UniversalViewer)
+[![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-UniversalViewer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-UniversalViewer)
 
 [Universal Viewer] is a module for [Omeka S] that adds the [IIIF] specifications
 in order to serve images like an [IIPImage] server, and the [UniversalViewer], a
