@@ -434,7 +434,7 @@ class IiifManifest extends AbstractHelper
     /**
      * Create an IIIF thumbnail object from an Omeka file.
      *
-     * @param Omeka\Api\Representation\MediaRepresentation $file
+     * @param Omeka\Api\Representation\MediaRepresentation $media
      * @return Standard object|null
      */
     protected function _iiifThumbnail(MediaRepresentation $media)
@@ -481,7 +481,7 @@ class IiifManifest extends AbstractHelper
     /**
      * Create an IIIF image object from an Omeka file.
      *
-     * @param MediaRepresentation $file
+     * @param MediaRepresentation $media
      * @param integer $index Used to set the standard name of the image.
      * @param string $canvasUrl Used to set the value for "on".
      * @param integer $width If not set, will be calculated.
@@ -538,7 +538,7 @@ class IiifManifest extends AbstractHelper
     /**
      * Create an IIIF canvas object for an image.
      *
-     * @param MediaRepresentation $file
+     * @param MediaRepresentation $media
      * @param integer $index Used to set the standard name of the image.
      * @return Standard object|null
      */
@@ -847,11 +847,11 @@ class IiifManifest extends AbstractHelper
     /**
      * Get the representative thumbnail of the whole work.
      *
-     * @param Record $record
+     * @param Resource $resource
      * @param boolean $isThreejs Manage an exception.
      * @return object The iiif thumbnail.
      */
-    protected function _mainThumbnail($record, $isThreejs)
+    protected function _mainThumbnail($resource, $isThreejs)
     {
         $media = null;
         // Threejs is an exception, because the thumbnail may be a true file
@@ -860,7 +860,7 @@ class IiifManifest extends AbstractHelper
             $response = $this->view->api()->search(
                 'media',
                 [
-                    'item_id' => $record->id(),
+                    'item_id' => $resource->id(),
                     'has_thumbnails' => 1,
                     // TODO Check only the base name for imported records.
                     'source' => 'thumb.jpg',
@@ -879,7 +879,7 @@ class IiifManifest extends AbstractHelper
             $response = $this->view->api()->search(
                 'media',
                 [
-                    'item_id' => $record->id(),
+                    'item_id' => $resource->id(),
                     'has_thumbnails' => 1,
                     'limit' => 1,
                 ]
@@ -896,7 +896,7 @@ class IiifManifest extends AbstractHelper
      *
      * @internal The method uses the Zoomify format of OpenLayersZoom.
      *
-     * @param MediaRepresentation $file
+     * @param MediaRepresentation $media
      * @return Standard object or null if no tile.
      * @see UniversalViewer_View_Helper_IiifInfo::_iiifTile()
      */
@@ -931,6 +931,7 @@ class IiifManifest extends AbstractHelper
     /**
      * Return the properties of a tiled file.
      *
+     * @param MediaRepresentation $media
      * @return array|null
      * @see UniversalViewer_ImageController::_getTileProperties()
      */

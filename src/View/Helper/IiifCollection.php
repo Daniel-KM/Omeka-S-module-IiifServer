@@ -54,7 +54,7 @@ class IiifCollection extends AbstractHelper
      */
     public function __invoke(ItemSetRepresentation $itemSet, $asJson = true)
     {
-        $result = $this->_buildManifestItemSet($itemSet);
+        $result = $this->buildManifestItemSet($itemSet);
 
         if ($asJson) {
             return version_compare(phpversion(), '5.4.0', '<')
@@ -71,7 +71,7 @@ class IiifCollection extends AbstractHelper
      * @param ItemSetRepresentation $itemSet
      * @return Object|null. The object corresponding to the collection.
      */
-    protected function _buildManifestItemSet(ItemSetRepresentation $itemSet)
+    protected function buildManifestItemSet(ItemSetRepresentation $itemSet)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
