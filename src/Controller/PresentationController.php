@@ -93,7 +93,7 @@ class PresentationController extends AbstractActionController
         }
 
         $iiifCollection = $this->viewHelpers()->get('iiifCollection');
-        $manifest = $iiifCollection($resource, false);
+        $manifest = $iiifCollection($resource);
 
         return $this->jsonLd($manifest);
     }
@@ -165,7 +165,7 @@ class PresentationController extends AbstractActionController
         }
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
-        $manifest = $iiifManifest($resource, false);
+        $manifest = $iiifManifest($resource);
 
         return $this->jsonLd($manifest);
     }

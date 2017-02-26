@@ -46,26 +46,22 @@ class IiifManifest extends AbstractHelper
         $this->fileManager = $fileManager;
     }
 
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $asJson = true)
+    /**
+     * Get the IIIF manifest for the specified record.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return Object|null
+     */
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
-            $result = $this->_buildManifestItem($resource);
-        }
-        elseif ($resourceName == 'item_sets') {
-            return $this->view->iiifCollection($resource, $asJson);
-        }
-        else {
-            return null;
+            return $this->buildManifestItem($resource);
         }
 
-        if ($asJson) {
-            return version_compare(phpversion(), '5.4.0', '<')
-                ? json_encode($result)
-                : json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($resourceName == 'item_sets') {
+            return $this->view->iiifCollection($resource);
         }
-        // Return as array
-        return $result;
     }
 
     /**
@@ -77,10 +73,10 @@ class IiifManifest extends AbstractHelper
      * @todo Replace all data by standard classes.
      * @todo Replace web root by routes, even if main ones are only urn.
      *
-     * @param $resource Item
+     * @param ItemRepresentation $item
      * @return Object|null. The object corresponding to the manifest.
      */
-    protected function _buildManifestItem(ItemRepresentation $item)
+    protected function buildManifestItem(ItemRepresentation $item)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.

@@ -48,30 +48,9 @@ class IiifCollection extends AbstractHelper
      * @see IiifManifest
      *
      * @param ItemSetRepresentation $itemSet Item set
-     * @param boolean $asJson Return manifest as object or as a json string.
-     * @return Object|string|null. The object or the json string corresponding to the
-     * manifest.
+     * @return Object|null
      */
-    public function __invoke(ItemSetRepresentation $itemSet, $asJson = true)
-    {
-        $result = $this->buildManifestItemSet($itemSet);
-
-        if ($asJson) {
-            return version_compare(phpversion(), '5.4.0', '<')
-                ? json_encode($result)
-                : json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        }
-        // Return as array
-        return $result;
-    }
-
-    /**
-     * Get the IIIF manifest for the specified item set.
-     *
-     * @param ItemSetRepresentation $itemSet
-     * @return Object|null. The object corresponding to the collection.
-     */
-    protected function buildManifestItemSet(ItemSetRepresentation $itemSet)
+    public function __invoke(ItemSetRepresentation $itemSet)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
@@ -97,7 +76,7 @@ class IiifCollection extends AbstractHelper
             'manifests' => array(),
         );
 
-        $manifest = array_merge($manifest, $this->_buildManifestBase($itemSet, false));
+        $manifest = array_merge($manifest, $this->buildManifestBase($itemSet));
 
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
@@ -150,7 +129,7 @@ class IiifCollection extends AbstractHelper
         $response = $this->view->api()->search('items', array('item_set_id' => $itemSet->id()));
         $items = $response->getContent();
         foreach ($items as $item) {
-            $manifests[] = $this->_buildManifestBase($item);
+            $manifests[] = $this->buildManifestBase($item);
         }
         $manifest['manifests'] = $manifests;
 
@@ -166,7 +145,7 @@ class IiifCollection extends AbstractHelper
         return $manifest;
     }
 
-    protected function _buildManifestBase(AbstractResourceEntityRepresentation $resource, $asObject = true)
+    protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
         $manifest = array();
@@ -192,8 +171,6 @@ class IiifCollection extends AbstractHelper
 
         $manifest['label'] = $resource->displayTitle();
 
-        return $asObject
-            ? (object) $manifest
-            : $manifest;
+        return $manifest;
     }
 }

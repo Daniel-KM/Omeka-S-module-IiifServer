@@ -49,6 +49,7 @@ class JsonLd extends AbstractPlugin
         }
         // Default to json with a link to json-ld.
         else {
+            // TODO Remove json ld keys if client ask json.
             $response->getHeaders()->addHeaderLine('Content-Type', 'application/json; charset=utf-8', true);
             $response->getHeaders()->addHeaderLine('Link', '<http://iiif.io/api/image/2/context.json>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"', true);
        }
