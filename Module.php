@@ -40,7 +40,9 @@ use Zend\View\Renderer\PhpRenderer;
 use Zend\Mvc\MvcEvent;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 
-class Module extends AbstractModule {
+class Module extends AbstractModule
+{
+
     protected $_settings = array(
         'universalviewer_manifest_description_property' => 'dcterms:bibliographicCitation',
         'universalviewer_manifest_attribution_property' => '',
@@ -72,7 +74,8 @@ class Module extends AbstractModule {
         $acl->allow(null, 'UniversalViewer\Controller\Media');
     }
 
-    public function install(ServiceLocatorInterface $serviceLocator) {
+    public function install(ServiceLocatorInterface $serviceLocator)
+    {
         $t = $serviceLocator->get('MvcTranslator');
 
         $processors = $this->_getProcessors($serviceLocator);
@@ -92,7 +95,8 @@ class Module extends AbstractModule {
         }
     }
 
-    public function uninstall(ServiceLocatorInterface $serviceLocator) {
+    public function uninstall(ServiceLocatorInterface $serviceLocator)
+    {
         $settings = $serviceLocator->get('Omeka\Settings');
 
         foreach ($this->_settings as $name => $value) {
@@ -184,11 +188,13 @@ class Module extends AbstractModule {
         }
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         return include __DIR__ . '/config/module.config.php';
     }
 
-    public function getConfigForm(PhpRenderer $renderer) {
+    public function getConfigForm(PhpRenderer $renderer)
+    {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
         $translator = $serviceLocator->get('MvcTranslator');
@@ -212,7 +218,8 @@ class Module extends AbstractModule {
         return $renderer->render('config-form', $vars);
     }
 
-    public function handleConfigForm(AbstractController $controller) {
+    public function handleConfigForm(AbstractController $controller)
+    {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
 

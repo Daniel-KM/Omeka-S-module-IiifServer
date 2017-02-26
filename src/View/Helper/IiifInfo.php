@@ -125,11 +125,11 @@ class IiifInfo extends AbstractHelper
         else {
             $info = array();
             $info['@context'] = array(
-                    'http://iiif.io/api/presentation/2/context.json',
-                    // See MediaController::contextAction()
-                    'http://wellcomelibrary.org/ld/ixif/0/context.json',
-                    // WEB_ROOT . '/ld/ixif/0/context.json',
-                );
+                'http://iiif.io/api/presentation/2/context.json',
+                // See MediaController::contextAction()
+                'http://wellcomelibrary.org/ld/ixif/0/context.json',
+                // WEB_ROOT . '/ld/ixif/0/context.json',
+            );
             $fileUrl = $this->view->url('universalviewer_media', array(
                 'id' => $media->id(),
             ));

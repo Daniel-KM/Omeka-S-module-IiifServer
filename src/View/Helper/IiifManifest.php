@@ -435,10 +435,6 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifThumbnail(MediaRepresentation $media)
     {
-        if (empty($media)) {
-            return;
-        }
-
         $imageSize = $this->_getImageSize($media, 'square');
         list($width, $height) = array_values($imageSize);
         if (empty($width) || empty($height)) {
@@ -884,7 +880,9 @@ class IiifManifest extends AbstractHelper
             $media = reset($medias);
         }
 
-        return $this->_iiifThumbnail($media);
+        if ($media) {
+            return $this->_iiifThumbnail($media);
+        }
     }
 
     /**
