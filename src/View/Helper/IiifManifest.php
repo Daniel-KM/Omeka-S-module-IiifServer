@@ -207,13 +207,17 @@ class IiifManifest extends AbstractHelper
                   }
                   // Check if this is a json file for old Omeka or old imports.
                   elseif ($mediaType == 'text/plain') {
-                      switch (strtolower($media->extension())) {
-                          case 'json':
-                              $jsonFiles[] = $media;
-                              break;
-                      }
-                  }
-              }
+                    // Currently, the extension is "txt", even for json files.
+                    // switch (strtolower($media->extension())) {
+                    //   case 'json':
+                    //       $jsonFiles[] = $media;
+                    //       break;
+                    // }
+                    if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'json') {
+                        $jsonFiles[] = $media;
+                    }
+                }
+            }
         }
         unset ($medias);
         $totalImages = count($images);
@@ -794,7 +798,7 @@ class IiifManifest extends AbstractHelper
         // $mediaSequenceElement['metadata'] = $values['metadata'];
         // Check if there is a "thumb.jpg" that can be managed as a thumbnail.
         foreach ($values['files'] as $imageFile) {
-            if ($imageFile->filename() == 'thumb.jpg') {
+            if (basename($imageFile->filename()) == 'thumb.jpg') {
                 // The original is used, because this is already a thumbnail.
                 $thumbnailUrl = $imageFile->originalUrl();
                 if ($thumbnailUrl) {
@@ -849,19 +853,24 @@ class IiifManifest extends AbstractHelper
         // Threejs is an exception, because the thumbnail may be a true file
         // named "thumb.js".
         if ($isThreejs) {
-            $response = $this->view->api()->search(
-                'media',
-                [
-                    'item_id' => $resource->id(),
-                    'has_thumbnails' => 1,
-                    // TODO Check only the base name for imported records.
-                    'source' => 'thumb.jpg',
-                    'limit' => 1,
-                ]
-                );
-            $medias = $response->getContent();
-            if ($medias) {
-                $media = reset($medias);
+            // The connection is used because the api does not allow to search
+            // on source name.
+            $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
+                ->get('Omeka\Connection');
+            $qb = $conn->createQueryBuilder()
+                ->select('id')
+                ->from('media', 'media')
+                ->where('item_id = :item_id')
+                ->setParameter(':item_id', $resource->id())
+                ->andWhere('has_thumbnails = 1')
+                ->andWhere('source LIKE "%thumb.jpg"')
+                ->orderBy('id', 'ASC')
+                ->setMaxResults(1);
+            $stmt = $conn->executeQuery($qb, $qb->getParameters());
+            $id = $stmt->fetch(\PDO::FETCH_COLUMN);
+            if ($id) {
+                $response = $this->view->api()->read('media', $id);
+                $media = $response->getContent();
             }
         }
 
