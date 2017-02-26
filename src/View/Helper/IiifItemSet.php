@@ -102,11 +102,12 @@ class IiifItemSet extends AbstractHelper
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
         $metadata = array();
-        foreach ($itemSet->values() as $name => $term) {
-            $value = reset($term['values']);
+        foreach ($itemSet->values() as $term => $value) {
             $metadata[] = (object) [
-                'label' => $value->property()->localName(),
-                'value' => (string) $value,
+                'label' => $value['alternate_label'] ?: $value['property']->label(),
+                'value' => count($value['values']) > 1
+                    ? array_map('strval', $value['values'])
+                    : (string) reset($value['values']),
             ];
         }
         $manifest['metadata'] = $metadata;
