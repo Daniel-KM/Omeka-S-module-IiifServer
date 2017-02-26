@@ -54,6 +54,28 @@ return [
             // @link http://iiif.io/api/image/2.0
             // Image          {scheme}://{server}{/prefix}/{identifier}
 
+            // Special route for the dynamic collections, search or browse pages.
+            // The first letter "c", "i", or "m" is used to distinct collections, items and
+            // media and are not required when the identifier is always unique for all of
+            // resources. The default letter is "i", so it is not required when all ids are
+            // items (the most common case). If the list contains only one id, the comma is
+            // required to avoid confusion with a normal collection.
+            // This route should be set before the "universalviewer_presentation_collection".
+            'universalviewer_presentation_collection_list' => [
+                'type' => 'segment',
+                'options' => [
+                    'route' => '/iiif/collection/:id',
+                    'constraints' => [
+                        'id' => '(?:[cim]?\-?\d+\,?)+',
+                    ],
+                    'defaults' => [
+                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        'controller' => 'Presentation',
+                        'action' => 'list',
+                    ],
+                ],
+            ],
+
             // For collections, the spec doesn't specify a name for the manifest itself.
             // Libraries use an empty name or "manifests", "manifest.json", "manifest",
             // "{id}.json", etc. Here, an empty name is used, and a second route is added.
@@ -318,6 +340,7 @@ return [
         'invokables' => [
             'universalViewer' => 'UniversalViewer\View\Helper\UniversalViewer',
             'iiifCollection' => 'UniversalViewer\View\Helper\IiifCollection',
+            'iiifCollectionList' => 'UniversalViewer\View\Helper\IiifCollectionList',
             'uvForceHttpsIfRequired' => 'UniversalViewer\View\Helper\UvForceHttpsIfRequired',
         ],
         'factories' => [

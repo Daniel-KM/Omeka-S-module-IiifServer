@@ -32,7 +32,6 @@ namespace UniversalViewer\Controller;
 
 use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
 
 class PresentationController extends AbstractActionController
 {
@@ -95,6 +94,59 @@ class PresentationController extends AbstractActionController
 
         $iiifCollection = $this->viewHelpers()->get('iiifCollection');
         $manifest = $iiifCollection($resource, false);
+
+        return $this->jsonLd($manifest);
+    }
+
+    public function listAction()
+    {
+        $id = $this->params('id');
+        if (empty($id)) {
+            throw new NotFoundException;
+        }
+
+        // For compatibility with old urls from Omeka Classic.
+        $id = preg_replace('/[^0-9,]/', '', $id);
+
+        $identifiers = array_filter(explode(',', $id));
+
+        // Extract the resources from the identifier.
+
+        // Currently, Omeka S doesn't allow to read mixed resources.
+        $conn = $this
+            ->getEvent()
+            ->getApplication()
+            ->getServiceManager()
+            ->get('Omeka\Connection');
+
+        $map = [
+            'Omeka\Entity\Item' => 'items',
+            'Omeka\Entity\ItemSet' => 'item_sets',
+            'Omeka\Entity\Media' => 'media',
+        ];
+
+        $qb = $conn->createQueryBuilder()
+            ->select('id, resource_type')
+            ->from('resource', 'resource')
+            ->where('resource.id IN (' . implode(',', $identifiers) . ')')
+            ->andWhere("resource.resource_type IN ('Omeka\\\Entity\\\Item', 'Omeka\\\Entity\\\ItemSet', 'Omeka\\\Entity\\\Media')");
+        $stmt = $conn->executeQuery($qb, $qb->getParameters());
+        $resourceIds = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+
+        // The loop is done with identifiers to keep original order and possible
+        // duplicates.
+        $identifiers = array_intersect($identifiers, array_keys($resourceIds));
+        foreach ($identifiers as $id) {
+            $response = $this->api()->read($map[$resourceIds[$id]], $id);
+            $resources[] = $response->getContent();
+        }
+
+        if (empty($resources)) {
+            throw new NotFoundException;
+        }
+
+        $iiifCollectionList = $this->viewHelpers()->get('iiifCollectionList');
+        $manifest = $iiifCollectionList($resources);
 
         return $this->jsonLd($manifest);
     }

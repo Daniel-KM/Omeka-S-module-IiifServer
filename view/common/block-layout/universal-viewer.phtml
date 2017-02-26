@@ -1,6 +1,10 @@
 <?php
-// TODO Only one attachment is managed in block currently.
-$attachment = reset($attachments);
-$item = $attachment->item();
-// Display the viewer with the specified item and specified config.
-echo $this->universalViewer($item);
+$resources = array();
+foreach ($attachments as $attachment) {
+    $item = $attachment->item();
+    if ($item) {
+        $resources[] = $item;
+    }
+}
+// Display the viewer with the specified item.
+echo $this->universalViewer($resources);

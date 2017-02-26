@@ -51,6 +51,8 @@ class Module extends AbstractModule {
         'universalviewer_alternative_manifest_property' => '',
         'universalviewer_append_item_set_show' => true,
         'universalviewer_append_item_show' => true,
+        'universalviewer_append_item_set_browse' => false,
+        'universalviewer_append_item_browse' => false,
         'universalviewer_class' => '',
         'universalviewer_style' => 'background-color: #000; height: 600px;',
         'universalviewer_locale' => 'en-GB:English (GB),fr:French',
@@ -124,13 +126,19 @@ class Module extends AbstractModule {
             $settings->set('universalviewer_manifest_logo_default',
                 $this->_settings['universalviewer_manifest_logo_default']);
 
+            $settings->set('universalviewer_append_item_set_show',
+                $settings->get('universalviewer_append_collections_show'));
+            $settings->delete('universalviewer_append_collections_show');
+
             $settings->set('universalviewer_append_item_show',
                 $settings->get('universalviewer_append_items_show'));
             $settings->delete('universalviewer_append_items_show');
 
-            $settings->set('universalviewer_append_item_set_show',
-                $settings->get('universalviewer_append_collections_show'));
-            $settings->delete('universalviewer_append_collections_show');
+            $settings->set('universalviewer_append_item_set_browse',
+                $this->_settings['universalviewer_append_item_set_browse']);
+
+            $settings->set('universalviewer_append_item_browse',
+                $this->_settings['universalviewer_append_item_browse']);
 
             $style = $this->_settings['universalviewer_style'];
             $width = $settings->get('universalviewer_width') ?: '';
@@ -157,14 +165,21 @@ class Module extends AbstractModule {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
 
+        // Note: there is no item-set show, but a special case for items browse.
+        if ($settings->get('universalviewer_append_item_set_show')
+            || $settings->get('universalviewer_append_item_browse')
+        ) {
+            $sharedEventManager->attach('Omeka\Controller\Site\Item',
+                'view.browse.after', array($this, 'displayUniversalViewer'));
+        }
+
         if ($settings->get('universalviewer_append_item_show')) {
             $sharedEventManager->attach('Omeka\Controller\Site\Item',
                 'view.show.after', array($this, 'displayUniversalViewer'));
         }
 
-        // Note: there is no item-set show, but a special case for items browse.
-        if ($settings->get('universalviewer_append_item_set_show')) {
-            $sharedEventManager->attach('Omeka\Controller\Site\Item',
+        if ($settings->get('universalviewer_append_item_set_browse')) {
+            $sharedEventManager->attach('Omeka\Controller\Site\ItemSet',
                 'view.browse.after', array($this, 'displayUniversalViewer'));
         }
     }
@@ -209,11 +224,18 @@ class Module extends AbstractModule {
 
     public function displayUniversalViewer(Event $event)
     {
+        $serviceLocator = $this->getServiceLocator();
+        $settings = $serviceLocator->get('Omeka\Settings');
+
         $view = $event->getTarget();
-        if (isset($view->item)) {
+        if ($settings->get('universalviewer_append_item_show') && isset($view->item)) {
             echo $view->universalViewer($view->item);
-        } elseif (isset($view->itemSet)) {
+        } elseif ($settings->get('universalviewer_append_item_browse') && isset($view->items)) {
+            echo $view->universalViewer($view->items);
+        } elseif ($settings->get('universalviewer_append_item_set_show') && isset($view->itemSet)) {
             echo $view->universalViewer($view->itemSet);
+        } elseif ($settings->get('universalviewer_append_item_set_browse') && isset($view->itemSets)) {
+            echo $view->universalViewer($view->itemSets);
         }
     }
 

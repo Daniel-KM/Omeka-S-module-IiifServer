@@ -41,7 +41,7 @@ class UniversalViewer extends AbstractHelper
      *
      * Proxies to {@link render()}.
      *
-     * @param AbstractResourceEntityRepresentation $resource
+     * @param AbstractResourceEntityRepresentation|array $resource
      * @param array $options Associative array of optional values:
      *   - (string) class
      *   - (string) locale
@@ -49,10 +49,21 @@ class UniversalViewer extends AbstractHelper
      *   - (string) config
      * @return string. The html string corresponding to the UniversalViewer.
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $options = array())
+    public function __invoke($resource, $options = array())
     {
         if (empty($resource)) {
             return $this;
+        }
+
+        // Prepare the url of the manifest for a dynamic collection.
+        if (is_array($resource)) {
+            $identifier = $this->buildIdentifierForList($resource);
+            $route = 'universalviewer_presentation_collection_list';
+            $urlManifest = $this->view->url($route, array(
+                'id' => $identifier,
+            ));
+            $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);
+            return $this->render($urlManifest, $options);
         }
 
         // Prepare the url for the manifest of a record after additional checks.
@@ -98,6 +109,35 @@ class UniversalViewer extends AbstractHelper
         $urlManifest = $this->view->uvForceHttpsIfRequired($urlManifest);
 
         return $this->render($urlManifest, $options);
+    }
+
+    /**
+     * Helper to create an identifier from a list of records.
+     *
+     * The dynamic identifier is a flat list of ids: "5,1,2,3".
+     * If there is only one id, a comma is added to avoid to have the same route
+     * than the collection itself.
+     * In all cases the order of records is kept.
+     *
+     * @todo Merge with UniversalViewer\View\Helper\IiifCollectionList::buildIdentifierForList()
+     *
+     * @param array $resources
+     * @return string
+     */
+    protected function buildIdentifierForList($resources)
+    {
+        $identifiers = array();
+        foreach ($resources as $resource) {
+            $identifiers[] = $resource->id();
+        }
+
+        $identifier = implode(',', $identifiers);
+
+        if (count($identifiers) == 1) {
+            $identifier .= ',';
+        }
+
+        return $identifier;
     }
 
     /**

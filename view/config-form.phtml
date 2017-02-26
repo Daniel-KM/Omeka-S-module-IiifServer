@@ -186,7 +186,7 @@ foreach ($response->getContent() as $vocabulary) {
 <fieldset id="fieldset-universalviewer-embed">
     <legend><?php echo $t->translate('Integration of the viewer'); ?></legend>
     <p class="explanation">
-        <?php echo $t->translate('If checked, the viewer will be automatically appended to the item sets or items show page.'); ?>
+        <?php echo $t->translate('If checked, the viewer will be automatically appended to the item sets or items pages.'); ?>
         <?php echo $t->translate('Else, the viewer can be added via the helper in the theme or the shortcode in any page.'); ?>
     </p>
     <div class="field">
@@ -209,6 +209,34 @@ foreach ($response->getContent() as $vocabulary) {
             $checkbox->setLabel($t->translate('Append to "Item show"'));
             $checkbox->setAttribute('id', 'universalviewer_append_item_show');
             $checkbox->setValue($settings->get('universalviewer_append_item_show'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($checkbox); ?>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formCheckbox($checkbox); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_set_browse');
+            $checkbox->setLabel($t->translate('Append to "Item set browse"'));
+            $checkbox->setAttribute('id', 'universalviewer_append_item_set_browse');
+            $checkbox->setValue($settings->get('universalviewer_append_item_set_browse'));
+        ?>
+        <div class="field-meta">
+            <?php echo $this->formLabel($checkbox); ?>
+        </div>
+        <div class="inputs">
+            <?php echo $this->formCheckbox($checkbox); ?>
+        </div>
+    </div>
+    <div class="field">
+        <?php
+            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_browse');
+            $checkbox->setLabel($t->translate('Append to "Item browse"'));
+            $checkbox->setAttribute('id', 'universalviewer_append_item_browse');
+            $checkbox->setValue($settings->get('universalviewer_append_item_browse'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($checkbox); ?>
