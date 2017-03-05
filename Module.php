@@ -49,7 +49,6 @@ class Module extends AbstractModule
         'iiifserver_manifest_license_property' => 'dcterms:license',
         'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
         'iiifserver_manifest_logo_default' => '',
-        'iiifserver_alternative_manifest_property' => '',
         'iiifserver_manifest_force_https' => false,
         'iiifserver_image_creator' => 'Auto',
         'iiifserver_image_max_size' => 10000000,
@@ -103,7 +102,6 @@ class Module extends AbstractModule
                     'universalviewer_manifest_license_property' => 'iiifserver_manifest_license_property',
                     'universalviewer_manifest_license_default' => 'iiifserver_manifest_license_default',
                     'universalviewer_manifest_logo_default' => 'iiifserver_manifest_logo_default',
-                    'universalviewer_alternative_manifest_property' => 'iiifserver_alternative_manifest_property',
                     'universalviewer_force_https' => 'iiifserver_manifest_force_https',
                     'universalviewer_iiif_creator' => 'iiifserver_image_creator',
                     'universalviewer_iiif_max_size' => 'iiifserver_image_max_size',
@@ -171,6 +169,7 @@ class Module extends AbstractModule
             'settings' => $settings,
             't' => $translator,
             'processors' => $processors,
+            'properties' => $properties,
         );
         return $renderer->render('config-form', $vars);
     }

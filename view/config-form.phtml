@@ -140,29 +140,6 @@
     </div>
     <div class="field">
         <?php
-        $select = new Zend\Form\Element\Select('iiifserver_alternative_manifest_property');
-        $select
-            ->setLabel($t->translate('Alternative Manifest Property'))
-            ->setAttribute('id', 'iiifserver_alternative_manifest_property')
-            ->setValue($settings->get('iiifserver_alternative_manifest_property'))
-            ->setEmptyOption($t->translate('Select a property...'))
-            ->setValueOptions($properties);
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($select); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('The property supplying the alternative manifest URL for the viewer, for example "dcterms:hasFormat".'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formSelect($select); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
             $checkbox = new Zend\Form\Element\Checkbox('iiifserver_manifest_force_https');
             $checkbox->setLabel($t->translate('Force https'));
             $checkbox->setAttribute('id', 'iiifserver_manifest_force_https');
