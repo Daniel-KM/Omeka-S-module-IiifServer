@@ -44,7 +44,7 @@ class JsonLd extends AbstractPlugin
         // According to specification, the response should be json, except if
         // client asks json-ld.
         $accept = $request->getHeader('Accept');
-        if ($accept->hasMediaType('application/ld+json')) {
+        if ($accept && $accept->hasMediaType('application/ld+json')) {
             $response->getHeaders()->addHeaderLine('Content-Type', 'application/ld+json; charset=utf-8', true);
         }
         // Default to json with a link to json-ld.
