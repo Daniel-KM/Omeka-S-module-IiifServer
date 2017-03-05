@@ -80,7 +80,7 @@ class IiifInfo extends AbstractHelper
             $imageUrl = $this->view->url('iiifserver_image', array(
                 'id' => $media->id(),
             ));
-            $imageUrl = $this->view->uvForceHttpsIfRequired($imageUrl);
+            $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
 
             $profile = array();
             $profile[] = 'http://iiif.io/api/image/2/level2.json';
@@ -133,7 +133,7 @@ class IiifInfo extends AbstractHelper
             $fileUrl = $this->view->url('iiifserver_media', array(
                 'id' => $media->id(),
             ));
-            $fileUrl = $this->view->uvForceHttpsIfRequired($fileUrl);
+            $fileUrl = $this->view->iiifForceHttpsIfRequired($fileUrl);
             $info['@id'] = $fileUrl;
             // See MediaController::contextAction()
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';

@@ -39,7 +39,7 @@ class IiifForceHttpsIfRequired extends AbstractHelper
      *
      * @var boolean
      */
-    protected $_forceHttps;
+    protected $forceHttps;
 
     /**
      * Force absolute urls to be secure (replace "http:" by "https:").
@@ -49,11 +49,11 @@ class IiifForceHttpsIfRequired extends AbstractHelper
      */
     public function __invoke($absoluteUrl)
     {
-        if (is_null($this->_forceHttps)) {
-            $this->_forceHttps = $this->view->setting('iiifserver_force_https');
+        if (is_null($this->forceHttps)) {
+            $this->forceHttps = $this->view->setting('iiifserver_manifest_force_https');
         }
 
-        return $this->_forceHttps && (strpos($absoluteUrl, 'http:') === 0)
+        return $this->forceHttps && (strpos($absoluteUrl, 'http:') === 0)
             ? substr_replace($absoluteUrl, 'https', 0, 4)
             : $absoluteUrl;
     }

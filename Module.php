@@ -32,18 +32,17 @@ namespace IiifServer;
 
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
+use Omeka\Mvc\Controller\Plugin\Messenger;
 use Zend\EventManager\Event;
-use Zend\EventManager\SharedEventManagerInterface;
-use Zend\Mvc\Controller\AbstractController;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
+use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
-use Omeka\Mvc\Controller\Plugin\Messenger;
 
 class Module extends AbstractModule
 {
 
-    protected $_settings = array(
+    protected $settings = array(
         'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
         'iiifserver_manifest_attribution_property' => '',
         'iiifserver_manifest_attribution_default' => 'Provided by Example Organization',
@@ -51,9 +50,9 @@ class Module extends AbstractModule
         'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
         'iiifserver_manifest_logo_default' => '',
         'iiifserver_alternative_manifest_property' => '',
+        'iiifserver_manifest_force_https' => false,
         'iiifserver_image_creator' => 'Auto',
         'iiifserver_image_max_size' => 10000000,
-        'iiifserver_force_https' => false,
     );
 
     public function getConfig()
@@ -71,11 +70,59 @@ class Module extends AbstractModule
         $acl->allow(null, 'IiifServer\Controller\Media');
     }
 
+    public function install(ServiceLocatorInterface $serviceLocator)
+    {
+        $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
+        $t = $serviceLocator->get('MvcTranslator');
+        $messenger = new Messenger();
+
+        $processors = $this->_getProcessors($serviceLocator);
+        if (count($processors) == 1) {
+            throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the IIIF Server.')); // @translate
+        }
+
+        $settings = $serviceLocator->get('Omeka\Settings');
+
+        // Convert settings from old releases of Universal Viewer, if installed.
+        $module = $moduleManager->getModule('UniversalViewer');
+        if ($module) {
+            $version = $module->getDb('version');
+            if (version_compare($version, '3.4.3', '<')) {
+                $messenger->addWarning(
+                    $t->translate('Warning: The module Universal Viewer was not upgraded to version 3.4.3.')
+                    . ' ' . $t->translate('The settings are set to default.'));
+            } elseif (version_compare($version, '3.4.3', '=')) {
+                $messenger->addSuccess(
+                    $t->translate('The settings were upgraded from Universal Viewer 3.4.3.')
+                    . ' ' . $t->translate('You can now upgrade Universal Viewer to 3.5.'));
+
+                foreach ([
+                    'universalviewer_manifest_description_property' => 'iiifserver_manifest_description_property',
+                    'universalviewer_manifest_attribution_property' => 'iiifserver_manifest_attribution_property',
+                    'universalviewer_manifest_attribution_default' => 'iiifserver_manifest_attribution_default',
+                    'universalviewer_manifest_license_property' => 'iiifserver_manifest_license_property',
+                    'universalviewer_manifest_license_default' => 'iiifserver_manifest_license_default',
+                    'universalviewer_manifest_logo_default' => 'iiifserver_manifest_logo_default',
+                    'universalviewer_alternative_manifest_property' => 'iiifserver_alternative_manifest_property',
+                    'universalviewer_force_https' => 'iiifserver_manifest_force_https',
+                    'universalviewer_iiif_creator' => 'iiifserver_image_creator',
+                    'universalviewer_iiif_max_size' => 'iiifserver_image_max_size',
+                ] as $uvSetting => $iiifSetting) {
+                    $this->settings[$iiifSetting] = $settings->get($uvSetting);
+                }
+            }
+        }
+
+        foreach ($this->settings as $name => $value) {
+            $settings->set($name, $value);
+        }
+    }
+
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
         $settings = $serviceLocator->get('Omeka\Settings');
 
-        foreach ($this->_settings as $name => $value) {
+        foreach ($this->settings as $name => $value) {
             $settings->delete($name);
         }
     }
@@ -85,17 +132,39 @@ class Module extends AbstractModule
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
         $translator = $serviceLocator->get('MvcTranslator');
+        $api = $serviceLocator->get('Omeka\ApiManager');
 
         $messenger = new Messenger();
         $processors = $this->_getProcessors();
 
         if (count($processors) == 1) {
-            $messenger->addError($translator->translate('Warning: No graphic library is installed: Universaliewer can’t work.')); // @translate
+            $messenger->addError(
+                $translator->translate('Warning: No graphic library is installed: Universaliewer can’t work.')); // @translate
         }
 
         if (!isset($processors['Imagick'])) {
             $messenger->addWarning(
                 $translator->translate('Warning: Imagick is not installed: Only standard images (jpg, png, gif and webp) will be processed.')); // @translate
+        }
+
+        // Use the true properties, not the internal ids (see PropertySelect()).
+        $properties = [];
+        $response = $api->search('vocabularies');
+        foreach ($response->getContent() as $vocabulary) {
+            $options = [];
+            foreach ($vocabulary->properties() as $property) {
+                $options[] = [
+                    'label' => $property->label(),
+                    'value' => $property->term(),
+                ];
+            }
+            if (!$options) {
+                continue;
+            }
+            $properties[] = [
+                'label' => $vocabulary->label(),
+                'options' => $options,
+            ];
         }
 
         $vars = array(

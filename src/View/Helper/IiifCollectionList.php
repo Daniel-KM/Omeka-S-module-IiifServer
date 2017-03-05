@@ -81,7 +81,7 @@ class IiifCollectionList extends AbstractHelper
         $url = $this->view->url($route, array(
             'id' => $identifier,
         ));
-        $url = $this->view->uvForceHttpsIfRequired($url);
+        $url = $this->view->iiifForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
         $label = $translate('Dynamic List');
@@ -142,7 +142,7 @@ class IiifCollectionList extends AbstractHelper
             $type = 'sc:Manifest';
         }
 
-        $url = $this->view->uvForceHttpsIfRequired($url);
+        $url = $this->view->iiifForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
         $manifest['@type'] = $type;

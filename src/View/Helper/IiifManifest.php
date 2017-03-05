@@ -105,7 +105,7 @@ class IiifManifest extends AbstractHelper
         $url = $this->view->url('iiifserver_presentation_item', array(
             'id' => $item->id(),
         ));
-        $url = $this->view->uvForceHttpsIfRequired($url);
+        $url = $this->view->iiifForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
         // The base url for some other ids.
@@ -177,7 +177,7 @@ class IiifManifest extends AbstractHelper
             $within = $this->view->url('iiifserver_presentation_collection', array(
                 'id' => $itemSet->id(),
             ));
-            $within = $this->view->uvForceHttpsIfRequired($within);
+            $within = $this->view->iiifForceHttpsIfRequired($within);
             $withins[] = $within;
         }
         if (!empty($withins)) {
@@ -457,7 +457,7 @@ class IiifManifest extends AbstractHelper
             'quality' => 'default',
             'format' => 'jpg',
         ));
-        $imageUrl = $this->view->uvForceHttpsIfRequired($imageUrl);
+        $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
         $thumbnail['@id'] = $imageUrl;
 
         $thumbnailService = array();
@@ -465,7 +465,7 @@ class IiifManifest extends AbstractHelper
         $thumbnailServiceUrl = $this->view->url('iiifserver_image', array(
             'id' => $media->id(),
         ));
-        $thumbnailServiceUrl = $this->view->uvForceHttpsIfRequired($thumbnailServiceUrl);
+        $thumbnailServiceUrl = $this->view->iiifForceHttpsIfRequired($thumbnailServiceUrl);
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
         $thumbnailService = (object) $thumbnailService;
@@ -518,7 +518,7 @@ class IiifManifest extends AbstractHelper
         $imageUrl = $this->view->url('iiifserver_image', array(
             'id' => $media->id(),
         ));
-        $imageUrl = $this->view->uvForceHttpsIfRequired($imageUrl);
+        $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
         $imageResourceService['@id'] = $imageUrl;
         $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
         $imageResourceService = (object) $imageResourceService;
@@ -646,7 +646,7 @@ class IiifManifest extends AbstractHelper
         $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
-        $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);
+        $mseUrl = $this->view->iiifForceHttpsIfRequired($mseUrl);
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
@@ -705,7 +705,7 @@ class IiifManifest extends AbstractHelper
         $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
-        $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);
+        $mseUrl = $this->view->iiifForceHttpsIfRequired($mseUrl);
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
@@ -764,7 +764,7 @@ class IiifManifest extends AbstractHelper
         $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
-        $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);
+        $mseUrl = $this->view->iiifForceHttpsIfRequired($mseUrl);
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
