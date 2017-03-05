@@ -1,0 +1,14 @@
+<?php
+$form->prepare();
+
+$fieldsets = $form->getFieldsets();
+foreach ($fieldsets as $fieldset):
+?>
+<fieldset id="fieldset-iiifserver-<?php echo $fieldset->getAttribute('name'); ?>">
+    <legend><?php echo $fieldset->getLabel(); ?></legend>
+    <p class="explanation">
+        <?php echo $fieldset->getOption('info'); ?>
+    </p>
+    <?php echo $this->formCollection($fieldset, false); ?>
+</fieldset>
+<?php endforeach; ?>

@@ -30,14 +30,15 @@
 
 namespace IiifServer;
 
+use IiifServer\Form\ConfigForm;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Zend\EventManager\Event;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\View\Renderer\PhpRenderer;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
+use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
@@ -72,15 +73,14 @@ class Module extends AbstractModule
     public function install(ServiceLocatorInterface $serviceLocator)
     {
         $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
+        $settings = $serviceLocator->get('Omeka\Settings');
         $t = $serviceLocator->get('MvcTranslator');
         $messenger = new Messenger();
 
-        $processors = $this->_getProcessors($serviceLocator);
+        $processors = $this->listProcessors($serviceLocator);
         if (count($processors) == 1) {
             throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the IIIF Server.')); // @translate
         }
-
-        $settings = $serviceLocator->get('Omeka\Settings');
 
         // Convert settings from old releases of Universal Viewer, if installed.
         $module = $moduleManager->getModule('UniversalViewer');
@@ -128,50 +128,24 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer)
     {
         $serviceLocator = $this->getServiceLocator();
-        $settings = $serviceLocator->get('Omeka\Settings');
-        $translator = $serviceLocator->get('MvcTranslator');
-        $api = $serviceLocator->get('Omeka\ApiManager');
+        $formElementManager = $serviceLocator->get('FormElementManager');
+        $form = $formElementManager->get(ConfigForm::class);
 
         $messenger = new Messenger();
-        $processors = $this->_getProcessors();
-
+        $processors = $this->listProcessors();
         if (count($processors) == 1) {
             $messenger->addError(
-                $translator->translate('Warning: No graphic library is installed: Universaliewer can’t work.')); // @translate
+                'Warning: No graphic library is installed: the IIIF Server can’t work.'); // @translate
         }
-
         if (!isset($processors['Imagick'])) {
             $messenger->addWarning(
-                $translator->translate('Warning: Imagick is not installed: Only standard images (jpg, png, gif and webp) will be processed.')); // @translate
+                'Warning: Imagick is not installed: Only standard images (jpg, png, gif and webp) will be processed.'); // @translate
         }
 
-        // Use the true properties, not the internal ids (see PropertySelect()).
-        $properties = [];
-        $response = $api->search('vocabularies');
-        foreach ($response->getContent() as $vocabulary) {
-            $options = [];
-            foreach ($vocabulary->properties() as $property) {
-                $options[] = [
-                    'label' => $property->label(),
-                    'value' => $property->term(),
-                ];
-            }
-            if (!$options) {
-                continue;
-            }
-            $properties[] = [
-                'label' => $vocabulary->label(),
-                'options' => $options,
-            ];
-        }
-
-        $vars = array(
-            'settings' => $settings,
-            't' => $translator,
-            'processors' => $processors,
-            'properties' => $properties,
-        );
-        return $renderer->render('config-form', $vars);
+        // In this form, fieldsets are only used for the view.
+        $vars = [];
+        $vars['form'] = $form;
+        return $renderer->render('admin/iiif-server/config-form.phtml', $vars);
     }
 
     public function handleConfigForm(AbstractController $controller)
@@ -180,8 +154,17 @@ class Module extends AbstractModule
         $settings = $serviceLocator->get('Omeka\Settings');
 
         $params = $controller->getRequest()->getPost();
+        // Manage fieldsets of params automatically (only used for the view).
         foreach ($params as $name => $value) {
-            $settings->set($name, $value);
+            if (isset($this->settings[$name])) {
+                $settings->set($name, $value);
+            } elseif (is_array($value)) {
+                foreach ($value as $subname => $subvalue) {
+                    if (isset($this->settings[$subname])) {
+                        $settings->set($subname, $subvalue);
+                    }
+                }
+            }
         }
     }
 
@@ -190,23 +173,21 @@ class Module extends AbstractModule
      *
      * @return array Associative array of available processors.
      */
-    protected function _getProcessors(ServiceLocatorInterface $serviceLocator = null)
+    protected function listProcessors(ServiceLocatorInterface $serviceLocator = null)
     {
         if ($serviceLocator === null) {
             $serviceLocator = $this->getServiceLocator();
         }
         $translator = $serviceLocator->get('MvcTranslator');
 
-        $processors = array(
-            'Auto' => $translator->translate('Automatic'),
-        );
+        $processors = [];
+        $processors['Auto'] = $translator->translate('Automatic'); // @translate
         if (extension_loaded('gd')) {
             $processors['GD'] = 'GD';
         }
         if (extension_loaded('imagick')) {
             $processors['Imagick'] = 'ImageMagick';
         }
-
         return $processors;
     }
 }

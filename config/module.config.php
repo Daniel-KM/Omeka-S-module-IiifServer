@@ -14,6 +14,11 @@ return [
             'jsonLd' => 'IiifServer\Mvc\Controller\Plugin\JsonLd',
         ],
     ],
+    'form_elements' => [
+        'factories' => [
+            'IiifServer\Form\ConfigForm' => 'IiifServer\Service\Form\ConfigFormFactory',
+        ],
+    ],
     'router' => [
         'routes' => [
             // @todo It is recommended to use a true identifier (ark, urn...], not an internal id.
