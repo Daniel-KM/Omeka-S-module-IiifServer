@@ -4,7 +4,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "UniversalViewerTest\\": "test/UniversalViewerTest/"
+            "IiifServerTest\\": "test/IiifServerTest/"
         }
     }
 }

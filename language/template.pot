@@ -1,4 +1,4 @@
-# Translation for the UniversalViewer module for Omeka S
+# Translation for the IiifServer module for Omeka S
 # Copyright (C) 2016 BibLibre
 # This file is distributed under the same license as the Omeka S package.
 # Julian Maurice <julian.maurice@biblibre.com>, 2016.
@@ -6,7 +6,7 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: UniversalViewer\n"
+"Project-Id-Version: IiifServer\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-03-03 15:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -20,41 +20,17 @@ msgstr ""
 #: Module.php:43
 msgid ""
 "At least one graphic processor (GD or ImageMagick) is required to use the "
-"UniversalViewer."
+"IiifServer."
 msgstr ""
 
 #: Module.php:54
 msgid ""
-"UniversalViewer library should be installed. See module's installation "
+"IiifServer library should be installed. See module's installation "
 "documentation."
 msgstr ""
 
 #: Module.php:131
 msgid "Automatic"
-msgstr ""
-
-#: view/config-form.phtml:2
-msgid "General parameters"
-msgstr ""
-
-#: view/config-form.phtml:5
-msgid ""
-"If checked, the viewer will be automatically appended to the collections or "
-"items show page."
-msgstr ""
-
-#: view/config-form.phtml:6
-msgid ""
-"Else, the viewer can be added via the helper in the theme or the shortcode "
-"in any page."
-msgstr ""
-
-#: view/config-form.phtml:11
-msgid "Append to \"Item set show\""
-msgstr ""
-
-#: view/config-form.phtml:25
-msgid "Append to \"Item show\""
 msgstr ""
 
 #: view/config-form.phtml:39
@@ -99,38 +75,6 @@ msgstr ""
 
 #: view/config-form.phtml:103
 msgid "Integration of the viewer"
-msgstr ""
-
-#: view/config-form.phtml:105
-msgid ""
-"These values allows to parameter the integration of the viewer in Omeka "
-"pages."
-msgstr ""
-
-#: view/config-form.phtml:106
-msgid ""
-"The viewer itself can be configured via the file \"config.json\" and the "
-"helper."
-msgstr ""
-
-#: view/config-form.phtml:112
-msgid "Class of inline frame"
-msgstr ""
-
-#: view/config-form.phtml:121
-msgid "Class to add to the inline frame."
-msgstr ""
-
-#: view/config-form.phtml:133
-msgid "Width of inline frame"
-msgstr ""
-
-#: view/config-form.phtml:148
-msgid "Height of inline frame"
-msgstr ""
-
-#: view/config-form.phtml:163
-msgid "Locales of the viewer"
 msgstr ""
 
 #: view/config-form.phtml:177

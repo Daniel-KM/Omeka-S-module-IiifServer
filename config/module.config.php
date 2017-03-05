@@ -1,43 +1,21 @@
 <?php
 return [
-    'block_layouts' => [
-        'invokables' => [
-            'universalViewer' => 'UniversalViewer\Site\BlockLayout\UniversalViewer',
-        ],
-    ],
     'controllers' => [
         'invokables' => [
-            'UniversalViewer\Controller\Player' => 'UniversalViewer\Controller\PlayerController',
-            'UniversalViewer\Controller\Presentation' => 'UniversalViewer\Controller\PresentationController',
+            'IiifServer\Controller\Presentation' => 'IiifServer\Controller\PresentationController',
         ],
         'factories' => [
-            'UniversalViewer\Controller\Image' => 'UniversalViewer\Service\Controller\ImageControllerFactory',
-            'UniversalViewer\Controller\Media' => 'UniversalViewer\Service\Controller\MediaControllerFactory',
+            'IiifServer\Controller\Image' => 'IiifServer\Service\Controller\ImageControllerFactory',
+            'IiifServer\Controller\Media' => 'IiifServer\Service\Controller\MediaControllerFactory',
         ],
     ],
     'controller_plugins' => [
         'invokables' => [
-            'jsonLd' => 'UniversalViewer\Mvc\Controller\Plugin\JsonLd',
+            'jsonLd' => 'IiifServer\Mvc\Controller\Plugin\JsonLd',
         ],
     ],
     'router' => [
         'routes' => [
-            'universalviewer_player' => [
-                'type' => 'segment',
-                'options' => [
-                    'route' => '/:resourcename/:id/play',
-                    'constraints' => [
-                        'resourcename' => 'item|item\-set',
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
-                        'controller' => 'Player',
-                        'action' => 'play',
-                    ],
-                ],
-            ],
-
             // @todo It is recommended to use a true identifier (ark, urn...], not an internal id.
 
             // @link http://iiif.io/api/presentation/2.0
@@ -60,8 +38,8 @@ return [
             // resources. The default letter is "i", so it is not required when all ids are
             // items (the most common case). If the list contains only one id, the comma is
             // required to avoid confusion with a normal collection.
-            // This route should be set before the "universalviewer_presentation_collection".
-            'universalviewer_presentation_collection_list' => [
+            // This route should be set before the "iiifserver_presentation_collection".
+            'iiifserver_presentation_collection_list' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif/collection/:id',
@@ -69,7 +47,7 @@ return [
                         'id' => '(?:[cim]?\-?\d+\,?)+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Presentation',
                         'action' => 'list',
                     ],
@@ -80,7 +58,7 @@ return [
             // Libraries use an empty name or "manifests", "manifest.json", "manifest",
             // "{id}.json", etc. Here, an empty name is used, and a second route is added.
             // Invert the names of the route to use the generic name for the manifest itself.
-            'universalviewer_presentation_collection' => [
+            'iiifserver_presentation_collection' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif/collection/:id',
@@ -88,13 +66,13 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Presentation',
                         'action' => 'collection',
                     ],
                 ],
             ],
-            'universalviewer_presentation_collection_redirect' => [
+            'iiifserver_presentation_collection_redirect' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif/collection/:id/manifest',
@@ -102,13 +80,13 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Presentation',
                         'action' => 'collection',
                     ],
                 ],
             ],
-            'universalviewer_presentation_item' => [
+            'iiifserver_presentation_item' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif/:id/manifest',
@@ -116,14 +94,14 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Presentation',
                         'action' => 'item',
                     ],
                 ],
             ],
             // The redirection is not required for presentation, but a forward is possible.
-            'universalviewer_presentation_item_redirect' => [
+            'iiifserver_presentation_item_redirect' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif/:id',
@@ -131,14 +109,14 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Presentation',
                         'action' => 'item',
                     ],
                 ],
             ],
             // A redirect to the info.json is required by the specification.
-            'universalviewer_image' => [
+            'iiifserver_image' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif-img/:id',
@@ -146,13 +124,13 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Image',
                         'action' => 'index',
                     ],
                 ],
             ],
-            'universalviewer_image_info' => [
+            'iiifserver_image_info' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif-img/:id/info.json',
@@ -160,7 +138,7 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Image',
                         'action' => 'info',
                     ],
@@ -168,10 +146,10 @@ return [
             ],
             // This route is a garbage collector that allows to return an error 400 or 501 to
             // invalid or not implemented requests, as required by specification.
-            // This route should be set before the universalviewer_image in order to be
+            // This route should be set before the iiifserver_image in order to be
             // processed after it.
             // TODO Simplify to any number of sub elements.
-            'universalviewer_image_bad' => [
+            'iiifserver_image_bad' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
@@ -184,14 +162,14 @@ return [
                         'format' => '.+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Image',
                         'action' => 'bad',
                     ],
                 ],
             ],
             // Warning: the format is separated with a ".", not a "/".
-            'universalviewer_image_url' => [
+            'iiifserver_image_url' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
@@ -205,14 +183,14 @@ return [
                         'format' => 'jpg|png|gif',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Image',
                         'action' => 'fetch',
                     ],
                 ],
             ],
             // A redirect to the info.json is required by the specification.
-            'universalviewer_media' => [
+            'iiifserver_media' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/ixif-media/:id',
@@ -220,13 +198,13 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Media',
                         'action' => 'index',
                     ],
                 ],
             ],
-            'universalviewer_media_info' => [
+            'iiifserver_media_info' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/ixif-media/:id/info.json',
@@ -234,7 +212,7 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Media',
                         'action' => 'info',
                     ],
@@ -242,9 +220,9 @@ return [
             ],
             // This route is a garbage collector that allows to return an error 400 or 501 to
             // invalid or not implemented requests, as required by specification.
-            // This route should be set before the universalviewer_media in order to be
+            // This route should be set before the iiifserver_media in order to be
             // processed after it.
-            'universalviewer_media_bad' => [
+            'iiifserver_media_bad' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/ixif-media/:id:.:format',
@@ -253,14 +231,14 @@ return [
                         'format' => '.+',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Media',
                         'action' => 'bad',
                     ],
                 ],
             ],
             // Warning: the format is separated with a ".", not a "/".
-            'universalviewer_media_url' => [
+            'iiifserver_media_url' => [
                 'type' => 'segment',
                 'options' => [
                     'route' => '/ixif-media/:id:.:format',
@@ -269,7 +247,7 @@ return [
                         'format' => 'pdf|mp3|ogg|mp4|webm|ogv',
                     ],
                     'defaults' => [
-                        '__NAMESPACE__' => 'UniversalViewer\Controller',
+                        '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => 'Media',
                         'action' => 'fetch',
                     ],
@@ -278,28 +256,13 @@ return [
 
             // For IxIF, some json files should be available to describe media for context.
             // This is not used currently: the Wellcome uris are kept because they are set
-            // for main purposes in UniversalViewer.
+            // for main purposes in IiifServer.
             // @link https://gist.github.com/tomcrane/7f86ac08d3b009c8af7c
 
-            // If really needed, the three next routes may be uncommented to
-            // keep compatibility with the old schemes used by the plugin for
-            // Omeka 2 before the version 2.4.2.
-            // 'universalviewer_player_classic' => [
-            //     'type' => 'segment',
-            //     'options' => [
-            //         'route' => '/:resourcename/play/:id',
-            //         'constraints' => [
-            //             'resourcename' => 'item|items|item\-set|item_set|collection|item\-sets|item_sets|collections',
-            //             'id' => '\d+',
-            //         ],
-            //         'defaults' => [
-            //             '__NAMESPACE__' => 'UniversalViewer\Controller',
-            //             'controller' => 'Player',
-            //             'action' => 'play',
-            //         ],
-            //     ],
-            // ],
-            // 'universalviewer_presentation_classic' => [
+            // If really needed, the two next routes may be uncommented to keep
+            // compatibility with the old schemes used by the plugin for Omeka 2
+            // before the version 2.4.2.
+            // 'iiifserver_presentation_classic' => [
             //     'type' => 'segment',
             //     'options' => [
             //         'route' => '/:resourcename/presentation/:id',
@@ -308,13 +271,13 @@ return [
             //             'id' => '\d+',
             //         ],
             //         'defaults' => [
-            //             '__NAMESPACE__' => 'UniversalViewer\Controller',
+            //             '__NAMESPACE__' => 'IiifServer\Controller',
             //             'controller' => 'Presentation',
             //             'action' => 'manifest',
             //         ],
             //     ],
             // ],
-            // 'universalviewer_presentation_manifest_classic' => [
+            // 'iiifserver_presentation_manifest_classic' => [
             //     'type' => 'segment',
             //     'options' => [
             //         'route' => '/:resourcename/presentation/:id/manifest',
@@ -323,7 +286,7 @@ return [
             //             'id' => '\d+',
             //         ],
             //         'defaults' => [
-            //             '__NAMESPACE__' => 'UniversalViewer\Controller',
+            //             '__NAMESPACE__' => 'IiifServer\Controller',
             //             'controller' => 'Presentation',
             //             'action' => 'manifest',
             //         ],
@@ -333,19 +296,18 @@ return [
     ],
     'view_manager' => [
         'template_path_stack' => [
-            OMEKA_PATH . '/modules/UniversalViewer/view',
+            OMEKA_PATH . '/modules/IiifServer/view',
         ],
     ],
     'view_helpers' => [
         'invokables' => [
-            'universalViewer' => 'UniversalViewer\View\Helper\UniversalViewer',
-            'iiifCollection' => 'UniversalViewer\View\Helper\IiifCollection',
-            'iiifCollectionList' => 'UniversalViewer\View\Helper\IiifCollectionList',
-            'uvForceHttpsIfRequired' => 'UniversalViewer\View\Helper\UvForceHttpsIfRequired',
+            'iiifCollection' => 'IiifServer\View\Helper\IiifCollection',
+            'iiifCollectionList' => 'IiifServer\View\Helper\IiifCollectionList',
+            'iiifForceHttpsIfRequired' => 'IiifServer\View\Helper\IiifForceHttpsIfRequired',
         ],
         'factories' => [
-            'iiifInfo' => 'UniversalViewer\Service\ViewHelper\IiifInfoFactory',
-            'iiifManifest' => 'UniversalViewer\Service\ViewHelper\IiifManifestFactory',
+            'iiifInfo' => 'IiifServer\Service\ViewHelper\IiifInfoFactory',
+            'iiifManifest' => 'IiifServer\Service\ViewHelper\IiifManifestFactory',
         ],
     ],
     'translator' => [

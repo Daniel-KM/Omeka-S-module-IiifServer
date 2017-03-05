@@ -19,21 +19,21 @@ foreach ($response->getContent() as $vocabulary) {
     ];
 }
 ?>
-<fieldset id="fieldset-universalviewer-manifest">
-    <legend><?php echo $t->translate('Manifest'); ?></legend>
+<fieldset id="fieldset-iiifserver-manifest">
+    <legend><?php echo $t->translate('IIIF Manifests'); ?></legend>
     <p class="explanation">
-        <?php echo $t->translate('The plugin creates a manifest for the viewer with elements from each resource (item or item set).'); ?>
+        <?php echo $t->translate('The module creates a manifest for the viewer with elements from each resource (item set, item and media).'); ?>
         <?php echo $t->translate('The elements below are used when some metadata are missing.'); ?>
         <?php echo $t->translate('In all cases, empty elements are not displayed.'); ?>
         <?php // echo $t->translate('Futhermore, the filter "uv.manifest" is available to change any data.'); ?>
     </p>
     <div class="field">
         <?php
-        $select = new Zend\Form\Element\Select('universalviewer_manifest_description_property');
+        $select = new Zend\Form\Element\Select('iiifserver_manifest_description_property');
         $select
             ->setLabel($t->translate('Property to use for Description'))
-            ->setAttribute('id', 'universalviewer_manifest_description_property')
-            ->setValue($settings->get('universalviewer_manifest_description_property'))
+            ->setAttribute('id', 'iiifserver_manifest_description_property')
+            ->setValue($settings->get('iiifserver_manifest_description_property'))
             ->setEmptyOption($t->translate('Select a property...'))
             ->setValueOptions($properties);
         ?>
@@ -53,11 +53,11 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-        $select = new Zend\Form\Element\Select('universalviewer_manifest_attribution_property');
+        $select = new Zend\Form\Element\Select('iiifserver_manifest_attribution_property');
         $select
             ->setLabel($t->translate('Property to use for Attribution'))
-            ->setAttribute('id', 'universalviewer_manifest_attribution_property')
-            ->setValue($settings->get('universalviewer_manifest_attribution_property'))
+            ->setAttribute('id', 'iiifserver_manifest_attribution_property')
+            ->setValue($settings->get('iiifserver_manifest_attribution_property'))
             ->setEmptyOption($t->translate('Select a property...'))
             ->setValueOptions($properties);
         ?>
@@ -76,10 +76,10 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('universalviewer_manifest_attribution_default');
+            $text = new Zend\Form\Element\Text('iiifserver_manifest_attribution_default');
             $text->setLabel($t->translate('Default Attribution'));
-            $text->setAttribute('id', 'universalviewer_manifest_attribution_default');
-            $text->setValue($settings->get('universalviewer_manifest_attribution_default'));
+            $text->setAttribute('id', 'iiifserver_manifest_attribution_default');
+            $text->setValue($settings->get('iiifserver_manifest_attribution_default'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
@@ -97,11 +97,11 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-        $select = new Zend\Form\Element\Select('universalviewer_manifest_license_property');
+        $select = new Zend\Form\Element\Select('iiifserver_manifest_license_property');
         $select
             ->setLabel($t->translate('Property to use for License'))
-            ->setAttribute('id', 'universalviewer_manifest_license_property')
-            ->setValue($settings->get('universalviewer_manifest_license_property'))
+            ->setAttribute('id', 'iiifserver_manifest_license_property')
+            ->setValue($settings->get('iiifserver_manifest_license_property'))
             ->setEmptyOption($t->translate('Select a property...'))
             ->setValueOptions($properties);
         ?>
@@ -121,10 +121,10 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('universalviewer_manifest_license_default');
+            $text = new Zend\Form\Element\Text('iiifserver_manifest_license_default');
             $text->setLabel($t->translate('Default License'));
-            $text->setAttribute('id', 'universalviewer_manifest_license_default');
-            $text->setValue($settings->get('universalviewer_manifest_license_default'));
+            $text->setAttribute('id', 'iiifserver_manifest_license_default');
+            $text->setValue($settings->get('iiifserver_manifest_license_default'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
@@ -141,10 +141,10 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('universalviewer_manifest_logo_default');
+            $text = new Zend\Form\Element\Text('iiifserver_manifest_logo_default');
             $text->setLabel($t->translate('Logo'));
-            $text->setAttribute('id', 'universalviewer_manifest_logo_default');
-            $text->setValue($settings->get('universalviewer_manifest_logo_default'));
+            $text->setAttribute('id', 'iiifserver_manifest_logo_default');
+            $text->setValue($settings->get('iiifserver_manifest_logo_default'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
@@ -161,11 +161,11 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-        $select = new Zend\Form\Element\Select('universalviewer_alternative_manifest_property');
+        $select = new Zend\Form\Element\Select('iiifserver_alternative_manifest_property');
         $select
             ->setLabel($t->translate('Alternative Manifest Property'))
-            ->setAttribute('id', 'universalviewer_alternative_manifest_property')
-            ->setValue($settings->get('universalviewer_alternative_manifest_property'))
+            ->setAttribute('id', 'iiifserver_alternative_manifest_property')
+            ->setValue($settings->get('iiifserver_alternative_manifest_property'))
             ->setEmptyOption($t->translate('Select a property...'))
             ->setValueOptions($properties);
         ?>
@@ -183,138 +183,16 @@ foreach ($response->getContent() as $vocabulary) {
         </div>
     </div>
 </fieldset>
-<fieldset id="fieldset-universalviewer-embed">
-    <legend><?php echo $t->translate('Integration of the viewer'); ?></legend>
-    <p class="explanation">
-        <?php echo $t->translate('If checked, the viewer will be automatically appended to the item sets or items pages.'); ?>
-        <?php echo $t->translate('Else, the viewer can be added via the helper in the theme or the shortcode in any page.'); ?>
-    </p>
-    <div class="field">
-        <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_set_show');
-            $checkbox->setLabel($t->translate('Append to "Item set show"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_item_set_show');
-            $checkbox->setValue($settings->get('universalviewer_append_item_set_show'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_show');
-            $checkbox->setLabel($t->translate('Append to "Item show"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_item_show');
-            $checkbox->setValue($settings->get('universalviewer_append_item_show'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_set_browse');
-            $checkbox->setLabel($t->translate('Append to "Item set browse"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_item_set_browse');
-            $checkbox->setValue($settings->get('universalviewer_append_item_set_browse'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_append_item_browse');
-            $checkbox->setLabel($t->translate('Append to "Item browse"'));
-            $checkbox->setAttribute('id', 'universalviewer_append_item_browse');
-            $checkbox->setValue($settings->get('universalviewer_append_item_browse'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($checkbox); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formCheckbox($checkbox); ?>
-        </div>
-    </div>
-    <p class="explanation">
-        <?php echo $t->translate('These values allows to parameter the integration of the viewer in Omeka pages.'); ?>
-        <?php echo $t->translate('The viewer itself can be configured via the file "config.json" and the helper.'); ?>
-    </p>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_class');
-            $text->setLabel($t->translate('Class of main div'));
-            $text->setAttribute('id', 'universalviewer_class');
-            $text->setValue($settings->get('universalviewer_class'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('Class to add to the main div.'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_style');
-            $text->setLabel($t->translate('Inline style'));
-            $text->setAttribute('id', 'universalviewer_style');
-            $text->setValue($settings->get('universalviewer_style'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-            <a class="expand" href="#"></a>
-            <div class="collapsible">
-                <div class="field-description">
-                    <?php echo $t->translate('If any, this style will be added to the main div of the Universal Viewer.'); ?>
-                    <?php echo $t->translate('The height may be required.'); ?>
-                </div>
-            </div>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-    <div class="field">
-        <?php
-            $text = new Zend\Form\Element\Text('universalviewer_locale');
-            $text->setLabel($t->translate('Locales of the viewer'));
-            $text->setAttribute('id', 'universalviewer_locale');
-            $text->setValue($settings->get('universalviewer_locale'));
-        ?>
-        <div class="field-meta">
-            <?php echo $this->formLabel($text); ?>
-        </div>
-        <div class="inputs">
-            <?php echo $this->formText($text); ?>
-        </div>
-    </div>
-</fieldset>
-<fieldset id="fieldset-universalviewer-background">
+<fieldset id="fieldset-iiifserver-background">
     <legend><?php echo $t->translate('Background parameters'); ?></legend>
     <div class="field">
         <?php
-            $select = new Zend\Form\Element\Select('universalviewer_iiif_creator');
+            $select = new Zend\Form\Element\Select('iiifserver_iiif_creator');
             $select->setLabel($t->translate('Image processor'));
-            $select->setAttribute('id', 'universalviewer_iiif_creator');
+            $select->setAttribute('id', 'iiifserver_iiif_creator');
             $processors['Auto'] = $t->translate('Automatic (GD when possible, else ImageMagick)');
             $select->setValueOptions($processors);
-            $select->setValue($settings->get('universalviewer_iiif_creator'));
+            $select->setValue($settings->get('iiifserver_iiif_creator'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($select); ?>
@@ -334,10 +212,10 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('universalviewer_iiif_max_size');
+            $text = new Zend\Form\Element\Text('iiifserver_iiif_max_size');
             $text->setLabel($t->translate('Max dynamic size for images'));
-            $text->setAttribute('id', 'universalviewer_iiif_max_size');
-            $text->setValue($settings->get('universalviewer_iiif_max_size'));
+            $text->setAttribute('id', 'iiifserver_iiif_max_size');
+            $text->setValue($settings->get('iiifserver_iiif_max_size'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>
@@ -355,14 +233,14 @@ foreach ($response->getContent() as $vocabulary) {
         </div>
     </div>
 </fieldset>
-<fieldset id="fieldset-universalviewer-various">
+<fieldset id="fieldset-iiifserver-various">
     <legend><?php echo $t->translate('Various parameters'); ?></legend>
     <div class="field">
         <?php
-            $checkbox = new Zend\Form\Element\Checkbox('universalviewer_force_https');
+            $checkbox = new Zend\Form\Element\Checkbox('iiifserver_force_https');
             $checkbox->setLabel($t->translate('Force https'));
-            $checkbox->setAttribute('id', 'universalviewer_force_https');
-            $checkbox->setValue($settings->get('universalviewer_force_https'));
+            $checkbox->setAttribute('id', 'iiifserver_force_https');
+            $checkbox->setValue($settings->get('iiifserver_force_https'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($checkbox); ?>

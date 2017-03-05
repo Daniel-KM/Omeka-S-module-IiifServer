@@ -2,8 +2,8 @@
 
 <phpunit bootstrap="./bootstrap.php" colors="true" backupGlobals="false">
     <testsuites>
-        <testsuite name="UniversalViewer">
-            <directory>./UniversalViewerTest</directory>
+        <testsuite name="IiifServer">
+            <directory>./IiifServerTest</directory>
         </testsuite>
     </testsuites>
 </phpunit>

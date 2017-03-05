@@ -1,29 +1,26 @@
 {
-  "name": "universalviewer4omekas",
+  "name": "iiifserver",
   "version": "1.0.0",
-  "description": "Universal Viewer (module for Omeka S)",
+  "description": "IIIF Server (module for Omeka S)",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Daniel-KM/omeka-s-module-UniversalViewer"
+    "url": "git+https://github.com/Daniel-KM/omeka-s-module-IiifServer"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Daniel-KM/omeka-s-module-UniversalViewer/issues"
+    "url": "https://github.com/Daniel-KM/omeka-s-module-IiifServer/issues"
   },
-  "homepage": "https://github.com/Daniel-KM/omeka-s-module-UniversalViewer#readme",
+  "homepage": "https://github.com/Daniel-KM/omeka-s-module-IiifServer#readme",
   "devDependencies": {
     "async": "^2.1.4",
     "del": "^2.2.2",
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
     "run-sequence": "^1.2.2"
-  },
-  "dependencies": {
-    "universalviewer": "github:universalviewer/universalviewer#master"
   }
 }

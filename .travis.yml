@@ -18,7 +18,7 @@ before_install:
 install:
   - cd ../..
   - git clone --depth 1 https://github.com/omeka/omeka-s.git
-  - cp -a $(readlink -e $(cd -)) omeka-s/modules/UniversalViewer
+  - cp -a $(readlink -e $(cd -)) omeka-s/modules/IiifServer
   - cd omeka-s
   - npm install
   - ./node_modules/gulp/bin/gulp.js init
@@ -28,8 +28,6 @@ before_script:
   - sed -i 's/^host.*/host = "localhost"/' application/test/config/database.ini
   - sed -i 's/^user.*/user = "root"/' application/test/config/database.ini
   - sed -i 's/^dbname.*/dbname = "omeka_test"/' application/test/config/database.ini
-  - cd modules/UniversalViewer
-  - composer install
-  - cd test
+  - cd modules/IiifServer/test
 
 script: phpunit
