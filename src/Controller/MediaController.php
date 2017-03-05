@@ -30,9 +30,12 @@
 
 namespace UniversalViewer\Controller;
 
-use Omeka\Mvc\Exception\NotFoundException;
+use Zend\I18n\Translator\TranslatorInterface;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use Omeka\File\Manager as FileManager;
+use Omeka\Module\Manager as ModuleManager;
+use Omeka\Mvc\Exception\NotFoundException;
 
 /**
  * The Media controller class.
@@ -43,7 +46,7 @@ class MediaController extends AbstractActionController
 {
     protected $fileManager;
 
-    public function __construct(FileManager $fileManager)
+    public function __construct(FileManager $fileManager, ModuleManager $moduleManager, TranslatorInterface $translator)
     {
         $this->fileManager = $fileManager;
     }
