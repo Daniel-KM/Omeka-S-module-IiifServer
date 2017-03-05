@@ -130,6 +130,8 @@ class IiifManifest extends AbstractHelper
         $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags($item->value($descriptionProperty, array('type' => 'literal')));
+        } else {
+            $description = '';
         }
         $manifest['description'] = $description;
 

@@ -31,7 +31,7 @@ foreach ($response->getContent() as $vocabulary) {
         <?php
         $select = new Zend\Form\Element\Select('universalviewer_manifest_description_property');
         $select
-            ->setLabel($t->translate('Property to use for Attribution'))
+            ->setLabel($t->translate('Property to use for Description'))
             ->setAttribute('id', 'universalviewer_manifest_description_property')
             ->setValue($settings->get('universalviewer_manifest_description_property'))
             ->setEmptyOption($t->translate('Select a property...'))
