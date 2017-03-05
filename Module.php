@@ -235,14 +235,14 @@ class Module extends AbstractModule
         $settings = $serviceLocator->get('Omeka\Settings');
 
         $view = $event->getTarget();
-        if ($settings->get('universalviewer_append_item_show') && isset($view->item)) {
-            echo $view->universalViewer($view->item);
-        } elseif ($settings->get('universalviewer_append_item_browse') && isset($view->items)) {
-            echo $view->universalViewer($view->items);
+        if ($settings->get('universalviewer_append_item_set_browse') && isset($view->itemSets)) {
+            echo $view->universalViewer($view->itemSets);
         } elseif ($settings->get('universalviewer_append_item_set_show') && isset($view->itemSet)) {
             echo $view->universalViewer($view->itemSet);
-        } elseif ($settings->get('universalviewer_append_item_set_browse') && isset($view->itemSets)) {
-            echo $view->universalViewer($view->itemSets);
+        } elseif ($settings->get('universalviewer_append_item_browse') && isset($view->items)) {
+            echo $view->universalViewer($view->items);
+        } elseif ($settings->get('universalviewer_append_item_show') && isset($view->item)) {
+            echo $view->universalViewer($view->item);
         }
     }
 
