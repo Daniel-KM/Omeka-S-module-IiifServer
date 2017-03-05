@@ -384,11 +384,11 @@ class IiifManifest extends AbstractHelper
             // Set a default render if needed.
             /*
             if (empty($rendering)) {
-                $placeholder = 'images/placeholder-unsupported.jpg';
+                $placeholder = 'img/placeholder-default.jpg';
                 $render = array();
-                $render['@id'] = src($placeholder);
+                $render['@id'] = $this->view->assetUrl($placeholder, 'IiifServer');
                 $render['format'] = 'image/jpeg';
-                $render['label'] = __('Unsupported content.');
+                $render['label'] = $translate('Unsupported content.');
                 $render = (object) $render;
                 $rendering[] = $render;
             }
@@ -585,10 +585,10 @@ class IiifManifest extends AbstractHelper
         $canvas['@type'] = 'sc:Canvas';
         $canvas['label'] = $translate('Placeholder image');
 
-        $placeholder = 'images/placeholder.jpg';
-        $canvas['thumbnail'] = $this->view->assetUrl($placeholder, 'UniversalViewer');
+        $placeholder = 'img/thumbnails/placeholder-image.png';
+        $canvas['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
 
-        $imageSize = $this->_getWidthAndHeight(OMEKA_PATH . '/modules/UniversalViewer/asset/' . $placeholder);
+        $imageSize = $this->_getWidthAndHeight(OMEKA_PATH . '/modules/IiifServer/asset/' . $placeholder);
         $canvas['width'] = $imageSize['width'];
         $canvas['height'] = $imageSize['height'];
 
@@ -684,8 +684,8 @@ class IiifManifest extends AbstractHelper
         }
         // A place holder is recommended for media.
         if (empty($mediaSequenceElement['thumbnail'])) {
-            // $placeholder = 'images/placeholder-audio.jpg';
-            // $mediaSequenceElement['thumbnail'] = src($placeholder);
+            // $placeholder = 'img/placeholder-audio.jpg';
+            // $mediaSequenceElement['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
             $mediaSequenceElement['thumbnail'] = '';
         }
 
@@ -743,8 +743,8 @@ class IiifManifest extends AbstractHelper
         }
         // A place holder is recommended for medias.
         if (empty($mediaSequenceElement['thumbnail'])) {
-            // $placeholder = 'images/placeholder-video.jpg';
-            // $mediaSequenceElement['thumbnail'] = src($placeholder);
+            // $placeholder = 'img/placeholder-video.jpg';
+            // $mediaSequenceElement['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
             $mediaSequenceElement['thumbnail'] = '';
         }
 
