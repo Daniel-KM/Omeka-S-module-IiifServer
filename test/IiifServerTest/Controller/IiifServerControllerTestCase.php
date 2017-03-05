@@ -1,10 +1,10 @@
 <?php
 
-namespace UniversalViewerTest\Controller;
+namespace IiifServerTest\Controller;
 
 use OmekaTestHelper\Controller\OmekaControllerTestCase;
 
-abstract class UniversalViewerControllerTestCase extends OmekaControllerTestCase
+abstract class IiifServerControllerTestCase extends OmekaControllerTestCase
 {
     protected $item;
 

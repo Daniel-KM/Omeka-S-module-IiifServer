@@ -1,10 +1,10 @@
 <?php
 
-namespace UniversalViewer\Service\ViewHelper;
+namespace IiifServer\Service\ViewHelper;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use UniversalViewer\View\Helper\IiifManifest;
+use IiifServer\View\Helper\IiifManifest;
 
 /**
  * Service factory for the api view helper.

@@ -1,9 +1,9 @@
 <?php
-namespace UniversalViewer\Service\Controller;
+namespace IiifServer\Service\Controller;
 
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
-use UniversalViewer\Controller\MediaController;
+use IiifServer\Controller\MediaController;
 
 class MediaControllerFactory implements FactoryInterface
 {

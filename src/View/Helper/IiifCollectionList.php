@@ -1,25 +1,25 @@
 <?php
 
 /*
- * Copyright 2015-2017  Daniel Berthereau
+ * Copyright 2015-2017 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
- * by the rules of distribution of free software.  You can use, modify and/or
+ * by the rules of distribution of free software. You can use, modify and/or
  * redistribute the software under the terms of the CeCILL license as circulated
  * by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
  *
  * As a counterpart to the access to the source code and rights to copy, modify
  * and redistribute granted by the license, users are provided only with a
- * limited warranty and the software's author, the holder of the economic
+ * limited warranty and the software’s author, the holder of the economic
  * rights, and the successive licensors have only limited liability.
  *
- * In this respect, the user's attention is drawn to the risks associated with
+ * In this respect, the user’s attention is drawn to the risks associated with
  * loading, using, modifying and/or developing or reproducing the software by
  * the user in light of its specific status of free software, that may mean that
  * it is complicated to manipulate, and that also therefore means that it is
  * reserved for developers and experienced professionals having in-depth
  * computer knowledge. Users are therefore encouraged to load and test the
- * software's suitability as regards their requirements in conditions enabling
+ * software’s suitability as regards their requirements in conditions enabling
  * the security of their systems and/or data to be ensured and, more generally,
  * to use and operate it in the same conditions as regards security.
  *
@@ -27,7 +27,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace UniversalViewer\View\Helper;
+namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
@@ -77,7 +77,7 @@ class IiifCollectionList extends AbstractHelper
         $translate = $this->getView()->plugin('translate');
 
         $identifier = $this->buildIdentifierForList($resources);
-        $route = 'universalviewer_presentation_collection_list';
+        $route = 'iiifserver_presentation_collection_list';
         $url = $this->view->url($route, array(
             'id' => $identifier,
         ));
@@ -89,13 +89,13 @@ class IiifCollectionList extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        $license = $this->view->setting('universalviewer_manifest_license_default');
+        $license = $this->view->setting('iiifserver_manifest_license_default');
         $manifest['license'] = $license;
 
-        $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
+        $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->view->setting('universalviewer_manifest_logo_default');
+        $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
         // List of the manifest of each record. IIIF v2.0 separates collections
         // and items, so the global order is not kept for them.
@@ -129,13 +129,13 @@ class IiifCollectionList extends AbstractHelper
         $manifest = array();
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('universalviewer_presentation_collection', array(
+            $url = $this->view->url('iiifserver_presentation_collection', array(
                 'id' => $resource->id(),
             ));
 
             $type = 'sc:Collection';
         } else {
-            $url = $this->view->url('universalviewer_presentation_item', array(
+            $url = $this->view->url('iiifserver_presentation_item', array(
                 'id' => $resource->id(),
             ));
 
@@ -160,7 +160,7 @@ class IiifCollectionList extends AbstractHelper
      * than the collection itself.
      * In all cases the order of records is kept.
      *
-     * @todo Merge with UniversalViewer\View\Helper\UniversalViewer::buildIdentifierForList()
+     * @todo Merge with IiifServer\View\Helper\UniversalViewer::buildIdentifierForList()
      *
      * @param array $resources
      * @return string

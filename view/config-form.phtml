@@ -187,12 +187,12 @@ foreach ($response->getContent() as $vocabulary) {
     <legend><?php echo $t->translate('Background parameters'); ?></legend>
     <div class="field">
         <?php
-            $select = new Zend\Form\Element\Select('iiifserver_iiif_creator');
+            $select = new Zend\Form\Element\Select('iiifserver_image_creator');
             $select->setLabel($t->translate('Image processor'));
-            $select->setAttribute('id', 'iiifserver_iiif_creator');
+            $select->setAttribute('id', 'iiifserver_image_creator');
             $processors['Auto'] = $t->translate('Automatic (GD when possible, else ImageMagick)');
             $select->setValueOptions($processors);
-            $select->setValue($settings->get('iiifserver_iiif_creator'));
+            $select->setValue($settings->get('iiifserver_image_creator'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($select); ?>
@@ -212,10 +212,10 @@ foreach ($response->getContent() as $vocabulary) {
     </div>
     <div class="field">
         <?php
-            $text = new Zend\Form\Element\Text('iiifserver_iiif_max_size');
+            $text = new Zend\Form\Element\Text('iiifserver_image_max_size');
             $text->setLabel($t->translate('Max dynamic size for images'));
-            $text->setAttribute('id', 'iiifserver_iiif_max_size');
-            $text->setValue($settings->get('iiifserver_iiif_max_size'));
+            $text->setAttribute('id', 'iiifserver_image_max_size');
+            $text->setValue($settings->get('iiifserver_image_max_size'));
         ?>
         <div class="field-meta">
             <?php echo $this->formLabel($text); ?>

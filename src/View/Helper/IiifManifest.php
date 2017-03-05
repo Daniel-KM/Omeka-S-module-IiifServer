@@ -1,26 +1,26 @@
 <?php
 
 /*
- * Copyright 2015  Daniel Berthereau
- * Copyright 2016  BibLibre
+ * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
- * by the rules of distribution of free software.  You can use, modify and/or
+ * by the rules of distribution of free software. You can use, modify and/or
  * redistribute the software under the terms of the CeCILL license as circulated
  * by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
  *
  * As a counterpart to the access to the source code and rights to copy, modify
  * and redistribute granted by the license, users are provided only with a
- * limited warranty and the software's author, the holder of the economic
+ * limited warranty and the software’s author, the holder of the economic
  * rights, and the successive licensors have only limited liability.
  *
- * In this respect, the user's attention is drawn to the risks associated with
+ * In this respect, the user’s attention is drawn to the risks associated with
  * loading, using, modifying and/or developing or reproducing the software by
  * the user in light of its specific status of free software, that may mean that
  * it is complicated to manipulate, and that also therefore means that it is
  * reserved for developers and experienced professionals having in-depth
  * computer knowledge. Users are therefore encouraged to load and test the
- * software's suitability as regards their requirements in conditions enabling
+ * software’s suitability as regards their requirements in conditions enabling
  * the security of their systems and/or data to be ensured and, more generally,
  * to use and operate it in the same conditions as regards security.
  *
@@ -28,7 +28,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace UniversalViewer\View\Helper;
+namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -102,7 +102,7 @@ class IiifManifest extends AbstractHelper
             'sequences' => array(),
         );
 
-        $url = $this->view->url('universalviewer_presentation_item', array(
+        $url = $this->view->url('iiifserver_presentation_item', array(
             'id' => $item->id(),
         ));
         $url = $this->view->uvForceHttpsIfRequired($url);
@@ -127,7 +127,7 @@ class IiifManifest extends AbstractHelper
         $label = $item->displayTitle();
         $manifest['label'] = $label;
 
-        $descriptionProperty = $this->view->setting('universalviewer_manifest_description_property');
+        $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags($item->value($descriptionProperty, array('type' => 'literal')));
         } else {
@@ -135,25 +135,25 @@ class IiifManifest extends AbstractHelper
         }
         $manifest['description'] = $description;
 
-        $licenseProperty = $this->view->setting('universalviewer_license_property');
+        $licenseProperty = $this->view->setting('iiifserver_license_property');
         if ($licenseProperty) {
             $license = $item->value($licenseProperty);
         }
         if (empty($license)) {
-            $license = $this->view->setting('universalviewer_manifest_license_default');
+            $license = $this->view->setting('iiifserver_manifest_license_default');
         }
         $manifest['license'] = $license;
 
-        $attributionProperty = $this->view->setting('universalviewer_attribution_property');
+        $attributionProperty = $this->view->setting('iiifserver_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags($item->value($attributionProperty, array('type' => 'literal')));
         }
         if (empty($attribution)) {
-            $attribution = $this->view->setting('universalviewer_manifest_attribution_default');
+            $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
         }
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->view->setting('universalviewer_manifest_logo_default');
+        $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
         // TODO To parameter or to extract from metadata.
         /*
@@ -174,7 +174,7 @@ class IiifManifest extends AbstractHelper
 
         $withins = array();
         foreach ($item->itemSets() as $itemSet) {
-            $within = $this->view->url('universalviewer_presentation_collection', array(
+            $within = $this->view->url('iiifserver_presentation_collection', array(
                 'id' => $itemSet->id(),
             ));
             $within = $this->view->uvForceHttpsIfRequired($within);
@@ -449,7 +449,7 @@ class IiifManifest extends AbstractHelper
 
         $thumbnail = array();
 
-        $imageUrl = $this->view->url('universalviewer_image_url', array(
+        $imageUrl = $this->view->url('iiifserver_image_url', array(
             'id' => $media->id(),
             'region' => 'full',
             'size' => $width . ',' . $height,
@@ -462,7 +462,7 @@ class IiifManifest extends AbstractHelper
 
         $thumbnailService = array();
         $thumbnailService['@context'] = 'http://iiif.io/api/image/2/context.json';
-        $thumbnailServiceUrl = $this->view->url('universalviewer_image', array(
+        $thumbnailServiceUrl = $this->view->url('iiifserver_image', array(
             'id' => $media->id(),
         ));
         $thumbnailServiceUrl = $this->view->uvForceHttpsIfRequired($thumbnailServiceUrl);
@@ -515,7 +515,7 @@ class IiifManifest extends AbstractHelper
         $imageResourceService = array();
         $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
 
-        $imageUrl = $this->view->url('universalviewer_image', array(
+        $imageUrl = $this->view->url('iiifserver_image', array(
             'id' => $media->id(),
         ));
         $imageUrl = $this->view->uvForceHttpsIfRequired($imageUrl);
@@ -643,7 +643,7 @@ class IiifManifest extends AbstractHelper
             }
         }
         $mediaSequencesService = array();
-        $mseUrl = $this->view->url('universalviewer_media', array(
+        $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
         $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);
@@ -702,7 +702,7 @@ class IiifManifest extends AbstractHelper
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
         $mediaSequencesService = array();
-        $mseUrl = $this->view->url('universalviewer_media', array(
+        $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
         $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);
@@ -761,7 +761,7 @@ class IiifManifest extends AbstractHelper
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
         $mediaSequencesService = array();
-        $mseUrl = $this->view->url('universalviewer_media', array(
+        $mseUrl = $this->view->url('iiifserver_media', array(
             'id' => $media->id(),
         ));
         $mseUrl = $this->view->uvForceHttpsIfRequired($mseUrl);

@@ -27,11 +27,11 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace UniversalViewer\View\Helper;
+namespace IiifServer\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 
-class UvForceHttpsIfRequired extends AbstractHelper
+class IiifForceHttpsIfRequired extends AbstractHelper
 {
 
     /**
@@ -50,7 +50,7 @@ class UvForceHttpsIfRequired extends AbstractHelper
     public function __invoke($absoluteUrl)
     {
         if (is_null($this->_forceHttps)) {
-            $this->_forceHttps = $this->view->setting('universalviewer_force_https');
+            $this->_forceHttps = $this->view->setting('iiifserver_force_https');
         }
 
         return $this->_forceHttps && (strpos($absoluteUrl, 'http:') === 0)
