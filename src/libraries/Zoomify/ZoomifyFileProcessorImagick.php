@@ -6,6 +6,7 @@
  * Cleanup for Drupal by Karim Ratib (kratib@open-craft.com)
  * Cleanup for Omeka by Daniel Berthereau (daniel.github@berthereau.net)
  * Conversion to ImageMagick by Daniel Berthereau
+ * Integrated in Omeka S and support a specified destination directory.
  *
  * @internal
  * This adaptation of the original ZoomifyFileProcessor doesn't use ImageMagick
@@ -35,6 +36,9 @@ class ZoomifyFileProcessor
 {
     public $_debug = false;
 
+    public $destinationDir = '';
+
+    public $updatePerms = true;
     public $fileMode = 0644;
     public $dirMode = 0755;
     public $fileGroup = 'www-data';
@@ -167,25 +171,35 @@ class ZoomifyFileProcessor
     }
 
     /**
-     * Create a container (a folder) for tiles and tile metadata.
+     * Create a container (a folder) for tiles and tile metadata if not set.
      */
     protected function _createDataContainer()
     {
-        list($root, $ext) = $this->_getRootAndDotExtension($this->_imageFilename);
-        $directory = dirname($root);
-        $filename = basename($root);
-        $root = $filename . '_zdata';
+        if ($this->destinationDir) {
+            $location = $this->destinationDir;
+        }
+        //Determine the path to the directory from the filepath.
+        else {
+            list($root, $ext) = $this->_getRootAndDotExtension($this->_imageFilename);
+            $directory = dirname($root);
+            $filename = basename($root);
+            $root = $filename . '_zdata';
+            $location = $directory . DIRECTORY_SEPARATOR . $root;
+        }
 
-        $this->_saveToLocation = $directory . DIRECTORY_SEPARATOR . $root;
+        $this->_saveToLocation = $location;
 
         // If the paths already exist, an image is being re-processed, clean up
         // for it.
         if (is_dir($this->_saveToLocation)) {
             $rm_err = $this->_rmDir($this->_saveToLocation);
         }
+
         mkdir($this->_saveToLocation);
-        @chmod($this->_saveToLocation, $this->dirMode);
-        @chgrp($this->_saveToLocation, $this->fileGroup);
+        if ($this->updatePerms) {
+            @chmod($this->_saveToLocation, $this->dirMode);
+            @chgrp($this->_saveToLocation, $this->fileGroup);
+        }
     }
 
     /**
@@ -197,8 +211,10 @@ class ZoomifyFileProcessor
 
         if (!is_dir($tileContainerPath)) {
             mkdir($tileContainerPath);
-            @chmod($tileContainerPath, $this->dirMode);
-            @chgrp($tileContainerPath, $this->fileGroup);
+            if ($this->updatePerms) {
+                @chmod($tileContainerPath, $this->dirMode);
+                @chgrp($tileContainerPath, $this->fileGroup);
+            }
         }
     }
 
@@ -291,8 +307,10 @@ class ZoomifyFileProcessor
             $imageRow->cropImage($width, $height, 0, $ul_y);
             $imageRow->writeImage($saveFilename);
             $imageRow->destroy();
-            @chmod($saveFilename, $this->fileMode);
-            @chgrp($saveFilename, $this->fileGroup);
+            if ($this->updatePerms) {
+                @chmod($saveFilename, $this->fileMode);
+                @chgrp($saveFilename, $this->fileGroup);
+            }
             if ($this->_debug) {
                 print "processImage root=$root tier=$tier row=$row saveFilename=$saveFilename<br />" . PHP_EOL;
             }
@@ -470,8 +488,10 @@ class ZoomifyFileProcessor
                 $tileImage->setImageCompressionQuality($this->qualitySetting);
                 $tileImage->writeImage($tileFilename);
                 $tileImage->destroy();
-                @chmod($tileFilename, $this->fileMode);
-                @chgrp($tileFilename, $this->fileGroup);
+                if ($this->updatePerms) {
+                    @chmod($tileFilename, $this->fileMode);
+                    @chgrp($tileFilename, $this->fileGroup);
+                }
                 $this->_numberOfTiles++;
                 if ($this->_debug) {
                     print "created tile: numberOfTiles= $this->_numberOfTiles tier column row =($tier,$column,$row)<br />" . PHP_EOL;
@@ -507,8 +527,10 @@ class ZoomifyFileProcessor
                 $tempImage->resizeImage($halfWidth, $halfHeight, Imagick::FILTER_LANCZOS, 1, false);
                 $tempImage->writeImage($rowFilename);
                 $tempImage->destroy();
-                @chmod($rowFilename, $this->fileMode);
-                @chgrp($rowFilename, $this->fileGroup);
+                if ($this->updatePerms) {
+                    @chmod($rowFilename, $this->fileMode);
+                    @chgrp($rowFilename, $this->fileGroup);
+                }
             }
 
             // http://greengaloshes.cc/2007/05/zoomifyimage-ported-to-php/#comment-451
@@ -553,8 +575,10 @@ class ZoomifyFileProcessor
         $xmlFile = fopen($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', 'w');
         fwrite($xmlFile, $this->_getXMLOutput());
         fclose($xmlFile);
-        @chmod($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileMode);
-        @chgrp($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileGroup);
+        if ($this->updatePerms) {
+            @chmod($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileMode);
+            @chgrp($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileGroup);
+        }
     }
 
     /**
@@ -564,7 +588,7 @@ class ZoomifyFileProcessor
      */
     protected function _getXMLOutput()
     {
-        $xmlOutput = '<IMAGE_PROPERTIES WIDTH="' . $this->_originalWidth . '" HEIGHT="' . $this->_originalHeight . '" NUMTILES="' . $this->_numberOfTiles . '" NUMIMAGES="1" VERSION="1.8" TILESIZE="' . $this->tileSize . '" />';
+        $xmlOutput = '<IMAGE_PROPERTIES WIDTH="' . $this->_originalWidth . '" HEIGHT="' . $this->_originalHeight . '" NUMTILES="' . $this->_numberOfTiles . '" NUMIMAGES="1" VERSION="1.8" TILESIZE="' . $this->tileSize . '" />' . PHP_EOL;
         return $xmlOutput;
     }
 
