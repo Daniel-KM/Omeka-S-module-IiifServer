@@ -2,14 +2,14 @@
 namespace Zoomify;
 
 /**
- * Copyright (C) 2005  Adam Smith  asmith@agile-software.com
- * Copyright (C) Wes Wright [http://greengaloshes.cc]
- * Copyright (C) Justin Henry [http://greengaloshes.cc]
- * Copyright (C) 2014-2017 Daniel Berthereau Daniel.github@Berthereau.net
+ * Copyright 2005 Adam Smith (asmith@agile-software.com)
+ * Copyright Wes Wright (http://greengaloshes.cc)
+ * Copyright Justin Henry (http://greengaloshes.cc)
+ * Copyright 2014-2017 Daniel Berthereau (Daniel.github@Berthereau.net)
  *
  * Ported from Python to PHP by Wes Wright
  * Cleanup for Drupal by Karim Ratib (kratib@open-craft.com)
- * Cleanup for Omeka by Daniel Berthereau (daniel.github@berthereau.net)
+ * Cleanup for Omeka Classic by Daniel Berthereau (daniel.github@berthereau.net)
  * Conversion to ImageMagick by Daniel Berthereau
  * Integrated in Omeka S and support a specified destination directory.
  *

@@ -2,21 +2,21 @@
 namespace Zoomify;
 
 /**
- * Zoomify big images into tiles supported by many viewer.
+ * Zoomify big images into tiles supported by many viewers.
  *
  * The Zoomify class is a port of the ZoomifyImage python script to a PHP class.
  * The original python script was written by Adam Smith, and was ported to PHP
- * (in the form of ZoomifyFileProcessor) by Wes Wright. The port to ImageMagick
- * was done by Daniel Berthereau.
+ * (in the form of ZoomifyFileProcessor) by Wes Wright. The port to Imagick was
+ * done by Daniel Berthereau for the Bibliothèque patrimoniale of Mines ParisTech.
  *
- * Copyright (C) 2005  Adam Smith  asmith@agile-software.com
- * Copyright (C) Wes Wright [http://greengaloshes.cc]
- * Copyright (C) Justin Henry [http://greengaloshes.cc]
- * Copyright (C) 2014-2017 Daniel Berthereau Daniel.github@Berthereau.net
+ * Copyright 2005 Adam Smith (asmith@agile-software.com)
+ * Copyright Wes Wright (http://greengaloshes.cc)
+ * Copyright Justin Henry (http://greengaloshes.cc)
+ * Copyright 2014-2017 Daniel Berthereau (Daniel.github@Berthereau.net)
  *
  * Ported from Python to PHP by Wes Wright
  * Cleanup for Drupal by Karim Ratib (kratib@open-craft.com)
- * Cleanup for Omeka by Daniel Berthereau (daniel.github@berthereau.net)
+ * Cleanup for Omeka Classic by Daniel Berthereau (daniel.github@berthereau.net)
  * Conversion to ImageMagick by Daniel Berthereau
  * Integrated in Omeka S and support a specified destination directory.
  *
