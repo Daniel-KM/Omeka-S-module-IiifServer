@@ -79,6 +79,7 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
     {
         $args = &$this->_args;
 
+        // Region.
         switch ($args['region']['feature']) {
             case 'full':
                 $sourceX = 0;
@@ -129,6 +130,7 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
             return;
         }
 
+        // Size.
         // The size is checked against the region, not the source.
         switch ($args['size']['feature']) {
             case 'full':

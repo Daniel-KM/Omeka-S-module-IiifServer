@@ -203,9 +203,14 @@ class ImageController extends AbstractActionController
                 // Check if the image is pre-tiled.
                 $pretiled = $this->_usePreTiled($media, $transform);
                 if ($pretiled) {
+                    // Warning: Currently, the tile server does not manage
+                    // regions or special size, so it is possible to process the
+                    // crop of an overlap in one transformation.
+
                     // Check if a light transformation is needed (all except
                     // extraction of the region).
-                    if ($transform['mirror']['feature'] != 'default'
+                    if (($pretiled['overlap'] && !$pretiled['isSingleCell'])
+                            || $transform['mirror']['feature'] != 'default'
                             || $transform['rotation']['feature'] != 'noRotation'
                             || $transform['quality']['feature'] != 'default'
                             || $transform['format']['feature'] != $pretiled['mime_type']
@@ -215,11 +220,23 @@ class ImageController extends AbstractActionController
                         $args['source']['mime_type'] = $pretiled['mime_type'];
                         $args['source']['width'] = $pretiled['width'];
                         $args['source']['height'] = $pretiled['height'];
-                        $args['region']['feature'] = 'full';
-                        $args['region']['x'] = 0;
-                        $args['region']['y'] = 0;
-                        $args['region']['width'] = $pretiled['width'];
-                        $args['region']['height'] = $pretiled['height'];
+                        // The tile server returns always the true tile, so crop
+                        // it when there is an overlap.
+                        if ($pretiled['overlap']) {
+                            $args['region']['feature'] = 'regionByPx';
+                            $args['region']['x'] = $pretiled['isFirstColumn'] ? 0 : $pretiled['overlap'];
+                            $args['region']['y'] = $pretiled['isFirstRow'] ? 0 : $pretiled['overlap'];
+                            $args['region']['width'] = $pretiled['size'];
+                            $args['region']['height'] = $pretiled['size'];
+                        }
+                        // Normal tile.
+                        else {
+                            $args['region']['feature'] = 'full';
+                            $args['region']['x'] = 0;
+                            $args['region']['y'] = 0;
+                            $args['region']['width'] = $pretiled['width'];
+                            $args['region']['height'] = $pretiled['height'];
+                        }
                         $args['size']['feature'] = 'full';
                         $imagePath = $this->_transformImage($args);
                     }
@@ -681,7 +698,8 @@ class ImageController extends AbstractActionController
     {
         $tileInfo = $this->tileInfo($media);
         if ($tileInfo) {
-            return $this->tileServer($tileInfo, $transform);
+            $tile = $this->tileServer($tileInfo, $transform);
+            return $tile;
         }
     }
 

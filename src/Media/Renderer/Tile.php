@@ -114,7 +114,7 @@ OUTPUT;
     protected function getDataDeepzoom(MediaRepresentation $media, PhpRenderer $view, array $tileInfo)
     {
         $url = $view->serverUrl()
-            . $view->basePath('files' . '/' . $this->tileDir . '/' . $tileInfo['relativepath']);
+            . $view->basePath('files' . '/' . $this->tileDir . '/' . $tileInfo['metadata_path']);
         $args = [];
         $args['id'] = 'osd-' . $media->id();
         $args['prefixUrl'] = '';
@@ -134,7 +134,7 @@ OUTPUT;
     {
         // NOTE OpenSeadragon doesn't support short syntax (url only) currently.
         $url = $view->serverUrl()
-            . $view->basePath('files' . '/' . $this->tileDir . '/' . dirname($tileInfo['relativepath'])) . '/';
+            . $view->basePath('files' . '/' . $this->tileDir . '/' . $tileInfo['media_path']) . '/';
         $tileSource = [];
         $tileSource['type'] = 'zoomifytileservice';
         $tileSource['width'] = $tileInfo['source']['width'];

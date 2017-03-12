@@ -216,11 +216,13 @@ class IiifInfo extends AbstractHelper
             $basename = $this->fileManager->getBasename($media->filename());
             $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
         }
-        $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
+        $filepath = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);
 
         if (empty($result['width']) || empty($result['height'])) {
-            throw new Exception("Failed to get image resolution: $filepath");
+            throw new \Exception("Failed to get image resolution: $filepath");
         }
 
         return $result;

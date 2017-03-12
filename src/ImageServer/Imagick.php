@@ -106,6 +106,7 @@ class Imagick extends AbstractImageServer
             $args['source']['height'] = $imagick->getImageHeight();
         }
 
+        // Region + Size.
         $extraction = $this->_prepareExtraction();
         if (!$extraction) {
             $imagick->clear();

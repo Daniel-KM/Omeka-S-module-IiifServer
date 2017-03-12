@@ -104,13 +104,12 @@ class TileServer extends AbstractPlugin
         }
 
         // To manage Windows, the same path cannot be used for url and local.
-        $relativeUrl = sprintf('/%d/%d_%d.jpg',
-            $data['level'], $data['x'] , $data['y']);
-        $relativePath = sprintf('%s%d%s%d_%d.jpg',
-            DIRECTORY_SEPARATOR, $data['level'],
-            DIRECTORY_SEPARATOR, $data['x'], $data['y']);
+        $relativeUrl = sprintf('%d/%d_%d.jpg',
+            $data['level'], $data['column'] , $data['row']);
+        $relativePath = sprintf('%d%s%d_%d.jpg',
+            $data['level'], DIRECTORY_SEPARATOR, $data['column'], $data['row']);
 
-        return $this->serveTiles($tileInfo, $relativeUrl, $relativePath);
+        return $this->serveTiles($tileInfo, $data, $relativeUrl, $relativePath);
     }
 
     /**
@@ -143,43 +142,45 @@ class TileServer extends AbstractPlugin
         }
 
         // To manage Windows, the same path cannot be used for url and local.
-        $relativeUrl = sprintf('/TileGroup%d/%d-%d-%d.jpg',
-            $tileGroup, $data['level'], $data['x'], $data['y']);
-        $relativePath = sprintf('%sTileGroup%d%s%d-%d-%d.jpg',
-            DIRECTORY_SEPARATOR, $tileGroup,
-            DIRECTORY_SEPARATOR, $data['level'], $data['x'], $data['y']);
+        $relativeUrl = sprintf('TileGroup%d/%d-%d-%d.jpg',
+            $tileGroup, $data['level'], $data['column'], $data['row']);
+        $relativePath = sprintf('TileGroup%d%s%d-%d-%d.jpg',
+            $tileGroup, DIRECTORY_SEPARATOR, $data['level'], $data['column'], $data['row']);
 
-        return $this->serveTiles($tileInfo, $relativeUrl, $relativePath);
+        return $this->serveTiles($tileInfo, $data, $relativeUrl, $relativePath);
     }
 
     /**
      * Retrieve the data for a transformation.
      *
      * @param array $tileInfo
+     * @param array $cellData
      * @param string $relativeUrl
      * @param string $relativePath
      * @return array
      */
-    protected function serveTiles($tileInfo, $relativeUrl, $relativePath)
+    protected function serveTiles($tileInfo, $cellData, $relativeUrl, $relativePath)
     {
-        $urlPath = $tileInfo['urlbase'] . $tileInfo['urlpath'];
-        $dirpath = dirname($tileInfo['path']);
-
         // The image url is used when there is no transformation.
-        $imageUrl = $urlPath . $relativeUrl;
-        $imagePath = $dirpath . $relativePath;
-        $derivativeType = 'tile';
+        $imageUrl = $tileInfo['url_base']
+            . '/' . $tileInfo['media_path']
+            . '/' . $relativeUrl;
+        $imagePath = $tileInfo['path_base']
+            . DIRECTORY_SEPARATOR . $tileInfo['media_path']
+            . DIRECTORY_SEPARATOR . $relativePath;
+
         list($tileWidth, $tileHeight) = array_values($this->getWidthAndHeight($imagePath));
 
         $result = [
             'fileurl' => $imageUrl,
             'filepath' => $imagePath,
-            'derivativeType' => $derivativeType,
+            'derivativeType' => 'tile',
             'mime_type' => 'image/jpeg',
             'width' => $tileWidth,
             'height' => $tileHeight,
+            'overlap' => $tileInfo['overlap'],
         ];
-        return $result;
+        return $result + $cellData;
     }
 
     /**
@@ -195,14 +196,6 @@ class TileServer extends AbstractPlugin
      */
     protected function getLevelAndPosition($tileInfo, $source, $region, $size, $isOneBased)
     {
-        // Check if the tile may be cropped.
-        $isFirstColumn = $region['x'] == 0;
-        $isFirstRow = $region['y'] == 0;
-        $isFirstCell = $isFirstColumn && $isFirstRow;
-        $isLastColumn = $source['width'] == ($region['x'] + $region['width']);
-        $isLastRow = $source['height'] == ($region['y'] + $region['height']);
-        $isLastCell = $isLastColumn && $isLastRow;
-
         // Initialize with default values.
         $level = 0;
         $cellX = 0;
@@ -212,15 +205,17 @@ class TileServer extends AbstractPlugin
         // processor.
         $cellSize = $tileInfo['size'];
 
-        // Manage the base level.
-        if ($isFirstCell && $isLastCell) {
-            $level = 0;
-            $cellX = 0;
-            $cellY = 0;
-        }
+        // Check if the tile may be cropped.
+        $isFirstColumn = $region['x'] == 0;
+        $isFirstRow = $region['y'] == 0;
+        $isFirstCell = $isFirstColumn && $isFirstRow;
+        $isLastColumn = $source['width'] == ($region['x'] + $region['width']);
+        $isLastRow = $source['height'] == ($region['y'] + $region['height']);
+        $isLastCell = $isLastColumn && $isLastRow;
+        $isSingleCell = $isFirstCell && $isLastCell;
 
-        // Else normal region.
-        else {
+        // No process is needed when the requested cell is single.
+        if (!$isSingleCell) {
             // Determine the position of the cell from the source and the
             // region.
             switch ($size['feature']) {
@@ -357,9 +352,16 @@ class TileServer extends AbstractPlugin
 
         return [
             'level' => $level,
-            'x' => $cellX,
-            'y' => $cellY,
+            'column' => $cellX,
+            'row' => $cellY,
             'size' => $cellSize,
+            'isFirstColumn' => $isFirstColumn,
+            'isFirstRow' => $isFirstRow,
+            'isFirstCell' => $isFirstCell,
+            'isLastColumn' => $isLastColumn,
+            'isLastRow' => $isLastRow,
+            'isLastCell' => $isLastCell,
+            'isSingleCell' => $isSingleCell,
         ];
     }
 
@@ -453,8 +455,8 @@ class TileServer extends AbstractPlugin
                 + $tileCountUpToTier[$i - 1];
         }
 
-        $tileIndex = $tile['x']
-            + $tile['y'] * $tierSizeInTiles[$tile['level']][0]
+        $tileIndex = $tile['column']
+            + $tile['row'] * $tierSizeInTiles[$tile['level']][0]
             + $tileCountUpToTier[$tile['level']];
         $tileGroup = ($tileIndex / $tile['size']) ?: 0;
         return (integer) $tileGroup;

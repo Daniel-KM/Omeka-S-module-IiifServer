@@ -116,16 +116,16 @@ class TileInfo extends AbstractPlugin
         $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.dzi';
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataDeepzoomDzi($basepath);
-            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
-            $tilingData['relativepath'] = $basename . '.dzi';
+            $tilingData['media_path'] = $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            $tilingData['metadata_path'] = $basename . '.dzi';
             return $tilingData;
         }
 
         $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.js';
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataDeepzoomJsonp($basepath);
-            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
-            $tilingData['relativepath'] = $basename . '.js';
+            $tilingData['media_path'] = $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            $tilingData['metadata_path'] = $basename . '.js';
             return $tilingData;
         }
 
@@ -134,8 +134,8 @@ class TileInfo extends AbstractPlugin
             . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataZoomify($basepath);
-            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_ZOOMIFY;
-            $tilingData['relativepath'] = $basename . self::FOLDER_EXTENSION_ZOOMIFY
+            $tilingData['media_path'] = $basename . self::FOLDER_EXTENSION_ZOOMIFY;
+            $tilingData['metadata_path'] = $basename . self::FOLDER_EXTENSION_ZOOMIFY
                 . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
             return $tilingData;
         }
@@ -158,11 +158,12 @@ class TileInfo extends AbstractPlugin
 
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
-        $tilingData['path'] = $path;
-        $tilingData['relativepath'] = '';
-        $tilingData['urlbase'] = $this->tileBaseUrl;
-        $tilingData['urlpath'] = '';
+        $tilingData['metadata_path'] = $path;
+        $tilingData['media_path'] = '';
+        $tilingData['url_base'] = $this->tileBaseUrl;
+        $tilingData['path_base'] = $this->tileBaseDir;
         $tilingData['size'] = (integer) $data['@attributes']['TileSize'];
+        $tilingData['overlap'] = (integer) $data['@attributes']['Overlap'];
         $tilingData['total'] = null;
         $tilingData['source']['width'] = (integer) $data['Size']['@attributes']['Width'];
         $tilingData['source']['height'] = (integer) $data['Size']['@attributes']['Height'];
@@ -186,11 +187,12 @@ class TileInfo extends AbstractPlugin
 
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
-        $tilingData['path'] = $path;
-        $tilingData['relativepath'] = '';
-        $tilingData['urlbase'] = $this->tileBaseUrl;
-        $tilingData['urlpath'] = '';
+        $tilingData['metadata_path'] = '';
+        $tilingData['media_path'] = '';
+        $tilingData['url_base'] = $this->tileBaseUrl;
+        $tilingData['path_base'] = $this->tileBaseDir;
         $tilingData['size'] = (integer) $data['TileSize'];
+        $tilingData['overlap'] = (integer) $data['Overlap'];
         $tilingData['total'] = null;
         $tilingData['source']['width'] = (integer) $data['Size']['Width'];
         $tilingData['source']['height'] = (integer) $data['Size']['Height'];
@@ -215,11 +217,12 @@ class TileInfo extends AbstractPlugin
 
         $tilingData = [];
         $tilingData['tile_type'] = 'zoomify';
-        $tilingData['path'] = $path;
-        $tilingData['relativepath'] = '';
-        $tilingData['urlbase'] = $this->tileBaseUrl;
-        $tilingData['urlpath'] = '';
+        $tilingData['metadata_path'] = '';
+        $tilingData['media_path'] = '';
+        $tilingData['url_base'] = $this->tileBaseUrl;
+        $tilingData['path_base'] = $this->tileBaseDir;
         $tilingData['size'] = (integer) $properties['TILESIZE'];
+        $tilingData['overlap'] = 0;
         $tilingData['total'] = (integer) $properties['NUMTILES'];
         $tilingData['source']['width'] = (integer) $properties['WIDTH'];
         $tilingData['source']['height'] = (integer) $properties['HEIGHT'];

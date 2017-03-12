@@ -30,7 +30,6 @@
 
 namespace IiifServer\ImageServer;
 
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Log\Logger;
 use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractImageServer;
@@ -111,6 +110,7 @@ class GD extends AbstractImageServer
             $args['source']['height'] = imagesy($sourceGD);
         }
 
+        // Region + Size.
         $extraction = $this->_prepareExtraction();
         if (!$extraction) {
             imagedestroy($sourceGD);

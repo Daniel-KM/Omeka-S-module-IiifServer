@@ -121,6 +121,7 @@ class ImageMagick extends AbstractImageServer
             list($args['source']['width'], $args['source']['height']) = getimagesize($image);
         }
 
+        // Region + Size.
         $extraction = $this->_prepareExtraction();
         if (!$extraction) {
             $this->_destroyIfFetched($image);
