@@ -155,7 +155,7 @@ class ConfigForm extends Form
             'options' => [
                 'label' => 'Max dynamic size for images', // @translate
                 'info' => 'Set the maximum size in bytes for the dynamic processing of images.' // @translate
-                    . ' ' .'Beyond this limit, the plugin will require a tiled image, for example made by the module OpenLayersZoom.' // @translate
+                    . ' ' .'Beyond this limit, the plugin will require a tiled image.' // @translate
                     . ' ' .'Let empty to allow processing of any image.', // @translate
             ],
             'attributes' => [

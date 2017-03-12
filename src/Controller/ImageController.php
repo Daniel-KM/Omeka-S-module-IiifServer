@@ -43,7 +43,7 @@ use IiifServer\IiifCreator;
 /**
  * The Image controller class.
  *
- * @todo Move all OpenLayersZoom stuff in OpenLayersZoom.
+ * @todo Move all image processing stuff in Image Server.
  *
  * @package IiifServer
  */
@@ -113,7 +113,7 @@ class ImageController extends AbstractActionController
         }
 
         $iiifInfo = $this->viewHelpers()->get('iiifInfo');
-        $info = $iiifInfo($media, false);
+        $info = $iiifInfo($media);
 
         return $this->jsonLd($info);
     }

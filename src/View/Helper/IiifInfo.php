@@ -52,11 +52,9 @@ class IiifInfo extends AbstractHelper
      * @todo Replace all data by standard classes.
      *
      * @param Record|integer|null $record
-     * @param boolean $asJson Return manifest as object or as a json string.
-     * @return Object|string|null. The object or the json string corresponding
-     * to the manifest.
+     * @return Object|null
      */
-    public function __invoke(MediaRepresentation $media, $asJson = true)
+    public function __invoke(MediaRepresentation $media)
     {
         if (empty($media)) {
             return null;
@@ -120,7 +118,6 @@ class IiifInfo extends AbstractHelper
             $info['profile'] = $profile;
             // Useless currently.
             // $info['service'] = $service;
-            $info = (object) $info;
         }
 
         // Else non-image file.
@@ -141,15 +138,9 @@ class IiifInfo extends AbstractHelper
             $info['@id'] = $fileUrl;
             // See MediaController::contextAction()
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';
-            $info = (object) $info;
         }
 
-        if ($asJson) {
-            return version_compare(phpversion(), '5.4.0', '<')
-                ? json_encode($info)
-                : json_encode($info, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        }
-        // Return as array
+        $info = (object) $info;
         return $info;
     }
 
