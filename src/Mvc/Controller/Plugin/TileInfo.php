@@ -106,7 +106,7 @@ class TileInfo extends AbstractPlugin
      *   and, inside it, metadata "ImageProperties.xml" and subdirs "TileGroup{x}".
      *
      * @internal This implementation is compatible with ArchiveRepertory (use of
-     * a basename that may be a partial path).
+     * a basename that may be a partial path) and possible alternate adapters.
      *
      * @param string $basename Filename without the extension (storage id).
      * @return array|null
@@ -117,6 +117,7 @@ class TileInfo extends AbstractPlugin
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataDeepzoomDzi($basepath);
             $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            $tilingData['relativepath'] = $basename . '.dzi';
             return $tilingData;
         }
 
@@ -124,6 +125,7 @@ class TileInfo extends AbstractPlugin
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataDeepzoomJsonp($basepath);
             $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            $tilingData['relativepath'] = $basename . '.js';
             return $tilingData;
         }
 
@@ -133,6 +135,8 @@ class TileInfo extends AbstractPlugin
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataZoomify($basepath);
             $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_ZOOMIFY;
+            $tilingData['relativepath'] = $basename . self::FOLDER_EXTENSION_ZOOMIFY
+                . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
             return $tilingData;
         }
     }
@@ -155,6 +159,7 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
         $tilingData['path'] = $path;
+        $tilingData['relativepath'] = '';
         $tilingData['urlbase'] = $this->tileBaseUrl;
         $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $data['@attributes']['TileSize'];
@@ -182,6 +187,7 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
         $tilingData['path'] = $path;
+        $tilingData['relativepath'] = '';
         $tilingData['urlbase'] = $this->tileBaseUrl;
         $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $data['TileSize'];
@@ -210,6 +216,7 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'zoomify';
         $tilingData['path'] = $path;
+        $tilingData['relativepath'] = '';
         $tilingData['urlbase'] = $this->tileBaseUrl;
         $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $properties['TILESIZE'];
