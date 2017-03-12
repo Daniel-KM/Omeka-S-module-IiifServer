@@ -164,6 +164,7 @@ class ImageController extends AbstractActionController
         // A quick check when there is no transformation.
         if ($transform['region']['feature'] == 'full'
                 && $transform['size']['feature'] == 'full'
+                && $transform['mirror']['feature'] == 'default'
                 && $transform['rotation']['feature'] == 'noRotation'
                 && $transform['quality']['feature'] == 'default'
                 && $transform['format']['feature'] == $media->mediaType()
@@ -178,6 +179,7 @@ class ImageController extends AbstractActionController
             if ($pretiled) {
                 // Check if a light transformation is needed.
                 if ($transform['size']['feature'] != 'full'
+                        || $transform['mirror']['feature'] != 'default'
                         || $transform['rotation']['feature'] != 'noRotation'
                         || $transform['quality']['feature'] != 'default'
                         || $transform['format']['feature'] != $pretiled['mime_type']
@@ -207,7 +209,8 @@ class ImageController extends AbstractActionController
                 if ($pretiled) {
                     // Check if a light transformation is needed (all except
                     // extraction of the region).
-                    if ($transform['rotation']['feature'] != 'noRotation'
+                    if ($transform['mirror']['feature'] != 'default'
+                            || $transform['rotation']['feature'] != 'noRotation'
                             || $transform['quality']['feature'] != 'default'
                             || $transform['format']['feature'] != $pretiled['mime_type']
                         ) {
@@ -530,28 +533,44 @@ class ImageController extends AbstractActionController
             }
         }
 
-        // Determine the rotation.
+        // Determine the mirroring and the rotation.
+
+        $transform['mirror']['feature'] = substr($rotation, 0, 1) === '!' ? 'mirror' : 'default';
+        if ($transform['mirror']['feature'] != 'default') {
+            $rotation = substr($rotation, 1);
+        }
+
+        // Strip leading and ending zeros.
+        if (strpos($rotation, '.') === false) {
+            $rotation += 0;
+        }
+        // This may be a float, so keep all digits, because they can be managed
+        // by the image creator.
+        else {
+            $rotation = trim($rotation, '0');
+            $rotationDotPos = strpos($rotation, '.');
+            if ($rotationDotPos === strlen($rotation)) {
+                $rotation = (integer) trim($rotation, '.');
+            } elseif ($rotationDotPos === 0) {
+                $rotation = '0' . $rotation;
+            }
+        }
 
         // No rotation.
-        if ($rotation == '0') {
+        if (empty($rotation)) {
             $transform['rotation']['feature'] = 'noRotation';
         }
 
         // Simple rotation.
-        elseif ($rotation == '90' ||$rotation == '180' || $rotation == '270')  {
+        elseif ($rotation == 90 || $rotation == 180 || $rotation == 270)  {
             $transform['rotation']['feature'] = 'rotationBy90s';
-            $transform['rotation']['degrees'] = (integer) $rotation;
+            $transform['rotation']['degrees'] = $rotation;
         }
 
         // Arbitrary rotation.
-        // Currently only supported with Imagick.
         else {
             $transform['rotation']['feature'] = 'rotationArbitrary';
-            if (!extension_loaded('imagick') || $settings->get('iiifserver_image_creator') == 'GD') {
-                $this->_view->setVariable('message', sprintf($this->translate('The IIIF server cannot fulfill the request: the rotation "%s" is not supported.'), $rotation));
-                return;
-            }
-            $transform['rotation']['degrees'] = (float) $rotation;
+            $transform['rotation']['degrees'] = $rotation;
         }
 
         // Determine the quality.

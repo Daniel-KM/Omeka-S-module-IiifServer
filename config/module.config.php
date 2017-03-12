@@ -194,8 +194,7 @@ return [
                         'id' => '\d+',
                         'region' => 'full|\d+,\d+,\d+,\d+|pct:\d+\.?\d*,\d+\.?\d*,\d+\.?\d*,\d+\.?\d*',
                         'size' => 'full|\d+,\d*|\d*,\d+|pct:\d+\.?\d*|!\d+,\d+',
-                        // TODO Max length of floating number is 10. No arbitrary rotation currently.
-                        'rotation' => '0|90|180|270',
+                        'rotation' => '\!?(?:(?:[0-2]?[0-9]?[0-9]|3[0-5][0-9])(?:\.\d*)?|360)',
                         'quality' => 'default|color|gray|bitonal',
                         'format' => 'jpg|png|gif',
                     ],

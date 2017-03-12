@@ -137,6 +137,46 @@ class GD extends AbstractIiifCreator
             return;
         }
 
+        // Mirror.
+        switch ($args['mirror']['feature']) {
+            case 'mirror':
+            case 'horizontal':
+                $result = imageflip($destinationGD, IMG_FLIP_HORIZONTAL);
+                if ($result === false) {
+                    imagedestroy($sourceGD);
+                    imagedestroy($destinationGD);
+                    return;
+                }
+                break;
+
+            case 'vertical':
+                $result = imageflip($destinationGD, IMG_FLIP_VERTICAL);
+                if ($result === false) {
+                    imagedestroy($sourceGD);
+                    imagedestroy($destinationGD);
+                    return;
+                }
+                break;
+
+            case 'both':
+                $result = imageflip($destinationGD, IMG_FLIP_BOTH);
+                if ($result === false) {
+                    imagedestroy($sourceGD);
+                    imagedestroy($destinationGD);
+                    return;
+                }
+                break;
+
+            case 'default':
+                // Nothing to do.
+                break;
+
+            default:
+                imagedestroy($sourceGD);
+                imagedestroy($destinationGD);
+                return;
+        }
+
         // Rotation.
         switch ($args['rotation']['feature']) {
             case 'noRotation':
@@ -146,10 +186,7 @@ class GD extends AbstractIiifCreator
                 switch ($args['rotation']['degrees']) {
                     case 90:
                     case 270:
-                        $i = $destinationWidth;
-                        $destinationWidth = $destinationHeight;
-                        $destinationHeight = $i;
-                        // GD uses anticlockwise rotation.
+                        // GD uses counterclockwise rotation.
                         $degrees = $args['rotation']['degrees'] == 90 ? 270 : 90;
                         // Continues below.
                     case 180:
@@ -168,7 +205,21 @@ class GD extends AbstractIiifCreator
                 break;
 
             case 'rotationArbitrary':
-                // Currently not managed.
+                // GD uses counterclockwise rotation.
+                $degrees = abs(360 - $args['rotation']['degrees']);
+                // Keep the transparency if possible.
+                $transparency = imagecolorallocatealpha($destinationGD , 0, 0, 0, 127);
+                imagefill($destinationGD, 0, 0, $transparency);
+                $destinationGDrotated = imagerotate( $destinationGD, $degrees, $transparency);
+                imagedestroy($destinationGD);
+                if ($destinationGDrotated === false) {
+                    imagedestroy($sourceGD);
+                    return;
+                }
+                imagealphablending($destinationGDrotated, true);
+                imagesavealpha($destinationGDrotated, true);
+                $destinationGD = &$destinationGDrotated;
+                break;
 
             default:
                 imagedestroy($sourceGD);

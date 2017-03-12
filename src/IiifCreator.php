@@ -34,10 +34,8 @@ use Zend\Log\LoggerAwareInterface;
 use Zend\Log\LoggerAwareTrait;
 use Zend\I18n\Translator\TranslatorAwareInterface;
 use Zend\I18n\Translator\TranslatorAwareTrait;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
 use Omeka\Settings\Settings;
-use Omeka\Service\Cli;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
