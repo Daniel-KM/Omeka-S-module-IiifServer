@@ -1,8 +1,6 @@
 <?php
 namespace Zoomify;
 
-use \Imagick;
-
 /**
  * Copyright (C) 2005  Adam Smith  asmith@agile-software.com
  * Copyright (C) Wes Wright [http://greengaloshes.cc]
@@ -36,8 +34,22 @@ use \Imagick;
  * @todo Use functions allowing to create multiple tiles in one time.
  */
 
- class ZoomifyImagick extends Zoomify
+class ZoomifyImageMagick extends Zoomify
 {
+
+    /**
+     * The path to command line ImageMagick convert when the processor is "cli".
+     *
+     * @var string
+     */
+    protected $convertPath;
+
+    /**
+     * The strategy to use by php to process a command ("exec" or "proc_open").
+     *
+     * @var string
+     */
+    protected $executeStrategy;
 
     /**
      * Constructor.
@@ -90,11 +102,12 @@ use \Imagick;
             $saveFilename = $root . '-' . $tier . '-' . $row . '.' . $ext;
             $width = $this->_originalWidth;
             $height = abs($lr_y - $ul_y);
-            $imageRow = new Imagick();
-            $imageRow->readImage($this->_imageFilename);
-            $imageRow->cropImage($width, $height, 0, $ul_y);
-            $imageRow->writeImage($saveFilename);
-            $imageRow->destroy();
+            $crop = array();
+            $crop['width'] = $width;
+            $crop['height'] = $height;
+            $crop['x'] = 0;
+            $crop['y'] = $ul_y;
+            $result = $this->imageResizeCrop($this->_imageFilename, $saveFilename, array(), $crop);
 
             $this->processRowImage($tier, $row);
             ++$row;
@@ -115,16 +128,17 @@ use \Imagick;
         list($root, $ext) = $this->getRootAndDotExtension($this->_imageFilename);
 
         $imageRow = null;
+        $imageRowSize = array();
 
         // Create row for the current tier.
         // First tier.
         if ($tier == count($this->_scaleInfo) - 1) {
             $firstTierRowFile = $root . '-' . $tier . '-' . $row . '.' . $ext;
             if (is_file($firstTierRowFile)) {
-                $imageRow = new Imagick();
-                $imageRow->readImage($firstTierRowFile);
-                $imageRow->setImageFormat($this->_tileExt);
-                $imageRow->setImageCompressionQuality($this->tileQuality);
+                $imageRow = ' -format ' . $this->_tileExt;
+                $imageRow .= ' -quality ' . $this->tileQuality;
+                $imageRow .= " $firstTierRowFile";
+                list($imageRowSize['width'], $imageRowSize['height']) = getimagesize($firstTierRowFile);
             }
         }
 
@@ -134,10 +148,12 @@ use \Imagick;
         // TODO Use an automagic tiling and check if it's quicker.
         else {
             // Create an empty file in case where there are no first row file.
-            $imageRow = new Imagick();
-            $imageRow->newImage($tierWidth, $this->tileSize, 'none', $this->_tileExt);
-            $imageRow->setImageFormat($this->_tileExt);
-            $imageRow->setImageCompressionQuality($this->tileQuality);
+            $imageRow = ' -format ' . $this->_tileExt;
+            $imageRow .= ' -quality ' . $this->tileQuality;
+            $imageRow .= ' -size ' . escapeshellarg(sprintf('%dx%d', $tierWidth, $this->tileSize));
+            $imageRowSize = array();
+            $imageRowSize['width'] = $tierWidth;
+            $imageRowSize['height'] = $this->tileSize;
 
             $t = $tier + 1;
             $r = $row * 2;
@@ -146,16 +162,16 @@ use \Imagick;
             $firstRowWidth = 0;
             $firstRowHeight = 0;
 
+            $isThereFirstRow = is_file($firstRowFile);
+
             if (is_file($firstRowFile)) {
                 // Take all the existing first row image and resize it to tier
                 // width and image row half height.
-                $firstRowImage = new Imagick();
-                $firstRowImage->readImage($firstRowFile);
-                $firstRowWidth = $firstRowImage->getImageWidth();
-                $firstRowHeight = $firstRowImage->getImageHeight();
-                $firstRowImage->resizeImage($tierWidth, $firstRowHeight, Imagick::FILTER_LANCZOS, 1, false);
-                $imageRow->compositeImage($firstRowImage, \Imagick::COMPOSITE_OVER, 0, 0);
-                $firstRowImage->destroy();
+                list($firstRowWidth, $firstRowHeight) = getimagesize($firstRowFile);
+                $imageRow .= ' \( '
+                    . $firstRowFile
+                    . ' -resize ' . escapeshellarg(sprintf('%dx%d!', $tierWidth, $firstRowHeight))
+                    . ' \)';
                 // unlink($firstRowFile);
             }
 
@@ -171,13 +187,12 @@ use \Imagick;
                 // copied in the bottom of imageRow, then the second row file is
                 // deleted.
                 $imageRowHalfHeight = floor($this->tileSize / 2);
-                $secondRowImage = new Imagick();
-                $secondRowImage->readImage($secondRowFile);
-                $secondRowWidth = $secondRowImage->getImageWidth();
-                $secondRowHeight = $secondRowImage->getImageHeight();
-                $secondRowImage->resizeImage($tierWidth, $secondRowHeight, Imagick::FILTER_LANCZOS, 1, false);
-                $imageRow->compositeImage($secondRowImage, \Imagick::COMPOSITE_OVER, 0, $imageRowHalfHeight);
-                $secondRowImage->destroy();
+                list($secondRowWidth, $secondRowHeight) = getimagesize($secondRowFile);
+                $imageRow .= ' \( '
+                    . $secondRowFile
+                    . ' -resize ' . escapeshellarg(sprintf('%dx%d!', $tierWidth, $secondRowHeight))
+                    . ' \)'
+                    . ' -append';
                 // unlink($secondRowFile);
             }
 
@@ -186,7 +201,11 @@ use \Imagick;
             $tileHeight = $this->tileSize * 2;
             $tierHeightCheck = $firstRowHeight + $secondRowHeight;
             if ($tierHeightCheck < $tileHeight) {
-                $imageRow->cropImage($tierWidth, $tierHeightCheck, 0, 0);
+                $imageRow .= ' -crop ' . escapeshellarg(sprintf('%dx%d', $tierWidth, $tierHeightCheck));
+            }
+
+            if (!$isThereFirstRow) {
+                $imageRow = null;
             }
         }
 
@@ -194,8 +213,8 @@ use \Imagick;
         if ($imageRow) {
             // Cycle through columns, then rows.
             $column = 0;
-            $imageWidth = $imageRow->getImageWidth();
-            $imageHeight = $imageRow->getImageHeight();
+            $imageWidth = $imageRowSize['width'];
+            $imageHeight = isset($tierHeightCheck) ? $tierHeightCheck : $imageRowSize['height'];
             $ul_x = 0;
             $ul_y = 0;
             $lr_x = 0;
@@ -213,13 +232,14 @@ use \Imagick;
                 $height = abs($lr_y - $ul_y);
 
                 $tileFilename = $this->getFileReference($tier, $column, $row);
+                $command = $imageRow
+                    . ' -page 0x0+0+0 '
+                    . ' -crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $width, $height, $ul_x, $ul_y));
 
-                $tileImage = clone $imageRow;
-                // Clean the canvas.
-                $tileImage->setImagePage(0, 0, 0, 0);
-                $tileImage->cropImage($width, $height, $ul_x, $ul_y);
-                $tileImage->writeImage($tileFilename);
-                $tileImage->destroy();
+                $command = $this->convertPath
+                    . ' ' . $command
+                    . ' ' . escapeshellarg($tileFilename);
+                $result = $this->execute($command);
                 $this->_numberOfTiles++;
 
                 // Set upper left cropping point.
@@ -244,14 +264,19 @@ use \Imagick;
                 //previous tier, if it exists, is removed.
                 $rowFilename = $root . '-' . $tier . '-' . $row . '.' . $ext;
 
-                $tempImage = clone $imageRow;
-                $tempImage->resizeImage($halfWidth, $halfHeight, Imagick::FILTER_LANCZOS, 1, false);
-                $tempImage->writeImage($rowFilename);
-                $tempImage->destroy();
+                $command = $imageRow;
+                $command .= ' +repage -flatten'
+                    . ' -resize ' . escapeshellarg(sprintf('%sx%s!', $halfWidth, $halfHeight));
+                $command = $this->convertPath
+                    . ' ' . $command
+                    . ' ' . escapeshellarg($rowFilename);
+                $result = $this->execute($command);
             }
 
-            // http://greengaloshes.cc/2007/05/zoomifyimage-ported-to-php/#comment-451
-            $imageRow->destroy();
+            if ($isThereRow) {
+//                 @unlink($firstRowFile);
+//                 @unlink($secondRowFile);
+            }
 
             // Process next tiers via a recursive call.
             if ($tier > 0) {
@@ -263,5 +288,149 @@ use \Imagick;
                 }
             }
         }
+    }
+
+    /**
+     * Resize and crop an image via convert.
+     *
+     * @internal For resize, the size is forced (option "!").
+     *
+     * @param string $source
+     * @param string $destination
+     * @param array $resize Array with width and height.
+     * @param array $crop Array with width, height, upper left x and y.
+     * @return boolean
+     */
+    protected function imageResizeCrop($source, $destination, $resize = array(), $crop = array())
+    {
+        $params = array();
+        // Clean the canvas.
+        $params[] = '+repage';
+        $params[] = '-flatten';
+        $params[] = '-alpha remove';
+        if ($resize) {
+            $params[] = '-thumbnail ' . escapeshellarg(sprintf('%sx%s!', $resize['width'], $resize['height']));
+        }
+        if ($crop) {
+            $params[] = '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $crop['width'], $crop['height'], $crop['x'], $crop['y']));
+        }
+        $params[] = '-quality ' . $this->tileQuality;
+
+        $result = $this->convert($source, $destination, $params);
+        return $result;
+    }
+
+    /**
+     * Helper to process a convert command.
+     *
+     * @param string $source
+     * @param string $destination
+     * @param array $params
+     * @return boolean
+     */
+    protected function convert($source, $destination, $params)
+    {
+        $command = sprintf(
+            '%s %s %s %s',
+            $this->convertPath,
+            escapeshellarg($source . '[0]'),
+            implode(' ', $params),
+            escapeshellarg($destination)
+        );
+        $result = $this->execute($command);
+        return $result !== false;
+    }
+
+    /**
+     * Helper to get the command line to convert.
+     *
+     * @return string|null
+     */
+    public function getConvertPath()
+    {
+        $command = 'whereis -b convert';
+        $result = $this->execute($command);
+        if (empty($result)) {
+            return;
+        }
+        strtok($result, ' ');
+        return strtok(' ');
+    }
+
+    /**
+     * Execute a command.
+     *
+     * Expects arguments to be properly escaped.
+     *
+     * @see Omeka\Service\Cli
+     *
+     * @param string $command An executable command
+     * @return string|false The command's standard output or false on error
+     */
+    protected function execute($command)
+    {
+        switch ($this->executeStrategy) {
+            case 'proc_open':
+                $output = $this->procOpen($command);
+                break;
+            case 'exec':
+            default:
+                $output = $this->exec($command);
+                break;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Execute command using PHP's exec function.
+     *
+     * @see http://php.net/manual/en/function.exec.php
+     * @param string $command
+     * @return string|false
+     */
+    protected function exec($command)
+    {
+        exec($command, $output, $exitCode);
+        if (0 !== $exitCode) {
+            return false;
+        }
+        return implode(PHP_EOL, $output);
+    }
+
+    /**
+     * Execute command using PHP's proc_open function.
+     *
+     * For servers that allow proc_open. Logs standard error.
+     *
+     * @see http://php.net/manual/en/function.proc-open.php
+     * @param string $command
+     * @return string|false
+     */
+    protected static function procOpen($command)
+    {
+        // Using proc_open() instead of exec() solves a problem where exec('convert')
+        // fails with a "Permission Denied" error because the current working
+        // directory cannot be set properly via exec().  Note that exec() works
+        // fine when executing in the web environment but fails in CLI.
+        $descriptorSpec = array(
+            0 => array("pipe", "r"), //STDIN
+            1 => array("pipe", "w"), //STDOUT
+            2 => array("pipe", "w"), //STDERR
+        );
+        $proc = proc_open($command, $descriptorSpec, $pipes, getcwd());
+        if (!is_resource($proc)) {
+            return false;
+        }
+        $output = stream_get_contents($pipes[1]);
+        $errors = stream_get_contents($pipes[2]);
+        foreach ($pipes as $pipe) {
+            fclose($pipe);
+        }
+        $exitCode = proc_close($proc);
+        if (0 !== $exitCode) {
+            return false;
+        }
+        return trim($output);
     }
 }

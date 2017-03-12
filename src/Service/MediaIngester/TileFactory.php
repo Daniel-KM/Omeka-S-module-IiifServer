@@ -28,13 +28,7 @@ class TileFactory implements FactoryInterface
         $params['format'] = $settings->get('iiifserver_image_tile_format');
 
         $processor = $settings->get('iiifserver_image_creator');
-        $processors = [
-            'Auto' => '',
-            'Imagick' => 'imagick',
-            'GD' => 'gd',
-            'ImageMagick' => 'cli',
-        ];
-        $params['processor'] = isset($processors[$processor]) ? $processors[$processor] : '';
+        $params['processor'] = $processor == 'Auto' ? '' : $processor;
 
         $cli = $services->get('Omeka\Cli');
         $config = $services->get('Config');

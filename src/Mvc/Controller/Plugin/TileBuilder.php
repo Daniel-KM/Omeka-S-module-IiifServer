@@ -4,6 +4,7 @@ namespace IiifServer\Mvc\Controller\Plugin;
 use Omeka\Service\Exception\InvalidArgumentException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Zoomify\Zoomify;
 
 class TileBuilder extends AbstractPlugin
 {
@@ -37,6 +38,8 @@ class TileBuilder extends AbstractPlugin
         if (empty($destination)) {
             throw new InvalidArgumentException('Destination is empty.'); // @translate
         }
+
+        $params['destinationRemove'] = true;
 
         $format = $params['format'];
         unset($params['format']);
@@ -72,10 +75,8 @@ class TileBuilder extends AbstractPlugin
             . DIRECTORY_SEPARATOR . 'Deepzoom'
             . DIRECTORY_SEPARATOR . 'Deepzoom.php';
 
-        $config = $params;
-        $config['destinationRemove'] = true;
-        $deepzoom = new \Deepzoom\Deepzoom($config);
-        $deepzoom->process($source, $destination);
+        $processor = new \Deepzoom\Deepzoom($params);
+        $processor->process($source, $destination);
     }
 
     /**
@@ -88,30 +89,12 @@ class TileBuilder extends AbstractPlugin
      */
     protected function zoomify($source, $destination, $params)
     {
-        $processor = $params['processor'];
-        if (!empty($processor) && !in_array($processor, ['imagick', 'gd'])) {
-            // Check if another processor is available before throwing an error.
-            if (extension_loaded('imagick')) {
-                $processor = 'imagick';
-            } elseif (extension_loaded('gd')) {
-                $processor = 'gd';
-            } else {
-                throw new InvalidArgumentException(
-                    'The Zoomify format requires the processors "Imagick" or "GD".'); // @translate
-            }
-        }
-
         require_once dirname(dirname(dirname(__DIR__)))
             . DIRECTORY_SEPARATOR . 'libraries'
             . DIRECTORY_SEPARATOR . 'Zoomify'
             . DIRECTORY_SEPARATOR . 'Zoomify.php';
 
-        $zoomify = new \Zoomify();
-        $zoomify->processor = $processor;
-        $zoomify->updatePerms = false;
-        $zoomify->destinationRemove = true;
-        $zoomify->convertPath = $params['convertPath'];
-        $zoomify->executeStrategy = $params['executeStrategy'];
-        $zoomify->zoomifyImage($source, $destination);
+        $processor = new \Zoomify\Zoomify($params);
+        $processor->process($source, $destination);
     }
 }

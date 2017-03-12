@@ -260,7 +260,7 @@ class ConfigForm extends Form
         if (extension_loaded('imagick')) {
             $processors['Imagick'] = 'Imagick (php extension)'; // @translate
         }
-        $processors['ImageMagick'] = 'ImageMagick (command line, not recommended)'; // @translate
+        $processors['ImageMagick'] = 'ImageMagick (command line)'; // @translate
         return $processors;
     }
 }

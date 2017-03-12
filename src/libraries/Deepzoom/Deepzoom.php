@@ -122,34 +122,34 @@ class Deepzoom
         // Automatic.
         if (empty($this->processor)) {
             if (extension_loaded('imagick')) {
-                $this->processor = 'imagick';
+                $this->processor = 'Imagick';
             } elseif (extension_loaded('gd')) {
-                $this->processor = 'gd';
+                $this->processor = 'GD';
             } elseif (!empty($this->convertPath)) {
-                $this->processor = 'cli';
+                $this->processor = 'ImageMagick';
             } else {
                 $this->convertPath = $this->getConvertPath();
                 if (!empty($this->convertPath)) {
-                    $this->processor = 'cli';
+                    $this->processor = 'ImageMagick';
                 } else {
                     throw new \Exception ('Convert path is not available.');
                 }
             }
         }
         // Imagick.
-        elseif ($this->processor == 'imagick') {
+        elseif ($this->processor == 'Imagick') {
             if (!extension_loaded('imagick')) {
                 throw new \Exception ('Imagick library is not available.');
             }
         }
         // GD.
-        elseif ($this->processor == 'gd') {
+        elseif ($this->processor == 'GD') {
             if (!extension_loaded('gd')) {
                 throw new \Exception ('GD library is not available.');
             }
         }
         // CLI.
-        elseif ($this->processor == 'cli') {
+        elseif ($this->processor == 'ImageMagick') {
             if (empty($this->convertPath)) {
                 $this->convertPath = $this->getConvertPath();
                 if (empty($this->convertPath)) {
@@ -257,17 +257,17 @@ class Deepzoom
     protected function processImage()
     {
         switch ($this->processor) {
-            case 'imagick':
+            case 'Imagick':
                 $image = new \Imagick();
                 $image->readImage($this->filepath);
                 $image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
                 $image->stripImage();
                 break;
-            case 'gd':
+            case 'GD':
                 $image = $this->openImage();
                 $this->data['image'] = $image;
                 break;
-            case 'cli':
+            case 'ImageMagick':
                 $image = $this->filepath;
                 break;
         }
@@ -286,13 +286,13 @@ class Deepzoom
         }
 
         switch ($this->processor) {
-            case 'imagick':
+            case 'Imagick':
                 $image->destroy();
                 break;
-            case 'gd':
+            case 'GD':
                 imagedestroy($image);
                 break;
-            case 'cli':
+            case 'ImageMagick':
                 // Nothing to do.
                 break;
         }
@@ -364,13 +364,13 @@ class Deepzoom
     {
         // Create new image at scaled dimensions.
         switch ($this->processor) {
-            case 'imagick':
+            case 'Imagick':
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, false);
                 break;
-            case 'gd':
+            case 'GD':
                 $imageLevel = $this->imageResize($width, $height);
                 break;
-            case 'cli':
+            case 'ImageMagick':
                 $resize = array();
                 $resize['width'] = $width;
                 $resize['height'] = $height;
@@ -389,7 +389,7 @@ class Deepzoom
                 $bounds = $this->getTileBounds($level, $column, $row, $width, $height);
 
                 switch ($this->processor) {
-                    case 'imagick':
+                    case 'Imagick':
                         $tileImage = clone $image;
                         $tileImage->setImagePage(0, 0, 0, 0);
                         $tileImage->cropImage($bounds['width'], $bounds['height'], $bounds['x'], $bounds['y']);
@@ -401,7 +401,7 @@ class Deepzoom
                         $tileImage->writeImage($filepath);
                         $tileImage->destroy();
                         break;
-                    case 'gd':
+                    case 'GD':
                         $ul_x = $bounds['x'];
                         $ul_y = $bounds['y'];
                         $lr_x = $bounds['x'] + $bounds['width'];
@@ -411,7 +411,7 @@ class Deepzoom
                         imagejpeg($tileImage, $filepath, $this->tileQuality);
                         imagedestroy($tileImage);
                         break;
-                    case 'cli':
+                    case 'ImageMagick':
                         $this->imageResizeCrop($image, $filepath, $resize, $bounds);
                         break;
                 }
@@ -419,13 +419,13 @@ class Deepzoom
         }
 
         switch ($this->processor) {
-            case 'imagick':
+            case 'Imagick':
                 // Nothing to do.
                 break;
-            case 'gd':
+            case 'GD':
                 imagedestroy($imageLevel);
                 break;
-            case 'cli':
+            case 'ImageMagick':
                 // Nothing to do.
                 break;
         }
@@ -591,31 +591,37 @@ class Deepzoom
     /**
      * Resize and crop an image via convert.
      *
+     * @internal For resize, the size is forced (option "!").
+     *
      * @param string $source
      * @param string $destination
      * @param array $resize
      * @param array $crop
-     * @return void
+     * @return boolean
      */
-    protected function imageResizeCrop($source, $destination, $resize, $crop)
+    protected function imageResizeCrop($source, $destination, $resize = array(), $crop = array())
     {
-        $args = array(
-            '+repage',
-            '-alpha remove',
-            '-thumbnail ' . escapeshellarg(sprintf('%sx%s', $resize['width'], $resize['height'])),
-            '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $crop['width'], $crop['height'], $crop['x'], $crop['y'])),
-            '-quality ' . $this->tileQuality,
-        );
+        $params = array();
+        $params[] = '+repage';
+        $params[] = '-alpha remove';
+        if ($resize) {
+            $params[] = '-thumbnail ' . escapeshellarg(sprintf('%sx%s!', $resize['width'], $resize['height']));
+        }
+        if ($crop) {
+            $params[] = '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $crop['width'], $crop['height'], $crop['x'], $crop['y']));
+        }
+        $params[] = '-quality ' . $this->tileQuality;
 
         $command = sprintf(
             '%s %s %s %s',
             $this->convertPath,
             escapeshellarg($source . '[0]'),
-            implode(' ', $args),
+            implode(' ', $params),
             escapeshellarg($destination)
         );
 
-        $this->execute($command);
+        $result = $this->execute($command);
+        return $result !== false;
     }
 
     /**

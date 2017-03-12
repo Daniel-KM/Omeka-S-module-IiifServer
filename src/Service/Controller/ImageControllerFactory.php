@@ -4,6 +4,8 @@ namespace IiifServer\Service\Controller;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use IiifServer\Controller\ImageController;
+use Omeka\Service\Cli;
+use Omeka\File\Thumbnailer\ImageMagickThumbnailer;
 
 class ImageControllerFactory implements FactoryInterface
 {
@@ -16,6 +18,7 @@ class ImageControllerFactory implements FactoryInterface
         $cli = $services->get('Omeka\Cli');
         $config = $services->get('Config');
         $config['file_manager']['thumbnail_options']['imagemagick_dir'];
+        $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
 
         $commandLineArgs = [];
         $commandLineArgs['cli'] = $cli;
