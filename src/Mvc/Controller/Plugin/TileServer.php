@@ -175,7 +175,7 @@ class TileServer extends AbstractPlugin
             'fileurl' => $imageUrl,
             'filepath' => $imagePath,
             'derivativeType' => 'tile',
-            'mime_type' => 'image/jpeg',
+            'media_type' => 'image/jpeg',
             'width' => $tileWidth,
             'height' => $tileHeight,
             'overlap' => $tileInfo['overlap'],

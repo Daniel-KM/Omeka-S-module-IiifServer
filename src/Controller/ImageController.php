@@ -178,11 +178,11 @@ class ImageController extends AbstractActionController
                         || $transform['mirror']['feature'] != 'default'
                         || $transform['rotation']['feature'] != 'noRotation'
                         || $transform['quality']['feature'] != 'default'
-                        || $transform['format']['feature'] != $pretiled['mime_type']
+                        || $transform['format']['feature'] != $pretiled['media_type']
                     ) {
                     $args = $transform;
                     $args['source']['filepath'] = $pretiled['filepath'];
-                    $args['source']['mime_type'] = $pretiled['mime_type'];
+                    $args['source']['media_type'] = $pretiled['media_type'];
                     $args['source']['width'] = $pretiled['width'];
                     $args['source']['height'] = $pretiled['height'];
                     $args['region']['feature'] = 'full';
@@ -213,11 +213,11 @@ class ImageController extends AbstractActionController
                             || $transform['mirror']['feature'] != 'default'
                             || $transform['rotation']['feature'] != 'noRotation'
                             || $transform['quality']['feature'] != 'default'
-                            || $transform['format']['feature'] != $pretiled['mime_type']
+                            || $transform['format']['feature'] != $pretiled['media_type']
                         ) {
                         $args = $transform;
                         $args['source']['filepath'] = $pretiled['filepath'];
-                        $args['source']['mime_type'] = $pretiled['mime_type'];
+                        $args['source']['media_type'] = $pretiled['media_type'];
                         $args['source']['width'] = $pretiled['width'];
                         $args['source']['height'] = $pretiled['height'];
                         // The tile server returns always the true tile, so crop
@@ -341,7 +341,7 @@ class ImageController extends AbstractActionController
         $transform = array();
 
         $transform['source']['filepath'] = $this->_getImagePath($media, 'original');
-        $transform['source']['mime_type'] = $media->mediaType();
+        $transform['source']['media_type'] = $media->mediaType();
 
         list($sourceWidth, $sourceHeight) = array_values($this->_getImageSize($media, 'original'));
         $transform['source']['width'] = $sourceWidth;
@@ -503,7 +503,7 @@ class ImageController extends AbstractActionController
                                 // TODO Check the format?
                                 if ($imageType != 'original') {
                                     $transform['source']['filepath'] = $filepath;
-                                    $transform['source']['mime_type'] = 'image/jpeg';
+                                    $transform['source']['media_type'] = 'image/jpeg';
                                     $transform['source']['width'] = $testWidth;
                                     $transform['source']['height'] = $testHeight;
                                 }
@@ -592,7 +592,7 @@ class ImageController extends AbstractActionController
 
         // Determine the format.
         // The regex in route checks it.
-        $mimeTypes = array(
+        $mediaTypes = array(
             'jpg' => 'image/jpeg',
             'png' => 'image/png',
             'tif' => 'image/tiff',
@@ -601,7 +601,7 @@ class ImageController extends AbstractActionController
             'jp2' => 'image/jp2',
             'webp' => 'image/webp',
         );
-        $transform['format']['feature'] = $mimeTypes[$format];
+        $transform['format']['feature'] = $mediaTypes[$format];
 
         return $transform;
     }
@@ -677,7 +677,7 @@ class ImageController extends AbstractActionController
             return array(
                 'filepath' => $derivativePath,
                 'derivativeType' => $derivativeType,
-                'mime_type' => 'image/jpeg',
+                'media_type' => 'image/jpeg',
                 'width' => $derivativeWidth,
                 'height' => $derivativeHeight,
             );

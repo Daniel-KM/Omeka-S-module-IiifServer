@@ -739,7 +739,7 @@ class IiifManifest extends AbstractHelper
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:Sound';
         // The format is not be set here (see rendering).
-        // $mediaSequenceElement['format'] = $media->mime_type;
+        // $mediaSequenceElement['format'] = $media->mediaType();
         // TODO If no file metadata, then item ones.
         // TODO Currently, the main title and metadata are used,
         // because in Omeka, such a file is normally the only
@@ -800,7 +800,7 @@ class IiifManifest extends AbstractHelper
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:MovingImage';
         // The format is not be set here (see rendering).
-        // $mediaSequenceElement['format'] = $media->mime_type;
+        // $mediaSequenceElement['format'] = $media->mediaType();
         // TODO If no file metadata, then item ones.
         // TODO Currently, the main title and metadata are used,
         // because in Omeka, such a file is normally the only
