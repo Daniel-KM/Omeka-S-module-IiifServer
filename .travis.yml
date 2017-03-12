@@ -12,8 +12,8 @@ cache:
     - $HOME/.composer/cache
 
 before_install:
- - nvm install node
- - nvm use node
+  - nvm install node
+  - nvm use node
 
 install:
   - cd ../..
@@ -22,14 +22,15 @@ install:
   - cd omeka-s
   - npm install
   - ./node_modules/gulp/bin/gulp.js init
+  - cd modules/IiifServer/
+  - composer install
+  - cd ../..
 
 before_script:
   - mysql -e "create database IF NOT EXISTS omeka_test;" -uroot
   - sed -i 's/^host.*/host = "localhost"/' application/test/config/database.ini
   - sed -i 's/^user.*/user = "root"/' application/test/config/database.ini
   - sed -i 's/^dbname.*/dbname = "omeka_test"/' application/test/config/database.ini
-  - cd modules/IiifServer
-  - composer install
-  - cd test
+  - cd modules/IiifServer/test
 
 script: phpunit

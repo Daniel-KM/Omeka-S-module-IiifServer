@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit bootstrap="./bootstrap.php" colors="true" backupGlobals="false">
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
+    colors="true"
+    backupGlobals="false"
+    bootstrap="./bootstrap.php"
+    >
     <testsuites>
-        <testsuite name="IiifServer">
+        <testsuite name="IiifServerTest">
             <directory>./IiifServerTest</directory>
         </testsuite>
     </testsuites>

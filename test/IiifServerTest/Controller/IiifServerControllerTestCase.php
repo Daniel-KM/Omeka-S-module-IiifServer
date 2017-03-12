@@ -7,6 +7,7 @@ use OmekaTestHelper\Controller\OmekaControllerTestCase;
 abstract class IiifServerControllerTestCase extends OmekaControllerTestCase
 {
     protected $item;
+    protected $itemSet;
 
     public function setUp()
     {
@@ -14,6 +15,9 @@ abstract class IiifServerControllerTestCase extends OmekaControllerTestCase
 
         $response = $this->api()->create('items');
         $this->item = $response->getContent();
+
+        $response = $this->api()->create('item_sets');
+        $this->itemSet = $response->getContent();
     }
 
     public function tearDown()
