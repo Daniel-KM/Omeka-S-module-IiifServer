@@ -679,7 +679,10 @@ class ImageController extends AbstractActionController
      */
     protected function _usePreTiled(MediaRepresentation $media, $transform)
     {
-        return $this->tileServer($media, $transform);
+        $tileInfo = $this->tileInfo($media);
+        if ($tileInfo) {
+            return $this->tileServer($tileInfo, $transform);
+        }
     }
 
     /**

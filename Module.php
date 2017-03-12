@@ -56,7 +56,7 @@ class Module extends AbstractModule
         'iiifserver_image_creator' => 'Auto',
         'iiifserver_image_max_size' => 10000000,
         'iiifserver_image_tile_dir' => 'tile',
-        'iiifserver_image_tile_format' => 'deepzoom',
+        'iiifserver_image_tile_type' => 'deepzoom',
     );
 
     public function getConfig()
@@ -192,8 +192,8 @@ class Module extends AbstractModule
             $settings->set('iiifserver_image_tile_dir',
                 $this->settings['iiifserver_image_tile_dir']);
 
-            $settings->set('iiifserver_image_tile_format',
-                $this->settings['iiifserver_image_tile_format']);
+            $settings->set('iiifserver_image_tile_type',
+                $this->settings['iiifserver_image_tile_type']);
         }
     }
 

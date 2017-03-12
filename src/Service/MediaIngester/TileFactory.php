@@ -25,7 +25,7 @@ class TileFactory implements FactoryInterface
 
         $params = [];
         $params['tile_dir'] = $settings->get('iiifserver_image_tile_dir');
-        $params['format'] = $settings->get('iiifserver_image_tile_format');
+        $params['tile_type'] = $settings->get('iiifserver_image_tile_type');
 
         $processor = $settings->get('iiifserver_image_creator');
         $params['processor'] = $processor == 'Auto' ? '' : $processor;

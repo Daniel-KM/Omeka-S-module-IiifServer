@@ -29,32 +29,10 @@
 
 namespace IiifServer\Mvc\Controller\Plugin;
 
-use Omeka\Api\Representation\MediaRepresentation;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class TileServer extends AbstractPlugin
 {
-
-    /**
-     * Extension added to a folder name to store data and tiles for DeepZoom.
-     *
-     * @var string
-     */
-    const FOLDER_EXTENSION_DEEPZOOM = '_files';
-
-    /**
-     * Extension added to a folder name to store data and tiles for Zoomify.
-     *
-     * @var string
-     */
-    const FOLDER_EXTENSION_ZOOMIFY = '_zdata';
-
-    /**
-     * Base dir of tiles.
-     *
-     * @var string
-     */
-    protected $tileBaseDir;
 
     /**
      * Base url of tiles.
@@ -76,14 +54,13 @@ class TileServer extends AbstractPlugin
      * a fullsize image that is larger the Omeka derivatives. In that case,
      * multiple tiles should be joined.
      *
-     * @param MediaRepresentation $media
+     * @param array $tileInfo
      * @param array $transform
      * @return array|null
      */
-    public function __invoke(MediaRepresentation $media, array $transform)
+    public function __invoke(array $tileInfo, array $transform)
     {
-        // Quick check for possible issue when used outside of the Iiif Server.
-        if (strpos($media->mediaType(), 'image/') !== 0) {
+        if (empty($tileInfo)) {
             return;
         }
 
@@ -94,140 +71,38 @@ class TileServer extends AbstractPlugin
             return;
         }
 
-        $services = $media->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        $tileDir = $settings->get('iiifserver_image_tile_dir');
-        $this->tileBaseDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $tileDir;
-
-        $zoomed = $this->getZoomedImage($media->storageId());
-        if (empty($zoomed)) {
-            return;
-        }
-
-        $viewHelpers = $services->get('ViewHelperManager');
+        $controller = $this->getController();
+        $settings = $controller->settings();
+        $viewHelpers = $controller->viewHelpers();
         $serverUrl = $viewHelpers->get('ServerUrl');
         $basePath = $viewHelpers->get('BasePath');
+        $tileDir = $settings->get('iiifserver_image_tile_dir');
 
         // A full url avoids some complexity when Omeka is not the root of the
         // server.
         $this->tileBaseUrl = $serverUrl() . $basePath('files' . '/' . $tileDir);
 
-        switch ($zoomed['format']) {
+        switch ($tileInfo['tile_type']) {
             case 'deepzoom':
-                $tile = $this->serveTilesDeepzoom($zoomed, $transform);
+                $tile = $this->serveTilesDeepzoom($tileInfo, $transform);
                 return $tile;
             case 'zoomify':
-                $tile = $this->serveTilesZoomify($zoomed, $transform);
+                $tile = $this->serveTilesZoomify($tileInfo, $transform);
                 return $tile;
         }
     }
 
     /**
-     * Explode a filepath into a base and an extension, i.e. "/path/file.ext" to
-     * "/path/file" and "ext".
-     *
-     * @param string $filepath
-     * @return array
-     */
-    protected function getFilebaseAndExtension($filepath)
-    {
-        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-        $filebase = $extension ? substr($filepath, 0, strrpos($filepath, '.')) : $filepath;
-        return [$filebase, $extension];
-    }
-
-    /**
-     * Check if an image is zoomed and return its main data.
-     *
-     * @internal Path to the storage of tiles:
-     * - For Omeka Semantic (DeepZoom): files/tile/storagehash_files
-     *   with metadata "storagehash.js" or "storagehash.dzi" and no subdir.
-     * - For Omeka Classic (Zoomify): files/zoom_tiles/storagehash_zdata
-     *   and, inside it, metadata "ImageProperties.xml" and subdirs "TileGroup{x}".
-     *
-     * @param string $basename Filename without the extension (storage id).
-     * @return array|null
-     */
-    protected function getZoomedImage($basename)
-    {
-        $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.dzi';
-        if (file_exists($basepath)) {
-            return $this->getDataDzi($basepath);
-        }
-
-        $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.js';
-        if (file_exists($basepath)) {
-            return $this->getDataJsonp($basepath);
-        }
-
-        $basepath = $this->tileBaseDir
-            . DIRECTORY_SEPARATOR . $basename . self::FOLDER_EXTENSION_ZOOMIFY
-            . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
-        if (file_exists($basepath)) {
-            $zoomed = $this->getDataZoomify($basepath);
-            $zoomed['baseurl'] = '/' . $basename . self::FOLDER_EXTENSION_ZOOMIFY;
-            return $zoomed;
-        }
-    }
-
-    /**
-     * Get rendering data from a dzi format.
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataDzi($path)
-    {
-    }
-
-    /**
-     * Get rendering data from a jsonp format.
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataJsonp($path)
-    {
-    }
-
-    /**
-     * Get rendering data from a zoomify format
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataZoomify($path)
-    {
-        $properties = simplexml_load_file($path, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_PARSEHUGE);
-        if ($properties === false) {
-            return;
-        }
-        $properties = $properties->attributes();
-        $properties = reset($properties);
-
-        $zoomed = [];
-        $zoomed['path'] = $path;
-        $zoomed['format'] = 'zoomify';
-        $zoomed['size'] = (integer) $properties['TILESIZE'];
-        $zoomed['total'] = (integer) $properties['NUMTILES'];
-        $zoomed['source']['width'] = (integer) $properties['WIDTH'];
-        $zoomed['source']['height'] = (integer) $properties['HEIGHT'];
-        return $zoomed;
-    }
-
-    /**
      * Retrieve the data for a transformation.
      *
      * @internal The format of Zoomify is very different from the DeepZoom one,
      * so some checks and computs are needed.
      *
-     * @param array $zoomed
+     * @param array $tileInfo
      * @param array $transform
      * @return array|null
      */
-    protected function serveTilesDeepzoom($zoomed, $transform)
+    protected function serveTilesDeepzoom($tileInfo, $transform)
     {
     }
 
@@ -237,13 +112,13 @@ class TileServer extends AbstractPlugin
      * @internal The format of Zoomify is very different from the DeepZoom one,
      * so some checks and computs are needed.
      *
-     * @param array $zoomed
+     * @param array $tileInfo
      * @param array $transform
      * @return array|null
      */
-    protected function serveTilesZoomify($zoomed, $transform)
+    protected function serveTilesZoomify($tileInfo, $transform)
     {
-        $data = $this->getLevelAndPosition($zoomed, $transform['source'], $transform['region'], $transform['size']);
+        $data = $this->getLevelAndPosition($tileInfo, $transform['source'], $transform['region'], $transform['size']);
         if (is_null($data)) {
             return;
         }
@@ -264,8 +139,8 @@ class TileServer extends AbstractPlugin
             DIRECTORY_SEPARATOR, $tileGroup,
             DIRECTORY_SEPARATOR, $data['level'], $data['x'] , $data['y']);
 
-        $baseUrl = $this->tileBaseUrl . $zoomed['baseurl'];
-        $dirpath = dirname($zoomed['path']);
+        $baseUrl = $this->tileBaseUrl . $tileInfo['baseurl'];
+        $dirpath = dirname($tileInfo['path']);
 
         // The image url is used when there is no transformation.
         $imageUrl = $baseUrl . $relativeUrl;
@@ -287,13 +162,13 @@ class TileServer extends AbstractPlugin
     /**
      * Get the level and the position of the cell from the source and region.
      *
-     * @param array $zoomed
+     * @param array $tileInfo
      * @param array $source
      * @param array $region
      * @param array $size
      * @return array|null
      */
-    protected function getLevelAndPosition($zoomed, $source, $region, $size)
+    protected function getLevelAndPosition($tileInfo, $source, $region, $size)
     {
         // Check if the tile may be cropped.
         $isFirstColumn = $region['x'] == 0;
@@ -305,7 +180,7 @@ class TileServer extends AbstractPlugin
 
         // TODO A bigger size can be requested directly, and, in that case,
         // multiple tiles should be joined.
-        $cellSize = $zoomed['size'];
+        $cellSize = $tileInfo['size'];
 
         // Manage the base level.
         if ($isFirstCell && $isLastCell) {
@@ -392,7 +267,7 @@ class TileServer extends AbstractPlugin
             // Get the list of squale factors.
             $squaleFactors = [];
             $maxSize = max($source['width'], $source['height']);
-            $total = (integer) ceil($maxSize / $zoomed['size']);
+            $total = (integer) ceil($maxSize / $tileInfo['size']);
             $factor = 1;
             // If level is set, count is not set and useless.
             $level = isset($level) ? $level : 0;
@@ -409,14 +284,13 @@ class TileServer extends AbstractPlugin
             // Process the last cell, an exception because it may be cropped.
             if ($isLastCell) {
                 // TODO Quick check if the last cell is a standard one (not cropped)?
-
                 // Because the default size of the region lacks, it is simpler
                 // to check if an image of the zoomed file is the same using the
                 // tile size from properties, for each possible factor.
                 $reversedSqualeFactors = array_reverse($squaleFactors);
                 $isLevelFound = false;
                 foreach ($reversedSqualeFactors as $level => $reversedFactor) {
-                    $tileFactor = $reversedFactor * $zoomed['size'];
+                    $tileFactor = $reversedFactor * $tileInfo['size'];
                     $countX = (integer) ceil($source['width'] / $tileFactor);
                     $countY = (integer) ceil($source['height'] / $tileFactor);
                     $lastRegionWidth = $source['width'] - (($countX -1) * $tileFactor);

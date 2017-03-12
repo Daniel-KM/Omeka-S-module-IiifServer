@@ -41,9 +41,9 @@ class TileBuilder extends AbstractPlugin
 
         $params['destinationRemove'] = true;
 
-        $format = $params['format'];
-        unset($params['format']);
-        switch ($format) {
+        $tileType = $params['tile_type'];
+        unset($params['tile_type']);
+        switch ($tileType) {
             case 'deepzoom':
                 $this->deepzoom($source, $destination, $params);
                 break;
@@ -56,7 +56,7 @@ class TileBuilder extends AbstractPlugin
                 break;
             default:
                 throw new InvalidArgumentException(new Message(
-                    'Format "%s" is not supported by the tile builder.', $format)); // @translate
+                    'The type of tiling "%s" is not supported by the tile builder.', $tileType)); // @translate
         }
     }
 

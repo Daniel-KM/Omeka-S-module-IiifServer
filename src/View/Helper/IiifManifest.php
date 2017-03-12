@@ -36,6 +36,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\Manager as FileManager;
 use Zend\View\Helper\AbstractHelper;
 use \Exception;
+use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class IiifManifest extends AbstractHelper
 {
@@ -515,28 +516,83 @@ class IiifManifest extends AbstractHelper
         // There is only one image (parallel is not managed currently).
         $imageResource = array();
 
+        $tiles = array();
+        $tileInfo = new TileInfo();
+        $tilingData = $tileInfo($media);
+        $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
+
+        // This is a tiled image.
+        if ($iiifTileInfo) {
+            $largeSize = $this->_getImageSize($media, 'large');
+            list($widthLarge, $heightLarge) = array_values($largeSize);
+            $imageUrl = $this->view->url(
+                'iiifserver_image',
+                [
+                    'id' => $media->id(),
+                    'region' => 'full',
+                    'size' => $widthLarge . ',' . $heightLarge,
+                    'rotation' => 0,
+                    'quality' => 'default',
+                    'format' => 'jpg',
+                ],
+                ['force_canonical' => true]
+            );
+            $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
+
+            $imageResource['@id'] = $imageUrl;
+            $imageResource['@type'] = 'dctypes:Image';
+            $imageResource['format'] = $media->mediaType();
+            $imageResource['width'] = $width;
+            $imageResource['height'] = $height;
+
+            $imageUrl = $this->view->url(
+                'iiifserver_image',
+                ['id' => $media->id()],
+                ['force_canonical' => true]
+            );
+            $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
+
+            $imageResourceService = array();
+            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
+            $imageResourceService['@id'] = $imageUrl;
+            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
+            $imageResourceService['width'] = $width;
+            $imageResourceService['height'] = $height;
+
+            $tiles = array();
+            $tiles[] = $iiifTileInfo;
+            $imageResourceService['tiles'] = $tiles;
+
+            $imageResourceService = (object) $imageResourceService;
+
+            $imageResource['service'] = $imageResourceService;
+            $imageResource = (object) $imageResource;
+        }
+
         // Simple light image.
-        $imageResource['@id'] = $media->originalUrl();
-        $imageResource['@type'] = 'dctypes:Image';
-        $imageResource['format'] = $media->mediaType();
-        $imageResource['width'] = $width;
-        $imageResource['height'] = $height;
+        else {
+            $imageResource['@id'] = $media->originalUrl();
+            $imageResource['@type'] = 'dctypes:Image';
+            $imageResource['format'] = $media->mediaType();
+            $imageResource['width'] = $width;
+            $imageResource['height'] = $height;
 
-        $imageResourceService = array();
-        $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
+            $imageResourceService = array();
+            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
 
-        $imageUrl = $this->view->url(
-            'iiifserver_image',
-            ['id' => $media->id()],
-            ['force_canonical' => true]
-        );
-        $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
-        $imageResourceService['@id'] = $imageUrl;
-        $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-        $imageResourceService = (object) $imageResourceService;
+            $imageUrl = $this->view->url(
+                'iiifserver_image',
+                ['id' => $media->id()],
+                ['force_canonical' => true]
+            );
+            $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
+            $imageResourceService['@id'] = $imageUrl;
+            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
+            $imageResourceService = (object) $imageResourceService;
 
-        $imageResource['service'] = $imageResourceService;
-        $imageResource = (object) $imageResource;
+            $imageResource['service'] = $imageResourceService;
+            $imageResource = (object) $imageResource;
+        }
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;
@@ -915,26 +971,18 @@ class IiifManifest extends AbstractHelper
     }
 
     /**
-     * Create an IIIF tile object for a place holder.
+     * Create the data for a IIIF tile object.
      *
-     * @internal The method uses the Zoomify format of OpenLayersZoom.
-     *
-     * @param MediaRepresentation $media
-     * @return Standard object or null if no tile.
-     * @see UniversalViewer_View_Helper_IiifInfo::_iiifTile()
+     * @param array $tileInfo
+     * @return array|null
      */
-    protected function _iiifTile(MediaRepresentation $media)
+    protected function iiifTileInfo($tileInfo)
     {
         $tile = array();
 
-        $tileProperties = $this->_getTileProperties($media);
-        if (empty($tileProperties)) {
-            return;
-        }
-
         $squaleFactors = array();
-        $maxSize = max($tileProperties['source']['width'], $tileProperties['source']['height']);
-        $tileSize = $tileProperties['size'];
+        $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
+        $tileSize = $tileInfo['size'];
         $total = (integer) ceil($maxSize / $tileSize);
         $factor = 1;
         while ($factor / 2 <= $total) {
@@ -947,37 +995,7 @@ class IiifManifest extends AbstractHelper
 
         $tile['width'] = $tileSize;
         $tile['scaleFactors'] = $squaleFactors;
-        $tile = (object) $tile;
         return $tile;
-    }
-
-    /**
-     * Return the properties of a tiled file.
-     *
-     * @param MediaRepresentation $media
-     * @return array|null
-     * @see UniversalViewer_ImageController::_getTileProperties()
-     */
-    protected function _getTileProperties(MediaRepresentation $media)
-    {
-        $olz = new OpenLayersZoom_Creator();
-        $dirpath = $olz->useIIPImageServer()
-            ? $olz->getZDataWeb($media)
-            : $olz->getZDataDir($media);
-        $properties = simplexml_load_file($dirpath . '/ImageProperties.xml', 'SimpleXMLElement', LIBXML_NOENT | LIBXML_XINCLUDE | LIBXML_PARSEHUGE);
-        if ($properties === false) {
-            return;
-        }
-        $properties = $properties->attributes();
-        $properties = reset($properties);
-
-        // Standardize the properties.
-        $result = array();
-        $result['size'] = (integer) $properties['TILESIZE'];
-        $result['total'] = (integer) $properties['NUMTILES'];
-        $result['source']['width'] = (integer) $properties['WIDTH'];
-        $result['source']['height'] = (integer) $properties['HEIGHT'];
-        return $result;
     }
 
     /**

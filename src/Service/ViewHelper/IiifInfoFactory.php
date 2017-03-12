@@ -13,6 +13,7 @@ class IiifInfoFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        return new IiifInfo($services->get('Omeka\File\Manager'));
+        $fileManager = $services->get('Omeka\File\Manager');
+        return new IiifInfo($fileManager);
     }
 }

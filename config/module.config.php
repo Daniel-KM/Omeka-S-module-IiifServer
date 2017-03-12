@@ -13,6 +13,7 @@ return [
         'invokables' => [
             'jsonLd' => 'IiifServer\Mvc\Controller\Plugin\JsonLd',
             'tileBuilder' => 'IiifServer\Mvc\Controller\Plugin\TileBuilder',
+            'tileInfo' => 'IiifServer\Mvc\Controller\Plugin\TileInfo',
             'tileServer' => 'IiifServer\Mvc\Controller\Plugin\TileServer',
         ],
     ],

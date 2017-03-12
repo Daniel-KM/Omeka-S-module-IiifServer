@@ -169,16 +169,16 @@ class ConfigForm extends Form
         ];
         $imageFieldset->add([
             'type' => 'Select',
-            'name' => 'iiifserver_image_tile_format',
+            'name' => 'iiifserver_image_tile_type',
             'options' => [
-                'label' => 'Tiling Format', // @translate
-                'info' => 'Deep Zoom Image is an %sfree proprietary format%s from Microsoft largely supported.' // @translate
+                'label' => 'Tiling Type', // @translate
+                'info' => 'Deep Zoom Image is a %sfree proprietary format%s from Microsoft largely supported.' // @translate
                     . ' ' . 'Zoomify is an %sold format%s that was largely supported by proprietary softwares and free viewers.' // @translate
-                    . ' ' . 'All formats are served via the IIIF Server, but a viewer not compliant with IIIF may require a specific format.', // @translate
+                    . ' ' . 'All formats are served as native by default, but may be served as IIIF too when a viewer request it.', // @translate
                 'value_options' => $valueOptions,
             ],
             'attributes' => [
-                'value' => $settings->get('iiifserver_image_tile_format'),
+                'value' => $settings->get('iiifserver_image_tile_type'),
             ],
         ]);
     }
