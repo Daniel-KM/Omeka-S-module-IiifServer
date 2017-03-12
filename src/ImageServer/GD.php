@@ -28,19 +28,19 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\IiifCreator;
+namespace IiifServer\ImageServer;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Log\Logger;
 use Omeka\File\Manager as FileManager;
-use IiifServer\AbstractIiifCreator;
+use IiifServer\AbstractImageServer;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
  *
  * @package IiifServer
  */
-class GD extends AbstractIiifCreator
+class GD extends AbstractImageServer
 {
     // List of managed IIIF media types.
     protected $_supportedFormats = array(

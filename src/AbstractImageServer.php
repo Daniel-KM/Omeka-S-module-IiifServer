@@ -40,7 +40,7 @@ use Zend\I18n\Translator\TranslatorAwareTrait;
  *
  * @package IiifServer
  */
-abstract class AbstractIiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
+abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAwareInterface
 {
     use LoggerAwareTrait, TranslatorAwareTrait;
 

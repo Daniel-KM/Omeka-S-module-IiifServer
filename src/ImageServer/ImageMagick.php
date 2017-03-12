@@ -2,7 +2,6 @@
 
 /*
  * Copyright 2015-2017 Daniel Berthereau
- * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -28,20 +27,28 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\IiifCreator;
+namespace IiifServer\ImageServer;
 
 use \Exception;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
-use IiifServer\AbstractIiifCreator;
+use Omeka\Service\Cli;
+use IiifServer\AbstractImageServer;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
  *
  * @package IiifServer
  */
-class Imagick extends AbstractIiifCreator
+class ImageMagick extends AbstractImageServer
 {
+
+    /**
+     * Path to the ImageMagick "convert" command.
+     *
+     * @var string
+     */
+    protected $convertPath;
+
     // List of managed IIIF media types.
     protected $_supportedFormats = array(
         'image/jpeg' => 'JPG',
@@ -54,22 +61,31 @@ class Imagick extends AbstractIiifCreator
     );
 
     protected $fileManager;
+    protected $cli;
+    protected $convertDir;
+
+    /**
+     * List of the fetched images in order to remove them after process.
+     *
+     * @var array
+     */
+    protected $fetched = [];
 
     /**
      * Check for the php extension.
      *
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager)
+    public function __construct(FileManager $fileManager, $commandLineArgs)
     {
         $this->fileManager = $fileManager;
+        $this->cli = $commandLineArgs['cli'];
+        $this->convertPath = $commandLineArgs['convertPath'];
 
         $t = $this->getTranslator();
-        if (!extension_loaded('imagick')) {
-            throw new Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
-        }
 
-        $this->_supportedFormats = array_intersect($this->_supportedFormats, \Imagick::queryFormats());
+        // TODO Get the true list of supported formats.
+        // $this->_supportedFormats = array_intersect($this->_supportedFormats, \Imagick::queryFormats());
     }
 
     /**
@@ -95,20 +111,19 @@ class Imagick extends AbstractIiifCreator
             return;
         }
 
-        $imagick = $this->_loadImageResource($args['source']['filepath']);
-        if (empty($imagick)) {
+        $image = $this->_loadImageResource($args['source']['filepath']);
+        if (empty($image)) {
             return;
         }
 
         // Get width and height if missing.
         if (empty($args['source']['width']) || empty($args['source']['height'])) {
-            $args['source']['width'] = $imagick->getImageWidth();
-            $args['source']['height'] = $imagick->getImageHeight();
+            list($args['source']['width'], $args['source']['height']) = getimagesize($image);
         }
 
         $extraction = $this->_prepareExtraction();
         if (!$extraction) {
-            $imagick->clear();
+            $this->_destroyIfFetched($image);
             return;
         }
 
@@ -120,28 +135,31 @@ class Imagick extends AbstractIiifCreator
             $destinationWidth,
             $destinationHeight) = $extraction;
 
+        $params = [];
         // The background is normally useless, but it's costless.
-        $imagick->setBackgroundColor('black');
-        $imagick->setImageBackgroundColor('black');
-        $imagick->setImagePage($sourceWidth, $sourceHeight, 0, 0);
-        $imagick->cropImage($sourceWidth, $sourceHeight, $sourceX, $sourceY);
-        $imagick->thumbnailImage($destinationWidth, $destinationHeight);
-        $imagick->setImagePage($destinationWidth, $destinationHeight, 0, 0);
+        $params[] = '-background black';
+        $params[] = '+repage';
+        $params[] = '-alpha remove';
+        $params[] = '-flatten';
+        $params[] = '-page ' . escapeshellarg(sprintf('%sx%s+0+0', $sourceWidth, $sourceHeight));
+        $params[] = '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $sourceWidth, $sourceHeight, $sourceX, $sourceY));
+        $params[] = '-thumbnail ' . escapeshellarg(sprintf('%sx%s', $destinationWidth, $destinationHeight));
+        $params[] = '-page ' . escapeshellarg(sprintf('%sx%s+0+0', $destinationWidth, $destinationHeight));
 
         // Mirror.
         switch ($args['mirror']['feature']) {
             case 'mirror':
             case 'horizontal':
-                $imagick->flopImage();
+                $params[] = '-flop';
                 break;
 
             case 'vertical':
-                $imagick->flipImage();
+                $params[] = '-flip';
                 break;
 
             case 'both':
-                $imagick->flopImage();
-                $imagick->flipImage();
+                $params[] = '-flop';
+                $params[] = '-flip';
                 break;
 
             case 'default':
@@ -149,7 +167,7 @@ class Imagick extends AbstractIiifCreator
                 break;
 
             default:
-                $imagick->clear();
+                $this->_destroyIfFetched($image);
                 return;
         }
 
@@ -160,11 +178,11 @@ class Imagick extends AbstractIiifCreator
 
             case 'rotationBy90s':
             case 'rotationArbitrary':
-                $imagick->rotateimage('black', $args['rotation']['degrees']);
+                $params[] = '-rotate ' . escapeshellarg($args['rotation']['degrees']);
                 break;
 
             default:
-                $imagick->clear();
+                $this->_destroyIfFetched($image);
                 return;
         }
 
@@ -178,15 +196,15 @@ class Imagick extends AbstractIiifCreator
                 break;
 
             case 'gray':
-                $imagick->transformImageColorspace(\Imagick::COLORSPACE_GRAY);
+                $params[] = '-colorspace Gray';
                 break;
 
             case 'bitonal':
-                $imagick->thresholdImage(0.77 * $imagick->getQuantum());
+                $params[] = '-monochrome';
                 break;
 
             default:
-                $imagick->clear();
+                $this->_destroyIfFetched($image);
                 return;
         }
 
@@ -196,19 +214,26 @@ class Imagick extends AbstractIiifCreator
         $destination = $file->getTempPath() . '.' . $extension;
         $file->delete();
 
-        $imagick->setImageFormat($this->_supportedFormats[$args['format']['feature']]);
-        $result = $imagick->writeImage($this->_supportedFormats[$args['format']['feature']] . ':' . $destination);
+        $command = sprintf(
+            '%s %s %s %s',
+            $this->convertPath,
+            escapeshellarg($image . '[0]'),
+            implode(' ', $params),
+            escapeshellarg($this->_supportedFormats[$args['format']['feature']] . ':' . $destination)
+        );
 
-        $imagick->clear();
+        $result = $this->cli->execute($command);
 
-        return $result ? $destination : null;
+        $this->_destroyIfFetched($image);
+
+        return $result !== false ? $destination : null;
     }
 
     /**
      * Load an image from anywhere.
      *
      * @param string $source Path of the managed image file
-     * @return Imagick|false
+     * @return false|string
      */
     protected function _loadImageResource($source)
     {
@@ -223,7 +248,7 @@ class Imagick extends AbstractIiifCreator
                 if (!is_readable($source)) {
                     return false;
                 }
-                $imagick = new \Imagick($source);
+                $image = $source;
             }
             // When the storage is external, the file should be fetched before.
             else {
@@ -234,16 +259,30 @@ class Imagick extends AbstractIiifCreator
                 if (!$result) {
                     return false;
                 }
-                $imagick = new \Imagick($tempPath);
-                unlink($tempPath);
+                $this->fetched[$tempPath] = true;
+                $image = $tempPath;
             }
         } catch (Exception $e) {
             $logger = $this->getLogger();
             $t = $this->getTranslator();
-            $logger->log(Logger::ERR, sprintf($t->translate("Imagick failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
+            $logger->log(Logger::ERR, sprintf($t->translate("ImageMagick failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
             return false;
         }
 
-        return $imagick;
+        return $image;
+    }
+
+    /**
+     * Destroy an image if fetched.
+     *
+     * @param string $image
+     * @return void
+     */
+    protected function _destroyIfFetched($image)
+    {
+        if (isset($this->fetched[$image])) {
+            unlink($image);
+            unset($this->fetched[$image]);
+        }
     }
 }

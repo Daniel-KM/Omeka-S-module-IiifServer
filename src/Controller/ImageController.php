@@ -38,7 +38,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\Manager as FileManager;
 use Omeka\Module\Manager as ModuleManager;
 use Omeka\Mvc\Exception\NotFoundException;
-use IiifServer\IiifCreator;
+use IiifServer\ImageServer;
 
 /**
  * The Image controller class.
@@ -314,7 +314,7 @@ class ImageController extends AbstractActionController
     /**
      * Check, clean and optimize the request for quicker transformation.
      *
-     * @todo Move the maximum of checks in ImageCreator/UniversalViewer_AbstractIiifCreator.
+     * @todo Move the maximum of checks in the Image Server.
      *
      * @param MediaRepresentation $media
      * @return array|null Array of cleaned requested image, else null.
@@ -541,7 +541,7 @@ class ImageController extends AbstractActionController
             $rotation += 0;
         }
         // This may be a float, so keep all digits, because they can be managed
-        // by the image creator.
+        // by the image server.
         else {
             $rotation = trim($rotation, '0');
             $rotationDotPos = strpos($rotation, '.');
@@ -690,11 +690,11 @@ class ImageController extends AbstractActionController
      */
     protected function _transformImage($args)
     {
-        $creator = new IiifCreator($this->fileManager, $this->commandLineArgs, $this->settings());
-        $creator->setLogger($this->logger());
-        $creator->setTranslator($this->translator);
+        $imageServer = new ImageServer($this->fileManager, $this->commandLineArgs, $this->settings());
+        $imageServer->setLogger($this->logger());
+        $imageServer->setTranslator($this->translator);
 
-        return $creator->transform($args);
+        return $imageServer->transform($args);
     }
 
     /**

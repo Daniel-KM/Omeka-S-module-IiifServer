@@ -28,10 +28,10 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\IiifCreator;
+namespace IiifServer\ImageServer;
 
 use Omeka\File\Manager as FileManager;
-use IiifServer\AbstractIiifCreator;
+use IiifServer\AbstractImageServer;
 use Omeka\Service\Cli;
 
 /**
@@ -39,7 +39,7 @@ use Omeka\Service\Cli;
  *
  * @package IiifServer
  */
-class Auto extends AbstractIiifCreator
+class Auto extends AbstractImageServer
 {
     protected $_gdMimeTypes = array();
     protected $_imagickMimeTypes = array();

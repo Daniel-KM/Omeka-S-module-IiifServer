@@ -42,7 +42,7 @@ use Omeka\Settings\Settings;
  *
  * @package IiifServer
  */
-class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
+class ImageServer implements LoggerAwareInterface, TranslatorAwareInterface
 {
     use LoggerAwareTrait, TranslatorAwareTrait;
 
@@ -59,15 +59,15 @@ class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
         $this->fileManager = $fileManager;
         $this->commandLineArgs = $commandLineArgs;
         $creatorClass = $settings->get('iiifserver_image_creator', 'Auto');
-        $this->setCreator("\\IiifServer\\IiifCreator\\" . $creatorClass);
+        $this->setCreator("\\IiifServer\\ImageServer\\" . $creatorClass);
     }
 
     public function setCreator($creatorClass)
     {
         try {
             $needCli = [
-                '\IiifServer\IiifCreator\Auto',
-                '\IiifServer\IiifCreator\ImageMagick',
+                '\IiifServer\ImageServer\Auto',
+                '\IiifServer\ImageServer\ImageMagick',
             ];
             $this->_creator = in_array($creatorClass, $needCli)
                 ? new $creatorClass($this->fileManager, $this->commandLineArgs)
