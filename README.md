@@ -3,32 +3,41 @@ IIIF Server (module for Omeka S)
 
 [![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer)
 
-[IIIF Server] is a module for [Omeka S] that adds the [IIIF] specifications in
-order to serve images like an [IIPImage] server. The full specification of the
-"International Image Interoperability Framework" standard is supported
-(level 2), so any widget that supports it can use it. Rotation, zoom, inside
-search, etc. may be managed too. Dynamic lists of records may be created, for
-example for browse pages.
+[IIIF Server] is a module for [Omeka S] that integrates the [IIIF specifications]
+and a simple [IIP Image] server to allow to process and share instantly images
+of any size and medias (pdf, audio, video, 3D...) in the desired formats.
 
-In Omeka S, this module may be used in conjunction with the [Universal Viewer],
-a widget that can display books, images, maps, audio, movies, pdf, 3D, and
-anything else as long as the appropriate extension is installed.
+The full specifications of the [International Image Interoperability Framework]
+standard are supported (level 2), so any widget that supports it can use it.
+Rotation, zoom, inside search, etc. may be managed too. Dynamic lists of records
+may be created, for example for browse pages.
 
-It can be improved by the [OpenLayersZoom], a module that convert big images
-like maps and deep paintings, and any other images, into tiles in order to load
-and zoom them instantly.
+Images are automatically tiled to the [Deep Zoom] or to the [Zoomify] formats.
+They can be displayed directly in any viewer that support thes formats, or in
+any viewer that supports the IIIF protocol. Tiled images are displayed with
+[OpenSeadragon], the default viewer integrated in Omeka S.
+
+The [IIIF Server] supports the IXIF media extension too, so manifests can be
+served for any type of file. For non-images files, it is recommended to use a
+specific viewer or the [Universal Viewer], a widget that can display books,
+images, maps, audio, movies, pdf, 3D, and anything else as long as the
+appropriate extension is installed.
 
 This [Omeka S] module is a rewrite of the [Universal Viewer plugin for Omeka] by
 [BibLibre] with the same features as the original plugin, but separated into two
-modules (the IIIF server and the widget Universal Viewer).
-
-See a [demo] on the [Bibliothèque patrimoniale] of [Mines ParisTech], or you can
-set the url "https://patrimoine.mines-paristech.fr/iiif/collection/7"
-in the official [example server], because this is fully interoperable.
+modules (the IIIF server and the widget Universal Viewer). It integrates the
+tiler [Zoomify] that was used the plugin [OpenLayers Zoom] for [Omeka Classic]
+and another tiler to support the [Deep Zoom Image] tile format.
 
 
 Installation
 ------------
+
+PHP should be installed with the extension "exif" in order to get the size of
+images. This is the case for all major distributions and providers. At least one
+of the php extensions [GD] or [Imagick] are recommended. They are installed by
+default in most servers. If not, the image server will use the command line
+[ImageMagick] tool convert.
 
 Uncompress files and rename module folder "IiifServer".
 
@@ -37,30 +46,14 @@ Then install it like any other Omeka module.
 Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
 before enabling of IiifServer. Else, simply set them in the config form.
 
-If you need to display big images (bigger than 1 to 10 MB according to your
-server), install the module [OpenLayersZoom], a module  that convert big images
-like maps and deep paintings, and any other images, into tiles in order to load
-and zoom them instantly.
+When you need to display big images (bigger than 10 to 50 MB according to your
+server), it is recommended to upload them as "Tile", so tiles will be
+automatically created (see below).
 
-Some options can be set:
-- Options for the IIIF server can be changed in the helpers "IiifCollection.php",
-  "IiifManifest.php" and "IiifInfo.php" of the module, and via the events.
+Options for the IIIF server can be changed in the helpers "IiifCollection.php",
+"IiifManifest.php" and "IiifInfo.php" of the module, and via the events.
 
 See below the notes for more info.
-
-* Processing of images
-
-Images are transformed internally via the GD or the ImageMagick libraries. GD is
-generally a little quicker, but ImageMagick manages many more formats. An option
-allows to select the library to use according to your server and your documents.
-So at least one of the php libraries ("php-gd" and "php-imagick" on Debian)
-should be installed.
-
-* Display of big images
-
-If your images are big (more than 10 to 50 MB, according to your server and your
-public), it’s highly recommended to tile them with a module such [OpenLayersZoom].
-Then, tiles will be automatically displayed by Universal Viewer.
 
 * Using externally supplied IIIF manifest and images
 
@@ -83,12 +76,19 @@ The module creates manifests with all the metadata of each record. The event
 collections. For example, it is possible to modify the citation, to remove some
 metadata or to change the thumbnail.
 
+* Using Zoomify format
+
+  The Zoomify format is supported since the version 2.2.2 of OpenSeadragon, that
+  is not yet available in the default assets of Omeka. Simply build it from the
+  sources and replace the file `application/asset/js/openseadragon/openseadragon.min.js`
+  with it. Else, set the mode "IIIF" for images tiled with this format.
+
 
 Usage
 -----
 
 All routes of the IIIF server are defined in `config/module.config.php`.
-They follow the recommandations of the [iiif specifications].
+They follow the recommandations of the [IIIF specifications].
 
 To view the json-ld manifests created for each resources of Omeka S, simply try
 these urls (replace :id by a true id):
@@ -114,17 +114,54 @@ If item sets are organized hierarchically with the plugin [Collection Tree], it
 will be used to build manifests for item sets.
 
 
-Notes
------
+Image Server
+------------
 
-- The plugin works fine for a standard usage, but the images server may be
-  improved for requests made outside of the Universal Viewer when OpenLayersZoom
-  is used. Without it, a configurable limit should be set (10 MB by default).
+The image server has two roles.
 
-*Warning*
+* Dynamic creation of tiles and transformation
 
-PHP should be installed with the extension "exif" in order to get the size of
-images. This is the case for all major distributions and providers.
+  The IIIF specifications allow to ask for any region of the original image, at
+  any size, eventually with a rotation and a specified quality and formats. The
+  image server creates them dynamically from the original image, from the Omeka
+  thumbnails or from the tiles if any.
+
+  It is recommended to use the php extensions GD or Imagick. The command line
+  tool ImageMagick, default in Omeka, is supported, but slower. GD is generally
+  a little quicker, but ImageMagick manages many more formats. An option allows
+  to select the library to use according to your server and your documents or to
+  let the module chooses automagically.
+
+* Creation of tiles
+
+  For big images that are not stored in a versatile format and cannot be
+  processed dynamically quickly, it is recommended to pre-tile them to load and
+  zoom them instantly. It can be done for any size of images. It may be
+  recommended to manage at least the big images (more than 10 to 50 MB,
+  according to your server and your public).
+
+  Tiles can be created in two formats: Deep Zoom and Zoomify. [Deep Zoom Image]
+  is a free proprietary format from Microsoft largely supported, and [Zoomify]
+  is an old format that was largely supported by proprietary image softwares and
+  free viewers, like the [OpenLayers Zoom].
+
+Note about the display of tiled and simple images
+
+When created, the tiles are displayed via their native format, so only viewers
+that support them can display them. [OpenSeadragon], the viewer integrated by
+default in Omeka S, can display the formats Deep Zoom and Zoomify directly (from
+version 2.2.2), so it is quicker. The [OpenLayers] viewer support the two
+formats too. The mode ("iiif" of "native") and other OpenSeadragon settings can
+be changed when the renderer is called.
+
+When the viewer doesn’t support a format, but the IIIF protocol, the image can
+be displayed through its IIIF url (https://example.org/iiif-img/:id). This can
+be done for any image, even if it is not tiled, because of the dynamic
+transformation of images.
+
+To display an image with the IIIF protocol, set its url (https://example.org/iiif-img/:id/info.json)
+in an attached media of type "IIIF" or use it directly in your viewer. The id is
+the one of the media, not the item.
 
 
 3D models
@@ -217,6 +254,10 @@ and, more generally, to use and operate it in the same conditions of security.
 This Agreement may be freely reproduced and published, provided it is not
 altered, and that no provisions are either added or removed herefrom.
 
+The module uses libraries based on [Deepzoom] of Jeremy Buggs (license MIT) and
+Zoomify of various authors (license [GNU/GPL]). See files inside the folder
+`libraries` for more information.
+
 
 Contact
 -------
@@ -226,7 +267,8 @@ See documentation on the IIIF on its site.
 Current maintainers of the plugin for Omeka 2 and the module for Omeka S:
 * Daniel Berthereau (see [Daniel-KM])
 
-First version of this module was built for [Mines ParisTech].
+First version of this plugin was built for the [Bibliothèque patrimoniale] of
+[Mines ParisTech].
 
 
 Copyright
@@ -236,30 +278,37 @@ Copyright
 * Copyright BibLibre, 2016-2017
 
 
-[IIIF Server]: https://github.com/Daniel-KM/Omeka-S-module-IIIF-Server
-[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[IIIF Server]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer
 [Omeka S]: https://omeka.org/s
-[Omeka]: https://omeka.org
-[IIIF]: http://iiif.io
-[IIPImage]: http://iipimage.sourceforge.net
-[UniversalViewer]: https://github.com/UniversalViewer/universalviewer
+[International Image Interoperability Framework]: http://iiif.io
+[IIIF specifications]: http://iiif.io/api/
+[IIP Image]: http://iipimage.sourceforge.net
+[OpenSeadragon]: https://openseadragon.github.io
 [Universal Viewer plugin for Omeka]: https://github.com/Daniel-KM/UniversalViewer4Omeka
-[demo]: https://patrimoine.mines-paristech.fr/collections/play/7
-[Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [BibLibre]: https://github.com/biblibre
-[Mines ParisTech]: http://mines-paristech.fr
-[example server]: http://universalviewer.io/examples/
-[Upgrade to Omeka S]: https://github.com/Daniel-KM/UpgradeToOmekaS
-[wiki]: https://github.com/UniversalViewer/universalviewer/wiki/Configuration
-[iiif specifications]: http://iiif.io/api/
-[OpenLayersZoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
+[OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
+[Omeka Classic]: https://omeka.org
+[GD]: https://secure.php.net/manual/en/book.image.php
+[Imagick]: https://php.net/manual/en/book.imagick.php
+[ImageMagick]: https://www.imagemagick.org/
+[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Ark]: https://github.com/BibLibre/omeka-s-module-Ark
+[Clean Url]: https://github.com/BibLibre/omeka-s-module-CleanUrl
 [Collection Tree]: https://github.com/Daniel-KM/Omeka-S-module-CollectionTree
+[Deep Zoom]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
+[Deep Zoom Image]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
+[Zoomify]: http://www.zoomify.com/
+[OpenLayers Zoom]: https://github.com/Daniel-KM/OpenLayersZoom
+[OpenLayers]: https://openlayers.org/
+[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [threejs]: https://threejs.org
 [Archive Repertory]: https://github.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
-[module issues]: https://github.com/Daniel-KM/UniversalViewer4Omeka/issues
+[Deepzoom]: https://github.com/jeremytubbs/deepzoom
+[module issues]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
-[MIT licence]: https://github.com/UniversalViewer/universalviewer/blob/master/LICENSE.txt
+[Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
+[Mines ParisTech]: http://mines-paristech.fr
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"

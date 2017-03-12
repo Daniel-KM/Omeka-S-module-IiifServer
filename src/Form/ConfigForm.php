@@ -129,7 +129,7 @@ class ConfigForm extends Form
             'type' => 'Fieldset',
             'name' => 'iiifserver_image',
             'options' => [
-                'label' => 'Image Service', // @translate
+                'label' => 'Image Server', // @translate
                 'info' => 'Images may be processed internally before to be sent to browser.', // @translate
             ],
         ]);
@@ -164,7 +164,7 @@ class ConfigForm extends Form
         ]);
 
         $valueOptions = [
-            'deepzoom' => 'Deep Zoom Image (recommended)', // @translate
+            'deepzoom' => 'Deep Zoom Image', // @translate
             'zoomify' => 'Zoomify', // @translate
         ];
         $imageFieldset->add([
