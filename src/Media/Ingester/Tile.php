@@ -114,12 +114,17 @@ class Tile implements IngesterInterface
             . DIRECTORY_SEPARATOR . 'files'
             . DIRECTORY_SEPARATOR . $storagePath;
 
+        $tileDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $this->tileParams['tile_dir'];
+
         $tileBuilder = $this->tileBuilder;
         $tileBuilder(
             $source,
-            $this->tileParams['tile_dir'],
+            $tileDir,
             $this->tileParams['format'],
-            $media->getStorageId()
+            $media->getStorageId(),
+            $this->tileParams['processor']
         );
     }
 

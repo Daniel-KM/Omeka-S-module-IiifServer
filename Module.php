@@ -116,11 +116,6 @@ class Module extends AbstractModule
             }
         }
 
-        // The local store is hard coded.
-        $baseDir = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files';
-        $this->settings['iiifserver_image_tile_dir'] = $baseDir
-            . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
-
         $this->createTilesMainDir();
 
         foreach ($this->settings as $name => $value) {
@@ -133,8 +128,19 @@ class Module extends AbstractModule
         $settings = $serviceLocator->get('Omeka\Settings');
 
         // Nuke all the tiles.
-        $tilesDir = $settings->get('iiifserver_image_tile_dir');
-        $this->rrmdir($tilesDir);
+        $tileDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
+
+        // A security check.
+        $removable = $tileDir == realpath($tileDir);
+        if ($removable) {
+            $this->rrmdir($dir);
+        } else {
+            $messenger = new Messenger();
+            $messenger->addWarning(
+                'The tile dir "%d" is not a real path and was not removed.', $tileDir); // @translate
+        }
 
         foreach ($this->settings as $name => $value) {
             $settings->delete($name);
@@ -152,18 +158,31 @@ class Module extends AbstractModule
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
 
+        $tileDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
+
+        $removable = $tileDir == realpath($tileDir);
+        if ($removable) {
+            $message = 'All tiles will be removed!'; // @translate
+        } else {
+            $message = new Message('The tile dir "%d" is not a real path and cannot be removed.', $tileDir); // @translate
+        }
+
         // TODO Add a checkbox to let the choice to remove or not.
         $html = '<ul class="messages"><li class="warning">';
         $html .= '<strong>';
         $html .= 'WARNING'; // @translate
         $html .= '</strong>' . ' ';
-        $html .= 'All tiles will be removed!'; // @translate
+        $html .= $message;
         $html .= '</li></ul>';
-        $html .= '<p>';
-        $html .= new Message(
-            'To keep the tiles, rename the dir "%s" before and after uninstall.', // @translate
-            $settings->get('iiifserver_image_tile_dir'));
-        $html .= '</p>';
+        if ($removable) {
+            $html .= '<p>';
+            $html .= new Message(
+                'To keep the tiles, rename the dir "%s" before and after uninstall.', // @translate
+                $tileDir);
+            $html .= '</p>';
+        }
         echo $html;
     }
 
@@ -171,11 +190,6 @@ class Module extends AbstractModule
     {
         if (version_compare($oldVersion, '3.5.1', '<')) {
             $settings = $serviceLocator->get('Omeka\Settings');
-
-            // The local store is hard coded.
-            $baseDir = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files';
-            $this->settings['iiifserver_image_tile_dir'] = $baseDir
-                . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
 
             $this->createTilesMainDir();
 
@@ -264,8 +278,12 @@ class Module extends AbstractModule
 
     protected function createTilesMainDir()
     {
+        // The local store "files" is hardcoded".
+        $dir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
+
         // Check if the directory exists in the archive.
-        $dir = $this->settings['iiifserver_image_tile_dir'];
         if (file_exists($dir)) {
             if (!is_dir($dir)) {
                 throw new ModuleCannotInstallException(new Message(
@@ -276,7 +294,7 @@ class Module extends AbstractModule
                     'The directory "%s" is not writeable.', $dir)); // @translate
             }
         } else {
-            $result = mkdir($dir);
+            $result = mkdir($dir, 0755, true);
             if (!$result) {
                 throw new ModuleCannotInstallException(new Message(
                     'The directory "%s" cannot be created.', $dir)); // @translate

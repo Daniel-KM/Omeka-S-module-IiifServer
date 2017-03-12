@@ -27,6 +27,11 @@ class Tile implements RendererInterface
      */
     protected $tileDir;
 
+    /**
+     * @var string
+     */
+    protected $fullTileDir;
+
     public function __construct(FileManager $fileManager, $tileDir)
     {
         $this->fileManager = $fileManager;
@@ -35,19 +40,24 @@ class Tile implements RendererInterface
 
     public function render(PhpRenderer $view, MediaRepresentation $media, array $options = [])
     {
-        $basepath = $this->tileDir . DIRECTORY_SEPARATOR;
-        $checkpath = $basepath . $media->storageId() . '.js';
-        if (file_exists($checkpath)) {
-            $data = $this->getDataJsonp($checkpath);
+        $this->fullTileDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $this->tileDir;
+
+        $basepath = $this->fullTileDir . DIRECTORY_SEPARATOR;
+
+        $relativePath = $media->storageId() . '.dzi';
+        if (file_exists($basepath . $relativePath)) {
+            $data = $this->getDataDeepzoom($media, $view, $relativePath);
         } else {
-            $checkpath = $basepath . $media->storageId() . '.dzi';
-            if (file_exists($checkpath)) {
-                $data = $this->getDataDzi($checkpath, $format);
+            $relativePath = $media->storageId() . '.js';
+            if (file_exists($basepath . $relativePath)) {
+                $data = $this->getDataDeepzoom($media, $view, $relativePath);
             } else {
-                $checkpath = $basepath . $media->storageId() . self::FOLDER_EXTENSION_ZOOMIFY
+                $relativePath = $media->storageId() . self::FOLDER_EXTENSION_ZOOMIFY
                     . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
-                if (file_exists($checkpath)) {
-                    $data = $this->getDataZoomify($checkpath);
+                if (file_exists($basepath . $relativePath)) {
+                    $data = $this->getDataZoomify($media, $view, $relativePath);
                 } else {
                     return new Message('No tile or no properties for media #%d.', // @translate
                         $media->id());
@@ -60,14 +70,78 @@ class Tile implements RendererInterface
                 $media->id());
         }
 
+        $data['prefixUrl'] = $view->assetUrl('js/openseadragon/images/', 'Omeka');
+        $args = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
         $view->headScript()->appendFile($view->assetUrl('js/openseadragon/openseadragon.min.js', 'Omeka'));
 
-        $prefixUrl = $view->assetUrl('js/openseadragon/images/', 'Omeka');
+        $noscript = 'OpenSeadragon is not available unless JavaScript is enabled.'; // @translate
+        $image = <<<OUTPUT
+<div class="openseadragon" id="iiif-{$media->id()}" style="height: 800px;"></div>
+<script type="text/javascript">
+    var viewer = OpenSeadragon({$args});
+</script>
+<noscript>
+    <p>{$noscript}</p>
+    <img src="{$media->thumbnailUrl('large')}" height="800px" />
+</noscript>
+OUTPUT;
+        return $image;
+    }
+
+    /**
+     * Get rendering data from a dzi format.
+     *
+     * @param MediaRepresentation $media
+     * @param PhpRenderer $view
+     * @param string $relativePath
+     * @return array|null
+     */
+    protected function getDataDeepzoom(MediaRepresentation $media, PhpRenderer $view, $relativePath)
+    {
+        $url = $view->serverUrl() . $view->basePath('files' . '/' . $this->tileDir . '/' . $relativePath);
+        $args = [];
+        $args['id'] = 'iiif-' . $media->id();
+        $args['prefixUrl'] = '';
+        $args['tileSources'] = [$url];
+        return $args;
+    }
+
+    /**
+     * Get rendering data from a zoomify format.
+     *
+     * @param MediaRepresentation $media
+     * @param PhpRenderer $view
+     * @param string $relativePath
+     * @return array|null
+     */
+    protected function getDataZoomify(MediaRepresentation $media, PhpRenderer $view, $relativePath)
+    {
+        $path = $this->fullTileDir . DIRECTORY_SEPARATOR . $relativePath;
+        $tileProperties = $this->getTileProperties($path);
+        if (empty($tileProperties)) {
+            return;
+        }
+
+        $squaleFactors = $this->getSqualeFactors($tileProperties);
+        if (empty($squaleFactors)) {
+            return;
+        }
+
         $url = $view->url(
             'iiifserver_image',
             ['id' => $media->id()],
             ['force_canonical' => true]
         );
+
+        $tile = [];
+        $tile['width'] = $tileProperties['size'];
+        $tile['scaleFactors'] = $squaleFactors;
+
+        $data = [];
+        $data['width'] = $tileProperties['source']['width'];
+        $data['height'] = $tileProperties['source']['height'];
+        $data['tiles'][] = $tile;
 
         $tileSource = [];
         $tileSource['@context'] = 'http://iiif.io/api/image/2/context.json';
@@ -78,73 +152,10 @@ class Tile implements RendererInterface
 
         $args = [];
         $args['id'] = 'iiif-' . $media->id();
-        $args['prefixUrl'] = $prefixUrl;
+        $args['prefixUrl'] = '';
         $args['tileSources'] = [$tileSource];
 
-        $image =
-        '<div class="openseadragon" id="iiif-' . $media->id() . '"></div>
-            <script type="text/javascript">
-                var viewer = OpenSeadragon(' . json_encode($args) . ');
-            </script>'
-        ;
-        return $image;
-    }
-
-    /**
-     * Get rendering data from a jsonp format.
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataJsonp($path)
-    {
-    }
-
-    /**
-     * Get rendering data from a dzi format.
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataDzi($path)
-    {
-    }
-
-    /**
-     * Get rendering data from a zoomify format.
-     *
-     * @param string $path
-     * @return array|null
-     */
-    protected function getDataZoomify($path)
-    {
-        $tileProperties = $this->getTileProperties($path);
-        if (empty($tileProperties)) {
-            return;
-        }
-
-        $squaleFactors = [];
-        $maxSize = max($tileProperties['source']['width'], $tileProperties['source']['height']);
-        $tileSize = $tileProperties['size'];
-        $total = (integer) ceil($maxSize / $tileSize);
-        $factor = 1;
-        while ($factor / 2 <= $total) {
-            $squaleFactors[] = $factor;
-            $factor = $factor * 2;
-        }
-        if (count($squaleFactors) <= 1) {
-            return;
-        }
-
-        $tile = [];
-        $tile['width'] = $tileSize;
-        $tile['scaleFactors'] = $squaleFactors;
-
-        $data = [];
-        $data['width'] = $tileProperties['source']['width'];
-        $data['height'] = $tileProperties['source']['height'];
-        $data['tiles'][] = $tile;
-        return $data;
+        return $args;
     }
 
     /**
@@ -171,5 +182,28 @@ class Tile implements RendererInterface
         $result['source']['width'] = (integer) $properties['WIDTH'];
         $result['source']['height'] = (integer) $properties['HEIGHT'];
         return $result;
+    }
+
+    /**
+     * Get the squale factors for a Zoomify tile file.
+     *
+     * @param array $tileProperties
+     * @return array|null
+     */
+    protected function getSqualeFactors($tileProperties)
+    {
+        $squaleFactors = [];
+        $maxSize = max($tileProperties['source']['width'], $tileProperties['source']['height']);
+        $tileSize = $tileProperties['size'];
+        $total = (integer) ceil($maxSize / $tileSize);
+        $factor = 1;
+        while ($factor / 2 <= $total) {
+            $squaleFactors[] = $factor;
+            $factor = $factor * 2;
+        }
+        if (count($squaleFactors) <= 1) {
+            return;
+        }
+        return $squaleFactors;
     }
 }

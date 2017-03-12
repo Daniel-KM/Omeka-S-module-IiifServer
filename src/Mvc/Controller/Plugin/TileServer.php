@@ -96,7 +96,10 @@ class TileServer extends AbstractPlugin
 
         $services = $media->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
-        $this->tileBaseDir = $settings->get('iiifserver_image_tile_dir');
+        $tileDir = $settings->get('iiifserver_image_tile_dir');
+        $this->tileBaseDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $tileDir;
 
         $zoomed = $this->getZoomedImage($media->storageId());
         if (empty($zoomed)) {
@@ -109,8 +112,7 @@ class TileServer extends AbstractPlugin
 
         // A full url avoids some complexity when Omeka is not the root of the
         // server.
-        $subpath = $basePath(substr($this->tileBaseDir, strlen(OMEKA_PATH)));
-        $this->tileBaseUrl = $serverUrl() . $subpath;
+        $this->tileBaseUrl = $serverUrl() . $basePath('files' . '/' . $tileDir);
 
         switch ($zoomed['format']) {
             case 'deepzoom':
@@ -150,14 +152,14 @@ class TileServer extends AbstractPlugin
      */
     protected function getZoomedImage($basename)
     {
-        $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.js';
-        if (file_exists($basepath)) {
-            return $this->getDataJsonp($basepath);
-        }
-
         $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.dzi';
         if (file_exists($basepath)) {
             return $this->getDataDzi($basepath);
+        }
+
+        $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.js';
+        if (file_exists($basepath)) {
+            return $this->getDataJsonp($basepath);
         }
 
         $basepath = $this->tileBaseDir
@@ -171,22 +173,22 @@ class TileServer extends AbstractPlugin
     }
 
     /**
-     * Get rendering data from a jsonp format.
-     *
-     * @param string path
-     * @return array|null
-     */
-    protected function getDataJsonp($path)
-    {
-    }
-
-    /**
      * Get rendering data from a dzi format.
      *
      * @param string path
      * @return array|null
      */
     protected function getDataDzi($path)
+    {
+    }
+
+    /**
+     * Get rendering data from a jsonp format.
+     *
+     * @param string path
+     * @return array|null
+     */
+    protected function getDataJsonp($path)
     {
     }
 
