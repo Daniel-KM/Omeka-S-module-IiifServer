@@ -39,7 +39,6 @@ use Omeka\File\Manager as FileManager;
 use Omeka\Module\Manager as ModuleManager;
 use Omeka\Mvc\Exception\NotFoundException;
 use IiifServer\IiifCreator;
-use Omeka\Service\Cli;
 
 /**
  * The Image controller class.
@@ -53,21 +52,18 @@ class ImageController extends AbstractActionController
     protected $fileManager;
     protected $moduleManager;
     protected $translator;
-    protected $cli;
-    protected $convertDir;
+    protected $commandLineArgs;
 
     public function __construct(
         FileManager $fileManager,
         ModuleManager $moduleManager,
         TranslatorInterface $translator,
-        Cli $cli,
-        $convertDir
+        array $commandLineArgs
     ) {
         $this->fileManager = $fileManager;
         $this->moduleManager = $moduleManager;
         $this->translator = $translator;
-        $this->cli = $cli;
-        $this->convertDir = $convertDir;
+        $this->commandLineArgs = $commandLineArgs;
     }
 
     /**
@@ -694,7 +690,7 @@ class ImageController extends AbstractActionController
      */
     protected function _transformImage($args)
     {
-        $creator = new IiifCreator($this->fileManager, $this->cli, $this->convertDir, $this->settings());
+        $creator = new IiifCreator($this->fileManager, $this->commandLineArgs, $this->settings());
         $creator->setLogger($this->logger());
         $creator->setTranslator($this->translator);
 

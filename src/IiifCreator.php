@@ -49,18 +49,15 @@ class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
     protected $_creator;
     protected $_args = array();
     protected $fileManager;
-    protected $cli;
-    protected $convertDir;
+    protected $commandLineArgs;
 
     public function __construct(
         FileManager $fileManager,
-        Cli $cli,
-        $convertDir,
+        array $commandLineArgs,
         Settings $settings
     ) {
         $this->fileManager = $fileManager;
-        $this->cli = $cli;
-        $this->convertDir = $convertDir;
+        $this->commandLineArgs = $commandLineArgs;
         $creatorClass = $settings->get('iiifserver_image_creator', 'Auto');
         $this->setCreator("\\IiifServer\\IiifCreator\\" . $creatorClass);
     }
@@ -73,7 +70,7 @@ class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
                 '\IiifServer\IiifCreator\ImageMagick',
             ];
             $this->_creator = in_array($creatorClass, $needCli)
-                ? new $creatorClass($this->fileManager, $this->cli, $this->convertDir)
+                ? new $creatorClass($this->fileManager, $this->commandLineArgs)
                 : new $creatorClass($this->fileManager);
         } catch (Exception $e) {
             throw $e;

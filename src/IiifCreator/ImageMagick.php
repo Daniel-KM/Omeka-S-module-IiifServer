@@ -30,11 +30,9 @@
 namespace IiifServer\IiifCreator;
 
 use \Exception;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
 use Omeka\Service\Cli;
 use IiifServer\AbstractIiifCreator;
-use Omeka\File\Thumbnailer\ImageMagickThumbnailer;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -78,11 +76,11 @@ class ImageMagick extends AbstractIiifCreator
      *
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager, Cli $cli, $convertDir)
+    public function __construct(FileManager $fileManager, $commandLineArgs)
     {
         $this->fileManager = $fileManager;
-        $this->cli = $cli;
-        $this->convertPath = $this->getConvertPath($cli, $convertDir);
+        $this->cli = $commandLineArgs['cli'];
+        $this->convertPath = $commandLineArgs['convertPath'];
 
         $t = $this->getTranslator();
 
@@ -286,20 +284,5 @@ class ImageMagick extends AbstractIiifCreator
             unlink($image);
             unset($this->fetched[$image]);
         }
-    }
-
-    /**
-     * Get the path to the ImageMagick "convert" command.
-     *
-     * @param Cli $cli
-     * @param string $convertDir
-     * @return string
-     */
-    protected function getConvertPath(Cli $cli, $convertDir)
-    {
-        $convertPath = $convertDir
-            ? $cli->validateCommand($convertDir, ImageMagickThumbnailer::CONVERT_COMMAND)
-            : $cli->getCommandPath(ImageMagickThumbnailer::CONVERT_COMMAND);
-        return (string) $convertPath;
     }
 }

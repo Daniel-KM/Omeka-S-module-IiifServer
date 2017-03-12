@@ -39,7 +39,7 @@ class TileFactory implements FactoryInterface
         $cli = $services->get('Omeka\Cli');
         $config = $services->get('Config');
         $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
-        $params['convert'] = $this->getConvertPath($cli, $convertDir);
+        $params['convertPath'] = $this->getConvertPath($cli, $convertDir);
         $params['executeStrategy'] = $config['cli']['execute_strategy'];
 
         return new Tile($fileManager, $tileBuilder, $params);

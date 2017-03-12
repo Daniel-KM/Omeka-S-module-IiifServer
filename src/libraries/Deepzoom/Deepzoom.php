@@ -27,11 +27,11 @@ class Deepzoom
     protected $processor;
 
     /**
-     * The path to convert if the processor is "cli".
+     * The path to command line ImageMagick convert when the processor is "cli".
      *
      * @var string
      */
-    protected $convert;
+    protected $convertPath;
 
     /**
      * The strategy to use by php to process a command ("exec" or "proc_open").
@@ -125,11 +125,11 @@ class Deepzoom
                 $this->processor = 'imagick';
             } elseif (extension_loaded('gd')) {
                 $this->processor = 'gd';
-            } elseif (!empty($this->convert)) {
+            } elseif (!empty($this->convertPath)) {
                 $this->processor = 'cli';
             } else {
-                $this->convert = $this->getConvertPath();
-                if (!empty($this->convert)) {
+                $this->convertPath = $this->getConvertPath();
+                if (!empty($this->convertPath)) {
                     $this->processor = 'cli';
                 } else {
                     throw new \Exception ('Convert path is not available.');
@@ -150,9 +150,9 @@ class Deepzoom
         }
         // CLI.
         elseif ($this->processor == 'cli') {
-            if (empty($this->convert)) {
-                $this->convert = $this->getConvertPath();
-                if (empty($this->convert)) {
+            if (empty($this->convertPath)) {
+                $this->convertPath = $this->getConvertPath();
+                if (empty($this->convertPath)) {
                     throw new \Exception ('Convert path is not available.');
                 }
             }
@@ -609,7 +609,7 @@ class Deepzoom
 
         $command = sprintf(
             '%s %s %s %s',
-            $this->convert,
+            $this->convertPath,
             escapeshellarg($source . '[0]'),
             implode(' ', $args),
             escapeshellarg($destination)

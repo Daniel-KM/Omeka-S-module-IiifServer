@@ -110,6 +110,8 @@ class TileBuilder extends AbstractPlugin
         $zoomify->processor = $processor;
         $zoomify->updatePerms = false;
         $zoomify->destinationRemove = true;
+        $zoomify->convertPath = $params['convertPath'];
+        $zoomify->executeStrategy = $params['executeStrategy'];
         $zoomify->zoomifyImage($source, $destination);
     }
 }
