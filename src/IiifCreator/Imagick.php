@@ -166,8 +166,10 @@ class Imagick extends AbstractIiifCreator
         }
 
         // Save resulted resource into the specified format.
-        // TODO Use a true name to allow cache, or is it managed somewhere else?
-        $destination = tempnam(sys_get_temp_dir(), 'uv_');
+        $extension = strtolower($this->_supportedFormats[$args['format']['feature']]);
+        $file = $this->fileManager->getTempFile();
+        $destination = $file->getTempPath() . '.' . $extension;
+        $file->delete();
 
         $imagick->setImageFormat($this->_supportedFormats[$args['format']['feature']]);
         $result = $imagick->writeImage($this->_supportedFormats[$args['format']['feature']] . ':' . $destination);
@@ -178,10 +180,10 @@ class Imagick extends AbstractIiifCreator
     }
 
     /**
-     * GD uses multiple functions to load an image, so this one manages all.
+     * Load an image from anywhere.
      *
      * @param string $source Path of the managed image file
-     * @return false|GD image ressource
+     * @return Imagick|false
      */
     protected function _loadImageResource($source)
     {
@@ -192,7 +194,7 @@ class Imagick extends AbstractIiifCreator
         try {
             // The source can be a local file or an external one.
             $store = $this->fileManager->getStore();
-            if (get_class($store) == 'LocalStore') {
+            if (get_class($store) == 'Omeka\File\Store\LocalStore') {
                 if (!is_readable($source)) {
                     return false;
                 }
@@ -200,7 +202,9 @@ class Imagick extends AbstractIiifCreator
             }
             // When the storage is external, the file should be fetched before.
             else {
-                $tempPath = tempnam(sys_get_temp_dir(), 'uv_');
+                $file = $this->fileManager->getTempFile();
+                $tempPath = $file->getTempPath();
+                $file->delete();
                 $result = copy($source, $tempPath);
                 if (!$result) {
                     return false;
