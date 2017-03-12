@@ -23,17 +23,21 @@
  */
 
 // Imagick manages more formats than GD.
-if (class_exists('Imagick')) {
-    require_once 'ZoomifyFileProcessorImagick.php';
-}
-else {
-    require_once 'ZoomifyFileProcessor.php';
+if (extension_loaded('imagick')) {
+    require_once 'ZoomifyProcessorImagick.php';
+} elseif (extension_loaded('gd')) {
+    require_once 'ZoomifyProcessorGD.php';
+} else {
+    throw new Exception ('No graphic library available.');
 }
 
 class Zoomify
 {
+    // The choice is automatic.
+    public $processor = '';
     public $imagePath = '';
     public $destinationDir = '';
+    public $destinationRemove = true;
 
     public $_debug = false;
     public $fileMode = 0644;
@@ -54,7 +58,7 @@ class Zoomify
     }
 
     /**
-     * Zoomify the specified image and store them in the destination dir.
+     * Zoomify the specified image and store it in the destination dir.
      *
      * Check to be sure the file hasn't been converted already.
      *
@@ -64,14 +68,17 @@ class Zoomify
      */
     public function zoomifyImage($filepath, $destinationDir = '')
     {
-        $properties = $destinationDir . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
-        if (file_exists($properties)) {
-            return;
+        if (!$destinationDir) {
+            $properties = $destinationDir . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
+            if (file_exists($properties)) {
+                return;
+            }
         }
 
         $converter = new ZoomifyFileProcessor();
         $converter->_debug = $this->_debug;
         $converter->destinationDir = $destinationDir;
+        $converter->destinationRemove = $this->destinationRemove;
         $converter->updatePerms = $this->updatePerms;
         $converter->fileMode = $this->fileMode;
         $converter->dirMode = $this->dirMode;
@@ -94,6 +101,7 @@ class Zoomify
             $converter = new ZoomifyFileProcessor();
             $converter->_debug = $this->_debug;
             $converter->destinationDir = $destinationDir;
+            $converter->destinationRemove = $this->destinationRemove;
             $converter->updatePerms = $this->updatePerms;
             $converter->fileMode = $this->fileMode;
             $converter->dirMode = $this->dirMode;

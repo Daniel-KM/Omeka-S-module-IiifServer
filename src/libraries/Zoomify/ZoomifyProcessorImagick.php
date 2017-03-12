@@ -37,6 +37,7 @@ class ZoomifyFileProcessor
     public $_debug = false;
 
     public $destinationDir = '';
+    public $destinationRemove = true;
 
     public $updatePerms = true;
     public $fileMode = 0644;
@@ -58,105 +59,42 @@ class ZoomifyFileProcessor
 
     /**
      * The method the client calls to generate zoomify metadata.
+     *
+     * Check to be sure the file hasn't been converted already.
+     *
+     * @param string $filepath The path to the image.
+     * @param string $destinationDir The directory where to store the tiles.
+     * @return boolean
      */
     public function ZoomifyProcess($image_name)
     {
         $this->_imageFilename = realpath($image_name);
-        $this->_createDataContainer();
-        $this->_getImageMetadata();
-        $this->_processImage();
-        $this->_saveXMLOutput();
-    }
-
-    /**
-     * Explode a filepath in a root and an extension, i.e. "/path/file.ext" to
-     * "/path/file" and ".ext".
-     *
-     * @return array
-     */
-    protected function _getRootAndDotExtension($filepath)
-    {
-        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
-        $root = $extension ? substr($filepath, 0, strrpos($filepath, '.')) : $filepath;
-        return array($root, $extension);
-    }
-
-    /**
-     * Get the name of the file for the tile.
-     *
-     * @return string
-     */
-    protected function _getTileFilename($scaleNumber, $columnNumber, $rowNumber)
-    {
-        return (string)$scaleNumber . '-' . (string)$columnNumber . '-' . (string)$rowNumber . '.' . $this->_tileExt;
-    }
-
-    /**
-     * Return the name of the next tile group container.
-     *
-     * @return string
-     */
-    protected function _getNewTileContainerName($tileGroupNumber = 0)
-    {
-        return 'TileGroup' . (string)$tileGroupNumber;
-    }
-
-    /**
-     * Get the full path of the file the tile will be saved as.
-     *
-     * @return string
-     */
-    protected function _getFileReference($scaleNumber, $columnNumber, $rowNumber)
-    {
-        $tileFilename = $this->_getTileFilename($scaleNumber, $columnNumber, $rowNumber);
-        $tileContainerName = $this->_getAssignedTileContainerName($tileFilename);
-        return $this->_saveToLocation . DIRECTORY_SEPARATOR . $tileContainerName . DIRECTORY_SEPARATOR . $tileFilename;
-    }
-
-    /**
-     * Return the name of the tile group for the indicated tile.
-     *
-     * @return string
-     */
-    protected function _getAssignedTileContainerName($tileFilename)
-    {
-        if ($tileFilename) {
-            // print "getAssignedTileContainerName tileFilename $tileFilename exists<br />" . PHP_EOL;
-            // if (isset($this->_tileGroupMappings)) {
-            //     print "getAssignedTileContainerName this->_tileGroupMappings defined<br />" . PHP_EOL;
-            // }
-            // if ($this->_tileGroupMappings) {
-            //     print "getAssignedTileContainerName this->_tileGroupMappings is true" . PHP_EOL;
-            // }
-            if (isset($this->_tileGroupMappings) && $this->_tileGroupMappings) {
-                if (isset($this->_tileGroupMappings[$tileFilename])) {
-                    $containerName = $this->_tileGroupMappings[$tileFilename];
-                    if ($containerName) {
-                        // print "getAssignedTileContainerName returning containerName " . $containerName ."<br />" . PHP_EOL;
-                        return $containerName;
-                    }
-                }
-            }
+        $result = $this->createDataContainer();
+        if (!$result) {
+            trigger_error('Output directory already exists.', E_USER_WARNING);
+            return;
         }
-        $containerName = $this->_getNewTileContainerName();
-        if ($this->_debug) {
-            print "getAssignedTileContainerName returning getNewTileContainerName " . $containerName . "<br />" . PHP_EOL;
-        }
-
-        return $containerName;
+        $this->getImageMetadata();
+        $this->processImage();
+        $result = $this->saveXMLOutput();
+        return $result;
     }
 
     /**
      * Given an image name, load it and extract metadata.
+     *
+     * @return void
      */
-    protected function _getImageMetadata()
+    protected function getImageMetadata()
     {
         list($this->_originalWidth, $this->_originalHeight, $this->_originalFormat) = getimagesize($this->_imageFilename);
 
         // Get scaling information.
         $width = $this->_originalWidth;
         $height = $this->_originalHeight;
-
+        if ($this->_debug) {
+            print "getImageMetadata for file $this->_imageFilename originalWidth=$width originalHeight=$height tilesize=$this->tileSize<br />" . PHP_EOL;
+        }
         $width_height = array($width, $height);
         array_unshift($this->_scaleInfo, $width_height);
         while (($width > $this->tileSize) || ($height > $this->tileSize)) {
@@ -164,23 +102,28 @@ class ZoomifyFileProcessor
             $height = floor($height / 2);
             $width_height = array($width, $height);
             array_unshift($this->_scaleInfo, $width_height);
+            if ($this->_debug) {
+                print "getImageMetadata newWidth=$width newHeight=$height<br />" . PHP_EOL;
+            }
         }
 
         // Tile and tile group information.
-        $this->_preProcess();
+        $this->preProcess();
     }
 
     /**
      * Create a container (a folder) for tiles and tile metadata if not set.
+     *
+     * @return boolean
      */
-    protected function _createDataContainer()
+    protected function createDataContainer()
     {
         if ($this->destinationDir) {
             $location = $this->destinationDir;
         }
         //Determine the path to the directory from the filepath.
         else {
-            list($root, $ext) = $this->_getRootAndDotExtension($this->_imageFilename);
+            list($root, $ext) = $this->getRootAndDotExtension($this->_imageFilename);
             $directory = dirname($root);
             $filename = basename($root);
             $root = $filename . '_zdata';
@@ -191,25 +134,34 @@ class ZoomifyFileProcessor
 
         // If the paths already exist, an image is being re-processed, clean up
         // for it.
-        if (is_dir($this->_saveToLocation)) {
-            $rm_err = $this->_rmDir($this->_saveToLocation);
+        if ($this->destinationRemove) {
+            if (is_dir($this->_saveToLocation)) {
+                $result = $this->rmDir($this->_saveToLocation);
+            }
+        } elseif (is_dir($this->_saveToLocation)) {
+            return false;
         }
 
-        mkdir($this->_saveToLocation);
+        if (!is_dir($this->_saveToLocation)) {
+            mkdir($this->_saveToLocation, $this->dirMode, true);
+        }
         if ($this->updatePerms) {
             @chmod($this->_saveToLocation, $this->dirMode);
             @chgrp($this->_saveToLocation, $this->fileGroup);
         }
+
+        return true;
     }
 
     /**
      * Create a container for the next group of tiles within the data container.
      */
-    protected function _createTileContainer($tileContainerName = '')
+    protected function createTileContainer($tileContainerName = '')
     {
         $tileContainerPath = $this->_saveToLocation . DIRECTORY_SEPARATOR . $tileContainerName;
 
         if (!is_dir($tileContainerPath)) {
+            // echo "Trying to make $tileContainerPath<br />" . PHP_EOL;
             mkdir($tileContainerPath);
             if ($this->updatePerms) {
                 @chmod($tileContainerPath, $this->dirMode);
@@ -221,7 +173,7 @@ class ZoomifyFileProcessor
     /**
      * Plan for the arrangement of the tile groups.
      */
-    protected function _preProcess()
+    protected function preProcess()
     {
         $tier = 0;
         $tileGroupNumber = 0;
@@ -238,23 +190,23 @@ class ZoomifyFileProcessor
             $lr_x = 0;
             $lr_y = 0;
             while (!(($lr_x == $width) && ($lr_y == $height))) {
-                $tileFilename = $this->_getTileFilename($tier, $column, $row);
-                $tileContainerName = $this->_getNewTileContainerName($tileGroupNumber);
+                $tileFilename = $this->getTileFilename($tier, $column, $row);
+                $tileContainerName = $this->getNewTileContainerName($tileGroupNumber);
 
                 if ($numberOfTiles == 0) {
-                    $this->_createTileContainer($tileContainerName);
+                    $this->createTileContainer($tileContainerName);
                 }
                 elseif ($numberOfTiles % $this->tileSize == 0) {
-                    $tileGroupNumber++;
-                    $tileContainerName = $this->_getNewTileContainerName($tileGroupNumber);
-                    $this->_createTileContainer($tileContainerName);
+                    ++$tileGroupNumber;
+                    $tileContainerName = $this->getNewTileContainerName($tileGroupNumber);
+                    $this->createTileContainer($tileContainerName);
 
                     if ($this->_debug) {
                         print 'new tile group ' . $tileGroupNumber . ' tileContainerName=' . $tileContainerName ."<br />" . PHP_EOL;
                     }
                 }
                 $this->_tileGroupMappings[$tileFilename] = $tileContainerName;
-                $numberOfTiles++;
+                ++$numberOfTiles;
 
                 // for the next tile, set lower right cropping point
                 $lr_x = ($ul_x + $this->tileSize < $width) ? $ul_x + $this->tileSize : $width;
@@ -265,21 +217,21 @@ class ZoomifyFileProcessor
                     $ul_x = 0;
                     $ul_y = $lr_y;
                     $column = 0;
-                    $row++;
+                    ++$row;
                 }
                 else {
                     $ul_x = $lr_x;
-                    $column++;
+                    ++$column;
                 }
             }
-            $tier++;
+            ++$tier;
         }
     }
 
     /**
      * Starting with the original image, start processing each row.
      */
-    protected function _processImage()
+    protected function processImage()
     {
         // Start from the last scale (bigger image).
         $tier = (count($this->_scaleInfo) - 1);
@@ -287,7 +239,7 @@ class ZoomifyFileProcessor
         $ul_y = 0;
         $lr_y = 0;
 
-        list($root, $ext) = $this->_getRootAndDotExtension($this->_imageFilename);
+        list($root, $ext) = $this->getRootAndDotExtension($this->_imageFilename);
 
         if ($this->_debug) {
             print "processImage root=$root ext=$ext<br />" . PHP_EOL;
@@ -295,13 +247,15 @@ class ZoomifyFileProcessor
         // Create a row from the original image and process it.
         while ($row * $this->tileSize < $this->_originalHeight) {
             $ul_y = $row * $this->tileSize;
-            $lr_y = ($ul_y + $this->tileSize < $this->_originalHeight) ? $ul_y + $this->tileSize : $this->_originalHeight;
-            $width = $this->_originalWidth;
-            $height = abs($lr_y - $ul_y);
+            $lr_y = ($ul_y + $this->tileSize < $this->_originalHeight)
+                ? $ul_y + $this->tileSize
+                : $this->_originalHeight;
+            $saveFilename = $root . $tier . '-' . $row . '.' . $ext;
             // print "line " . __LINE__ . " calling crop<br />" . PHP_EOL;
             # imageRow = image.crop([0, ul_y, $this->_originalWidth, lr_y])
             // $imageRow = imageCrop($image, 0, $ul_y, $this->originalWidth, $lr_y);
-            $saveFilename = $root . $tier . '-' . $row . '.' . $ext;
+            $width = $this->_originalWidth;
+            $height = abs($lr_y - $ul_y);
             $imageRow = new Imagick();
             $imageRow->readImage($this->_imageFilename);
             $imageRow->cropImage($width, $height, 0, $ul_y);
@@ -315,15 +269,15 @@ class ZoomifyFileProcessor
                 print "processImage root=$root tier=$tier row=$row saveFilename=$saveFilename<br />" . PHP_EOL;
             }
 
-            $this->_processRowImage($tier, $row);
-            $row++;
+            $this->processRowImage($tier, $row);
+            ++$row;
         }
     }
 
     /**
      * For a row image, create and save tiles.
      */
-    protected function _processRowImage($tier = 0, $row = 0)
+    protected function processRowImage($tier = 0, $row = 0)
     {
         # print '*** processing tier: ' + str(tier) + ' row: ' + str(row)
 
@@ -333,10 +287,10 @@ class ZoomifyFileProcessor
         }
         $rowsForTier = floor($tierHeight / $this->tileSize);
         if ($tierHeight % $this->tileSize > 0) {
-            $rowsForTier++;
+            ++$rowsForTier;
         }
 
-        list($root, $ext) = $this->_getRootAndDotExtension($this->_imageFilename);
+        list($root, $ext) = $this->getRootAndDotExtension($this->_imageFilename);
 
         $imageRow = null;
 
@@ -403,7 +357,7 @@ class ZoomifyFileProcessor
                 }
             }
 
-            $r++;
+            ++$r;
             $secondRowFile = $root . $t . '-' . $r . '.' . $ext;
             $secondRowWidth = 0;
             $secondRowHeight = 0;
@@ -467,8 +421,12 @@ class ZoomifyFileProcessor
                     print "ul_x=$ul_x lr_x=$lr_x ul_y=$ul_y lr_y=$lr_y imageWidth=$imageWidth imageHeight=$imageHeight<br />" . PHP_EOL;
                 }
                 // Set lower right cropping point.
-                $lr_x = (($ul_x + $this->tileSize) < $imageWidth) ? $ul_x + $this->tileSize : $imageWidth;
-                $lr_y = (($ul_y + $this->tileSize) < $imageHeight) ? $ul_y + $this->tileSize : $imageHeight;
+                $lr_x = (($ul_x + $this->tileSize) < $imageWidth)
+                    ? $ul_x + $this->tileSize
+                    : $imageWidth;
+                $lr_y = (($ul_y + $this->tileSize) < $imageHeight)
+                    ? $ul_y + $this->tileSize
+                    : $imageHeight;
                 $width = abs($lr_x - $ul_x);
                 $height = abs($lr_y - $ul_y);
 
@@ -476,7 +434,7 @@ class ZoomifyFileProcessor
                 if ($this->_debug) {
                     print "line " . __LINE__ . " calling crop<br />" . PHP_EOL;
                 }
-                $tileFilename = $this->_getFileReference($tier, $column, $row);
+                $tileFilename = $this->getFileReference($tier, $column, $row);
                 // $this->saveTile(imageCrop($imageRow, $ul_x, $ul_y, $lr_x, $lr_y), $tier, $column, $row);
 
                 $tileImage = clone $imageRow;
@@ -484,7 +442,9 @@ class ZoomifyFileProcessor
                 $tileImage->setImagePage(0, 0, 0, 0);
                 $tileImage->cropImage($width, $height, $ul_x, $ul_y);
                 $tileImage->setImageFormat($this->_tileExt);
-                $tileImage->setImageCompression(Imagick::COMPRESSION_JPEG);
+                if ($this->_tileExt == 'jpg') {
+                    $tileImage->setImageCompression(Imagick::COMPRESSION_JPEG);
+                }
                 $tileImage->setImageCompressionQuality($this->tileQuality);
                 $tileImage->writeImage($tileFilename);
                 $tileImage->destroy();
@@ -506,7 +466,7 @@ class ZoomifyFileProcessor
                 }
                 else {
                     $ul_x = $lr_x;
-                    $column++;
+                    ++$column;
                 }
             }
 
@@ -546,7 +506,7 @@ class ZoomifyFileProcessor
                         print "processRowImage final checks tier=$tier row=$row mod 2 check before<br />" . PHP_EOL;
                     }
                     // $this->processRowImage($tier = $tier - 1, $row = ($row - 1) / 2);
-                    $this->_processRowImage($tier - 1, floor(($row - 1) / 2));
+                    $this->processRowImage($tier - 1, floor(($row - 1) / 2));
                     if ($this->_debug) {
                         print "processRowImage final checks tier=$tier row=$row mod 2 check after<br />" . PHP_EOL;
                     }
@@ -556,7 +516,7 @@ class ZoomifyFileProcessor
                         print "processRowImage final checks tier=$tier row=$row rowsForTier=$rowsForTier check before<br />" . PHP_EOL;
                     }
                     // $this->processRowImage($tier = $tier - 1, $row = $row / 2);
-                    $this->_processRowImage($tier - 1, floor($row / 2));
+                    $this->processRowImage($tier - 1, floor($row / 2));
                     if ($this->_debug) {
                         print "processRowImage final checks tier=$tier row=$row rowsForTier=$rowsForTier check after<br />" . PHP_EOL;
                     }
@@ -566,19 +526,101 @@ class ZoomifyFileProcessor
     }
 
     /**
+     * Explode a filepath in a root and an extension, i.e. "/path/file.ext" to
+     * "/path/file" and ".ext".
+     *
+     * @return array
+     */
+    protected function getRootAndDotExtension($filepath)
+    {
+        $extension = pathinfo($filepath, PATHINFO_EXTENSION);
+        $root = $extension ? substr($filepath, 0, strrpos($filepath, '.')) : $filepath;
+        return array($root, $extension);
+    }
+
+    /**
+     * Get the name of the file for the tile.
+     *
+     * @return string
+     */
+    protected function getTileFilename($scaleNumber, $columnNumber, $rowNumber)
+    {
+        return (string) $scaleNumber . '-' . (string) $columnNumber . '-' . (string) $rowNumber . '.' . $this->_tileExt;
+    }
+
+    /**
+     * Return the name of the next tile group container.
+     *
+     * @return string
+     */
+    protected function getNewTileContainerName($tileGroupNumber = 0)
+    {
+        return 'TileGroup' . (string) $tileGroupNumber;
+    }
+
+    /**
+     * Get the full path of the file the tile will be saved as.
+     *
+     * @return string
+     */
+    protected function getFileReference($scaleNumber, $columnNumber, $rowNumber)
+    {
+        $tileFilename = $this->getTileFilename($scaleNumber, $columnNumber, $rowNumber);
+        $tileContainerName = $this->getAssignedTileContainerName($tileFilename);
+        return $this->_saveToLocation . DIRECTORY_SEPARATOR . $tileContainerName . DIRECTORY_SEPARATOR . $tileFilename;
+    }
+
+    /**
+     * Return the name of the tile group for the indicated tile.
+     *
+     * @return string
+     */
+    protected function getAssignedTileContainerName($tileFilename)
+    {
+        if ($tileFilename) {
+            // print "getAssignedTileContainerName tileFilename $tileFilename exists<br />" . PHP_EOL;
+            // if (isset($this->_tileGroupMappings)) {
+            //     print "getAssignedTileContainerName this->_tileGroupMappings defined<br />" . PHP_EOL;
+            // }
+            // if ($this->_tileGroupMappings) {
+            //     print "getAssignedTileContainerName this->_tileGroupMappings is true" . PHP_EOL;
+            // }
+            if (isset($this->_tileGroupMappings) && $this->_tileGroupMappings) {
+                if (isset($this->_tileGroupMappings[$tileFilename])) {
+                    $containerName = $this->_tileGroupMappings[$tileFilename];
+                    if ($containerName) {
+                        // print "getAssignedTileContainerName returning containerName " . $containerName ."<br />" . PHP_EOL;
+                        return $containerName;
+                    }
+                }
+            }
+        }
+        $containerName = $this->getNewTileContainerName();
+        if ($this->_debug) {
+            print "getAssignedTileContainerName returning getNewTileContainerName " . $containerName . "<br />" . PHP_EOL;
+        }
+
+        return $containerName;
+    }
+
+    /**
      * Save xml metadata about the tiles.
      *
-     * @return void
+     * @return boolean
      */
-    protected function _saveXMLOutput()
+    protected function saveXMLOutput()
     {
         $xmlFile = fopen($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', 'w');
-        fwrite($xmlFile, $this->_getXMLOutput());
-        fclose($xmlFile);
+        if ($xmlFile === false) {
+            return false;
+        }
+        fwrite($xmlFile, $this->getXMLOutput());
+        $result = fclose($xmlFile);
         if ($this->updatePerms) {
             @chmod($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileMode);
             @chgrp($this->_saveToLocation . DIRECTORY_SEPARATOR . 'ImageProperties.xml', $this->fileGroup);
         }
+        return $result;
     }
 
     /**
@@ -586,9 +628,10 @@ class ZoomifyFileProcessor
      *
      * @return string
      */
-    protected function _getXMLOutput()
+    protected function getXMLOutput()
     {
-        $xmlOutput = '<IMAGE_PROPERTIES WIDTH="' . $this->_originalWidth . '" HEIGHT="' . $this->_originalHeight . '" NUMTILES="' . $this->_numberOfTiles . '" NUMIMAGES="1" VERSION="1.8" TILESIZE="' . $this->tileSize . '" />' . PHP_EOL;
+        $xmlOutput = sprintf('<IMAGE_PROPERTIES WIDTH="%s" HEIGHT="%s" NUMTILES="%s" NUMIMAGES="1" TILESIZE="%s" VERSION="1.8" />',
+            $this->_originalWidth, $this->_originalHeight, $this->_numberOfTiles, $this->tileSize) . PHP_EOL;
         return $xmlOutput;
     }
 
@@ -598,13 +641,13 @@ class ZoomifyFileProcessor
      * @param string $dirpath
      * @return boolean
      */
-    protected function _rmDir($dirPath)
+    protected function rmDir($dirPath)
     {
         $files = array_diff(scandir($dirPath), array('.', '..'));
         foreach ($files as $file) {
             $path = $dirPath . DIRECTORY_SEPARATOR . $file;
             if (is_dir($path)) {
-                $this->_rmDir($path);
+                $this->rmDir($path);
             }
             else {
                 unlink($path);
