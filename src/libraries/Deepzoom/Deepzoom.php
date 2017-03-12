@@ -9,9 +9,9 @@ namespace Deepzoom;
  * format that can be used by the "OpenSeadragon" image viewer and any IIIF
  * viewer.
  *
- * The process is a mix of the laravel plugin [Deepzoom](https://github.com/jeremytubbs/deepzoom)
+ * The process is a mix of the Laravel plugin [Deepzoom](https://github.com/jeremytubbs/deepzoom)
  * of Jeremy Tubbs, the standalone open zoom builder [Deepzoom.php](https://github.com/nfabre/deepzoom.php)
- * of Nicolas Fabre, the [script](http://omarriott.com/aux/leaflet-js-non-geographical-imagery/)
+ * of Nicolas Fabre, the [blog](http://omarriott.com/aux/leaflet-js-non-geographical-imagery/)
  * of Olivier Mariott, and the Zoomify converter (see the integrated library).
  * See respective copyright and license (MIT and GNU/GPL) in the above pages.
  */
