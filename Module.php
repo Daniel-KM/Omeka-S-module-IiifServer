@@ -35,7 +35,7 @@ use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
-use Zend\EventManager\Event;
+use Zend\EventManager\Event as ZendEvent;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
@@ -147,7 +147,7 @@ class Module extends AbstractModule
         }
     }
 
-    public function warnUninstall(Event $event)
+    public function warnUninstall(ZendEvent $event)
     {
         $view = $event->getTarget();
         $module = $view->vars()->module;
@@ -206,8 +206,14 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Module',
             'view.details',
-            array($this, 'warnUninstall')
-            );
+            [$this, 'warnUninstall']
+        );
+
+        $sharedEventManager->attach(
+            'Omeka\Entity\Media',
+            'entity.remove.post',
+            [$this, 'deleteMediaTiles']
+        );
     }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -308,6 +314,40 @@ class Module extends AbstractModule
         @copy(
             $baseDir. DIRECTORY_SEPARATOR . 'index.html',
             $dir . DIRECTORY_SEPARATOR . 'index.html');
+    }
+
+    /**
+     * Delete all tiles associated with a removed Media entity.
+     *
+     * @param Event $event
+     */
+    public function deleteMediaTiles(ZendEvent $event)
+    {
+        $serviceLocator = $this->getServiceLocator();
+        $settings = $serviceLocator->get('Omeka\Settings');
+        $tileDir = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
+
+        // Remove all files and folders, whatever the format or the source.
+        $media = $event->getTarget();
+        $storageId = $media->getStorageId();
+        $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '.dzi';
+        if (file_exists($filepath)) {
+            unlink($filepath);
+        }
+        $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '.js';
+        if (file_exists($filepath)) {
+            unlink($filepath);
+        }
+        $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '_files';
+        if (file_exists($filepath) && is_dir($filepath)) {
+            $this->rrmdir($filepath);
+        }
+        $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '_zdata';
+        if (file_exists($filepath) && is_dir($filepath)) {
+            $this->rrmdir($filepath);
+        }
     }
 
     /**
