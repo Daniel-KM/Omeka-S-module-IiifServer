@@ -8,19 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Daniel-KM/omeka-s-module-IiifServer"
+    "url": "git+https://github.com/Daniel-KM/Omeka-S-module-IiifServer"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Daniel-KM/omeka-s-module-IiifServer/issues"
+    "url": "https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues"
   },
-  "homepage": "https://github.com/Daniel-KM/omeka-s-module-IiifServer#readme",
-  "devDependencies": {
-    "async": "^2.1.4",
-    "del": "^2.2.2",
-    "gulp": "^3.9.1",
-    "gulp-rename": "^1.2.2",
-    "run-sequence": "^1.2.2"
-  }
+  "homepage": "https://github.com/Daniel-KM/Omeka-S-module-IiifServer#readme"
 }

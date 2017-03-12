@@ -28,6 +28,8 @@ before_script:
   - sed -i 's/^host.*/host = "localhost"/' application/test/config/database.ini
   - sed -i 's/^user.*/user = "root"/' application/test/config/database.ini
   - sed -i 's/^dbname.*/dbname = "omeka_test"/' application/test/config/database.ini
-  - cd modules/IiifServer/test
+  - cd modules/IiifServer
+  - composer install
+  - cd test
 
 script: phpunit
