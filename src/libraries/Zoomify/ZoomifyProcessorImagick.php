@@ -44,7 +44,7 @@ class ZoomifyFileProcessor
     public $fileGroup = 'www-data';
 
     public $tileSize = 256;
-    public $qualitySetting = 80;
+    public $tileQuality = 85;
 
     protected $_tileExt = 'jpg';
     protected $_imageFilename = '';
@@ -485,7 +485,7 @@ class ZoomifyFileProcessor
                 $tileImage->cropImage($width, $height, $ul_x, $ul_y);
                 $tileImage->setImageFormat($this->_tileExt);
                 $tileImage->setImageCompression(Imagick::COMPRESSION_JPEG);
-                $tileImage->setImageCompressionQuality($this->qualitySetting);
+                $tileImage->setImageCompressionQuality($this->tileQuality);
                 $tileImage->writeImage($tileFilename);
                 $tileImage->destroy();
                 if ($this->updatePerms) {

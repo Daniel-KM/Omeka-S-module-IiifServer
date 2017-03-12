@@ -12,11 +12,23 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'jsonLd' => 'IiifServer\Mvc\Controller\Plugin\JsonLd',
+            'tileBuilder' => 'IiifServer\Mvc\Controller\Plugin\TileBuilder',
+            'tileServer' => 'IiifServer\Mvc\Controller\Plugin\TileServer',
         ],
     ],
     'form_elements' => [
         'factories' => [
             'IiifServer\Form\ConfigForm' => 'IiifServer\Service\Form\ConfigFormFactory',
+        ],
+    ],
+    'media_ingesters' => [
+        'factories' => [
+            'tile' => 'IiifServer\Service\MediaIngester\TileFactory',
+        ]
+    ],
+    'media_renderers' => [
+        'factories' => [
+            'tile' => 'IiifServer\Service\MediaRenderer\TileFactory',
         ],
     ],
     'router' => [

@@ -34,7 +34,9 @@ use IiifServer\Form\ConfigForm;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
+use Omeka\Stdlib\Message;
 use Zend\EventManager\Event;
+use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -53,6 +55,8 @@ class Module extends AbstractModule
         'iiifserver_manifest_force_https' => false,
         'iiifserver_image_creator' => 'Auto',
         'iiifserver_image_max_size' => 10000000,
+        'iiifserver_image_tile_dir' => 'tile',
+        'iiifserver_image_tile_format' => 'deepzoom',
     );
 
     public function getConfig()
@@ -79,7 +83,8 @@ class Module extends AbstractModule
 
         $processors = $this->listProcessors($serviceLocator);
         if (count($processors) == 1) {
-            throw new ModuleCannotInstallException($t->translate('At least one graphic processor (GD or ImageMagick) is required to use the IIIF Server.')); // @translate
+            throw new ModuleCannotInstallException(
+                $t->translate('At least one graphic processor (GD or ImageMagick) is required to use the IIIF Server.')); // @translate
         }
 
         // Convert settings from old releases of Universal Viewer, if installed.
@@ -88,12 +93,12 @@ class Module extends AbstractModule
             $version = $module->getDb('version');
             if (version_compare($version, '3.4.3', '<')) {
                 $messenger->addWarning(
-                    $t->translate('Warning: The module Universal Viewer was not upgraded to version 3.4.3.')
+                    $t->translate('Warning: The module Universal Viewer was not upgraded to version 3.4.3.') // @translate
                     . ' ' . $t->translate('The settings are set to default.'));
             } elseif (version_compare($version, '3.4.3', '=')) {
                 $messenger->addSuccess(
-                    $t->translate('The settings were upgraded from Universal Viewer 3.4.3.')
-                    . ' ' . $t->translate('You can now upgrade Universal Viewer to 3.5.'));
+                    $t->translate('The settings were upgraded from Universal Viewer 3.4.3.') // @translate
+                    . ' ' . $t->translate('You can now upgrade Universal Viewer to 3.5.')); // @translate
 
                 foreach ([
                     'universalviewer_manifest_description_property' => 'iiifserver_manifest_description_property',
@@ -111,6 +116,13 @@ class Module extends AbstractModule
             }
         }
 
+        // The local store is hard coded.
+        $baseDir = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files';
+        $this->settings['iiifserver_image_tile_dir'] = $baseDir
+            . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
+
+        $this->createTilesMainDir();
+
         foreach ($this->settings as $name => $value) {
             $settings->set($name, $value);
         }
@@ -120,9 +132,68 @@ class Module extends AbstractModule
     {
         $settings = $serviceLocator->get('Omeka\Settings');
 
+        // Nuke all the tiles.
+        $tilesDir = $settings->get('iiifserver_image_tile_dir');
+        $this->rrmdir($tilesDir);
+
         foreach ($this->settings as $name => $value) {
             $settings->delete($name);
         }
+    }
+
+    public function warnUninstall(Event $event)
+    {
+        $view = $event->getTarget();
+        $module = $view->vars()->module;
+        if ($module->getId() != __NAMESPACE__) {
+            return;
+        }
+
+        $serviceLocator = $this->getServiceLocator();
+        $settings = $serviceLocator->get('Omeka\Settings');
+
+        // TODO Add a checkbox to let the choice to remove or not.
+        $html = '<ul class="messages"><li class="warning">';
+        $html .= '<strong>';
+        $html .= 'WARNING'; // @translate
+        $html .= '</strong>' . ' ';
+        $html .= 'All tiles will be removed!'; // @translate
+        $html .= '</li></ul>';
+        $html .= '<p>';
+        $html .= new Message(
+            'To keep the tiles, rename the dir "%s" before and after uninstall.', // @translate
+            $settings->get('iiifserver_image_tile_dir'));
+        $html .= '</p>';
+        echo $html;
+    }
+
+    public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
+    {
+        if (version_compare($oldVersion, '3.5.1', '<')) {
+            $settings = $serviceLocator->get('Omeka\Settings');
+
+            // The local store is hard coded.
+            $baseDir = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files';
+            $this->settings['iiifserver_image_tile_dir'] = $baseDir
+                . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
+
+            $this->createTilesMainDir();
+
+            $settings->set('iiifserver_image_tile_dir',
+                $this->settings['iiifserver_image_tile_dir']);
+
+            $settings->set('iiifserver_image_tile_format',
+                $this->settings['iiifserver_image_tile_format']);
+        }
+    }
+
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    {
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Module',
+            'view.details',
+            array($this, 'warnUninstall')
+            );
     }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -189,5 +260,70 @@ class Module extends AbstractModule
             $processors['Imagick'] = 'ImageMagick';
         }
         return $processors;
+    }
+
+    protected function createTilesMainDir()
+    {
+        // Check if the directory exists in the archive.
+        $dir = $this->settings['iiifserver_image_tile_dir'];
+        if (file_exists($dir)) {
+            if (!is_dir($dir)) {
+                throw new ModuleCannotInstallException(new Message(
+                    'The directory "%s" cannot be created: a file exists.', $dir)); // @translate
+            }
+            if (!is_writeable($dir)) {
+                throw new ModuleCannotInstallException(new Message(
+                    'The directory "%s" is not writeable.', $dir)); // @translate
+            }
+        } else {
+            $result = mkdir($dir);
+            if (!$result) {
+                throw new ModuleCannotInstallException(new Message(
+                    'The directory "%s" cannot be created.', $dir)); // @translate
+            }
+        }
+
+        $messenger = new Messenger();
+        $messenger->addSuccess(new Message(
+            'The tiles will be saved in the directory "%s".', $dir));
+
+        @copy(
+            $baseDir. DIRECTORY_SEPARATOR . 'index.html',
+            $dir . DIRECTORY_SEPARATOR . 'index.html');
+    }
+
+    /**
+     * Removes directories recursively.
+     *
+     * @param string $dir Directory name.
+     * @return boolean
+     */
+    private function rrmdir($dir)
+    {
+        if (!file_exists($dir)
+            || !is_dir($dir)
+            || !is_readable($dir)
+            || !is_writable($dir)
+        ) {
+            return false;
+        }
+
+        $scandir = scandir($dir);
+        if (!is_array($scandir)) {
+            return false;
+        }
+
+        $files = array_diff($scandir, array('.', '..'));
+        foreach ($files as $file) {
+            $path = $dir . DIRECTORY_SEPARATOR . $file;
+            if (is_dir($path)) {
+                $this->rrmdir($path);
+            }
+            else {
+                unlink($path);
+            }
+        }
+
+        return @rmdir($dir);
     }
 }

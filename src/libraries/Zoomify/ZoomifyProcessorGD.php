@@ -98,7 +98,7 @@ class ZoomifyFileProcessor
     public $fileGroup = 'www-data';
 
     public $tileSize = 256;
-    public $qualitySetting = 80;
+    public $tileQuality = 85;
 
     protected $_tileExt = 'jpg';
     protected $_imageFilename = '';
@@ -697,7 +697,7 @@ class ZoomifyFileProcessor
             @chmod($tile_file, $this->fileMode);
             @chgrp($tile_file, $this->fileGroup);
         }
-        imagejpeg($image, $tile_file, $this->qualitySetting);
+        imagejpeg($image, $tile_file, $this->tileQuality);
         if ($this->_debug) {
             print "Saving to tile_file $tile_file<br />" . PHP_EOL;
         }

@@ -163,6 +163,25 @@ class ConfigForm extends Form
                 'value' => $settings->get('iiifserver_image_max_size'),
             ],
         ]);
+
+        $valueOptions = [
+            'deepzoom' => 'Deep Zoom Image (recommended)', // @translate
+            'zoomify' => 'Zoomify', // @translate
+        ];
+        $imageFieldset->add([
+            'type' => 'Select',
+            'name' => 'iiifserver_image_tile_format',
+            'options' => [
+                'label' => 'Tiling Format', // @translate
+                'info' => 'Deep Zoom Image is an %sfree proprietary format%s from Microsoft largely supported.' // @translate
+                    . ' ' . 'Zoomify is an %sold format%s that was largely supported by proprietary softwares and free viewers.' // @translate
+                    . ' ' . 'All formats are served via the IIIF Server, but a viewer not compliant with IIIF may require a specific format.', // @translate
+                'value_options' => $valueOptions,
+            ],
+            'attributes' => [
+                'value' => $settings->get('iiifserver_image_tile_format'),
+            ],
+        ]);
     }
 
     /**
