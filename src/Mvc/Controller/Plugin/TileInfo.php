@@ -57,6 +57,13 @@ class TileInfo extends AbstractPlugin
     protected $tileBaseDir;
 
     /**
+     * Base url of tiles.
+     *
+     * @var string
+     */
+    protected $tileBaseUrl;
+
+    /**
      * Retrieve info about the tiling of an image.
      *
      * @param MediaRepresentation $media
@@ -71,10 +78,19 @@ class TileInfo extends AbstractPlugin
 
         $services = $media->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
+        $viewHelpers = $services->get('ViewHelperManager');
+
         $tileDir = $settings->get('iiifserver_image_tile_dir');
+
         $this->tileBaseDir = OMEKA_PATH
             . DIRECTORY_SEPARATOR . 'files'
             . DIRECTORY_SEPARATOR . $tileDir;
+
+        // A full url avoids some complexity when Omeka is not the root of the
+        // server.
+        $serverUrl = $viewHelpers->get('ServerUrl');
+        $basePath = $viewHelpers->get('BasePath');
+        $this->tileBaseUrl = $serverUrl() . $basePath('files' . '/' . $tileDir);
 
         $tilingData = $this->getTilingData($media->storageId());
         return $tilingData;
@@ -89,6 +105,9 @@ class TileInfo extends AbstractPlugin
      * - For Omeka Classic (Zoomify): files/zoom_tiles/storagehash_zdata
      *   and, inside it, metadata "ImageProperties.xml" and subdirs "TileGroup{x}".
      *
+     * @internal This implementation is compatible with ArchiveRepertory (use of
+     * a basename that may be a partial path).
+     *
      * @param string $basename Filename without the extension (storage id).
      * @return array|null
      */
@@ -96,12 +115,16 @@ class TileInfo extends AbstractPlugin
     {
         $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.dzi';
         if (file_exists($basepath)) {
-            return $this->getTilingDataDeepzoomDzi($basepath);
+            $tilingData = $this->getTilingDataDeepzoomDzi($basepath);
+            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            return $tilingData;
         }
 
         $basepath = $this->tileBaseDir . DIRECTORY_SEPARATOR . $basename . '.js';
         if (file_exists($basepath)) {
-            return $this->getTilingDataDeepzoomJsonp($basepath);
+            $tilingData = $this->getTilingDataDeepzoomJsonp($basepath);
+            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_DEEPZOOM;
+            return $tilingData;
         }
 
         $basepath = $this->tileBaseDir
@@ -109,7 +132,7 @@ class TileInfo extends AbstractPlugin
             . DIRECTORY_SEPARATOR . 'ImageProperties.xml';
         if (file_exists($basepath)) {
             $tilingData = $this->getTilingDataZoomify($basepath);
-            $tilingData['baseurl'] = '/' . $basename . self::FOLDER_EXTENSION_ZOOMIFY;
+            $tilingData['urlpath'] = '/' . $basename . self::FOLDER_EXTENSION_ZOOMIFY;
             return $tilingData;
         }
     }
@@ -132,7 +155,8 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
         $tilingData['path'] = $path;
-        $tilingData['baseurl'] = '';
+        $tilingData['urlbase'] = $this->tileBaseUrl;
+        $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $data['@attributes']['TileSize'];
         $tilingData['total'] = null;
         $tilingData['source']['width'] = (integer) $data['Size']['@attributes']['Width'];
@@ -158,7 +182,8 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'deepzoom';
         $tilingData['path'] = $path;
-        $tilingData['baseurl'] = '';
+        $tilingData['urlbase'] = $this->tileBaseUrl;
+        $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $data['TileSize'];
         $tilingData['total'] = null;
         $tilingData['source']['width'] = (integer) $data['Size']['Width'];
@@ -185,7 +210,8 @@ class TileInfo extends AbstractPlugin
         $tilingData = [];
         $tilingData['tile_type'] = 'zoomify';
         $tilingData['path'] = $path;
-        $tilingData['baseurl'] = '';
+        $tilingData['urlbase'] = $this->tileBaseUrl;
+        $tilingData['urlpath'] = '';
         $tilingData['size'] = (integer) $properties['TILESIZE'];
         $tilingData['total'] = (integer) $properties['NUMTILES'];
         $tilingData['source']['width'] = (integer) $properties['WIDTH'];

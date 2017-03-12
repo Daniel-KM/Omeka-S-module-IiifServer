@@ -35,20 +35,16 @@ class TileServer extends AbstractPlugin
 {
 
     /**
-     * Base url of tiles.
-     *
-     * @var string
-     */
-    protected $tileBaseUrl;
-
-    /**
      * Retrieve tiles for an image, if any, according to the required transform.
+     *
+     * @note This tile server was tested only with images tiled from the
+     * integrated tiler.
      *
      * @internal Because the position of the requested region may be anything
      * (it depends of the client), until four images may be needed to build the
      * resulting image. It's always quicker to reassemble them rather than
      * extracting the part from the full image, specially with big ones.
-     * Nevertheless, OpenSeaDragon tries to ask 0-based tiles, so only this case
+     * Nevertheless, OpenSeadragon tries to ask 0-based tiles, so only this case
      * is managed currently.
      * @todo For non standard requests, the tiled images may be used to rebuild
      * a fullsize image that is larger the Omeka derivatives. In that case,
@@ -71,21 +67,11 @@ class TileServer extends AbstractPlugin
             return;
         }
 
-        $controller = $this->getController();
-        $settings = $controller->settings();
-        $viewHelpers = $controller->viewHelpers();
-        $serverUrl = $viewHelpers->get('ServerUrl');
-        $basePath = $viewHelpers->get('BasePath');
-        $tileDir = $settings->get('iiifserver_image_tile_dir');
-
-        // A full url avoids some complexity when Omeka is not the root of the
-        // server.
-        $this->tileBaseUrl = $serverUrl() . $basePath('files' . '/' . $tileDir);
-
         switch ($tileInfo['tile_type']) {
             case 'deepzoom':
                 $tile = $this->serveTilesDeepzoom($tileInfo, $transform);
                 return $tile;
+
             case 'zoomify':
                 $tile = $this->serveTilesZoomify($tileInfo, $transform);
                 return $tile;
@@ -95,8 +81,10 @@ class TileServer extends AbstractPlugin
     /**
      * Retrieve the data for a transformation.
      *
-     * @internal The format of Zoomify is very different from the DeepZoom one,
-     * so some checks and computs are needed.
+     * @internal See a client implementation of the converter in OpenSeadragon.
+     * @see https://github.com/openseadragon/openseadragon/blob/master/src/iiiftilesource.js
+     * @see https://gist.github.com/jpstroop/4624253#file-dzi_to_iiif_2-py
+     * @see /src/libraries/Deepzoom/Deepzoom.php
      *
      * @param array $tileInfo
      * @param array $transform
@@ -104,13 +92,29 @@ class TileServer extends AbstractPlugin
      */
     protected function serveTilesDeepzoom($tileInfo, $transform)
     {
+        $data = $this->getLevelAndPosition(
+            $tileInfo,
+            $transform['source'],
+            $transform['region'],
+            $transform['size'],
+            true
+        );
+        if (is_null($data)) {
+            return;
+        }
+
+        // To manage Windows, the same path cannot be used for url and local.
+        $relativeUrl = sprintf('/%d/%d_%d.jpg',
+            $data['level'], $data['x'] , $data['y']);
+        $relativePath = sprintf('%s%d%s%d_%d.jpg',
+            DIRECTORY_SEPARATOR, $data['level'],
+            DIRECTORY_SEPARATOR, $data['x'], $data['y']);
+
+        return $this->serveTiles($tileInfo, $relativeUrl, $relativePath);
     }
 
     /**
      * Retrieve the data for a transformation.
-     *
-     * @internal The format of Zoomify is very different from the DeepZoom one,
-     * so some checks and computs are needed.
      *
      * @param array $tileInfo
      * @param array $transform
@@ -118,7 +122,13 @@ class TileServer extends AbstractPlugin
      */
     protected function serveTilesZoomify($tileInfo, $transform)
     {
-        $data = $this->getLevelAndPosition($tileInfo, $transform['source'], $transform['region'], $transform['size']);
+        $data = $this->getLevelAndPosition(
+            $tileInfo,
+            $transform['source'],
+            $transform['region'],
+            $transform['size'],
+            false
+        );
         if (is_null($data)) {
             return;
         }
@@ -134,16 +144,29 @@ class TileServer extends AbstractPlugin
 
         // To manage Windows, the same path cannot be used for url and local.
         $relativeUrl = sprintf('/TileGroup%d/%d-%d-%d.jpg',
-            $tileGroup, $data['level'], $data['x'] , $data['y']);
+            $tileGroup, $data['level'], $data['x'], $data['y']);
         $relativePath = sprintf('%sTileGroup%d%s%d-%d-%d.jpg',
             DIRECTORY_SEPARATOR, $tileGroup,
-            DIRECTORY_SEPARATOR, $data['level'], $data['x'] , $data['y']);
+            DIRECTORY_SEPARATOR, $data['level'], $data['x'], $data['y']);
 
-        $baseUrl = $this->tileBaseUrl . $tileInfo['baseurl'];
+        return $this->serveTiles($tileInfo, $relativeUrl, $relativePath);
+    }
+
+    /**
+     * Retrieve the data for a transformation.
+     *
+     * @param array $tileInfo
+     * @param string $relativeUrl
+     * @param string $relativePath
+     * @return array
+     */
+    protected function serveTiles($tileInfo, $relativeUrl, $relativePath)
+    {
+        $urlPath = $tileInfo['urlbase'] . $tileInfo['urlpath'];
         $dirpath = dirname($tileInfo['path']);
 
         // The image url is used when there is no transformation.
-        $imageUrl = $baseUrl . $relativeUrl;
+        $imageUrl = $urlPath . $relativeUrl;
         $imagePath = $dirpath . $relativePath;
         $derivativeType = 'tile';
         list($tileWidth, $tileHeight) = array_values($this->getWidthAndHeight($imagePath));
@@ -166,9 +189,11 @@ class TileServer extends AbstractPlugin
      * @param array $source
      * @param array $region
      * @param array $size
+     * @param boolean $isOneBased True if the pyramid starts at 1x1, or false if
+     * it starts at the tile size.
      * @return array|null
      */
-    protected function getLevelAndPosition($tileInfo, $source, $region, $size)
+    protected function getLevelAndPosition($tileInfo, $source, $region, $size, $isOneBased)
     {
         // Check if the tile may be cropped.
         $isFirstColumn = $region['x'] == 0;
@@ -178,8 +203,13 @@ class TileServer extends AbstractPlugin
         $isLastRow = $source['height'] == ($region['y'] + $region['height']);
         $isLastCell = $isLastColumn && $isLastRow;
 
+        // Initialize with default values.
+        $level = 0;
+        $cellX = 0;
+        $cellY = 0;
         // TODO A bigger size can be requested directly, and, in that case,
-        // multiple tiles should be joined.
+        // multiple tiles should be joined. Currently managed via the dynamic
+        // processor.
         $cellSize = $tileInfo['size'];
 
         // Manage the base level.
@@ -198,7 +228,9 @@ class TileServer extends AbstractPlugin
                     if ($isLastColumn) {
                         // Normal row. The last cell is an exception.
                         if (!$isLastCell) {
-                            // Use row, because Zoomify tiles are square.
+                            // Use row, because Deepzoom and Zoomify tiles are
+                            // square by default.
+                            // TODO Manage the case where tiles are not square.
                             $count = (integer) ceil(max($source['width'], $source['height']) / $region['height']);
                             $cellX = $region['x'] / $region['height'];
                             $cellY = $region['y'] / $region['height'];
@@ -216,7 +248,7 @@ class TileServer extends AbstractPlugin
                     if ($isLastRow) {
                         // Normal column. The last cell is an exception.
                         if (!$isLastCell) {
-                            // Use column, because Zoomify tiles are square.
+                            // Use column, because tiles are square.
                             $count = (integer) ceil(max($source['width'], $source['height']) / $region['width']);
                             $cellX = $region['x'] / $region['width'];
                             $cellY = $region['y'] / $region['width'];
@@ -236,7 +268,7 @@ class TileServer extends AbstractPlugin
                     if ($isLastColumn) {
                         // Normal row. The last cell is an exception.
                         if (!$isLastCell) {
-                            // Use row, because Zoomify tiles are square.
+                            // Use row, because tiles are square.
                             $count = (integer) ceil(max($source['width'], $source['height']) / $region['height']);
                             $cellX = $region['x'] / $region['width'];
                             $cellY = $region['y'] / $region['height'];
@@ -265,20 +297,21 @@ class TileServer extends AbstractPlugin
             }
 
             // Get the list of squale factors.
-            $squaleFactors = [];
+            $maxDimension = max([$source['width'], $source['height']]);
+            $numLevels = $this->getNumLevels($maxDimension);
+            // In IIIF, levels start at the tile size.
+            $numLevels -= (integer) log($cellSize, 2);
+            $squaleFactors = $this->getScaleFactors($numLevels);
             $maxSize = max($source['width'], $source['height']);
             $total = (integer) ceil($maxSize / $tileInfo['size']);
-            $factor = 1;
             // If level is set, count is not set and useless.
             $level = isset($level) ? $level : 0;
             $count = isset($count) ? $count : 0;
-            while ($factor / 2 < $total) {
-                // This allows to determine the level for normal regions.
-                if ($factor < $count) {
-                    $level++;
+            foreach ($squaleFactors as $squaleFactor) {
+                if ($squaleFactor >= $count) {
+                    break;
                 }
-                $squaleFactors[] = $factor;
-                $factor = $factor * 2;
+                ++$level;
             }
 
             // Process the last cell, an exception because it may be cropped.
@@ -318,12 +351,45 @@ class TileServer extends AbstractPlugin
 
         // TODO Check if the cell size is the required one (always true for image tiled here).
 
+        if ($isOneBased) {
+            $level += (integer) log($cellSize, 2);
+        }
+
         return [
             'level' => $level,
             'x' => $cellX,
             'y' => $cellY,
             'size' => $cellSize,
         ];
+    }
+
+    /**
+     * Get the number of levels in the pyramid (first level has a size of 1x1).
+     *
+     * @param integer $maxDimension
+     * @return integer
+     */
+    protected function getNumLevels($maxDimension)
+    {
+        $result = (integer) ceil(log($maxDimension, 2)) + 1;
+        return $result;
+    }
+
+    /**
+     * Get the scale factors.
+     *
+     * @internal Check the number of levels (1-based or tile based) before.
+     *
+     * @param integer $numLevels
+     * @return array
+     */
+    protected function getScaleFactors($numLevels)
+    {
+        $result = [];
+        foreach (range(0, $numLevels - 1) as $level) {
+            $result[] = pow(2, $level);
+        }
+        return $result;
     }
 
     /**
@@ -344,16 +410,16 @@ class TileServer extends AbstractPlugin
         $tierSizeCalculation = 'default';
         // $tierSizeCalculation = 'truncated';
 
-        $tierSizeInTiles = array();
+        $tierSizeInTiles = [];
 
         switch ($tierSizeCalculation) {
             case 'default':
                 $tileSize = $tile['size'];
                 while ($image['width'] > $tileSize || $image['height'] > $tileSize) {
-                    $tierSizeInTiles[] = array(
+                    $tierSizeInTiles[] = [
                         ceil($image['width'] / $tileSize),
                         ceil($image['height'] / $tileSize),
-                    );
+                    ];
                     $tileSize += $tileSize;
                 }
                 break;
@@ -362,10 +428,10 @@ class TileServer extends AbstractPlugin
                 $width = $image['width'];
                 $height = $image['height'];
                 while ($width > $tile['size'] || $height > $tile['size']) {
-                    $tierSizeInTiles[] = array(
+                    $tierSizeInTiles[] = [
                         ceil($width / $tile['size']),
                         ceil($height / $tile['size']),
-                    );
+                    ];
                     $width >>= 1;
                     $height >>= 1;
                 }
@@ -383,7 +449,7 @@ class TileServer extends AbstractPlugin
         for ($i = 1, $ii = count($tierSizeInTiles); $i < $ii; $i++) {
             $resolutions[] = 1 << $i;
             $tileCountUpToTier[] =
-                $tierSizeInTiles[$i - 1][0] * $tierSizeInTiles[$i - 1][1]
+            $tierSizeInTiles[$i - 1][0] * $tierSizeInTiles[$i - 1][1]
                 + $tileCountUpToTier[$i - 1];
         }
 

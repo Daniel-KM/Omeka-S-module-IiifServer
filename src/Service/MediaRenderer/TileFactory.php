@@ -14,11 +14,8 @@ class TileFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        $fileManager = $services->get('Omeka\File\Manager');
-
         $settings = $services->get('Omeka\Settings');
         $tileDir = $settings->get('iiifserver_image_tile_dir');
-
-        return new Tile($fileManager, $tileDir);
+        return new Tile($tileDir);
     }
 }
