@@ -118,13 +118,14 @@ class Tile implements IngesterInterface
             . DIRECTORY_SEPARATOR . 'files'
             . DIRECTORY_SEPARATOR . $this->tileParams['tile_dir'];
 
+        $params = $this->tileParams;
+        $params['storageId'] = $media->getStorageId();
+
         $tileBuilder = $this->tileBuilder;
         $tileBuilder(
             $source,
             $tileDir,
-            $this->tileParams['format'],
-            $media->getStorageId(),
-            $this->tileParams['processor']
+            $params
         );
     }
 

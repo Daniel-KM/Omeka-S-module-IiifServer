@@ -19,13 +19,10 @@ class TileBuilder extends AbstractPlugin
      *
      * @param string $filepath The path to the image.
      * @param string $destination The directory where to store the tiles.
-     * @param string $format The format of the tiles.
-     * @param string $storageId The storage id may be used to create filenames
-     * with some formats.
-     * @param string $processor The processor to use or the path to a command.
+     * @param array $params The processor to use or the path to a command.
      * @return void
      */
-    public function __invoke($source, $destination, $format, $storageId = '', $processor = '')
+    public function __invoke($source, $destination, array $params = [])
     {
         $source = realpath($source);
         if (empty($source)) {
@@ -41,16 +38,18 @@ class TileBuilder extends AbstractPlugin
             throw new InvalidArgumentException('Destination is empty.'); // @translate
         }
 
+        $format = $params['format'];
+        unset($params['format']);
         switch ($format) {
             case 'deepzoom':
-                $this->deepzoom($source, $destination, $processor);
+                $this->deepzoom($source, $destination, $params);
                 break;
             case 'zoomify':
-                if (empty($storageId)) {
-                    $storageId = pathinfo($source, PATHINFO_FILENAME);
+                if (empty($params['storageId'])) {
+                    $params['storageId'] = pathinfo($source, PATHINFO_FILENAME);
                 }
-                $destination .= DIRECTORY_SEPARATOR . $storageId . self::FOLDER_EXTENSION_ZOOMIFY;
-                $this->zoomify($source, $destination, $processor);
+                $destination .= DIRECTORY_SEPARATOR . $params['storageId'] . self::FOLDER_EXTENSION_ZOOMIFY;
+                $this->zoomify($source, $destination, $params);
                 break;
             default:
                 throw new InvalidArgumentException(new Message(
@@ -63,18 +62,17 @@ class TileBuilder extends AbstractPlugin
      *
      * @param string $source The path to the image.
      * @param string $destination The directory where to store the tiles.
-     * @param string $processor The processor to use or the path to a command.
+     * @param array $params The params for the graphic processor.
      * @return void
      */
-    protected function deepzoom($source, $destination, $processor)
+    protected function deepzoom($source, $destination, $params)
     {
         require_once dirname(dirname(dirname(__DIR__)))
             . DIRECTORY_SEPARATOR . 'libraries'
             . DIRECTORY_SEPARATOR . 'Deepzoom'
             . DIRECTORY_SEPARATOR . 'Deepzoom.php';
 
-        $config = [];
-        $config['processor'] = $processor;
+        $config = $params;
         $config['destinationRemove'] = true;
         $deepzoom = new \Deepzoom\Deepzoom($config);
         $deepzoom->process($source, $destination);
@@ -85,11 +83,12 @@ class TileBuilder extends AbstractPlugin
      *
      * @param string $source The path to the image.
      * @param string $destination The directory where to store the tiles.
-     * @param string $processor The processor to use or the path to a command.
+     * @param array $params The params for the graphic processor.
      * @return void
      */
-    protected function zoomify($source, $destination, $processor)
+    protected function zoomify($source, $destination, $params)
     {
+        $processor = $params['processor'];
         if (!empty($processor) && !in_array($processor, ['imagick', 'gd'])) {
             // Check if another processor is available before throwing an error.
             if (extension_loaded('imagick')) {
@@ -97,8 +96,8 @@ class TileBuilder extends AbstractPlugin
             } elseif (extension_loaded('gd')) {
                 $processor = 'gd';
             } else {
-                throw new InvalidArgumentException(new Message(
-                    'The processor "%s" is not supported to build tiles with the Zoomify format.', $processor)); // @translate
+                throw new InvalidArgumentException(
+                    'The Zoomify format requires the processors "Imagick" or "GD".'); // @translate
             }
         }
 

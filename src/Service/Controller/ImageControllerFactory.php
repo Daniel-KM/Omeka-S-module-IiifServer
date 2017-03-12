@@ -12,11 +12,16 @@ class ImageControllerFactory implements FactoryInterface
         $fileManager = $services->get('Omeka\File\Manager');
         $moduleManager = $services->get('Omeka\ModuleManager');
         $translator = $services->get('MvcTranslator');
+        $cli = $services->get('Omeka\Cli');
+        $config = $services->get('Config');
+        $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
 
         $controller = new ImageController(
             $fileManager,
             $moduleManager,
-            $translator
+            $translator,
+            $cli,
+            $convertDir
         );
 
         return $controller;

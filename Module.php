@@ -82,10 +82,6 @@ class Module extends AbstractModule
         $messenger = new Messenger();
 
         $processors = $this->listProcessors($serviceLocator);
-        if (count($processors) == 1) {
-            throw new ModuleCannotInstallException(
-                $t->translate('At least one graphic processor (GD or ImageMagick) is required to use the IIIF Server.')); // @translate
-        }
 
         // Convert settings from old releases of Universal Viewer, if installed.
         $module = $moduleManager->getModule('UniversalViewer');
@@ -222,17 +218,6 @@ class Module extends AbstractModule
         $formElementManager = $serviceLocator->get('FormElementManager');
         $form = $formElementManager->get(ConfigForm::class);
 
-        $messenger = new Messenger();
-        $processors = $this->listProcessors();
-        if (count($processors) == 1) {
-            $messenger->addError(
-                'Warning: No graphic library is installed: the IIIF Server can’t work.'); // @translate
-        }
-        if (!isset($processors['Imagick'])) {
-            $messenger->addWarning(
-                'Warning: Imagick is not installed: Only standard images (jpg, png, gif and webp) will be processed.'); // @translate
-        }
-
         // In this form, fieldsets are only used for the view.
         $vars = [];
         $vars['form'] = $form;
@@ -277,8 +262,10 @@ class Module extends AbstractModule
             $processors['GD'] = 'GD';
         }
         if (extension_loaded('imagick')) {
-            $processors['Imagick'] = 'ImageMagick';
+            $processors['Imagick'] = 'Imagick';
         }
+        // TODO Check if available.
+        $processors['ImageMagick'] = 'ImageMagick';
         return $processors;
     }
 

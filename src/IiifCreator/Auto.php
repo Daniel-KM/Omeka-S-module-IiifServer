@@ -33,6 +33,7 @@ namespace IiifServer\IiifCreator;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractIiifCreator;
+use Omeka\Service\Cli;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -45,13 +46,15 @@ class Auto extends AbstractIiifCreator
     protected $_imagickMimeTypes = array();
 
     protected $fileManager;
+    protected $cli;
+    protected $convertDir;
 
     /**
      * Check for the imagick extension at creation.
      *
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager)
+    public function __construct(FileManager $fileManager, Cli $cli, $convertDir)
     {
         // For simplicity, the check is prepared here, without load of classes.
 
@@ -89,6 +92,8 @@ class Auto extends AbstractIiifCreator
         }
 
         $this->fileManager = $fileManager;
+        $this->cli = $cli;
+        $this->convertDir = $convertDir;
     }
 
     /**
@@ -111,12 +116,16 @@ class Auto extends AbstractIiifCreator
             return $processor->transform($args);
         }
 
-        // Else use the extension ImageMagick, that manages more formats.
+        // Else use the extension Imagick, that manages more formats.
         if (!empty($this->_imagickMimeTypes[$args['source']['mime_type']])
                 && !empty($this->_imagickMimeTypes[$args['format']['feature']])
             ) {
             $processor = new Imagick($this->fileManager);
             return $processor->transform($args);
         }
+
+        // Else use the command line convert, if available.
+        $processor = new ImageMagick($this->fileManager, $this->cli, $this->convertDir);
+        return $processor->transform($args);
     }
 }

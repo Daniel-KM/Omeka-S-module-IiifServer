@@ -135,13 +135,12 @@ class ConfigForm extends Form
         ]);
         $imageFieldset = $this->get('iiifserver_image');
 
-        $processors['Auto'] = 'Automatic (GD when possible, else ImageMagick)'; // @translate
         $imageFieldset->add([
             'type' => 'Select',
             'name' => 'iiifserver_image_creator',
             'options' => [
                 'label' => 'Image processor', // @translate
-                'info' => 'Generally, GD is quicker than ImageMagick, but ImageMagick manages more formats.' // @translate
+                'info' => 'Generally, GD is a little faster than ImageMagick, but ImageMagick manages more formats.' // @translate
                     . ' ' . 'Nevertheless, the performance depends on your installation and your server.', // @translate
                 'value_options' => $processors,
             ],
@@ -254,13 +253,14 @@ class ConfigForm extends Form
     protected function listProcessors()
     {
         $processors = [];
-        $processors['Auto'] = 'Automatic'; // @translate
+        $processors['Auto'] = 'Automatic (GD when possible, else Imagick, else command line)'; // @translate
         if (extension_loaded('gd')) {
-            $processors['GD'] = 'GD';
+            $processors['GD'] = 'GD (php extension)'; // @translate
         }
         if (extension_loaded('imagick')) {
-            $processors['Imagick'] = 'ImageMagick';
+            $processors['Imagick'] = 'Imagick (php extension)'; // @translate
         }
+        $processors['ImageMagick'] = 'ImageMagick (command line, not recommended)'; // @translate
         return $processors;
     }
 }

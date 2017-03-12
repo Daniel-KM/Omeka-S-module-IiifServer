@@ -27,20 +27,20 @@ class TileFactory implements FactoryInterface
         $params['tile_dir'] = $settings->get('iiifserver_image_tile_dir');
         $params['format'] = $settings->get('iiifserver_image_tile_format');
 
-        $config = $services->get('Config');
-        $thumbnailer = $config['file_manager']['thumbnailer'];
+        $processor = $settings->get('iiifserver_image_creator');
         $processors = [
-            'Omeka\File\ImageMagickThumbnailer' => 'convert',
-            'Omeka\File\ImagickThumbnailer' => 'imagick',
-            'Omeka\File\GdThumbnailer' => 'gd',
+            'Auto' => '',
+            'Imagick' => 'imagick',
+            'GD' => 'gd',
+            'ImageMagick' => 'cli',
         ];
-        $processor = isset($processors[$thumbnailer]) ? $processors[$thumbnailer] : '';
-        if ($processor == 'convert') {
-            $cli = $services->get('Omeka\Cli');
-            $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
-            $processor = $this->getConvertPath($cli, $convertDir);
-        }
-        $params['processor'] = $processor;
+        $params['processor'] = isset($processors[$processor]) ? $processors[$processor] : '';
+
+        $cli = $services->get('Omeka\Cli');
+        $config = $services->get('Config');
+        $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
+        $params['convert'] = $this->getConvertPath($cli, $convertDir);
+        $params['executeStrategy'] = $config['cli']['execute_strategy'];
 
         return new Tile($fileManager, $tileBuilder, $params);
     }

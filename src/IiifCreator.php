@@ -37,6 +37,7 @@ use Zend\I18n\Translator\TranslatorAwareTrait;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
 use Omeka\Settings\Settings;
+use Omeka\Service\Cli;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -50,10 +51,18 @@ class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
     protected $_creator;
     protected $_args = array();
     protected $fileManager;
+    protected $cli;
+    protected $convertDir;
 
-    public function __construct(FileManager $fileManager, Settings $settings)
-    {
+    public function __construct(
+        FileManager $fileManager,
+        Cli $cli,
+        $convertDir,
+        Settings $settings
+    ) {
         $this->fileManager = $fileManager;
+        $this->cli = $cli;
+        $this->convertDir = $convertDir;
         $creatorClass = $settings->get('iiifserver_image_creator', 'Auto');
         $this->setCreator("\\IiifServer\\IiifCreator\\" . $creatorClass);
     }
@@ -61,7 +70,13 @@ class IiifCreator implements LoggerAwareInterface, TranslatorAwareInterface
     public function setCreator($creatorClass)
     {
         try {
-            $this->_creator = new $creatorClass($this->fileManager);
+            $needCli = [
+                '\IiifServer\IiifCreator\Auto',
+                '\IiifServer\IiifCreator\ImageMagick',
+            ];
+            $this->_creator = in_array($creatorClass, $needCli)
+                ? new $creatorClass($this->fileManager, $this->cli, $this->convertDir)
+                : new $creatorClass($this->fileManager);
         } catch (Exception $e) {
             throw $e;
         }

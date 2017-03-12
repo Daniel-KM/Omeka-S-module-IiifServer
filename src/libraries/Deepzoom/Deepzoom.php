@@ -6,7 +6,7 @@ namespace Deepzoom;
  * Support the use of the Deepzom processor classes.
  *
  * Both tools do the about same thing - that is, they convert images into a
- * format that can be used by the "OpenSeaDragon" image viewer and any IIIF
+ * format that can be used by the "OpenSeadragon" image viewer and any IIIF
  * viewer.
  *
  * The process is a mix of the laravel plugin [Deepzoom](https://github.com/jeremytubbs/deepzoom)
@@ -25,6 +25,20 @@ class Deepzoom
      * @var string
      */
     protected $processor;
+
+    /**
+     * The path to convert if the processor is "cli".
+     *
+     * @var string
+     */
+    protected $convert;
+
+    /**
+     * The strategy to use by php to process a command ("exec" or "proc_open").
+     *
+     * @var string
+     */
+    protected $executeStrategy;
 
     /**
      * The path to the image.
@@ -111,8 +125,15 @@ class Deepzoom
                 $this->processor = 'imagick';
             } elseif (extension_loaded('gd')) {
                 $this->processor = 'gd';
+            } elseif (!empty($this->convert)) {
+                $this->processor = 'cli';
             } else {
-                throw new \Exception ('No graphic library available.');
+                $this->convert = $this->getConvertPath();
+                if (!empty($this->convert)) {
+                    $this->processor = 'cli';
+                } else {
+                    throw new \Exception ('Convert path is not available.');
+                }
             }
         }
         // Imagick.
@@ -128,7 +149,16 @@ class Deepzoom
             }
         }
         // CLI.
-        elseif (strpos($this->processor, 'convert') === false) {
+        elseif ($this->processor == 'cli') {
+            if (empty($this->convert)) {
+                $this->convert = $this->getConvertPath();
+                if (empty($this->convert)) {
+                    throw new \Exception ('Convert path is not available.');
+                }
+            }
+        }
+        // Error.
+        else {
             throw new \Exception ('No graphic library available.');
         }
     }
@@ -234,6 +264,11 @@ class Deepzoom
                 $image->stripImage();
                 break;
             case 'gd':
+                $image = $this->openImage();
+                $this->data['image'] = $image;
+                break;
+            case 'cli':
+                $image = $this->filepath;
                 break;
         }
 
@@ -246,7 +281,7 @@ class Deepzoom
         foreach(range($numLevels - 1, 0) as $level) {
             $this->createTileContainer($level);
             $scale = $this->getScaleForLevel($numLevels, $level);
-            $dimension = $this->getDimensionForLevel($width, $height, $scale);
+            $dimension = $this->getDimensionForScale($width, $height, $scale);
             $this->createLevelTiles($image, $level, $dimension['width'], $dimension['height']);
         }
 
@@ -255,6 +290,10 @@ class Deepzoom
                 $image->destroy();
                 break;
             case 'gd':
+                imagedestroy($image);
+                break;
+            case 'cli':
+                // Nothing to do.
                 break;
         }
     }
@@ -265,7 +304,7 @@ class Deepzoom
      * @param $maxDimension
      * @return int
      */
-    public function getNumLevels($maxDimension)
+    protected function getNumLevels($maxDimension)
     {
         return (integer) ceil(log($maxDimension, 2)) + 1;
     }
@@ -277,7 +316,7 @@ class Deepzoom
      * @param $height
      * @return array
      */
-    public function getNumTiles($width, $height)
+    protected function getNumTiles($width, $height)
     {
         $columns = (int)ceil(floatval($width) / $this->tileSize);
         $rows = (int)ceil(floatval($height) / $this->tileSize);
@@ -305,7 +344,7 @@ class Deepzoom
      * @param $scale
      * @return array
      */
-    public function getDimensionForLevel($width, $height, $scale)
+    protected function getDimensionForScale($width, $height, $scale)
     {
         $width = (integer) ceil($width * $scale);
         $height = (integer) ceil($height * $scale);
@@ -321,7 +360,7 @@ class Deepzoom
      * @param $height
      * @return void
      */
-    public function createLevelTiles($image, $level, $width, $height)
+    protected function createLevelTiles($image, $level, $width, $height)
     {
         // Create new image at scaled dimensions.
         switch ($this->processor) {
@@ -329,6 +368,12 @@ class Deepzoom
                 $image->resizeImage($width, $height, \Imagick::FILTER_LANCZOS, 1, false);
                 break;
             case 'gd':
+                $imageLevel = $this->imageResize($width, $height);
+                break;
+            case 'cli':
+                $resize = array();
+                $resize['width'] = $width;
+                $resize['height'] = $height;
                 break;
         }
 
@@ -346,7 +391,6 @@ class Deepzoom
                 switch ($this->processor) {
                     case 'imagick':
                         $tileImage = clone $image;
-                        // Clean the canvas and optimize for web.
                         $tileImage->setImagePage(0, 0, 0, 0);
                         $tileImage->cropImage($bounds['width'], $bounds['height'], $bounds['x'], $bounds['y']);
                         $tileImage->setImageFormat($this->tileFormat);
@@ -358,9 +402,32 @@ class Deepzoom
                         $tileImage->destroy();
                         break;
                     case 'gd':
+                        $ul_x = $bounds['x'];
+                        $ul_y = $bounds['y'];
+                        $lr_x = $bounds['x'] + $bounds['width'];
+                        $lr_y = $bounds['y'] + $bounds['height'];
+                        $tileImage = $this->imageCrop($imageLevel, $ul_x, $ul_y, $lr_x, $lr_y);
+                        touch($filepath);
+                        imagejpeg($tileImage, $filepath, $this->tileQuality);
+                        imagedestroy($tileImage);
+                        break;
+                    case 'cli':
+                        $this->imageResizeCrop($image, $filepath, $resize, $bounds);
                         break;
                 }
             }
+        }
+
+        switch ($this->processor) {
+            case 'imagick':
+                // Nothing to do.
+                break;
+            case 'gd':
+                imagedestroy($imageLevel);
+                break;
+            case 'cli':
+                // Nothing to do.
+                break;
         }
     }
 
@@ -371,7 +438,7 @@ class Deepzoom
      * @param $row
      * @return array
      */
-    public function getTileBoundsPosition($column, $row)
+    protected function getTileBoundsPosition($column, $row)
     {
         $offsetX = $column == 0 ? 0 : $this->tileOverlap;
         $offsetY = $row == 0 ? 0 : $this->tileOverlap;
@@ -391,7 +458,7 @@ class Deepzoom
      * @param $h
      * @return array
      */
-    public function getTileBounds($level, $column, $row, $w, $h)
+    protected function getTileBounds($level, $column, $row, $w, $h)
     {
         $position = $this->getTileBoundsPosition($column, $row);
 
@@ -469,18 +536,18 @@ class Deepzoom
      *
      * @return ressource identifier of the image.
      */
-    protected function getImageFromFile($filename)
+    protected function getImageFromFile($filepath)
     {
-        switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
+        switch (strtolower(pathinfo($filepath, PATHINFO_EXTENSION))) {
             case 'png':
-                return imagecreatefrompng($filename);
+                return imagecreatefrompng($filepath);
             case 'gif':
-                return imagecreatefromgif($filename);
+                return imagecreatefromgif($filepath);
             case 'jpg':
             case 'jpe':
             case 'jpeg':
             default:
-                return imagecreatefromjpeg($filename);
+                return imagecreatefromjpeg($filepath);
         }
     }
 
@@ -499,19 +566,148 @@ class Deepzoom
     }
 
     /**
-     * Save the cropped region.
+     * Resize the GD main image.
+     *
+     * @param integer $width
+     * @param integer $height
+     * @return resource
      */
-    protected function saveTile($image, $scaleNumber, $column, $row)
+    protected function imageResize($width, $height)
     {
-        $tile_file = $this->getFileReference($scaleNumber, $column, $row);
-        touch($tile_file);
-        if ($this->updatePerms) {
-            @chmod($tile_file, $this->fileMode);
-            @chgrp($tile_file, $this->fileGroup);
+        $tempImage = imagecreatetruecolor($width, $height);
+        $result = imagecopyresampled(
+            $tempImage, $this->data['image'],
+            0, 0, 0, 0,
+            $width, $height, $this->data['width'], $this->data['height']);
+
+        if ($result === false) {
+            imagedestroy($tempImage);
+            throw new \Exception('Cannot resize image with GD.');
         }
-        imagejpeg($image, $tile_file, $this->tileQuality);
-        if ($this->_debug) {
-            print "Saving to tile_file $tile_file<br />" . PHP_EOL;
+
+        return $tempImage;
+    }
+
+    /**
+     * Resize and crop an image via convert.
+     *
+     * @param string $source
+     * @param string $destination
+     * @param array $resize
+     * @param array $crop
+     * @return void
+     */
+    protected function imageResizeCrop($source, $destination, $resize, $crop)
+    {
+        $args = array(
+            '+repage',
+            '-alpha remove',
+            '-thumbnail ' . escapeshellarg(sprintf('%sx%s', $resize['width'], $resize['height'])),
+            '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $crop['width'], $crop['height'], $crop['x'], $crop['y'])),
+            '-quality ' . $this->tileQuality,
+        );
+
+        $command = sprintf(
+            '%s %s %s %s',
+            $this->convert,
+            escapeshellarg($source . '[0]'),
+            implode(' ', $args),
+            escapeshellarg($destination)
+        );
+
+        $this->execute($command);
+    }
+
+    /**
+     * Helper to get the command line to convert.
+     *
+     * @return string|null
+     */
+    protected function getConvertPath()
+    {
+        $command = 'whereis -b convert';
+        $result = $this->execute($command);
+        if (empty($result)) {
+            return;
         }
+        strtok($result, ' ');
+        return strtok(' ');
+    }
+
+    /**
+     * Execute a command.
+     *
+     * Expects arguments to be properly escaped.
+     *
+     * @see Omeka\Service\Cli
+     *
+     * @param string $command An executable command
+     * @return string|false The command's standard output or false on error
+     */
+    protected function execute($command)
+    {
+        switch ($this->executeStrategy) {
+            case 'proc_open':
+                $output = $this->procOpen($command);
+                break;
+            case 'exec':
+            default:
+                $output = $this->exec($command);
+                break;
+        }
+
+        return $output;
+    }
+
+    /**
+     * Execute command using PHP's exec function.
+     *
+     * @see http://php.net/manual/en/function.exec.php
+     * @param string $command
+     * @return string|false
+     */
+    protected function exec($command)
+    {
+        exec($command, $output, $exitCode);
+        if (0 !== $exitCode) {
+            return false;
+        }
+        return implode(PHP_EOL, $output);
+    }
+
+    /**
+     * Execute command using PHP's proc_open function.
+     *
+     * For servers that allow proc_open. Logs standard error.
+     *
+     * @see http://php.net/manual/en/function.proc-open.php
+     * @param string $command
+     * @return string|false
+     */
+    protected static function procOpen($command)
+    {
+        // Using proc_open() instead of exec() solves a problem where exec('convert')
+        // fails with a "Permission Denied" error because the current working
+        // directory cannot be set properly via exec().  Note that exec() works
+        // fine when executing in the web environment but fails in CLI.
+        $descriptorSpec = array(
+            0 => array("pipe", "r"), //STDIN
+            1 => array("pipe", "w"), //STDOUT
+            2 => array("pipe", "w"), //STDERR
+        );
+        $proc = proc_open($command, $descriptorSpec, $pipes, getcwd());
+        if (!is_resource($proc)) {
+            return false;
+        }
+        $output = stream_get_contents($pipes[1]);
+        $errors = stream_get_contents($pipes[2]);
+        foreach ($pipes as $pipe) {
+            fclose($pipe);
+        }
+        $exitCode = proc_close($proc);
+        if (0 !== $exitCode) {
+            return false;
+        }
+        return trim($output);
     }
 }
