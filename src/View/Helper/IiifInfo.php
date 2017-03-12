@@ -77,9 +77,11 @@ class IiifInfo extends AbstractHelper
             $imageType = 'original';
             $imageSize = $this->_getImageSize($media, $imageType);
             list($width, $height) = array_values($imageSize);
-            $imageUrl = $this->view->url('iiifserver_image', array(
-                'id' => $media->id(),
-            ));
+            $imageUrl = $this->view->url(
+                'iiifserver_image',
+                ['id' => $media->id()],
+                ['force_canonical' => true]
+            );
             $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
 
             $profile = array();
@@ -130,9 +132,11 @@ class IiifInfo extends AbstractHelper
                 'http://wellcomelibrary.org/ld/ixif/0/context.json',
                 // WEB_ROOT . '/ld/ixif/0/context.json',
             );
-            $fileUrl = $this->view->url('iiifserver_media', array(
-                'id' => $media->id(),
-            ));
+            $fileUrl = $this->view->url(
+                'iiifserver_media',
+                ['id' => $media->id()],
+                ['force_canonical' => true]
+            );
             $fileUrl = $this->view->iiifForceHttpsIfRequired($fileUrl);
             $info['@id'] = $fileUrl;
             // See MediaController::contextAction()

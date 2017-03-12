@@ -78,9 +78,11 @@ class IiifCollectionList extends AbstractHelper
 
         $identifier = $this->buildIdentifierForList($resources);
         $route = 'iiifserver_presentation_collection_list';
-        $url = $this->view->url($route, array(
-            'id' => $identifier,
-        ));
+        $url = $this->view->url(
+            $route,
+            ['id' => $identifier],
+            ['force_canonical' => true]
+        );
         $url = $this->view->iiifForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
@@ -135,9 +137,11 @@ class IiifCollectionList extends AbstractHelper
 
             $type = 'sc:Collection';
         } else {
-            $url = $this->view->url('iiifserver_presentation_item', array(
-                'id' => $resource->id(),
-            ));
+            $url = $this->view->url(
+                'iiifserver_presentation_item',
+                ['id' => $resource->id()],
+                ['force_canonical' => true]
+            );
 
             $type = 'sc:Manifest';
         }

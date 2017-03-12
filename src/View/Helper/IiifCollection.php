@@ -151,15 +151,19 @@ class IiifCollection extends AbstractHelper
         $manifest = array();
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('iiifserver_presentation_collection', array(
-                'id' => $resource->id(),
-            ));
+            $url = $this->view->url(
+                'iiifserver_presentation_collection',
+                ['id' => $resource->id()],
+                ['force_canonical' => true]
+            );
 
             $type = 'sc:Collection';
         } else {
-            $url = $this->view->url('iiifserver_presentation_item', array(
-                'id' => $resource->id(),
-            ));
+            $url = $this->view->url(
+                'iiifserver_presentation_item',
+                ['id' => $resource->id()],
+                ['force_canonical' => true]
+            );
 
             $type = 'sc:Manifest';
         }
