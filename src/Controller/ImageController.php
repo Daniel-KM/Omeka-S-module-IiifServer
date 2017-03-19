@@ -795,8 +795,25 @@ class ImageController extends AbstractActionController
      */
     protected function _getWidthAndHeight($filepath)
     {
-        if (file_exists($filepath)) {
-            list($width, $height, $type, $attr) = getimagesize($filepath);
+        // An internet path.
+        if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
+            $file = $this->fileManager->getTempFile();
+            $tempPath = $file->getTempPath();
+            $file->delete();
+            $result = file_put_contents($tempPath, $filepath);
+            if ($result !== false) {
+                list($width, $height) = getimagesize($tempPath);
+                unlink($tempPath);
+                return array(
+                    'width' => $width,
+                    'height' => $height,
+                );
+            }
+            unlink($tempPath);
+        }
+        // A normal path.
+        elseif (file_exists($filepath)) {
+            list($width, $height) = getimagesize($filepath);
             return array(
                 'width' => $width,
                 'height' => $height,

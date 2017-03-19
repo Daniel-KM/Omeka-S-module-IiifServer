@@ -31,7 +31,6 @@
 namespace IiifServer\ImageServer;
 
 use \Exception;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractImageServer;
 

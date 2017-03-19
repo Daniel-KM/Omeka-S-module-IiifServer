@@ -234,12 +234,29 @@ class IiifInfo extends AbstractHelper
      * @param string $filepath This should be an image (no check here).
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
-     * @see UniversalViewer_ImageController::_getWidthAndHeight()
+     * @see IiifServer\Controller\ImageController::_getWidthAndHeight()
      */
     protected function _getWidthAndHeight($filepath)
     {
-        if (file_exists($filepath)) {
-            list($width, $height, $type, $attr) = getimagesize($filepath);
+        // An internet path.
+        if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
+            $file = $this->fileManager->getTempFile();
+            $tempPath = $file->getTempPath();
+            $file->delete();
+            $result = file_put_contents($tempPath, $filepath);
+            if ($result !== false) {
+                list($width, $height) = getimagesize($tempPath);
+                unlink($tempPath);
+                return array(
+                    'width' => $width,
+                    'height' => $height,
+                );
+            }
+            unlink($tempPath);
+        }
+        // A normal path.
+        elseif (file_exists($filepath)) {
+            list($width, $height) = getimagesize($filepath);
             return array(
                 'width' => $width,
                 'height' => $height,
