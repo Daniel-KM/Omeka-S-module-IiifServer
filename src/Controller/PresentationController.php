@@ -35,7 +35,6 @@ use Zend\Mvc\Controller\AbstractActionController;
 
 class PresentationController extends AbstractActionController
 {
-
     /**
      * Forward to the 'manifest' action.
      *
@@ -56,7 +55,7 @@ class PresentationController extends AbstractActionController
         }
 
         // Map iiif resources with Omeka Classic and Omeka S records.
-        $matchingResources = array(
+        $matchingResources = [
             'item' => 'items',
             'items' => 'items',
             'item-set' => 'item_sets',
@@ -65,7 +64,7 @@ class PresentationController extends AbstractActionController
             'item_sets' => 'item_sets',
             'collection' => 'item_sets',
             'collections' => 'item_sets',
-        );
+        ];
         $resourceName = $this->params('resourcename');
         if (!isset($matchingResources[$resourceName])) {
             throw new NotFoundException;

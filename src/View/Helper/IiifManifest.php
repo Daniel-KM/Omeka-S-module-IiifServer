@@ -35,7 +35,7 @@ use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\Manager as FileManager;
 use Zend\View\Helper\AbstractHelper;
-use \Exception;
+use Exception;
 use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class IiifManifest extends AbstractHelper
@@ -81,7 +81,7 @@ class IiifManifest extends AbstractHelper
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
-        $manifest = array(
+        $manifest = [
             '@context' => '',
             '@id' => '',
             '@type' => 'sc:Manifest',
@@ -98,10 +98,10 @@ class IiifManifest extends AbstractHelper
             // Other formats of the same data.
             'seeAlso' => '',
             'within' => '',
-            'metadata' => array(),
-            'mediaSequences' => array(),
-            'sequences' => array(),
-        );
+            'metadata' => [],
+            'mediaSequences' => [],
+            'sequences' => [],
+        ];
 
         $url = $this->view->url(
             'iiifserver_presentation_item',
@@ -132,7 +132,7 @@ class IiifManifest extends AbstractHelper
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags($item->value($descriptionProperty, array('type' => 'literal')));
+            $description = strip_tags($item->value($descriptionProperty, ['type' => 'literal']));
         } else {
             $description = '';
         }
@@ -149,7 +149,7 @@ class IiifManifest extends AbstractHelper
 
         $attributionProperty = $this->view->setting('iiifserver_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags($item->value($attributionProperty, array('type' => 'literal')));
+            $attribution = strip_tags($item->value($attributionProperty, ['type' => 'literal']));
         }
         if (empty($attribution)) {
             $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
@@ -175,7 +175,7 @@ class IiifManifest extends AbstractHelper
         );
         */
 
-        $withins = array();
+        $withins = [];
         foreach ($item->itemSets() as $itemSet) {
             $within = $this->view->url(
                 'iiifserver_presentation_collection',
@@ -192,13 +192,13 @@ class IiifManifest extends AbstractHelper
             $metadata['within'] = $within;
         }
 
-        $canvases = array();
+        $canvases = [];
 
         // Get all images and non-images and detect json files (for 3D model).
         $medias = $item->media();
-        $images = array();
-        $nonImages = array();
-        $jsonFiles = array();
+        $images = [];
+        $nonImages = [];
+        $jsonFiles = [];
         foreach ($medias as $media) {
             $mediaType = $media->mediaType();
             // Images files.
@@ -208,13 +208,13 @@ class IiifManifest extends AbstractHelper
             }
             // Non-images files.
             else {
-                  $nonImages[] = $media;
-                  if ($mediaType == 'application/json') {
-                      $jsonFiles[] = $media;
-                  }
+                $nonImages[] = $media;
+                if ($mediaType == 'application/json') {
+                    $jsonFiles[] = $media;
+                }
                   // Check if this is a json file for old Omeka or old imports.
                   elseif ($mediaType == 'text/plain') {
-                    // Currently, the extension is "txt", even for json files.
+                      // Currently, the extension is "txt", even for json files.
                     // switch (strtolower($media->extension())) {
                     //   case 'json':
                     //       $jsonFiles[] = $media;
@@ -223,10 +223,10 @@ class IiifManifest extends AbstractHelper
                     if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'json') {
                         $jsonFiles[] = $media;
                     }
-                }
+                  }
             }
         }
-        unset ($medias);
+        unset($medias);
         $totalImages = count($images);
         $totalJsonFiles = count($jsonFiles);
 
@@ -253,9 +253,9 @@ class IiifManifest extends AbstractHelper
         }
 
         // Process non images.
-        $rendering = array();
-        $mediaSequences = array();
-        $mediaSequencesElements = array();
+        $rendering = [];
+        $mediaSequences = [];
+        $mediaSequencesElements = [];
 
         $translate = $this->getView()->plugin('translate');
 
@@ -269,7 +269,7 @@ class IiifManifest extends AbstractHelper
             foreach ($nonImages as $media) {
                 switch ($media->mediaType()) {
                     case 'application/pdf':
-                        $render = array();
+                        $render = [];
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $media->mediaType();
                         $render['label'] = $translate('Download as PDF');
@@ -285,7 +285,7 @@ class IiifManifest extends AbstractHelper
             if ($isThreejs) {
                 $mediaSequenceElement = $this->_iiifMediaSequenceThreejs(
                     $media,
-                    array('label' => $label, 'metadata' => $metadata, 'files' => $images)
+                    ['label' => $label, 'metadata' => $metadata, 'files' => $images]
                     );
                 $mediaSequencesElements[] = $mediaSequenceElement;
             }
@@ -298,7 +298,7 @@ class IiifManifest extends AbstractHelper
                     case 'application/pdf':
                         $mediaSequenceElement = $this->_iiifMediaSequencePdf(
                             $media,
-                            array('label' => $label, 'metadata' => $metadata)
+                            ['label' => $label, 'metadata' => $metadata]
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // TODO Add the file for download (no rendering)? The
@@ -310,7 +310,7 @@ class IiifManifest extends AbstractHelper
                     // case 'audio/mp3':
                         $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
                             $media,
-                            array('label' => $label, 'metadata' => $metadata)
+                            ['label' => $label, 'metadata' => $metadata]
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // Rendering files are automatically added for download.
@@ -322,7 +322,7 @@ class IiifManifest extends AbstractHelper
                     // case 'video/webm':
                         $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
                             $media,
-                            array('label' => $label, 'metadata' => $metadata)
+                            ['label' => $label, 'metadata' => $metadata]
                         );
                         $mediaSequencesElements[] = $mediaSequenceElement;
                         // Rendering files are automatically added for download.
@@ -340,11 +340,11 @@ class IiifManifest extends AbstractHelper
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $isThreejs);
 
         // Prepare sequences.
-        $sequences = array();
+        $sequences = [];
 
         // Manage the exception: the media sequence with threejs 3D model.
         if ($isThreejs && $mediaSequencesElements) {
-            $mediaSequence = array();
+            $mediaSequence = [];
             $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
@@ -354,7 +354,7 @@ class IiifManifest extends AbstractHelper
         }
         // When there are images.
         elseif ($totalImages) {
-            $sequence = array();
+            $sequence = [];
             $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
             $sequence['@type'] = 'sc:Sequence';
             $sequence['label'] = 'Current Page Order';
@@ -371,7 +371,7 @@ class IiifManifest extends AbstractHelper
 
         // Sequences when there is no image (special content).
         elseif ($mediaSequencesElements) {
-            $mediaSequence = array();
+            $mediaSequence = [];
             $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
@@ -412,23 +412,23 @@ class IiifManifest extends AbstractHelper
         }
 
         if ($isThreejs) {
-            $manifest['@context'] = array(
+            $manifest['@context'] = [
                 'http://iiif.io/api/presentation/2/context.json',
                 'http://files.universalviewer.io/ld/ixif/0/context.json',
-            );
+            ];
         }
         // For images, the normalized context.
-        elseif($totalImages) {
+        elseif ($totalImages) {
             $manifest['@context'] = 'http://iiif.io/api/presentation/2/context.json';
         }
         // For other non standard iiif files.
         else {
-            $manifest['@context'] = array(
+            $manifest['@context'] = [
                 'http://iiif.io/api/presentation/2/context.json',
                 // See MediaController::contextAction()
                 'http://wellcomelibrary.org/ld/ixif/0/context.json',
                 // WEB_ROOT . '/ld/ixif/0/context.json',
-            );
+            ];
         }
 
         // Remove all empty values (there is no "0" or "null" at first level).
@@ -452,7 +452,7 @@ class IiifManifest extends AbstractHelper
             return;
         }
 
-        $thumbnail = array();
+        $thumbnail = [];
 
         $imageUrl = $this->view->url(
             'iiifserver_image_url',
@@ -469,7 +469,7 @@ class IiifManifest extends AbstractHelper
         $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
         $thumbnail['@id'] = $imageUrl;
 
-        $thumbnailService = array();
+        $thumbnailService = [];
         $thumbnailService['@context'] = 'http://iiif.io/api/image/2/context.json';
         $thumbnailServiceUrl = $this->view->url(
             'iiifserver_image',
@@ -491,10 +491,10 @@ class IiifManifest extends AbstractHelper
      * Create an IIIF image object from an Omeka file.
      *
      * @param MediaRepresentation $media
-     * @param integer $index Used to set the standard name of the image.
+     * @param int $index Used to set the standard name of the image.
      * @param string $canvasUrl Used to set the value for "on".
-     * @param integer $width If not set, will be calculated.
-     * @param integer $height If not set, will be calculated.
+     * @param int $width If not set, will be calculated.
+     * @param int $height If not set, will be calculated.
      * @return Standard object|null
      */
     protected function _iiifImage(MediaRepresentation $media, $index, $canvasUrl, $width = null, $height = null)
@@ -508,15 +508,15 @@ class IiifManifest extends AbstractHelper
             list($width, $height) = array_values($sizeFile);
         }
 
-        $image = array();
+        $image = [];
         $image['@id'] = $this->_baseUrl . '/annotation/p' . sprintf('%04d', $index) . '-image';
         $image['@type'] = 'oa:Annotation';
         $image['motivation'] = "sc:painting";
 
         // There is only one image (parallel is not managed currently).
-        $imageResource = array();
+        $imageResource = [];
 
-        $tiles = array();
+        $tiles = [];
         $tileInfo = new TileInfo();
         $tilingData = $tileInfo($media);
         $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
@@ -552,14 +552,14 @@ class IiifManifest extends AbstractHelper
             );
             $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
 
-            $imageResourceService = array();
+            $imageResourceService = [];
             $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
             $imageResourceService['@id'] = $imageUrl;
             $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
             $imageResourceService['width'] = $width;
             $imageResourceService['height'] = $height;
 
-            $tiles = array();
+            $tiles = [];
             $tiles[] = $iiifTileInfo;
             $imageResourceService['tiles'] = $tiles;
 
@@ -577,7 +577,7 @@ class IiifManifest extends AbstractHelper
             $imageResource['width'] = $width;
             $imageResource['height'] = $height;
 
-            $imageResourceService = array();
+            $imageResourceService = [];
             $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
 
             $imageUrl = $this->view->url(
@@ -605,14 +605,14 @@ class IiifManifest extends AbstractHelper
      * Create an IIIF canvas object for an image.
      *
      * @param MediaRepresentation $media
-     * @param integer $index Used to set the standard name of the image.
+     * @param int $index Used to set the standard name of the image.
      * @return Standard object|null
      */
     protected function _iiifCanvasImage(MediaRepresentation $media, $index)
     {
-        $canvas = array();
+        $canvas = [];
 
-        $titleFile = $media->value('dcterms:title', array('type' => 'literal'));
+        $titleFile = $media->value('dcterms:title', ['type' => 'literal']);
         $canvasUrl = $this->_baseUrl . '/canvas/p' . $index;
 
         $canvas['@id'] = $canvasUrl;
@@ -630,7 +630,7 @@ class IiifManifest extends AbstractHelper
 
         $image = $this->_iiifImage($media, $index, $canvasUrl, $width, $height);
 
-        $images = array();
+        $images = [];
         $images[] = $image;
         $canvas['images'] = $images;
 
@@ -648,7 +648,7 @@ class IiifManifest extends AbstractHelper
     {
         $translate = $this->getView()->plugin('translate');
 
-        $canvas = array();
+        $canvas = [];
         $canvas['@id'] = $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $canvas['@type'] = 'sc:Canvas';
         $canvas['label'] = $translate('Placeholder image');
@@ -660,13 +660,13 @@ class IiifManifest extends AbstractHelper
         $canvas['width'] = $imageSize['width'];
         $canvas['height'] = $imageSize['height'];
 
-        $image = array();
+        $image = [];
         $image['@id'] = $this->view->basePath('/iiif/ixif-message/imageanno/placeholder');
         $image['@type'] = 'oa:Annotation';
         $image['motivation'] = "sc:painting";
 
         // There is only one image (parallel is not managed).
-        $imageResource = array();
+        $imageResource = [];
         $imageResource['@id'] = $this->view->basePath('/iiif/ixif-message-0/res/placeholder');
         $imageResource['@type'] = 'dctypes:Image';
         $imageResource['width'] = $imageSize['width'];
@@ -676,7 +676,7 @@ class IiifManifest extends AbstractHelper
         $image['resource'] = $imageResource;
         $image['on'] = $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $image = (object) $image;
-        $images = array($image);
+        $images = [$image];
 
         $canvas['images'] = $images;
 
@@ -694,7 +694,7 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifMediaSequencePdf(MediaRepresentation $media, $values)
     {
-        $mediaSequenceElement = array();
+        $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl();
         $mediaSequenceElement['@type'] = 'foaf:Document';
         $mediaSequenceElement['format'] = $media->mediaType();
@@ -710,7 +710,7 @@ class IiifManifest extends AbstractHelper
                 $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
             }
         }
-        $mediaSequencesService = array();
+        $mediaSequencesService = [];
         $mseUrl = $this->view->url(
             'iiifserver_media',
             ['id' => $media->id()],
@@ -735,7 +735,7 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifMediaSequenceAudio(MediaRepresentation $media, $values)
     {
-        $mediaSequenceElement = array();
+        $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:Sound';
         // The format is not be set here (see rendering).
@@ -760,18 +760,18 @@ class IiifManifest extends AbstractHelper
         }
 
         // Specific to media files.
-        $mseRenderings = array();
+        $mseRenderings = [];
         // Only one rendering currently: the file itself, but it
         // may be converted to multiple format: high and low
         // resolution, webm...
-        $mseRendering = array();
+        $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();
         $mseRendering = (object) $mseRendering;
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
-        $mediaSequencesService = array();
+        $mediaSequencesService = [];
         $mseUrl = $this->view->url(
             'iiifserver_media',
             ['id' => $media->id()],
@@ -796,7 +796,7 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifMediaSequenceVideo(MediaRepresentation $media, $values)
     {
-        $mediaSequenceElement = array();
+        $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:MovingImage';
         // The format is not be set here (see rendering).
@@ -821,18 +821,18 @@ class IiifManifest extends AbstractHelper
         }
 
         // Specific to media files.
-        $mseRenderings = array();
+        $mseRenderings = [];
         // Only one rendering currently: the file itself, but it
         // may be converted to multiple format: high and low
         // resolution, webm...
-        $mseRendering = array();
+        $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();
         $mseRendering = (object) $mseRendering;
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
-        $mediaSequencesService = array();
+        $mediaSequencesService = [];
         $mseUrl = $this->view->url(
             'iiifserver_media',
             ['id' => $media->id()],
@@ -861,7 +861,7 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifMediaSequenceThreejs(MediaRepresentation $media, $values)
     {
-        $mediaSequenceElement = array();
+        $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl();
         $mediaSequenceElement['@type'] = 'dctypes:PhysicalObject';
         $mediaSequenceElement['format'] = 'application/vnd.threejs+json';
@@ -894,9 +894,9 @@ class IiifManifest extends AbstractHelper
      * @param array $rendering
      * @return Standard object
      */
-    protected function _iiifSequenceUnsupported($rendering = array())
+    protected function _iiifSequenceUnsupported($rendering = [])
     {
-        $sequence = array();
+        $sequence = [];
         $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
         $sequence['@type'] = 'sc:Sequence';
         $sequence['label'] = $this->view->translate('Unsupported extension. This manifest is being used as a wrapper for non-IIIF content (e.g., audio, video) and is unfortunately incompatible with IIIF viewers.');
@@ -904,7 +904,7 @@ class IiifManifest extends AbstractHelper
 
         $canvas = $this->_iiifCanvasPlaceholder();
 
-        $canvases = array();
+        $canvases = [];
         $canvases[] = $canvas;
 
         if ($rendering) {
@@ -920,7 +920,7 @@ class IiifManifest extends AbstractHelper
      * Get the representative thumbnail of the whole work.
      *
      * @param Resource $resource
-     * @param boolean $isThreejs Manage an exception.
+     * @param bool $isThreejs Manage an exception.
      * @return object The iiif thumbnail.
      */
     protected function _mainThumbnail($resource, $isThreejs)
@@ -978,9 +978,9 @@ class IiifManifest extends AbstractHelper
      */
     protected function iiifTileInfo($tileInfo)
     {
-        $tile = array();
+        $tile = [];
 
-        $squaleFactors = array();
+        $squaleFactors = [];
         $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
         $tileSize = $tileInfo['size'];
         $total = (integer) ceil($maxSize / $tileSize);
@@ -1015,10 +1015,10 @@ class IiifManifest extends AbstractHelper
     {
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
-            return array(
+            return [
                 'width' => null,
                 'height' => null,
-            );
+            ];
         }
 
         // The storage adapter should be checked for external storage.
@@ -1057,25 +1057,25 @@ class IiifManifest extends AbstractHelper
             if ($result !== false) {
                 list($width, $height) = getimagesize($tempPath);
                 unlink($tempPath);
-                return array(
+                return [
                     'width' => $width,
                     'height' => $height,
-                );
+                ];
             }
             unlink($tempPath);
         }
         // A normal path.
         elseif (file_exists($filepath)) {
             list($width, $height) = getimagesize($filepath);
-            return array(
+            return [
                 'width' => $width,
                 'height' => $height,
-            );
+            ];
         }
 
-        return array(
+        return [
             'width' => null,
             'height' => null,
-        );
+        ];
     }
 }

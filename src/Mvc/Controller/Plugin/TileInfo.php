@@ -34,7 +34,6 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class TileInfo extends AbstractPlugin
 {
-
     /**
      * Extension added to a folder name to store data and tiles for DeepZoom.
      *

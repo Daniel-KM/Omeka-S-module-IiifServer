@@ -45,7 +45,7 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
     use LoggerAwareTrait, TranslatorAwareTrait;
 
     // List of managed IIIF media types.
-    protected $_supportedFormats = array();
+    protected $_supportedFormats = [];
 
     protected $_args;
 
@@ -53,7 +53,7 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
      * Check if a media type is supported.
      *
      * @param string $mediaType
-     * @return boolean
+     * @return bool
      */
     public function checkMediaType($mediaType)
     {
@@ -68,7 +68,7 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
      * @param array $args List of arguments for the transformation.
      * @return string|null The filepath to the temp image if success.
      */
-    abstract public function transform(array $args = array());
+    abstract public function transform(array $args = []);
 
     /**
      * Prepare the extraction from the source and the requested region and size.
@@ -188,13 +188,13 @@ abstract class AbstractImageServer implements LoggerAwareInterface, TranslatorAw
             return;
         }
 
-        return array(
+        return [
             $sourceX,
             $sourceY,
             $sourceWidth,
             $sourceHeight,
             $destinationWidth,
             $destinationHeight,
-        );
+        ];
     }
 }

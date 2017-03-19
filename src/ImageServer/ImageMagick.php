@@ -29,7 +29,7 @@
 
 namespace IiifServer\ImageServer;
 
-use \Exception;
+use Exception;
 use Omeka\File\Manager as FileManager;
 use Omeka\Service\Cli;
 use IiifServer\AbstractImageServer;
@@ -41,7 +41,6 @@ use IiifServer\AbstractImageServer;
  */
 class ImageMagick extends AbstractImageServer
 {
-
     /**
      * Path to the ImageMagick "convert" command.
      *
@@ -50,7 +49,7 @@ class ImageMagick extends AbstractImageServer
     protected $convertPath;
 
     // List of managed IIIF media types.
-    protected $_supportedFormats = array(
+    protected $_supportedFormats = [
         'image/jpeg' => 'JPG',
         'image/png' => 'PNG',
         'image/tiff' => 'TIFF',
@@ -58,7 +57,7 @@ class ImageMagick extends AbstractImageServer
         'application/pdf' => 'PDF',
         'image/jp2' => 'JP2',
         'image/webp' => 'WEBP',
-    );
+    ];
 
     protected $fileManager;
     protected $cli;
@@ -96,7 +95,7 @@ class ImageMagick extends AbstractImageServer
      * @param array $args List of arguments for the transformation.
      * @return string|null The filepath to the temp image if success.
      */
-    public function transform(array $args = array())
+    public function transform(array $args = [])
     {
         if (empty($args)) {
             return;
@@ -277,7 +276,6 @@ class ImageMagick extends AbstractImageServer
      * Destroy an image if fetched.
      *
      * @param string $image
-     * @return void
      */
     protected function _destroyIfFetched($image)
     {

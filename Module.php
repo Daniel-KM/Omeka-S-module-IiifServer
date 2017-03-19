@@ -44,8 +44,7 @@ use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
-
-    protected $settings = array(
+    protected $settings = [
         'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
         'iiifserver_manifest_attribution_property' => '',
         'iiifserver_manifest_attribution_default' => 'Provided by Example Organization',
@@ -57,7 +56,7 @@ class Module extends AbstractModule
         'iiifserver_image_max_size' => 10000000,
         'iiifserver_image_tile_dir' => 'tile',
         'iiifserver_image_tile_type' => 'deepzoom',
-    );
+    ];
 
     public function getConfig()
     {
@@ -359,7 +358,7 @@ class Module extends AbstractModule
      * Removes directories recursively.
      *
      * @param string $dir Directory name.
-     * @return boolean
+     * @return bool
      */
     private function rrmdir($dir)
     {
@@ -376,13 +375,12 @@ class Module extends AbstractModule
             return false;
         }
 
-        $files = array_diff($scandir, array('.', '..'));
+        $files = array_diff($scandir, ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . DIRECTORY_SEPARATOR . $file;
             if (is_dir($path)) {
                 $this->rrmdir($path);
-            }
-            else {
+            } else {
                 unlink($path);
             }
         }

@@ -40,8 +40,8 @@ use IiifServer\AbstractImageServer;
  */
 class Auto extends AbstractImageServer
 {
-    protected $_gdMediaTypes = array();
-    protected $_imagickMediaTypes = array();
+    protected $_gdMediaTypes = [];
+    protected $_imagickMediaTypes = [];
 
     protected $fileManager;
     protected $commandLineArgs;
@@ -57,7 +57,7 @@ class Auto extends AbstractImageServer
 
         // If available, use GD when source and destination formats are managed.
         if (extension_loaded('gd')) {
-            $this->_gdMediaTypes = array(
+            $this->_gdMediaTypes = [
                 'image/jpeg' => true,
                 'image/png' => true,
                 'image/tiff' => false,
@@ -65,7 +65,7 @@ class Auto extends AbstractImageServer
                 'application/pdf' => false,
                 'image/jp2' => false,
                 'image/webp' => true,
-            );
+            ];
             $gdInfo = gd_info();
             if (empty($gdInfo['GIF Read Support']) || empty($gdInfo['GIF Create Support'])) {
                 $this->_gdMediaTypes['image/gif'] = false;
@@ -76,7 +76,7 @@ class Auto extends AbstractImageServer
         }
 
         if (extension_loaded('imagick')) {
-            $iiifMediaTypes = array(
+            $iiifMediaTypes = [
                 'image/jpeg' => 'JPG',
                 'image/png' => 'PNG',
                 'image/tiff' => 'TIFF',
@@ -84,7 +84,7 @@ class Auto extends AbstractImageServer
                 'application/pdf' => 'PDF',
                 'image/jp2' => 'JP2',
                 'image/webp' => 'WEBP',
-            );
+            ];
             $this->_imagickMediaTypes = array_intersect($iiifMediaTypes, \Imagick::queryFormats());
         }
 
@@ -100,7 +100,7 @@ class Auto extends AbstractImageServer
      * @param array $args List of arguments for the transformation.
      * @return string|null The filepath to the temp image if success.
      */
-    public function transform(array $args = array())
+    public function transform(array $args = [])
     {
         // GD seems to be 15% speeder, so it is used first if available.
         if (!empty($this->_gdMediaTypes[$args['source']['media_type']])

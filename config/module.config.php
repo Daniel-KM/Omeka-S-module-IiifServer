@@ -25,7 +25,7 @@ return [
     'media_ingesters' => [
         'factories' => [
             'tile' => 'IiifServer\Service\MediaIngester\TileFactory',
-        ]
+        ],
     ],
     'media_renderers' => [
         'factories' => [

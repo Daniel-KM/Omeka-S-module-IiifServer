@@ -54,7 +54,7 @@ class IiifCollection extends AbstractHelper
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
-        $manifest = array(
+        $manifest = [
             '@context' => 'http://iiif.io/api/presentation/2/context.json',
             '@id' => '',
             '@type' => 'sc:Collection',
@@ -71,16 +71,16 @@ class IiifCollection extends AbstractHelper
             // Other formats of the same data.
             'seeAlso' => '',
             'within' => '',
-            'metadata' => array(),
-            'collections' => array(),
-            'manifests' => array(),
-        );
+            'metadata' => [],
+            'collections' => [],
+            'manifests' => [],
+        ];
 
         $manifest = array_merge($manifest, $this->buildManifestBase($itemSet));
 
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
-        $metadata = array();
+        $metadata = [];
         foreach ($itemSet->values() as $term => $value) {
             $metadata[] = (object) [
                 'label' => $value['alternate_label'] ?: $value['property']->label(),
@@ -93,7 +93,7 @@ class IiifCollection extends AbstractHelper
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags($itemSet->value($descriptionProperty, array('type' => 'literal')));
+            $description = strip_tags($itemSet->value($descriptionProperty, ['type' => 'literal']));
         }
         $manifest['description'] = $description;
 
@@ -108,7 +108,7 @@ class IiifCollection extends AbstractHelper
 
         $attributionProperty = $this->view->setting('iiifserver_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags($itemSet->value($attributionProperty, array('type' => 'literal')));
+            $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal']));
         }
         if (empty($attribution)) {
             $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
@@ -125,8 +125,8 @@ class IiifCollection extends AbstractHelper
         // $manifest['within'] = $within;
 
         // List of manifests inside the item set.
-        $manifests = array();
-        $response = $this->view->api()->search('items', array('item_set_id' => $itemSet->id()));
+        $manifests = [];
+        $response = $this->view->api()->search('items', ['item_set_id' => $itemSet->id()]);
         $items = $response->getContent();
         foreach ($items as $item) {
             $manifests[] = $this->buildManifestBase($item);
@@ -138,7 +138,7 @@ class IiifCollection extends AbstractHelper
 
         // Keep at least "manifests", even if no member.
         if (empty($manifest['collections']) && empty($manifest['manifests'])) {
-            $manifest['manifests'] = array();
+            $manifest['manifests'] = [];
         }
 
         $manifest = (object) $manifest;
@@ -148,7 +148,7 @@ class IiifCollection extends AbstractHelper
     protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
-        $manifest = array();
+        $manifest = [];
 
         if ($resourceName == 'item_sets') {
             $url = $this->view->url(

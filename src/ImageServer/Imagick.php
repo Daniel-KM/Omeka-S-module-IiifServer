@@ -30,7 +30,7 @@
 
 namespace IiifServer\ImageServer;
 
-use \Exception;
+use Exception;
 use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractImageServer;
 
@@ -42,7 +42,7 @@ use IiifServer\AbstractImageServer;
 class Imagick extends AbstractImageServer
 {
     // List of managed IIIF media types.
-    protected $_supportedFormats = array(
+    protected $_supportedFormats = [
         'image/jpeg' => 'JPG',
         'image/png' => 'PNG',
         'image/tiff' => 'TIFF',
@@ -50,7 +50,7 @@ class Imagick extends AbstractImageServer
         'application/pdf' => 'PDF',
         'image/jp2' => 'JP2',
         'image/webp' => 'WEBP',
-    );
+    ];
 
     protected $fileManager;
 
@@ -79,7 +79,7 @@ class Imagick extends AbstractImageServer
      * @param array $args List of arguments for the transformation.
      * @return string|null The filepath to the temp image if success.
      */
-    public function transform(array $args = array())
+    public function transform(array $args = [])
     {
         if (empty($args)) {
             return;

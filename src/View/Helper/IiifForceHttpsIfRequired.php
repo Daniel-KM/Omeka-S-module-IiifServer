@@ -33,11 +33,10 @@ use Zend\View\Helper\AbstractHelper;
 
 class IiifForceHttpsIfRequired extends AbstractHelper
 {
-
     /**
      * Set the option to force https or not.
      *
-     * @var boolean
+     * @var bool
      */
     protected $forceHttps;
 

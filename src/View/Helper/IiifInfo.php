@@ -52,7 +52,7 @@ class IiifInfo extends AbstractHelper
      *
      * @todo Replace all data by standard classes.
      *
-     * @param Record|integer|null $record
+     * @param Record|int|null $record
      * @return Object|null
      */
     public function __invoke(MediaRepresentation $media)
@@ -62,11 +62,11 @@ class IiifInfo extends AbstractHelper
         }
 
         if (strpos($media->mediaType(), 'image/') === 0) {
-            $sizes = array();
-            $availableTypes = array('medium', 'large', 'original');
+            $sizes = [];
+            $availableTypes = ['medium', 'large', 'original'];
             foreach ($availableTypes as $imageType) {
                 $imageSize = $this->_getImageSize($media, $imageType);
-                $size = array();
+                $size = [];
                 $size['width'] = $imageSize['width'];
                 $size['height'] = $imageSize['height'];
                 $size = (object) $size;
@@ -83,7 +83,7 @@ class IiifInfo extends AbstractHelper
             );
             $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
 
-            $tiles = array();
+            $tiles = [];
             $tileInfo = new TileInfo();
             $tilingData = $tileInfo($media);
             if ($tilingData) {
@@ -93,10 +93,10 @@ class IiifInfo extends AbstractHelper
                 }
             }
 
-            $profile = array();
+            $profile = [];
             $profile[] = 'http://iiif.io/api/image/2/level2.json';
             // Temporary fix. See https://github.com/UniversalViewer/universalviewer/issues/438.
-            $profile[] = array();
+            $profile[] = [];
             // According to specifications, the profile details should be omitted,
             // because only default formats, qualities and supports are supported
             // currently.
@@ -119,7 +119,7 @@ class IiifInfo extends AbstractHelper
             $service = (object) $service;
             */
 
-            $info = array();
+            $info = [];
             $info['@context'] = 'http://iiif.io/api/image/2/context.json';
             $info['@id'] = $imageUrl;
             $info['protocol'] = 'http://iiif.io/api/image';
@@ -136,13 +136,13 @@ class IiifInfo extends AbstractHelper
 
         // Else non-image file.
         else {
-            $info = array();
-            $info['@context'] = array(
+            $info = [];
+            $info['@context'] = [
                 'http://iiif.io/api/presentation/2/context.json',
                 // See MediaController::contextAction()
                 'http://wellcomelibrary.org/ld/ixif/0/context.json',
                 // WEB_ROOT . '/ld/ixif/0/context.json',
-            );
+            ];
             $fileUrl = $this->view->url(
                 'iiifserver_media',
                 ['id' => $media->id()],
@@ -166,9 +166,9 @@ class IiifInfo extends AbstractHelper
      */
     protected function iiifTileInfo($tileInfo)
     {
-        $tile = array();
+        $tile = [];
 
-        $squaleFactors = array();
+        $squaleFactors = [];
         $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
         $tileSize = $tileInfo['size'];
         $total = (integer) ceil($maxSize / $tileSize);
@@ -203,10 +203,10 @@ class IiifInfo extends AbstractHelper
     {
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
-            return array(
+            return [
                 'width' => null,
                 'height' => null,
-            );
+            ];
         }
 
         // The storage adapter should be checked for external storage.
@@ -247,25 +247,25 @@ class IiifInfo extends AbstractHelper
             if ($result !== false) {
                 list($width, $height) = getimagesize($tempPath);
                 unlink($tempPath);
-                return array(
+                return [
                     'width' => $width,
                     'height' => $height,
-                );
+                ];
             }
             unlink($tempPath);
         }
         // A normal path.
         elseif (file_exists($filepath)) {
             list($width, $height) = getimagesize($filepath);
-            return array(
+            return [
                 'width' => $width,
                 'height' => $height,
-            );
+            ];
         }
 
-        return array(
+        return [
             'width' => null,
             'height' => null,
-        );
+        ];
     }
 }

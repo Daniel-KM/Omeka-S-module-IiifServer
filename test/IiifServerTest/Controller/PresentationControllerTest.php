@@ -2,8 +2,6 @@
 
 namespace IiifServerTest\Controller;
 
-use IiifServerTest\Controller\IiifServerControllerTestCase;
-
 class PresentationControllerTest extends IiifServerControllerTestCase
 {
     public function testIndexActionCanBeAccessed()

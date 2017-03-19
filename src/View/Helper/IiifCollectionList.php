@@ -52,7 +52,7 @@ class IiifCollectionList extends AbstractHelper
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
-        $manifest = array(
+        $manifest = [
             '@context' => 'http://iiif.io/api/presentation/2/context.json',
             '@id' => '',
             '@type' => 'sc:Collection',
@@ -69,10 +69,10 @@ class IiifCollectionList extends AbstractHelper
             // Other formats of the same data.
             'seeAlso' => '',
             'within' => '',
-            'metadata' => array(),
-            'collections' => array(),
-            'manifests' => array(),
-        );
+            'metadata' => [],
+            'collections' => [],
+            'manifests' => [],
+        ];
 
         $translate = $this->getView()->plugin('translate');
 
@@ -101,8 +101,8 @@ class IiifCollectionList extends AbstractHelper
 
         // List of the manifest of each record. IIIF v2.0 separates collections
         // and items, so the global order is not kept for them.
-        $collections = array();
-        $manifests = array();
+        $collections = [];
+        $manifests = [];
         foreach ($resources as $resource) {
             if ($resource->resourceName() == 'item_sets') {
                 $collections[] = $this->buildManifestBase($resource);
@@ -118,7 +118,7 @@ class IiifCollectionList extends AbstractHelper
 
         // Keep at least "manifests", even if no member.
         if (empty($manifest['collections']) && empty($manifest['manifests'])) {
-            $manifest['manifests'] = array();
+            $manifest['manifests'] = [];
         }
 
         $manifest = (object) $manifest;
@@ -128,12 +128,12 @@ class IiifCollectionList extends AbstractHelper
     protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
-        $manifest = array();
+        $manifest = [];
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('iiifserver_presentation_collection', array(
+            $url = $this->view->url('iiifserver_presentation_collection', [
                 'id' => $resource->id(),
-            ));
+            ]);
 
             $type = 'sc:Collection';
         } else {
@@ -171,7 +171,7 @@ class IiifCollectionList extends AbstractHelper
      */
     protected function buildIdentifierForList($resources)
     {
-        $identifiers = array();
+        $identifiers = [];
         foreach ($resources as $resource) {
             $identifiers[] = $resource->id();
         }

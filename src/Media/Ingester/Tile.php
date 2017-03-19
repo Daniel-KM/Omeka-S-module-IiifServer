@@ -75,7 +75,7 @@ class Tile implements IngesterInterface
         $fileInput = new FileInput('tile');
         $fileInput->getFilterChain()->attach(new RenameUpload([
             'target' => $file->getTempPath(),
-            'overwrite' => true
+            'overwrite' => true,
         ]));
 
         $validatorChain = $fileInput->getValidatorChain();
@@ -85,7 +85,7 @@ class Tile implements IngesterInterface
         $fileData = $fileData['tile'][$index];
         $fileInput->setValue($fileData);
         if (!$fileInput->isValid()) {
-            foreach($fileInput->getMessages() as $message) {
+            foreach ($fileInput->getMessages() as $message) {
                 $errorStore->addError('upload', $message);
             }
             return;

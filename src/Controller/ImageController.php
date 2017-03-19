@@ -30,7 +30,7 @@
 
 namespace IiifServer\Controller;
 
-use \Exception;
+use Exception;
 use Zend\I18n\Translator\TranslatorInterface;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -74,7 +74,7 @@ class ImageController extends AbstractActionController
     public function indexAction()
     {
         $id = $this->params('id');
-        $this->redirect()->toRoute('iiifserver_image_info', array('id' => $id));
+        $this->redirect()->toRoute('iiifserver_image_info', ['id' => $id]);
     }
 
     /**
@@ -338,7 +338,7 @@ class ImageController extends AbstractActionController
      */
     protected function _cleanRequest(MediaRepresentation $media)
     {
-        $transform = array();
+        $transform = [];
 
         $transform['source']['filepath'] = $this->_getImagePath($media, 'original');
         $transform['source']['media_type'] = $media->mediaType();
@@ -492,7 +492,7 @@ class ImageController extends AbstractActionController
             if ($destinationWidth && $destinationHeight) {
                 // Check the size only if the region is full, else it's forced.
                 if ($transform['region']['feature'] == 'full') {
-                    $availableTypes = array('square', 'medium', 'large', 'original');
+                    $availableTypes = ['square', 'medium', 'large', 'original'];
                     foreach ($availableTypes as $imageType) {
                         $filepath = $this->_getImagePath($media, $imageType);
                         if ($filepath) {
@@ -575,7 +575,7 @@ class ImageController extends AbstractActionController
         }
 
         // Simple rotation.
-        elseif ($rotation == 90 || $rotation == 180 || $rotation == 270)  {
+        elseif ($rotation == 90 || $rotation == 180 || $rotation == 270) {
             $transform['rotation']['feature'] = 'rotationBy90s';
             $transform['rotation']['degrees'] = $rotation;
         }
@@ -592,7 +592,7 @@ class ImageController extends AbstractActionController
 
         // Determine the format.
         // The regex in route checks it.
-        $mediaTypes = array(
+        $mediaTypes = [
             'jpg' => 'image/jpeg',
             'png' => 'image/png',
             'tif' => 'image/tiff',
@@ -600,7 +600,7 @@ class ImageController extends AbstractActionController
             'pdf' => 'application/pdf',
             'jp2' => 'image/jp2',
             'webp' => 'image/webp',
-        );
+        ];
         $transform['format']['feature'] = $mediaTypes[$format];
 
         return $transform;
@@ -674,13 +674,13 @@ class ImageController extends AbstractActionController
         if ($useDerivativePath) {
             $derivativePath = $this->_getImagePath($media, $derivativeType);
 
-            return array(
+            return [
                 'filepath' => $derivativePath,
                 'derivativeType' => $derivativeType,
                 'media_type' => 'image/jpeg',
                 'width' => $derivativeWidth,
                 'height' => $derivativeHeight,
-            );
+            ];
         }
     }
 
@@ -735,10 +735,10 @@ class ImageController extends AbstractActionController
     {
         // Check if this is an image.
         if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
-            return array(
+            return [
                 'width' => null,
                 'height' => null,
-            );
+            ];
         }
 
         // The storage adapter should be checked for external storage.
@@ -804,25 +804,25 @@ class ImageController extends AbstractActionController
             if ($result !== false) {
                 list($width, $height) = getimagesize($tempPath);
                 unlink($tempPath);
-                return array(
+                return [
                     'width' => $width,
                     'height' => $height,
-                );
+                ];
             }
             unlink($tempPath);
         }
         // A normal path.
         elseif (file_exists($filepath)) {
             list($width, $height) = getimagesize($filepath);
-            return array(
+            return [
                 'width' => $width,
                 'height' => $height,
-            );
+            ];
         }
 
-        return array(
+        return [
             'width' => null,
             'height' => null,
-        );
+        ];
     }
 }

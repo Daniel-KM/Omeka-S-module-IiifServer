@@ -7,7 +7,6 @@ use Zend\Form\Form;
 
 class ConfigForm extends Form
 {
-
     protected $api;
     protected $settings;
 
@@ -116,7 +115,7 @@ class ConfigForm extends Form
             'type' => 'Checkbox',
             'options' => [
                 'label' => 'Force https', // @translate
-                'info'  => 'In some cases, the json files (manifest and info) on a secured site (https) contains some urls with the scheme "http".' // @translate
+                'info' => 'In some cases, the json files (manifest and info) on a secured site (https) contains some urls with the scheme "http".' // @translate
                     . ' ' . 'This option forces all Omeka absolute urls in these files to start with the scheme "https".' // @translate
                     . ' ' . 'Of course, this should be unchecked on a http-only site.', // @translate
             ],

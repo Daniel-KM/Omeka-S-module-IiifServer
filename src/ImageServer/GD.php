@@ -42,7 +42,7 @@ use IiifServer\AbstractImageServer;
 class GD extends AbstractImageServer
 {
     // List of managed IIIF media types.
-    protected $_supportedFormats = array(
+    protected $_supportedFormats = [
         'image/jpeg' => true,
         'image/png' => true,
         'image/tiff' => false,
@@ -50,7 +50,7 @@ class GD extends AbstractImageServer
         'application/pdf' => false,
         'image/jp2' => false,
         'image/webp' => true,
-    );
+    ];
 
     protected $fileManager;
 
@@ -84,7 +84,7 @@ class GD extends AbstractImageServer
      * @param array $args List of arguments for the transformation.
      * @return string|null The filepath to the temp image if success.
      */
-    public function transform(array $args = array())
+    public function transform(array $args = [])
     {
         if (empty($args)) {
             return;
@@ -208,9 +208,9 @@ class GD extends AbstractImageServer
                 // GD uses counterclockwise rotation.
                 $degrees = abs(360 - $args['rotation']['degrees']);
                 // Keep the transparency if possible.
-                $transparency = imagecolorallocatealpha($destinationGD , 0, 0, 0, 127);
+                $transparency = imagecolorallocatealpha($destinationGD, 0, 0, 0, 127);
                 imagefill($destinationGD, 0, 0, $transparency);
-                $destinationGDrotated = imagerotate( $destinationGD, $degrees, $transparency);
+                $destinationGDrotated = imagerotate($destinationGD, $degrees, $transparency);
                 imagedestroy($destinationGD);
                 if ($destinationGDrotated === false) {
                     imagedestroy($sourceGD);
@@ -324,7 +324,8 @@ class GD extends AbstractImageServer
             }
         } catch (Exception $e) {
             $logger = $this->getLogger();
-            $t = $this->getTranslator();;
+            $t = $this->getTranslator();
+            ;
             $logger->log(Logger::ERR, sprintf($t->translate("GD failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
             return false;
         }

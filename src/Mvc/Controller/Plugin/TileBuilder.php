@@ -22,7 +22,6 @@ class TileBuilder extends AbstractPlugin
      * @param string $filepath The path to the image.
      * @param string $destination The directory where to store the tiles.
      * @param array $params The processor to use or the path to a command.
-     * @return void
      */
     public function __invoke($source, $destination, array $params = [])
     {
@@ -67,7 +66,7 @@ class TileBuilder extends AbstractPlugin
      * @param string $source The path to the image.
      * @param string $destination The directory where to store the tiles.
      * @param array $params The params for the graphic processor.
-     * @return boolean
+     * @return bool
      */
     protected function deepzoom($source, $destination, $params)
     {
@@ -89,7 +88,6 @@ class TileBuilder extends AbstractPlugin
      * @param string $source The path to the image.
      * @param string $destination The directory where to store the tiles.
      * @param array $params The params for the graphic processor.
-     * @return void
      */
     protected function zoomify($source, $destination, $params)
     {

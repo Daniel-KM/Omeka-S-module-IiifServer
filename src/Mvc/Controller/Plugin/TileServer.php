@@ -33,7 +33,6 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class TileServer extends AbstractPlugin
 {
-
     /**
      * Retrieve tiles for an image, if any, according to the required transform.
      *
@@ -105,7 +104,7 @@ class TileServer extends AbstractPlugin
 
         // To manage Windows, the same path cannot be used for url and local.
         $relativeUrl = sprintf('%d/%d_%d.jpg',
-            $data['level'], $data['column'] , $data['row']);
+            $data['level'], $data['column'], $data['row']);
         $relativePath = sprintf('%d%s%d_%d.jpg',
             $data['level'], DIRECTORY_SEPARATOR, $data['column'], $data['row']);
 
@@ -190,7 +189,7 @@ class TileServer extends AbstractPlugin
      * @param array $source
      * @param array $region
      * @param array $size
-     * @param boolean $isOneBased True if the pyramid starts at 1x1, or false if
+     * @param bool $isOneBased True if the pyramid starts at 1x1, or false if
      * it starts at the tile size.
      * @return array|null
      */
@@ -321,7 +320,7 @@ class TileServer extends AbstractPlugin
                     $tileFactor = $reversedFactor * $tileInfo['size'];
                     $countX = (integer) ceil($source['width'] / $tileFactor);
                     $countY = (integer) ceil($source['height'] / $tileFactor);
-                    $lastRegionWidth = $source['width'] - (($countX -1) * $tileFactor);
+                    $lastRegionWidth = $source['width'] - (($countX - 1) * $tileFactor);
                     $lastRegionHeight = $source['height'] - (($countY - 1) * $tileFactor);
                     $lastRegionX = $source['width'] - $lastRegionWidth;
                     $lastRegionY = $source['height'] - $lastRegionHeight;
@@ -368,8 +367,8 @@ class TileServer extends AbstractPlugin
     /**
      * Get the number of levels in the pyramid (first level has a size of 1x1).
      *
-     * @param integer $maxDimension
-     * @return integer
+     * @param int $maxDimension
+     * @return int
      */
     protected function getNumLevels($maxDimension)
     {
@@ -382,7 +381,7 @@ class TileServer extends AbstractPlugin
      *
      * @internal Check the number of levels (1-based or tile based) before.
      *
-     * @param integer $numLevels
+     * @param int $numLevels
      * @return array
      */
     protected function getScaleFactors($numLevels)
@@ -401,7 +400,7 @@ class TileServer extends AbstractPlugin
      *
      * @param array $image
      * @param array $tile
-     * @return integer|null
+     * @return int|null
      */
     protected function getTileGroup($image, $tile)
     {
@@ -443,11 +442,11 @@ class TileServer extends AbstractPlugin
                 return;
         }
 
-        $tierSizeInTiles[] = array(1, 1);
+        $tierSizeInTiles[] = [1, 1];
         $tierSizeInTiles = array_reverse($tierSizeInTiles);
 
-        $resolutions = array(1);
-        $tileCountUpToTier = array(0);
+        $resolutions = [1];
+        $tileCountUpToTier = [0];
         for ($i = 1, $ii = count($tierSizeInTiles); $i < $ii; $i++) {
             $resolutions[] = 1 << $i;
             $tileCountUpToTier[] =

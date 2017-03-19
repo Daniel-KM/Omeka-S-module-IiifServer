@@ -9,7 +9,6 @@ use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class Tile implements RendererInterface
 {
-
     /**
      * @var string
      */
@@ -167,7 +166,6 @@ OUTPUT;
         $args['prefixUrl'] = '';
         $args['tileSources'] = $url;
         return $args;
-
     }
 
     /**
@@ -222,9 +220,9 @@ OUTPUT;
     /**
      * Get the squale factors of an tiled image for iiif.
      *
-     * @param integer $width
-     * @param integer $height
-     * @param integer $tileSize
+     * @param int $width
+     * @param int $height
+     * @param int $tileSize
      * @return array|null
      */
     protected function getSqualeFactors($width, $height, $tileSize)
