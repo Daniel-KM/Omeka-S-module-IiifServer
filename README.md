@@ -33,15 +33,37 @@ and another tiler to support the [Deep Zoom Image] tile format.
 Installation
 ------------
 
-PHP should be installed with the extension "exif" in order to get the size of
+PHP should be installed with the extension `exif` in order to get the size of
 images. This is the case for all major distributions and providers. At least one
-of the php extensions [GD] or [Imagick] are recommended. They are installed by
-default in most servers. If not, the image server will use the command line
-[ImageMagick] tool convert.
+of the php extensions `[GD]` or `[Imagick]` are recommended. They are installed
+by default in most servers. If not, the image server will use the command line
+[ImageMagick] tool `convert`.
 
-Uncompress files and rename module folder "IiifServer".
+* From the zip
+
+Download the zipped release, not the zipped source, uncompress it in the `modules`
+directory, and rename the module folder `IiifServer`.
+
+* From the source and for development:
+
+If the module was installed from the source, check if the name of the folder of
+the module is `IiifServer`, go to the root of the module, and run either:
+
+```
+    gulp init
+```
+
+or
+
+```
+    composer install
+```
 
 Then install it like any other Omeka module.
+
+
+Notes
+-----
 
 Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
 before enabling of IiifServer. Else, simply set them in the config form.
@@ -254,9 +276,9 @@ and, more generally, to use and operate it in the same conditions of security.
 This Agreement may be freely reproduced and published, provided it is not
 altered, and that no provisions are either added or removed herefrom.
 
-The module uses libraries based on [Deepzoom] of Jeremy Buggs (license MIT) and
-Zoomify of various authors (license [GNU/GPL]). See files inside the folder
-`libraries` for more information.
+The module uses the [Deepzoom library] and [Zoomify library], the first based on
+[Deepzoom] of Jeremy Buggs (license MIT) and the second of various authors
+(license [GNU/GPL]). See files inside the folder `vendor` for more information.
 
 
 Contact
@@ -303,6 +325,8 @@ Copyright
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [threejs]: https://threejs.org
 [Archive Repertory]: https://github.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
+[Deepzoom library]: https://github.com/Daniel-KM/LibraryDeepzoom
+[Zoomify library]: https://github.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html

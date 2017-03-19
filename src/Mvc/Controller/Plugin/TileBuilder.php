@@ -4,7 +4,8 @@ namespace IiifServer\Mvc\Controller\Plugin;
 use Omeka\Service\Exception\InvalidArgumentException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-use Zoomify\Zoomify;
+use DanielKm\Deepzoom\DeepzoomFactory;
+use DanielKm\Zoomify\ZoomifyFactory;
 
 class TileBuilder extends AbstractPlugin
 {
@@ -66,17 +67,20 @@ class TileBuilder extends AbstractPlugin
      * @param string $source The path to the image.
      * @param string $destination The directory where to store the tiles.
      * @param array $params The params for the graphic processor.
-     * @return void
+     * @return boolean
      */
     protected function deepzoom($source, $destination, $params)
     {
-        require_once dirname(dirname(dirname(__DIR__)))
-            . DIRECTORY_SEPARATOR . 'libraries'
-            . DIRECTORY_SEPARATOR . 'Deepzoom'
-            . DIRECTORY_SEPARATOR . 'Deepzoom.php';
+        require_once dirname(dirname(dirname(dirname(__DIR__))))
+            . DIRECTORY_SEPARATOR . 'vendor'
+            . DIRECTORY_SEPARATOR . 'daniel-km'
+            . DIRECTORY_SEPARATOR . 'deepzoom'
+            . DIRECTORY_SEPARATOR . 'src'
+            . DIRECTORY_SEPARATOR . 'DeepzoomFactory.php';
 
-        $processor = new \Deepzoom\Deepzoom($params);
-        $processor->process($source, $destination);
+        $factory = new DeepzoomFactory;
+        $processor = $factory($params);
+        return $processor->process($source, $destination);
     }
 
     /**
@@ -89,12 +93,15 @@ class TileBuilder extends AbstractPlugin
      */
     protected function zoomify($source, $destination, $params)
     {
-        require_once dirname(dirname(dirname(__DIR__)))
-            . DIRECTORY_SEPARATOR . 'libraries'
-            . DIRECTORY_SEPARATOR . 'Zoomify'
-            . DIRECTORY_SEPARATOR . 'Zoomify.php';
+        require_once dirname(dirname(dirname(dirname(__DIR__))))
+            . DIRECTORY_SEPARATOR . 'vendor'
+            . DIRECTORY_SEPARATOR . 'daniel-km'
+            . DIRECTORY_SEPARATOR . 'zoomify'
+            . DIRECTORY_SEPARATOR . 'src'
+            . DIRECTORY_SEPARATOR . 'ZoomifyFactory.php';
 
-        $processor = new \Zoomify\Zoomify($params);
+        $factory = new ZoomifyFactory;
+        $processor = $factory($params);
         $processor->process($source, $destination);
     }
 }

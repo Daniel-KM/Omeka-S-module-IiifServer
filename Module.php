@@ -81,6 +81,24 @@ class Module extends AbstractModule
         $t = $serviceLocator->get('MvcTranslator');
         $messenger = new Messenger();
 
+        $checkDeepzoom = __DIR__
+            . DIRECTORY_SEPARATOR . 'vendor'
+            . DIRECTORY_SEPARATOR . 'daniel-km'
+            . DIRECTORY_SEPARATOR . 'deepzoom'
+            . DIRECTORY_SEPARATOR . 'src'
+            . DIRECTORY_SEPARATOR . 'DeepzoomFactory.php';
+        $checkZoomify = __DIR__
+            . DIRECTORY_SEPARATOR . 'vendor'
+            . DIRECTORY_SEPARATOR . 'daniel-km'
+            . DIRECTORY_SEPARATOR . 'zoomify'
+            . DIRECTORY_SEPARATOR . 'src'
+            . DIRECTORY_SEPARATOR . 'ZoomifyFactory.php';
+        if (!file_exists($checkDeepzoom) || !file_exists($checkZoomify)) {
+            throw new ModuleCannotInstallException(
+                $t->translate('You should run "composer install" from the root of the module, or install a release with the dependencies.') // @translate
+                . ' ' . $t->translate('See module’s installation documentation.')); // @translate
+        }
+
         $processors = $this->listProcessors($serviceLocator);
 
         // Convert settings from old releases of Universal Viewer, if installed.

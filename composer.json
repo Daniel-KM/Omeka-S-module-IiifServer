@@ -1,6 +1,21 @@
 {
+    "name": "daniel-km/iiifserver",
+    "type": "library",
+    "description": "Integrates the IIIF specifications and a simple IIP Image Server to allow to process and share instantly images of any size and medias (pdf, audio, video, 3D...) in the desired formats.",
+    "license": "CECILL-2.1",
+    "require": {
+        "daniel-km/deepzoom": "dev-master",
+        "daniel-km/zoomify": "dev-master"
+    },
     "require-dev": {
-        "biblibre/omeka-s-test-helper": "dev-master"
+        "biblibre/omeka-s-test-helper": "dev-master",
+        "friendsofphp/php-cs-fixer": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DanielKm\\Deepzoom\\": "vendor/daniel-km/deepzoom/src/",
+            "DanielKm\\Zoomify\\": "vendor/daniel-km/zoomify/src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {

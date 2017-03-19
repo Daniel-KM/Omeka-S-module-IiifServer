@@ -1,2 +1,7 @@
-node_modules
+.DS_Store
+build
+composer.phar
+composer.lock
 debug.log
+node_modules
+vendor
