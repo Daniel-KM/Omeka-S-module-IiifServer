@@ -106,8 +106,8 @@ metadata or to change the thumbnail.
   with it. Else, set the mode "IIIF" for images tiled with this format.
 
 
-Usage
------
+IIIF Server
+-----------
 
 All routes of the IIIF server are defined in `config/module.config.php`.
 They follow the recommandations of the [IIIF specifications].
@@ -244,8 +244,8 @@ Warning
 
 Use it at your own risk.
 
-It’s always recommended to backup and to check your files and database regularly
-so you can roll back if needed.
+It’s always recommended to backup your files and your databases and to check
+your archives regularly so you can roll back if needed.
 
 
 Troubleshooting
