@@ -23,5 +23,6 @@ abstract class IiifServerControllerTestCase extends OmekaControllerTestCase
     public function tearDown()
     {
         $this->api()->delete('items', $this->item->id());
+        $this->api()->delete('item_sets', $this->itemSet->id());
     }
 }
