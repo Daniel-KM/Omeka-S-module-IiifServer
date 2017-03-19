@@ -139,7 +139,6 @@ class ImageMagick extends AbstractImageServer
         // The background is normally useless, but it's costless.
         $params[] = '-background black';
         $params[] = '+repage';
-        $params[] = '-alpha remove';
         $params[] = '-flatten';
         $params[] = '-page ' . escapeshellarg(sprintf('%sx%s+0+0', $sourceWidth, $sourceHeight));
         $params[] = '-crop ' . escapeshellarg(sprintf('%dx%d+%d+%d', $sourceWidth, $sourceHeight, $sourceX, $sourceY));
