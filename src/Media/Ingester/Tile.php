@@ -106,7 +106,9 @@ class Tile implements IngesterInterface
             $media->setSource($fileData['name']);
         }
         $fileManager->storeOriginal($file);
-        $file->delete();
+        if (file_exists($file->getTempPath())) {
+            $file->delete();
+        }
 
         $storagePath = $this->fileManager
             ->getStoragePath('original', $media->getFilename());
