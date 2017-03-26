@@ -140,6 +140,7 @@ class Tile implements IngesterInterface
         ]);
         $fileInput->setAttributes([
             'id' => 'media-tile-input-__index__',
+            'required' => true,
         ]);
         $field = $view->formRow($fileInput);
         return $field . '<input type="hidden" name="o:media[__index__][tile_index]" value="__index__">';
