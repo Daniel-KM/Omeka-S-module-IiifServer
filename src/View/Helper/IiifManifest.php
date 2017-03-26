@@ -1044,10 +1044,11 @@ class IiifManifest extends AbstractHelper
         if ($imageType == 'original') {
             $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $this->fileManager->getBasename($media->filename());
-            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->storageId(), FileManager::THUMBNAIL_EXTENSION);
         }
-        $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
+        $filepath = OMEKA_PATH
+            . DIRECTORY_SEPARATOR . 'files'
+            . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);
 
         if (empty($result['width']) || empty($result['height'])) {

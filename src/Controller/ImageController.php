@@ -318,8 +318,7 @@ class ImageController extends AbstractActionController
         if ($imageType == 'original') {
             $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
         } else {
-            $basename = $this->fileManager->getBasename($media->filename());
-            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
+            $storagePath = $this->fileManager->getStoragePath($imageType, $media->storageId(), FileManager::THUMBNAIL_EXTENSION);
         }
         $filepath = OMEKA_PATH
             . DIRECTORY_SEPARATOR . 'files'
@@ -741,14 +740,8 @@ class ImageController extends AbstractActionController
             ];
         }
 
-        // The storage adapter should be checked for external storage.
-        if ($imageType == 'original') {
-            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
-        } else {
-            $basename = $this->fileManager->getBasename($media->filename());
-            $storagePath = $this->fileManager->getStoragePath($imageType, $basename, FileManager::THUMBNAIL_EXTENSION);
-        }
-        $filepath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . $storagePath;
+        $filepath = $this->_mediaFilePath($media, $imageType);
+
         $result = $this->_getWidthAndHeight($filepath);
 
         if (empty($result['width']) || empty($result['height'])) {
