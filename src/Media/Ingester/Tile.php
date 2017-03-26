@@ -1,6 +1,7 @@
 <?php
 namespace IiifServer\Media\Ingester;
 
+use IiifServer\Mvc\Controller\Plugin\TileBuilder;
 use Omeka\Api\Request;
 use Omeka\Entity\Media;
 use Omeka\File\Manager as FileManager;
@@ -10,7 +11,6 @@ use Zend\Filter\File\RenameUpload;
 use Zend\Form\Element\File;
 use Zend\InputFilter\FileInput;
 use Zend\View\Renderer\PhpRenderer;
-use IiifServer\Mvc\Controller\Plugin\TileBuilder;
 
 class Tile implements IngesterInterface
 {
@@ -47,10 +47,14 @@ class Tile implements IngesterInterface
         return 'tile';
     }
 
+    /**
+     * {@inheritDoc}
+     * @see \Omeka\Media\Ingester\IngesterInterface::ingest()
+     * @see \Omeka\Media\Ingester\Upload::ingest()
+     */
     public function ingest(Media $media, Request $request,
         ErrorStore $errorStore
     ) {
-        // @see Omeka\Media\Ingester\Upload
         $data = $request->getContent();
         $fileData = $request->getFileData();
         if (!isset($fileData['tile'])) {
@@ -124,11 +128,7 @@ class Tile implements IngesterInterface
         $params['storageId'] = $media->getStorageId();
 
         $tileBuilder = $this->tileBuilder;
-        $tileBuilder(
-            $source,
-            $tileDir,
-            $params
-        );
+        $tileBuilder($source, $tileDir, $params);
     }
 
     public function form(PhpRenderer $view, array $options = [])

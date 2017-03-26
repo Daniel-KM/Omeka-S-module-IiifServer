@@ -41,6 +41,7 @@ use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
+use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class Module extends AbstractModule
 {
@@ -131,6 +132,8 @@ class Module extends AbstractModule
 
         $this->createTilesMainDir();
 
+        $this->registerArchiveRepertory();
+
         foreach ($this->settings as $name => $value) {
             $settings->set($name, $value);
         }
@@ -153,6 +156,12 @@ class Module extends AbstractModule
             $messenger = new Messenger();
             $messenger->addWarning(
                 'The tile dir "%d" is not a real path and was not removed.', $tileDir); // @translate
+        }
+
+        $ingesters = $settings->get('archive_repertory_ingesters');
+        if ($ingesters && isset($ingesters['tile'])) {
+            unset($ingesters['tile']);
+            $settings->set('archive_repertory_ingesters', $ingesters);
         }
 
         foreach ($this->settings as $name => $value) {
@@ -231,6 +240,8 @@ class Module extends AbstractModule
 
     public function getConfigForm(PhpRenderer $renderer)
     {
+        $this->registerArchiveRepertory();
+
         $serviceLocator = $this->getServiceLocator();
         $formElementManager = $serviceLocator->get('FormElementManager');
         $form = $formElementManager->get(ConfigForm::class);
@@ -351,6 +362,27 @@ class Module extends AbstractModule
         $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '_zdata';
         if (file_exists($filepath) && is_dir($filepath)) {
             $this->rrmdir($filepath);
+        }
+    }
+
+    /**
+     * Helper to register the tile for ArchiveRepertory.
+     */
+    protected function registerArchiveRepertory()
+    {
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $ingesters = $settings->get('archive_repertory_ingesters');
+        if (!empty($ingesters)) {
+            $ingesters['tile'] = [
+                'path' => 'tile',
+                'extension' => [
+                    '.dzi',
+                    '.js',
+                    TileInfo::FOLDER_EXTENSION_DEEPZOOM,
+                    TileInfo::FOLDER_EXTENSION_ZOOMIFY,
+                ],
+            ];
+            $settings->set('archive_repertory_ingesters', $ingesters);
         }
     }
 
