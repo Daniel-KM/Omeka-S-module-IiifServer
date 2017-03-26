@@ -134,8 +134,8 @@ class MediaController extends AbstractActionController
         // The source can be a local file or an external one (Amazon S3).
         // A check can be added if the file is local.
         $store = $this->fileManager->getStore();
-        if (get_class($store) == 'LocalStore') {
-            $filepath = $this->fileManager->getStoragePath('original', $media->filename());
+        if (get_class($store) == Omeka\File\Store\LocalStore::class) {
+            $filepath = $this->fileManager->getStoragePath(\Omeka\File\Manager::ORIGINAL_PREFIX, $media->filename());
             if (!file_exists($filepath) || filesize($filepath) == 0) {
                 $response->setStatusCode(500);
 

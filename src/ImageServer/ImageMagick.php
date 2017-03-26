@@ -243,7 +243,7 @@ class ImageMagick extends AbstractImageServer
         try {
             // The source can be a local file or an external one.
             $store = $this->fileManager->getStore();
-            if (get_class($store) == 'Omeka\File\Store\LocalStore') {
+            if (get_class($store) == Omeka\File\Store\LocalStore::class) {
                 if (!is_readable($source)) {
                     return false;
                 }
