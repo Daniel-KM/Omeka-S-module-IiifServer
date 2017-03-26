@@ -165,7 +165,8 @@ The image server has two roles.
   Tiles can be created in two formats: Deep Zoom and Zoomify. [Deep Zoom Image]
   is a free proprietary format from Microsoft largely supported, and [Zoomify]
   is an old format that was largely supported by proprietary image softwares and
-  free viewers, like the [OpenLayers Zoom].
+  free viewers, like the [OpenLayers Zoom]. They are manageable by the module
+  [Archive Repertory].
 
 Note about the display of tiled and simple images
 
