@@ -952,17 +952,36 @@ class IiifManifest extends AbstractHelper
 
         // Standard record.
         if (empty($media)) {
-            // TODO Use index of the true Omeka representative file.
-            $response = $this->view->api()->search(
-                'media',
-                [
-                    'item_id' => $resource->id(),
-                    'has_thumbnails' => 1,
-                    'limit' => 1,
-                ]
-                );
-            $medias = $response->getContent();
-            $media = reset($medias);
+            // TODO Use index of the true Omeka representative file (primaryMedia()).
+            // The connection is used because the api does not allow to search
+            // on field "has_thumbnails".
+            // $response = $this->view->api()->search(
+            //     'media',
+            //     [
+            //         'item_id' => $resource->id(),
+            //         'has_thumbnails' => 1,
+            //         'limit' => 1,
+            //     ]
+            // );
+            // $medias = $response->getContent();
+            // $media = reset($medias);
+
+            $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
+                ->get('Omeka\Connection');
+            $qb = $conn->createQueryBuilder()
+                ->select('id')
+                ->from('media', 'media')
+                ->where('item_id = :item_id')
+                ->setParameter(':item_id', $resource->id())
+                ->andWhere('has_thumbnails = 1')
+                ->orderBy('id', 'ASC')
+                ->setMaxResults(1);
+            $stmt = $conn->executeQuery($qb, $qb->getParameters());
+            $id = $stmt->fetch(\PDO::FETCH_COLUMN);
+            if ($id) {
+                $response = $this->view->api()->read('media', $id);
+                $media = $response->getContent();
+            }
         }
 
         if ($media) {
