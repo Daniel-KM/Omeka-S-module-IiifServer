@@ -132,7 +132,7 @@ class Module extends AbstractModule
 
         $this->createTilesMainDir();
 
-        $this->registerArchiveRepertory();
+        $this->registerArchiveRepertory($serviceLocator);
 
         foreach ($this->settings as $name => $value) {
             $settings->set($name, $value);
@@ -240,9 +240,10 @@ class Module extends AbstractModule
 
     public function getConfigForm(PhpRenderer $renderer)
     {
-        $this->registerArchiveRepertory();
-
         $serviceLocator = $this->getServiceLocator();
+
+        $this->registerArchiveRepertory($serviceLocator);
+
         $formElementManager = $serviceLocator->get('FormElementManager');
         $form = $formElementManager->get(ConfigForm::class);
 
@@ -367,10 +368,12 @@ class Module extends AbstractModule
 
     /**
      * Helper to register the tile for ArchiveRepertory.
+     *
+     * @param ServiceLocatorInterface $serviceLocator
      */
-    protected function registerArchiveRepertory()
+    protected function registerArchiveRepertory(ServiceLocatorInterface $serviceLocator)
     {
-        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        $settings = $serviceLocator->get('Omeka\Settings');
         $ingesters = $settings->get('archive_repertory_ingesters');
         if (!empty($ingesters)) {
             $ingesters['tile'] = [
