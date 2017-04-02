@@ -100,10 +100,10 @@ metadata or to change the thumbnail.
 
 * Using Zoomify format
 
-  The Zoomify format is supported since the version 2.2.2 of OpenSeadragon, that
-  is not yet available in the default assets of Omeka. Simply build it from the
-  sources and replace the file `application/asset/js/openseadragon/openseadragon.min.js`
-  with it. Else, set the mode "IIIF" for images tiled with this format.
+The Zoomify format is supported since the version 2.2.2 of OpenSeadragon, that
+is not yet available in the default assets of Omeka. Simply build it from the
+sources and replace the file `application/asset/js/openseadragon/openseadragon.min.js`
+with it. Else, set the mode "IIIF" for images tiled with this format.
 
 
 IIIF Server
@@ -238,6 +238,8 @@ TODO / Bugs
 
 - When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image.
+- Separate IIIF Server (creation of manifests and media infos) and image server
+  (tiling and display compliant with iiif specifications).
 
 
 Warning
@@ -274,6 +276,7 @@ professionals having in-depth computer knowledge. Users are therefore encouraged
 to load and test the suitability of the software as regards their requirements
 in conditions enabling the security of their systems and/or data to be ensured
 and, more generally, to use and operate it in the same conditions of security.
+
 This Agreement may be freely reproduced and published, provided it is not
 altered, and that no provisions are either added or removed herefrom.
 
