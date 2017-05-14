@@ -78,7 +78,7 @@ class Tile implements RendererInterface
                 $media->id());
         }
 
-        $data['prefixUrl'] = $view->assetUrl('js/openseadragon/images/', 'Omeka');
+        $data['prefixUrl'] = $view->assetUrl('vendor/openseadragon/images/', 'Omeka');
 
         if (isset($options['data'])) {
             $data = array_merge($data, $options['data']);
@@ -86,7 +86,7 @@ class Tile implements RendererInterface
 
         $args = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        $view->headScript()->appendFile($view->assetUrl('js/openseadragon/openseadragon.min.js', 'Omeka'));
+        $view->headScript()->appendFile($view->assetUrl('vendor/openseadragon/openseadragon.min.js', 'Omeka'));
 
         $noscript = 'OpenSeadragon is not available unless JavaScript is enabled.'; // @translate
         $image = <<<OUTPUT
