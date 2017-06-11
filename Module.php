@@ -30,7 +30,7 @@
 
 namespace IiifServer;
 
-use IiifServer\Form\ConfigForm;
+use IiifServer\Form\Config as ConfigForm;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
@@ -250,7 +250,7 @@ class Module extends AbstractModule
         // In this form, fieldsets are only used for the view.
         $vars = [];
         $vars['form'] = $form;
-        return $renderer->render('admin/iiif-server/config-form.phtml', $vars);
+        return $renderer->render('iiif-server/module/config.phtml', $vars);
     }
 
     public function handleConfigForm(AbstractController $controller)

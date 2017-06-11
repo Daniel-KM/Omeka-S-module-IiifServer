@@ -5,7 +5,7 @@ use Omeka\Api\Manager as ApiManager;
 use Omeka\Settings\Settings;
 use Zend\Form\Form;
 
-class ConfigForm extends Form
+class Config extends Form
 {
     protected $api;
     protected $settings;

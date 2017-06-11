@@ -1,35 +1,53 @@
 <?php
+namespace IiifServer;
+
 return [
     'controllers' => [
         'invokables' => [
-            'IiifServer\Controller\Presentation' => 'IiifServer\Controller\PresentationController',
+            'IiifServer\Controller\Presentation' => Controller\PresentationController::class,
         ],
         'factories' => [
-            'IiifServer\Controller\Image' => 'IiifServer\Service\Controller\ImageControllerFactory',
-            'IiifServer\Controller\Media' => 'IiifServer\Service\Controller\MediaControllerFactory',
+            'IiifServer\Controller\Image' => Service\Controller\ImageControllerFactory::class,
+            'IiifServer\Controller\Media' => Service\Controller\MediaControllerFactory::class,
         ],
     ],
     'controller_plugins' => [
         'invokables' => [
-            'jsonLd' => 'IiifServer\Mvc\Controller\Plugin\JsonLd',
-            'tileBuilder' => 'IiifServer\Mvc\Controller\Plugin\TileBuilder',
-            'tileInfo' => 'IiifServer\Mvc\Controller\Plugin\TileInfo',
-            'tileServer' => 'IiifServer\Mvc\Controller\Plugin\TileServer',
+            'jsonLd' => Mvc\Controller\Plugin\JsonLd::class,
+            'tileBuilder' => Mvc\Controller\Plugin\TileBuilder::class,
+            'tileInfo' => Mvc\Controller\Plugin\TileInfo::class,
+            'tileServer' => Mvc\Controller\Plugin\TileServer::class,
         ],
     ],
     'form_elements' => [
         'factories' => [
-            'IiifServer\Form\ConfigForm' => 'IiifServer\Service\Form\ConfigFormFactory',
+            'IiifServer\Form\Config' => Service\Form\ConfigFactory::class,
         ],
     ],
     'media_ingesters' => [
         'factories' => [
-            'tile' => 'IiifServer\Service\MediaIngester\TileFactory',
+            'tile' => Service\MediaIngester\TileFactory::class,
         ],
     ],
     'media_renderers' => [
         'factories' => [
-            'tile' => 'IiifServer\Service\MediaRenderer\TileFactory',
+            'tile' => Service\MediaRenderer\TileFactory::class,
+        ],
+    ],
+    'view_manager' => [
+        'template_path_stack' => [
+            OMEKA_PATH . '/modules/IiifServer/view',
+        ],
+    ],
+    'view_helpers' => [
+        'invokables' => [
+            'iiifCollection' => View\Helper\IiifCollection::class,
+            'iiifCollectionList' => View\Helper\IiifCollectionList::class,
+            'iiifForceHttpsIfRequired' => View\Helper\IiifForceHttpsIfRequired::class,
+        ],
+        'factories' => [
+            'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
+            'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
         ],
     ],
     'router' => [
@@ -309,22 +327,6 @@ return [
             //         ],
             //     ],
             // ],
-        ],
-    ],
-    'view_manager' => [
-        'template_path_stack' => [
-            OMEKA_PATH . '/modules/IiifServer/view',
-        ],
-    ],
-    'view_helpers' => [
-        'invokables' => [
-            'iiifCollection' => 'IiifServer\View\Helper\IiifCollection',
-            'iiifCollectionList' => 'IiifServer\View\Helper\IiifCollectionList',
-            'iiifForceHttpsIfRequired' => 'IiifServer\View\Helper\IiifForceHttpsIfRequired',
-        ],
-        'factories' => [
-            'iiifInfo' => 'IiifServer\Service\ViewHelper\IiifInfoFactory',
-            'iiifManifest' => 'IiifServer\Service\ViewHelper\IiifManifestFactory',
         ],
     ],
     'translator' => [
