@@ -33,11 +33,6 @@ and another tiler to support the [Deep Zoom Image] tile format.
 Installation
 ------------
 
-* IMPORTANT *
-
-Use release 3.5.3 for Omeka S 1.0 beta 3 and master for Omeka S upstream dev.
-
-
 PHP should be installed with the extension `exif` in order to get the size of
 images. This is the case for all major distributions and providers. At least one
 of the php extensions `[GD]` or `[Imagick]` are recommended. They are installed
