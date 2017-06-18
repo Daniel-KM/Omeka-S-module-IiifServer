@@ -44,6 +44,8 @@ by default in most servers. If not, the image server will use the command line
 Download the zipped release, not the zipped source, uncompress it in the `modules`
 directory, and rename the module folder `IiifServer`.
 
+The zip is created with this command: `gulp zip --no-dev`.
+
 * From the source and for development:
 
 If the module was installed from the source, check if the name of the folder of
