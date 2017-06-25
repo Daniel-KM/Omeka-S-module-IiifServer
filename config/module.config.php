@@ -36,7 +36,10 @@ return [
     ],
     'view_manager' => [
         'template_path_stack' => [
-            OMEKA_PATH . '/modules/IiifServer/view',
+            __DIR__ . '/../view',
+        ],
+        'strategies' => [
+            'ViewJsonStrategy',
         ],
     ],
     'view_helpers' => [
