@@ -31,6 +31,7 @@
 namespace IiifServer;
 
 use IiifServer\Form\Config as ConfigForm;
+use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
@@ -41,7 +42,6 @@ use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
-use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class Module extends AbstractModule
 {
@@ -96,7 +96,7 @@ class Module extends AbstractModule
         if (!file_exists($checkDeepzoom) || !file_exists($checkZoomify)) {
             throw new ModuleCannotInstallException(
                 $t->translate('You should run "composer install" from the root of the module, or install a release with the dependencies.') // @translate
-                . ' ' . $t->translate('See module’s installation documentation.')); // @translate
+                    . ' ' . $t->translate('See module’s installation documentation.')); // @translate
         }
 
         $processors = $this->listProcessors($serviceLocator);
@@ -105,7 +105,10 @@ class Module extends AbstractModule
         $module = $moduleManager->getModule('UniversalViewer');
         if ($module) {
             $version = $module->getDb('version');
-            if (version_compare($version, '3.4.3', '<')) {
+            // Check if installed.
+            if (empty($version)) {
+                // Nothing to do.
+            } elseif (version_compare($version, '3.4.3', '<')) {
                 $messenger->addWarning(
                     $t->translate('Warning: The module Universal Viewer was not upgraded to version 3.4.3.') // @translate
                     . ' ' . $t->translate('The settings are set to default.'));
@@ -155,7 +158,7 @@ class Module extends AbstractModule
         } else {
             $messenger = new Messenger();
             $messenger->addWarning(
-                'The tile dir "%d" is not a real path and was not removed.', $tileDir); // @translate
+                'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
         }
 
         $ingesters = $settings->get('archive_repertory_ingesters');
@@ -381,8 +384,11 @@ class Module extends AbstractModule
                 'extension' => [
                     '.dzi',
                     '.js',
-                    TileInfo::FOLDER_EXTENSION_DEEPZOOM,
-                    TileInfo::FOLDER_EXTENSION_ZOOMIFY,
+                    // The classes are not available before the end of install.
+                    // TileInfo::FOLDER_EXTENSION_DEEPZOOM,
+                    '_files',
+                    // TileInfo::FOLDER_EXTENSION_ZOOMIFY,
+                    '_zdata',
                 ],
             ];
             $settings->set('archive_repertory_ingesters', $ingesters);
