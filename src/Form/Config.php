@@ -20,7 +20,7 @@ class Config extends Form
             'type' => 'Fieldset',
             'name' => 'iiifserver_manifest',
             'options' => [
-                'label' => 'IIIF Manifests', // @translate
+                'label' => 'IIIF manifests', // @translate
                 'info' => 'The module creates manifests with the properties from each resource (item set, item and media).' // @translate
                     . ' ' . 'The properties below are used when some metadata are missing.' // @translate
                     . ' ' . 'In all cases, empty properties are not set.' // @translate
@@ -62,7 +62,7 @@ class Config extends Form
             'name' => 'iiifserver_manifest_attribution_default',
             'type' => 'Text',
             'options' => [
-                'label' => 'Default Attribution', // @translate
+                'label' => 'Default attribution', // @translate
                 'info' => 'If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.' // @translate
                     . ' ' . 'It will be used as pop up in the Universal Viewer too, if enabled.',  // @translate
             ],
@@ -75,7 +75,7 @@ class Config extends Form
             'type' => 'Select',
             'name' => 'iiifserver_manifest_license_property',
             'options' => [
-                'label' => 'Property to use for License', // @translate
+                'label' => 'Property to use for license', // @translate
                 'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the rights.' // @translate
                     . ' ' . 'It’s recommended to use "dcterms:license".', // @translate
                 'empty_option' => 'Select a property...', // @translate
@@ -90,7 +90,7 @@ class Config extends Form
             'name' => 'iiifserver_manifest_license_default',
             'type' => 'Text',
             'options' => [
-                'label' => 'Default License', // @translate
+                'label' => 'Default license', // @translate
                 'info' => 'If any, and if there is no metadata for the element above, this text will be added in all manifests and viewers to indicate the license.',  // @translate
             ],
             'attributes' => [
@@ -128,7 +128,7 @@ class Config extends Form
             'type' => 'Fieldset',
             'name' => 'iiifserver_image',
             'options' => [
-                'label' => 'Image Server', // @translate
+                'label' => 'Image server', // @translate
                 'info' => 'Images may be processed internally before to be sent to browser.', // @translate
             ],
         ]);
@@ -170,7 +170,7 @@ class Config extends Form
             'type' => 'Select',
             'name' => 'iiifserver_image_tile_type',
             'options' => [
-                'label' => 'Tiling Type', // @translate
+                'label' => 'Tiling type', // @translate
                 'info' => 'Deep Zoom Image is a %sfree proprietary format%s from Microsoft largely supported.' // @translate
                     . ' ' . 'Zoomify is an %sold format%s that was largely supported by proprietary softwares and free viewers.' // @translate
                     . ' ' . 'All formats are served as native by default, but may be served as IIIF too when a viewer request it.', // @translate

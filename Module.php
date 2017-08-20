@@ -31,7 +31,7 @@
 namespace IiifServer;
 
 use IiifServer\Form\Config as ConfigForm;
-use IiifServer\Mvc\Controller\Plugin\TileInfo;
+// use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;

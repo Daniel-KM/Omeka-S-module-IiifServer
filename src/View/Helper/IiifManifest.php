@@ -30,21 +30,32 @@
 
 namespace IiifServer\View\Helper;
 
+use Exception;
+use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\File\Manager as FileManager;
+use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
-use Exception;
-use IiifServer\Mvc\Controller\Plugin\TileInfo;
 
 class IiifManifest extends AbstractHelper
 {
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
 
-    public function __construct(FileManager $fileManager)
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory= $tempFileFactory;
+        $this->basePath = $basePath;
     }
 
     /**
@@ -1018,6 +1029,20 @@ class IiifManifest extends AbstractHelper
     }
 
     /**
+     * Get a storage path.
+     *
+     * @param string $prefix The storage prefix
+     * @param string $name The file name, or basename if extension is passed
+     * @param null|string $extension The file extension
+     * @return string
+     * @todo Refactorize.
+     */
+    protected function getStoragePath($prefix, $name, $extension = null)
+    {
+        return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
+    }
+
+    /**
      * Get an array of the width and height of the image file.
      *
      * @param MediaRepresentation $media
@@ -1042,12 +1067,11 @@ class IiifManifest extends AbstractHelper
 
         // The storage adapter should be checked for external storage.
         if ($imageType == 'original') {
-            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->getStoragePath($imageType, $media->filename());
         } else {
-            $storagePath = $this->fileManager->getStoragePath($imageType, $media->storageId(), FileManager::THUMBNAIL_EXTENSION);
+            $storagePath = $this->getStoragePath($imageType, $media->storageId(), 'jpg');
         }
-        $filepath = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
+        $filepath = $this->basePath
             . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->_getWidthAndHeight($filepath);
 
@@ -1065,14 +1089,15 @@ class IiifManifest extends AbstractHelper
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
      * @see IiifServer\Controller\ImageController::_getWidthAndHeight()
+     * @todo Refactorize.
      */
     protected function _getWidthAndHeight($filepath)
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
-            $file = $this->fileManager->getTempFile();
-            $tempPath = $file->getTempPath();
-            $file->delete();
+            $tempFile = $this->tempFileFactory->build();
+            $tempPath = $tempFile->getTempPath();
+            $tempFile->delete();
             $result = file_put_contents($tempPath, $filepath);
             if ($result !== false) {
                 list($width, $height) = getimagesize($tempPath);

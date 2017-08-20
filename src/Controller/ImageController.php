@@ -31,14 +31,14 @@
 namespace IiifServer\Controller;
 
 use Exception;
+use IiifServer\ImageServer;
+use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\File\TempFileFactory;
+use Omeka\Module\Manager as ModuleManager;
+use Omeka\Mvc\Exception\NotFoundException;
 use Zend\I18n\Translator\TranslatorInterface;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\File\Manager as FileManager;
-use Omeka\Module\Manager as ModuleManager;
-use Omeka\Mvc\Exception\NotFoundException;
-use IiifServer\ImageServer;
 
 /**
  * The Image controller class.
@@ -49,21 +49,52 @@ use IiifServer\ImageServer;
  */
 class ImageController extends AbstractActionController
 {
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
+
+    /**
+     * @var ModuleManager
+     */
     protected $moduleManager;
+
+    /**
+     * @var TranslatorInterface
+     */
     protected $translator;
+
+    /**
+     * @var array
+     */
     protected $commandLineArgs;
 
+   /**
+    * Full path to the files.
+    *
+    * @var string
+    */
+    protected $basePath;
+
     public function __construct(
-        FileManager $fileManager,
+        TempFileFactory $tempFileFactory,
+        $store,
         ModuleManager $moduleManager,
         TranslatorInterface $translator,
-        array $commandLineArgs
+        array $commandLineArgs,
+        $basePath
     ) {
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory= $tempFileFactory;
+        $this->store = $store;
         $this->moduleManager = $moduleManager;
         $this->translator = $translator;
         $this->commandLineArgs = $commandLineArgs;
+        $this->basePath = $basePath;
     }
 
     /**
@@ -316,12 +347,11 @@ class ImageController extends AbstractActionController
     protected function _mediaFilePath(MediaRepresentation $media, $imageType = 'original')
     {
         if ($imageType == 'original') {
-            $storagePath = $this->fileManager->getStoragePath($imageType, $media->filename());
+            $storagePath = $this->getStoragePath($imageType, $media->filename());
         } else {
-            $storagePath = $this->fileManager->getStoragePath($imageType, $media->storageId(), FileManager::THUMBNAIL_EXTENSION);
+            $storagePath = $this->getStoragePath($imageType, $media->storageId(), 'jpg');
         }
-        $filepath = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
+        $filepath = $this->basePath
             . DIRECTORY_SEPARATOR . $storagePath;
 
         return $filepath;
@@ -710,7 +740,7 @@ class ImageController extends AbstractActionController
      */
     protected function _transformImage($args)
     {
-        $imageServer = new ImageServer($this->fileManager, $this->commandLineArgs, $this->settings());
+        $imageServer = new ImageServer($this->tempFileFactory, $this->store, $this->commandLineArgs, $this->settings());
         $imageServer->setLogger($this->logger());
         $imageServer->setTranslator($this->translator);
 
@@ -779,20 +809,35 @@ class ImageController extends AbstractActionController
     }
 
     /**
+     * Get a storage path.
+     *
+     * @param string $prefix The storage prefix
+     * @param string $name The file name, or basename if extension is passed
+     * @param null|string $extension The file extension
+     * @return string
+     * @todo Refactorize.
+     */
+    protected function getStoragePath($prefix, $name, $extension = null)
+    {
+        return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
+    }
+
+    /**
      * Helper to get width and height of an image.
      *
      * @param string $filepath This should be an image (no check here).
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
      * @see UniversalViewer_View_Helper_IiifInfo::_getWidthAndHeight()
+     * @todo Refactorize.
      */
     protected function _getWidthAndHeight($filepath)
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
-            $file = $this->fileManager->getTempFile();
-            $tempPath = $file->getTempPath();
-            $file->delete();
+            $tempFile = $this->tempFileFactory->build();
+            $tempPath = $tempFile->getTempPath();
+            $tempFile->delete();
             $result = file_put_contents($tempPath, $filepath);
             if ($result !== false) {
                 list($width, $height) = getimagesize($tempPath);

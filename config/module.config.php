@@ -26,12 +26,12 @@ return [
     ],
     'media_ingesters' => [
         'factories' => [
-            'tile' => Service\MediaIngester\TileFactory::class,
+            'tile' => Service\Media\Ingester\TileFactory::class,
         ],
     ],
     'media_renderers' => [
         'factories' => [
-            'tile' => Service\MediaRenderer\TileFactory::class,
+            'tile' => Service\Media\Renderer\TileFactory::class,
         ],
     ],
     'view_manager' => [

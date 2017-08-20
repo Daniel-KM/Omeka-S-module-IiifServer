@@ -1,5 +1,5 @@
 <?php
-namespace IiifServer\Service\MediaRenderer;
+namespace IiifServer\Service\Media\Renderer;
 
 use IiifServer\Media\Renderer\Tile;
 use Zend\ServiceManager\Factory\FactoryInterface;

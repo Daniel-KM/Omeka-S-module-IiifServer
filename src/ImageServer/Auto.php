@@ -30,8 +30,8 @@
 
 namespace IiifServer\ImageServer;
 
-use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractImageServer;
+use Omeka\File\TempFileFactory;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -43,16 +43,33 @@ class Auto extends AbstractImageServer
     protected $_gdMediaTypes = [];
     protected $_imagickMediaTypes = [];
 
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
+
+    /**
+     * @var array
+     */
     protected $commandLineArgs;
 
     /**
-     * Check for the imagick extension at creation.
+     * Select the thumbnailer according to options.
+     *
+     * Note: Check for the imagick extension at creation.
      *
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager, array $commandLineArgs)
-    {
+    public function __construct(
+        TempFileFactory $tempFileFactory,
+        $store,
+        array $commandLineArgs
+    ) {
         // For simplicity, the check is prepared here, without load of classes.
 
         // If available, use GD when source and destination formats are managed.
@@ -88,7 +105,8 @@ class Auto extends AbstractImageServer
             $this->_imagickMediaTypes = array_intersect($iiifMediaTypes, \Imagick::queryFormats());
         }
 
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory = $tempFileFactory;
+        $this->store = $store;
         $this->commandLineArgs = $commandLineArgs;
     }
 
@@ -104,24 +122,24 @@ class Auto extends AbstractImageServer
     {
         // GD seems to be 15% speeder, so it is used first if available.
         if (!empty($this->_gdMediaTypes[$args['source']['media_type']])
-                && !empty($this->_gdMediaTypes[$args['format']['feature']])
-                // The arbitrary rotation is not managed currently.
-                && $args['rotation']['feature'] != 'rotationArbitrary'
-            ) {
-            $processor = new GD($this->fileManager);
+            && !empty($this->_gdMediaTypes[$args['format']['feature']])
+            // The arbitrary rotation is not managed currently.
+            && $args['rotation']['feature'] != 'rotationArbitrary'
+        ) {
+            $processor = new GD($this->tempFileFactory, $this->store);
             return $processor->transform($args);
         }
 
         // Else use the extension Imagick, that manages more formats.
         if (!empty($this->_imagickMediaTypes[$args['source']['media_type']])
-                && !empty($this->_imagickMediaTypes[$args['format']['feature']])
-            ) {
-            $processor = new Imagick($this->fileManager);
+            && !empty($this->_imagickMediaTypes[$args['format']['feature']])
+        ) {
+            $processor = new Imagick($this->tempFileFactory, $this->store);
             return $processor->transform($args);
         }
 
         // Else use the command line convert, if available.
-        $processor = new ImageMagick($this->fileManager, $this->commandLineArgs);
+        $processor = new ImageMagick($this->tempFileFactory, $this->store, $this->commandLineArgs);
         return $processor->transform($args);
     }
 }

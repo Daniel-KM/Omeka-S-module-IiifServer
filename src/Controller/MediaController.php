@@ -30,12 +30,9 @@
 
 namespace IiifServer\Controller;
 
-use Zend\I18n\Translator\TranslatorInterface;
+use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Omeka\File\Manager as FileManager;
-use Omeka\Module\Manager as ModuleManager;
-use Omeka\Mvc\Exception\NotFoundException;
 
 /**
  * The Media controller class.
@@ -44,11 +41,22 @@ use Omeka\Mvc\Exception\NotFoundException;
  */
 class MediaController extends AbstractActionController
 {
-    protected $fileManager;
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
 
-    public function __construct(FileManager $fileManager, ModuleManager $moduleManager, TranslatorInterface $translator)
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    public function __construct($store, $basePath)
     {
-        $this->fileManager = $fileManager;
+        $this->store = $store;
+        $this->basePath = $basePath;
     }
 
     /**
@@ -131,20 +139,22 @@ class MediaController extends AbstractActionController
             return $view;
         }
 
-        // The source can be a local file or an external one (Amazon S3).
-        // A check can be added if the file is local.
-        $store = $this->fileManager->getStore();
-        if (get_class($store) == Omeka\File\Store\LocalStore::class) {
-            $filepath = $this->fileManager->getStoragePath(\Omeka\File\Manager::ORIGINAL_PREFIX, $media->filename());
-            if (!file_exists($filepath) || filesize($filepath) == 0) {
-                $response->setStatusCode(500);
+        // A check is added if the file is local: the source can be a local file
+        // or an external one (Amazon S3...).
+        switch (get_class($this->store)) {
+            case \Omeka\File\Store\Local::class:
+                $filepath = $basePath
+                    . DIRECTORY_SEPARATOR . $this->getStoragePath('original', $media->filename());
+                if (!file_exists($filepath) || filesize($filepath) == 0) {
+                    $response->setStatusCode(500);
 
-                $view = new ViewModel;
-                $view->setVariable('message', $this->translate('The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.'));
-                $view->setTemplate('public/image/error');
+                    $view = new ViewModel;
+                    $view->setVariable('message', $this->translate('The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.'));
+                    $view->setTemplate('public/image/error');
 
-                return $view;
-            }
+                    return $view;
+                }
+                break;
         }
         // TODO Check if the external url is not empty.
 
@@ -157,5 +167,19 @@ class MediaController extends AbstractActionController
         // Redirect (302/307) to the url of the file.
         $fileurl = $media->originalUrl();
         return $this->redirect()->toUrl($fileurl);
+    }
+
+    /**
+     * Get a storage path.
+     *
+     * @param string $prefix The storage prefix
+     * @param string $name The file name, or basename if extension is passed
+     * @param null|string $extension The file extension
+     * @return string
+     * @todo Refactorize.
+     */
+    protected function getStoragePath($prefix, $name, $extension = null)
+    {
+        return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
     }
 }

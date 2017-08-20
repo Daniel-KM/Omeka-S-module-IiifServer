@@ -31,8 +31,8 @@
 namespace IiifServer\ImageServer;
 
 use Exception;
-use Omeka\File\Manager as FileManager;
 use IiifServer\AbstractImageServer;
+use Omeka\File\TempFileFactory;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -52,22 +52,32 @@ class Imagick extends AbstractImageServer
         'image/webp' => 'WEBP',
     ];
 
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
 
     /**
      * Check for the php extension.
      *
+     * @param TempFileFactory $tempFileFactory
+     * @param StoreInterface $store
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager)
+    public function __construct(TempFileFactory $tempFileFactory, $store)
     {
-        $this->fileManager = $fileManager;
-
         $t = $this->getTranslator();
         if (!extension_loaded('imagick')) {
             throw new Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
         }
 
+        $this->tempFileFactory= $tempFileFactory;
+        $this->store = $store;
         $this->_supportedFormats = array_intersect($this->_supportedFormats, \Imagick::queryFormats());
     }
 
@@ -89,8 +99,8 @@ class Imagick extends AbstractImageServer
         $args = &$this->_args;
 
         if (!$this->checkMediaType($args['source']['media_type'])
-                || !$this->checkMediaType($args['format']['feature'])
-            ) {
+            || !$this->checkMediaType($args['format']['feature'])
+        ) {
             return;
         }
 
@@ -192,9 +202,9 @@ class Imagick extends AbstractImageServer
 
         // Save resulted resource into the specified format.
         $extension = strtolower($this->_supportedFormats[$args['format']['feature']]);
-        $file = $this->fileManager->getTempFile();
-        $destination = $file->getTempPath() . '.' . $extension;
-        $file->delete();
+        $tempFile = $this->tempFileFactory->build();
+        $destination = $tempFile->getTempPath() . '.' . $extension;
+        $tempFile->delete();
 
         $imagick->setImageFormat($this->_supportedFormats[$args['format']['feature']]);
         $result = $imagick->writeImage($this->_supportedFormats[$args['format']['feature']] . ':' . $destination);
@@ -217,25 +227,28 @@ class Imagick extends AbstractImageServer
         }
 
         try {
-            // The source can be a local file or an external one.
-            $store = $this->fileManager->getStore();
-            if (get_class($store) == Omeka\File\Store\LocalStore::class) {
-                if (!is_readable($source)) {
-                    return false;
-                }
-                $imagick = new \Imagick($source);
-            }
-            // When the storage is external, the file should be fetched before.
-            else {
-                $file = $this->fileManager->getTempFile();
-                $tempPath = $file->getTempPath();
-                $file->delete();
-                $result = copy($source, $tempPath);
-                if (!$result) {
-                    return false;
-                }
-                $imagick = new \Imagick($tempPath);
-                unlink($tempPath);
+            // A check is added if the file is local: the source can be a local file
+            // or an external one (Amazon S3...).
+            switch (get_class($this->store)) {
+                case \Omeka\File\Store\Local::class:
+                    if (!is_readable($source)) {
+                        return false;
+                    }
+                    $imagick = new \Imagick($source);
+                    break;
+
+                // When the storage is external, the file is fetched before.
+                default:
+                    $tempFile = $this->tempFileFactory->build();
+                    $tempPath = $tempFile->getTempPath();
+                    $tempFile->delete();
+                    $result = copy($source, $tempPath);
+                    if (!$result) {
+                        return false;
+                    }
+                    $imagick = new \Imagick($tempPath);
+                    unlink($tempPath);
+                    break;
             }
         } catch (Exception $e) {
             $logger = $this->getLogger();

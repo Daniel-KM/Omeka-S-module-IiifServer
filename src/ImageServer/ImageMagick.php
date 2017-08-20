@@ -30,9 +30,9 @@
 namespace IiifServer\ImageServer;
 
 use Exception;
-use Omeka\File\Manager as FileManager;
-use Omeka\Service\Cli;
 use IiifServer\AbstractImageServer;
+use Omeka\File\TempFileFactory;
+use Omeka\Stdlib\Cli;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -41,13 +41,6 @@ use IiifServer\AbstractImageServer;
  */
 class ImageMagick extends AbstractImageServer
 {
-    /**
-     * Path to the ImageMagick "convert" command.
-     *
-     * @var string
-     */
-    protected $convertPath;
-
     // List of managed IIIF media types.
     protected $_supportedFormats = [
         'image/jpeg' => 'JPG',
@@ -59,9 +52,29 @@ class ImageMagick extends AbstractImageServer
         'image/webp' => 'WEBP',
     ];
 
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
+
     protected $cli;
+
+    /**
+     * @var string
+     */
     protected $convertDir;
+
+    /**
+     * Path to the ImageMagick "convert" command.
+     *
+     * @var string
+     */
+    protected $convertPath;
 
     /**
      * List of the fetched images in order to remove them after process.
@@ -73,11 +86,15 @@ class ImageMagick extends AbstractImageServer
     /**
      * Check for the php extension.
      *
+     * @param TempFileFactory $tempFileFactory
+     * @param StoreInterface $store
+     * @param array $commandLineArgs
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager, $commandLineArgs)
+    public function __construct(TempFileFactory $tempFileFactory, $store, $commandLineArgs)
     {
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory= $tempFileFactory;
+        $this->store = $store;
         $this->cli = $commandLineArgs['cli'];
         $this->convertPath = $commandLineArgs['convertPath'];
 
@@ -209,9 +226,9 @@ class ImageMagick extends AbstractImageServer
 
         // Save resulted resource into the specified format.
         $extension = strtolower($this->_supportedFormats[$args['format']['feature']]);
-        $file = $this->fileManager->getTempFile();
-        $destination = $file->getTempPath() . '.' . $extension;
-        $file->delete();
+        $tempFile = $this->tempFileFactory->build();
+        $destination = $tempFile->getTempPath() . '.' . $extension;
+        $tempFile->delete();
 
         $command = sprintf(
             '%s %s %s %s',
@@ -241,25 +258,28 @@ class ImageMagick extends AbstractImageServer
         }
 
         try {
-            // The source can be a local file or an external one.
-            $store = $this->fileManager->getStore();
-            if (get_class($store) == Omeka\File\Store\LocalStore::class) {
-                if (!is_readable($source)) {
-                    return false;
-                }
-                $image = $source;
-            }
-            // When the storage is external, the file should be fetched before.
-            else {
-                $file = $this->fileManager->getTempFile();
-                $tempPath = $file->getTempPath();
-                $file->delete();
-                $result = copy($source, $tempPath);
-                if (!$result) {
-                    return false;
-                }
-                $this->fetched[$tempPath] = true;
-                $image = $tempPath;
+            // A check is added if the file is local: the source can be a local file
+            // or an external one (Amazon S3...).
+            switch (get_class($this->store)) {
+                case \Omeka\File\Store\Local::class:
+                    if (!is_readable($source)) {
+                        return false;
+                    }
+                    $image = $source;
+                    break;
+
+                // When the storage is external, the file is fetched before.
+                default:
+                    $tempFile = $this->tempFileFactory->build();
+                    $tempPath = $tempFile->getTempPath();
+                    $tempFile->delete();
+                    $result = copy($source, $tempPath);
+                    if (!$result) {
+                        return false;
+                    }
+                    $this->fetched[$tempPath] = true;
+                    $image = $tempPath;
+                    break;
             }
         } catch (Exception $e) {
             $logger = $this->getLogger();

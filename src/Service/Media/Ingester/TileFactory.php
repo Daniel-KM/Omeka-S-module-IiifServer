@@ -1,12 +1,12 @@
 <?php
-namespace IiifServer\Service\MediaIngester;
+namespace IiifServer\Service\Media\Ingester;
 
 use IiifServer\Media\Ingester\Tile;
 use IiifServer\Mvc\Controller\Plugin\TileBuilder;
-use Omeka\File\Thumbnailer\ImageMagickThumbnailer;
-use Omeka\Service\Cli;
-use Zend\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
+use Omeka\File\Thumbnailer\ImageMagick;
+use Omeka\Stdlib\Cli;
+use Zend\ServiceManager\Factory\FactoryInterface;
 
 class TileFactory implements FactoryInterface
 {
@@ -17,7 +17,8 @@ class TileFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
-        $fileManager = $services->get('Omeka\File\Manager');
+        $validator = $services->get('Omeka\File\Validator');
+        $uploader = $services->get('Omeka\File\Uploader');
 
         $tileBuilder = new TileBuilder();
 
@@ -28,15 +29,19 @@ class TileFactory implements FactoryInterface
         $params['tile_type'] = $settings->get('iiifserver_image_tile_type');
 
         $processor = $settings->get('iiifserver_image_creator');
-        $params['processor'] = $processor == 'Auto' ? '' : $processor;
+        $params['processor'] = $processor === 'Auto' ? '' : $processor;
 
         $cli = $services->get('Omeka\Cli');
         $config = $services->get('Config');
-        $convertDir = $config['file_manager']['thumbnail_options']['imagemagick_dir'];
+        $convertDir = $config['thumbnails']['thumbnailer_options']['imagemagick_dir'];
         $params['convertPath'] = $this->getConvertPath($cli, $convertDir);
         $params['executeStrategy'] = $config['cli']['execute_strategy'];
 
-        return new Tile($fileManager, $tileBuilder, $params);
+        return new Tile(
+            $validator,
+            $uploader,
+            $tileBuilder,
+            $params);
     }
 
     /**
@@ -49,8 +54,8 @@ class TileFactory implements FactoryInterface
     protected function getConvertPath(Cli $cli, $convertDir)
     {
         $convertPath = $convertDir
-            ? $cli->validateCommand($convertDir, ImageMagickThumbnailer::CONVERT_COMMAND)
-            : $cli->getCommandPath(ImageMagickThumbnailer::CONVERT_COMMAND);
+            ? $cli->validateCommand($convertDir, ImageMagick::CONVERT_COMMAND)
+            : $cli->getCommandPath(ImageMagick::CONVERT_COMMAND);
         return (string) $convertPath;
     }
 }

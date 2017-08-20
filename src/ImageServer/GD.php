@@ -31,7 +31,7 @@
 namespace IiifServer\ImageServer;
 
 use Zend\Log\Logger;
-use Omeka\File\Manager as FileManager;
+use Omeka\File\TempFileFactory;
 use IiifServer\AbstractImageServer;
 
 /**
@@ -52,17 +52,28 @@ class GD extends AbstractImageServer
         'image/webp' => true,
     ];
 
-    protected $fileManager;
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
 
     /**
      * Check for the php extension.
      *
+     * @param TempFileFactory $tempFileFactory
+     * @param StoreInterface $store
      * @throws Exception
      */
-    public function __construct(FileManager $fileManager)
+    public function __construct(TempFileFactory $tempFileFactory, $store)
     {
+        $t = $this->getTranslator();
         if (!extension_loaded('gd')) {
-            throw new Exception(__('The transformation of images via GD requires the PHP extension "gd".'));
+            throw new Exception($t->translate('The transformation of images via GD requires the PHP extension "gd".'));
         }
 
         $gdInfo = gd_info();
@@ -73,7 +84,8 @@ class GD extends AbstractImageServer
             $this->_supportedFormats['image/webp'] = false;
         }
 
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory= $tempFileFactory;
+        $this->store = $store;
     }
 
     /**
@@ -94,8 +106,8 @@ class GD extends AbstractImageServer
         $args = &$this->_args;
 
         if (!$this->checkMediaType($args['source']['media_type'])
-                || !$this->checkMediaType($args['format']['feature'])
-            ) {
+            || !$this->checkMediaType($args['format']['feature'])
+        ) {
             return;
         }
 
@@ -264,9 +276,9 @@ class GD extends AbstractImageServer
         // Save resulted resource into the specified format.
         // TODO Use a true name to allow cache, or is it managed somewhere else?
         $extension = strtolower($this->_supportedFormats[$args['format']['feature']]);
-        $file = $this->fileManager->getTempFile();
-        $destination = $file->getTempPath() . '.' . $extension;
-        $file->delete();
+        $tempFile = $this->tempFileFactory->build();
+        $destination = $tempFile->getTempPath() . '.' . $extension;
+        $tempFile->delete();
 
         switch ($args['format']['feature']) {
             case 'image/jpeg':
@@ -293,7 +305,7 @@ class GD extends AbstractImageServer
      * Load an image from anywhere.
      *
      * @param string $source Path of the managed image file
-     * @return false|GD image ressource
+     * @return GD|false image ressource
      */
     protected function _loadImageResource($source)
     {
@@ -302,30 +314,32 @@ class GD extends AbstractImageServer
         }
 
         try {
-            // The source can be a local file or an external one.
-            $store = $this->fileManager->getStore();
-            if (get_class($store) == Omeka\File\Store\LocalStore::class) {
-                if (!is_readable($source)) {
-                    return false;
-                }
-                $image = imagecreatefromstring(file_get_contents($source));
-            }
-            // When the storage is external, the file should be fetched before.
-            else {
-                $file = $this->fileManager->getTempFile();
-                $tempPath = $file->getTempPath();
-                $file->delete();
-                $result = copy($source, $tempPath);
-                if (!$result) {
-                    return false;
-                }
-                $image = imagecreatefromstring(file_get_contents($tempPath));
-                unlink($tempPath);
+            // A check is added if the file is local: the source can be a local file
+            // or an external one (Amazon S3...).
+            switch (get_class($this->store)) {
+                case \Omeka\File\Store\Local::class:
+                    if (!is_readable($source)) {
+                        return false;
+                    }
+                    $image = imagecreatefromstring(file_get_contents($source));
+                    break;
+
+                // When the storage is external, the file is fetched before.
+                default:
+                    $tempFile = $this->tempFileFactory->build();
+                    $tempPath = $tempFile->getTempPath();
+                    $tempFile->delete();
+                    $result = copy($source, $tempPath);
+                    if (!$result) {
+                        return false;
+                    }
+                    $image = imagecreatefromstring(file_get_contents($tempPath));
+                    unlink($tempPath);
+                    break;
             }
         } catch (Exception $e) {
             $logger = $this->getLogger();
             $t = $this->getTranslator();
-            ;
             $logger->log(Logger::ERR, sprintf($t->translate("GD failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
             return false;
         }

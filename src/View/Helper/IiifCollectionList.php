@@ -86,7 +86,7 @@ class IiifCollectionList extends AbstractHelper
         $url = $this->view->iiifForceHttpsIfRequired($url);
         $manifest['@id'] = $url;
 
-        $label = $translate('Dynamic List');
+        $label = $translate('Dynamic list');
         $manifest['label'] = $label;
 
         // TODO The dynamic list has no metadata. Use the query?

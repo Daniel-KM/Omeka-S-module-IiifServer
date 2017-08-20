@@ -30,12 +30,12 @@
 
 namespace IiifServer;
 
-use Zend\Log\LoggerAwareInterface;
-use Zend\Log\LoggerAwareTrait;
+use Omeka\File\TempFileFactory;
+use Omeka\Settings\Settings;
 use Zend\I18n\Translator\TranslatorAwareInterface;
 use Zend\I18n\Translator\TranslatorAwareTrait;
-use Omeka\File\Manager as FileManager;
-use Omeka\Settings\Settings;
+use Zend\Log\LoggerAwareInterface;
+use Zend\Log\LoggerAwareTrait;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -48,15 +48,30 @@ class ImageServer implements LoggerAwareInterface, TranslatorAwareInterface
 
     protected $_creator;
     protected $_args = [];
-    protected $fileManager;
+
+    /**
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * @var StoreInterface
+     */
+    protected $store;
+
+    /**
+     * @var array
+     */
     protected $commandLineArgs;
 
     public function __construct(
-        FileManager $fileManager,
+        TempFileFactory $tempFileFactory,
+        $store,
         array $commandLineArgs,
         Settings $settings
     ) {
-        $this->fileManager = $fileManager;
+        $this->tempFileFactory= $tempFileFactory;
+        $this->store = $store;
         $this->commandLineArgs = $commandLineArgs;
         $creatorClass = $settings->get('iiifserver_image_creator', 'Auto');
         $this->setCreator("\\IiifServer\\ImageServer\\" . $creatorClass);
@@ -70,8 +85,8 @@ class ImageServer implements LoggerAwareInterface, TranslatorAwareInterface
                 '\IiifServer\ImageServer\ImageMagick',
             ];
             $this->_creator = in_array($creatorClass, $needCli)
-                ? new $creatorClass($this->fileManager, $this->commandLineArgs)
-                : new $creatorClass($this->fileManager);
+                ? new $creatorClass($this->tempFileFactory, $this->store, $this->commandLineArgs)
+                : new $creatorClass($this->tempFileFactory, $this->store);
         } catch (Exception $e) {
             throw $e;
         }
