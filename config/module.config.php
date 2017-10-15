@@ -2,6 +2,31 @@
 namespace IiifServer;
 
 return [
+    'view_manager' => [
+        'template_path_stack' => [
+            __DIR__ . '/../view',
+        ],
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
+    ],
+    'view_helpers' => [
+        'invokables' => [
+            'iiifCollection' => View\Helper\IiifCollection::class,
+            'iiifCollectionList' => View\Helper\IiifCollectionList::class,
+            'iiifForceHttpsIfRequired' => View\Helper\IiifForceHttpsIfRequired::class,
+            'iiifUrl' => View\Helper\IiifUrl::class,
+        ],
+        'factories' => [
+            'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
+            'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
+        ],
+    ],
+    'form_elements' => [
+        'factories' => [
+            'IiifServer\Form\Config' => Service\Form\ConfigFactory::class,
+        ],
+    ],
     'controllers' => [
         'invokables' => [
             'IiifServer\Controller\Presentation' => Controller\PresentationController::class,
@@ -19,11 +44,6 @@ return [
             'tileServer' => Mvc\Controller\Plugin\TileServer::class,
         ],
     ],
-    'form_elements' => [
-        'factories' => [
-            'IiifServer\Form\Config' => Service\Form\ConfigFactory::class,
-        ],
-    ],
     'media_ingesters' => [
         'factories' => [
             'tile' => Service\Media\Ingester\TileFactory::class,
@@ -32,25 +52,6 @@ return [
     'media_renderers' => [
         'factories' => [
             'tile' => Service\Media\Renderer\TileFactory::class,
-        ],
-    ],
-    'view_manager' => [
-        'template_path_stack' => [
-            __DIR__ . '/../view',
-        ],
-        'strategies' => [
-            'ViewJsonStrategy',
-        ],
-    ],
-    'view_helpers' => [
-        'invokables' => [
-            'iiifCollection' => View\Helper\IiifCollection::class,
-            'iiifCollectionList' => View\Helper\IiifCollectionList::class,
-            'iiifForceHttpsIfRequired' => View\Helper\IiifForceHttpsIfRequired::class,
-        ],
-        'factories' => [
-            'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
-            'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
         ],
     ],
     'router' => [
@@ -73,7 +74,7 @@ return [
 
             // Special route for the dynamic collections, search or browse pages.
             // The first letter "c", "i", or "m" is used to distinct collections, items and
-            // media and are not required when the identifier is always unique for all of
+            // media and is not required when the identifier is always unique for all of
             // resources. The default letter is "i", so it is not required when all ids are
             // items (the most common case). If the list contains only one id, the comma is
             // required to avoid confusion with a normal collection.

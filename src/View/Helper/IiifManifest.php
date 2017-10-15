@@ -59,7 +59,7 @@ class IiifManifest extends AbstractHelper
     }
 
     /**
-     * Get the IIIF manifest for the specified record.
+     * Get the IIIF manifest for the specified resource.
      *
      * @param AbstractResourceEntityRepresentation $resource
      * @return Object|null
@@ -128,17 +128,20 @@ class IiifManifest extends AbstractHelper
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
         $metadata = [];
-        foreach ($item->values() as $term => $value) {
-            $metadata[] = (object) [
-                'label' => $value['alternate_label'] ?: $value['property']->label(),
-                'value' => count($value['values']) > 1
-                    ? array_map('strval', $value['values'])
-                    : (string) reset($value['values']),
-            ];
+        foreach ($item->values() as $term => $propertyData) {
+            $valueMetadata =  [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) {
+                return $v->type() === 'resource'
+                    ? $this->view->iiifUrl($v->valueResource())
+                    : (string) $v;
+            }, $propertyData['values']), 'strlen');
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
         }
         $manifest['metadata'] = $metadata;
 
-        $label = $item->displayTitle();
+        $label = $item->displayTitle('') ?: $this->view->iiifUrl($item);
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -268,7 +271,7 @@ class IiifManifest extends AbstractHelper
         $mediaSequences = [];
         $mediaSequencesElements = [];
 
-        $translate = $this->getView()->plugin('translate');
+        $translate = $this->view->plugin('translate');
 
         // TODO Manage the case where there is a video, a pdf etc, and the image
         // is only a quick view. So a main file should be set, that is not the
@@ -930,11 +933,11 @@ class IiifManifest extends AbstractHelper
     /**
      * Get the representative thumbnail of the whole work.
      *
-     * @param Resource $resource
+     * @param AbstractResourceEntityRepresentation $resource
      * @param bool $isThreejs Manage an exception.
      * @return object The iiif thumbnail.
      */
-    protected function _mainThumbnail($resource, $isThreejs)
+    protected function _mainThumbnail(AbstractResourceEntityRepresentation $resource, $isThreejs)
     {
         $media = null;
         // Threejs is an exception, because the thumbnail may be a true file
@@ -942,7 +945,7 @@ class IiifManifest extends AbstractHelper
         if ($isThreejs) {
             // The connection is used because the api does not allow to search
             // on source name.
-            $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
+            $conn = $resource->getServiceLocator()
                 ->get('Omeka\Connection');
             $qb = $conn->createQueryBuilder()
                 ->select('id')
