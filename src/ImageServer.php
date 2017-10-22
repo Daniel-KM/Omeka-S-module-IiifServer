@@ -87,7 +87,7 @@ class ImageServer implements LoggerAwareInterface, TranslatorAwareInterface
             $this->_creator = in_array($creatorClass, $needCli)
                 ? new $creatorClass($this->tempFileFactory, $this->store, $this->commandLineArgs)
                 : new $creatorClass($this->tempFileFactory, $this->store);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             throw $e;
         }
     }

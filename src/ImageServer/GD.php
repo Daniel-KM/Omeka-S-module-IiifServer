@@ -30,9 +30,9 @@
 
 namespace IiifServer\ImageServer;
 
-use Zend\Log\Logger;
-use Omeka\File\TempFileFactory;
 use IiifServer\AbstractImageServer;
+use Omeka\File\TempFileFactory;
+use Zend\Log\Logger;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -337,7 +337,7 @@ class GD extends AbstractImageServer
                     unlink($tempPath);
                     break;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $logger = $this->getLogger();
             $t = $this->getTranslator();
             $logger->log(Logger::ERR, sprintf($t->translate("GD failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));

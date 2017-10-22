@@ -30,7 +30,6 @@
 
 namespace IiifServer\ImageServer;
 
-use Exception;
 use IiifServer\AbstractImageServer;
 use Omeka\File\TempFileFactory;
 
@@ -250,7 +249,7 @@ class Imagick extends AbstractImageServer
                     unlink($tempPath);
                     break;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $logger = $this->getLogger();
             $t = $this->getTranslator();
             $logger->log(Logger::ERR, sprintf($t->translate("Imagick failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));

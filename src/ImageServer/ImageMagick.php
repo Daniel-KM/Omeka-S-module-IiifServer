@@ -29,7 +29,6 @@
 
 namespace IiifServer\ImageServer;
 
-use Exception;
 use IiifServer\AbstractImageServer;
 use Omeka\File\TempFileFactory;
 use Omeka\Stdlib\Cli;
@@ -281,7 +280,7 @@ class ImageMagick extends AbstractImageServer
                     $image = $tempPath;
                     break;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $logger = $this->getLogger();
             $t = $this->getTranslator();
             $logger->log(Logger::ERR, sprintf($t->translate("ImageMagick failed to open the file \"%s\". Details:\n%s"), $source, $e->getMessage()));
