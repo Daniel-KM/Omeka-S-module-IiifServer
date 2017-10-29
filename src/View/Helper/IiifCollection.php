@@ -168,7 +168,7 @@ class IiifCollection extends AbstractHelper
             $type = 'sc:Manifest';
         }
 
-        $url = $this->view->iiifForceHttpsIfRequired($url);
+        $url = $this->view->iiifForceBaseUrlIfRequired($url);
         $manifest['@id'] = $url;
 
         $manifest['@type'] = $type;

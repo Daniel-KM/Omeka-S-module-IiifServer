@@ -52,7 +52,8 @@ class Module extends AbstractModule
         'iiifserver_manifest_license_property' => 'dcterms:license',
         'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
         'iiifserver_manifest_logo_default' => '',
-        'iiifserver_manifest_force_https' => false,
+        'iiifserver_manifest_force_url_from' => '',
+        'iiifserver_manifest_force_url_to' => '',
         'iiifserver_image_creator' => 'Auto',
         'iiifserver_image_max_size' => 10000000,
         'iiifserver_image_tile_dir' => 'tile',
@@ -215,14 +216,21 @@ class Module extends AbstractModule
     {
         if (version_compare($oldVersion, '3.5.1', '<')) {
             $settings = $serviceLocator->get('Omeka\Settings');
-
             $this->createTilesMainDir();
-
             $settings->set('iiifserver_image_tile_dir',
                 $this->settings['iiifserver_image_tile_dir']);
-
             $settings->set('iiifserver_image_tile_type',
                 $this->settings['iiifserver_image_tile_type']);
+        }
+
+        if (version_compare($oldVersion, '3.5.8', '<')) {
+            $settings = $serviceLocator->get('Omeka\Settings');
+            $forceHttps = $settings->get('iiifserver_manifest_force_https');
+            if ($forceHttps) {
+                $settings->set('iiifserver_manifest_force_url_from', 'http:');
+                $settings->set('iiifserver_manifest_force_url_to', 'https:');
+            }
+            $settings->delete('iiifserver_manifest_force_https');
         }
     }
 

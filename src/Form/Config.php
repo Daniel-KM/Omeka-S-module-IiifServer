@@ -111,16 +111,26 @@ class Config extends Form
         ]);
 
         $manifestFieldset->add([
-            'name' => 'iiifserver_manifest_force_https',
-            'type' => 'Checkbox',
+            'name' => 'iiifserver_manifest_force_url_from',
+            'type' => 'Text',
             'options' => [
-                'label' => 'Force https', // @translate
-                'info' => 'In some cases, the json files (manifest and info) on a secured site (https) contains some urls with the scheme "http".' // @translate
-                    . ' ' . 'This option forces all Omeka absolute urls in these files to start with the scheme "https".' // @translate
-                    . ' ' . 'Of course, this should be unchecked on a http-only site.', // @translate
+                'label' => 'Force base of url (from)', // @translate
+                'info' => 'When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url.
+For example, when the server is secured, the "http:" urls may be replaced by "https:".', // @translate
             ],
             'attributes' => [
-                'value' => $settings->get('iiifserver_manifest_force_https'),
+                'value' => $settings->get('iiifserver_manifest_force_url_from'),
+            ],
+        ]);
+
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_force_url_to',
+            'type' => 'Text',
+            'options' => [
+                'label' => 'Force base of url (to)', // @translate
+            ],
+            'attributes' => [
+                'value' => $settings->get('iiifserver_manifest_force_url_to'),
             ],
         ]);
 

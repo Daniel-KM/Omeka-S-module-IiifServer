@@ -14,7 +14,7 @@ return [
         'invokables' => [
             'iiifCollection' => View\Helper\IiifCollection::class,
             'iiifCollectionList' => View\Helper\IiifCollectionList::class,
-            'iiifForceHttpsIfRequired' => View\Helper\IiifForceHttpsIfRequired::class,
+            'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [

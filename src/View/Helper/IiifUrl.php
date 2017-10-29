@@ -55,6 +55,6 @@ class IiifUrl extends AbstractHelper
             ['id' => $resource->id()],
             ['force_canonical' => true]
         );
-        return $this->view->iiifForceHttpsIfRequired($url);
+        return $this->view->iiifForceBaseUrlIfRequired($url);
     }
 }

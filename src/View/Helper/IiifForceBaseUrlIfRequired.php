@@ -31,29 +31,37 @@ namespace IiifServer\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 
-class IiifForceHttpsIfRequired extends AbstractHelper
+class IiifForceBaseUrlIfRequired extends AbstractHelper
 {
     /**
-     * Set the option to force https or not.
+     * Set the base of the url to change from, for example "http:".
      *
-     * @var bool
+     * @var string
      */
-    protected $forceHttps;
+    protected $forceFrom;
 
     /**
-     * Force absolute urls to be secure (replace "http:" by "https:").
+     * Set the base of the url to change to, for example "https:".
+     *
+     * @var string
+     */
+    protected $forceTo;
+
+    /**
+     * Force the base of absolute urls.
      *
      * @param string $absoluteUrl
      * @return string
      */
     public function __invoke($absoluteUrl)
     {
-        if (is_null($this->forceHttps)) {
-            $this->forceHttps = $this->view->setting('iiifserver_manifest_force_https');
+        if (is_null($this->forceFrom)) {
+            $this->forceFrom = (string) $this->view->setting('iiifserver_manifest_force_url_from');
+            $this->forceTo = (string) $this->view->setting('iiifserver_manifest_force_url_to');
         }
 
-        return $this->forceHttps && (strpos($absoluteUrl, 'http:') === 0)
-            ? substr_replace($absoluteUrl, 'https', 0, 4)
+        return $this->forceFrom && (strpos($absoluteUrl, $this->forceFrom) === 0)
+            ? substr_replace($absoluteUrl, $this->forceTo, 0, strlen($this->forceFrom))
             : $absoluteUrl;
     }
 }

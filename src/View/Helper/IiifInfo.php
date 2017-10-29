@@ -92,7 +92,7 @@ class IiifInfo extends AbstractHelper
                 ['id' => $media->id()],
                 ['force_canonical' => true]
             );
-            $imageUrl = $this->view->iiifForceHttpsIfRequired($imageUrl);
+            $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
 
             $tiles = [];
             $tileInfo = new TileInfo();
@@ -159,7 +159,7 @@ class IiifInfo extends AbstractHelper
                 ['id' => $media->id()],
                 ['force_canonical' => true]
             );
-            $fileUrl = $this->view->iiifForceHttpsIfRequired($fileUrl);
+            $fileUrl = $this->view->iiifForceBaseUrlIfRequired($fileUrl);
             $info['@id'] = $fileUrl;
             // See MediaController::contextAction()
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';
