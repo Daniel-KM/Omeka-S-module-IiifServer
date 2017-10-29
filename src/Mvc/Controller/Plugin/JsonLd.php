@@ -55,11 +55,9 @@ class JsonLd extends AbstractPlugin
         }
 
         // Header for CORS, required for access of IIIF.
-        $response->getHeaders()->addHeaderLine('access-control-allow-origin', '*');
+        $response->getHeaders()->addHeaderLine('Access-Control-Allow-Origin', '*');
         //$response->clearBody();
-        $body = version_compare(phpversion(), '5.4.0', '<')
-            ? json_encode($data)
-            : json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $body = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $response->setContent($body);
 
         return $response;
