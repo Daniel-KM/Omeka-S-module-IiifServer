@@ -1,12 +1,12 @@
 <?php
 namespace IiifServer\Media\Ingester;
 
-use IiifServer\Mvc\Controller\Plugin\TileBuilder;
 use Omeka\Api\Request;
 use Omeka\Entity\Media;
 use Omeka\File\TempFile;
 use Omeka\File\Uploader;
 use Omeka\File\Validator;
+use Omeka\Job\Dispatcher;
 use Omeka\Media\Ingester\IngesterInterface;
 use Omeka\Stdlib\ErrorStore;
 use Zend\Form\Element\File;
@@ -26,32 +26,23 @@ class Tile implements IngesterInterface
     protected $uploader;
 
     /**
-     * @var TileBuilder
+     * @var Dispatcher
      */
-    protected $tileBuilder;
+    protected $dispatcher;
 
     /**
-     * @var array
+     * @param Validator $validator
+     * @param Uploader $uploader
+     * @param Dispatcher $dispatcher
      */
-    protected $tileParams;
-
-    /**
-     * @var string
-     */
-    protected $basePath;
-
     public function __construct(
         Validator $validator,
         Uploader $uploader,
-        TileBuilder $tileBuilder,
-        array $tileParams,
-        $basePath
+        Dispatcher $dispatcher
     ) {
         $this->validator = $validator;
         $this->uploader = $uploader;
-        $this->tileBuilder = $tileBuilder;
-        $this->tileParams = $tileParams;
-        $this->basePath = $basePath;
+        $this->dispatcher = $dispatcher;
     }
 
     public function getLabel()
@@ -118,26 +109,30 @@ class Tile implements IngesterInterface
             $tempFile->delete();
         }
 
-        $storagePath = $this->getStoragePath('original', $media->getFilename());
-        $source = $this->basePath
-            . DIRECTORY_SEPARATOR . $storagePath;
+        // Here, we have only a deleted temp file; there is no media id, maybe
+        // no item id, and the storage id and path may be changed by another
+        // process until the media is fully saved. So the job won’t know which
+        // file to process.
+        // So, the job id is saved temporarily in the data of the media and it
+        // will be removed during the job process. The args are kept for info.
 
-        $tileDir = $this->basePath
-            . DIRECTORY_SEPARATOR . $this->tileParams['tile_dir'];
+        $args = [];
+        $args['storageId'] = $media->getStorageId();
+        $args['storagePath'] = $this->getStoragePath('original', $media->getFilename());
 
-        $params = $this->tileParams;
-        $params['storageId'] = $media->getStorageId();
+        $dispatcher = $this->dispatcher;
+        $job = $dispatcher->dispatch(\IiifServer\Job\Tiler::class, $args);
 
-        $tileBuilder = $this->tileBuilder;
-        $tileBuilder($source, $tileDir, $params);
+        $media->setData(['job' => $job->getId()]);
     }
 
     public function form(PhpRenderer $view, array $options = [])
     {
         $fileInput = new File('tile[__index__]');
         $fileInput->setOptions([
-            'label' => 'Upload image to tile', // @translate
-            'info' => $view->uploadLimit(),
+            'label' => 'Upload image to tile in background', // @translate
+            'info' => $view->uploadLimit()
+                . ' ' . $view->translate('The tiling will be built in the background: check jobs.'),
         ]);
         $fileInput->setAttributes([
             'id' => 'media-tile-input-__index__',

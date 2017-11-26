@@ -1,14 +1,28 @@
 <?php
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use DanielKm\Deepzoom\DeepzoomFactory;
+use DanielKm\Zoomify\ZoomifyFactory;
 use Omeka\Service\Exception\InvalidArgumentException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-use DanielKm\Deepzoom\DeepzoomFactory;
-use DanielKm\Zoomify\ZoomifyFactory;
 
 class TileBuilder extends AbstractPlugin
 {
+    /**
+     * Extension added to a folder name to store tiles for Deepzoom.
+     *
+     * @var string
+     */
+    const FOLDER_EXTENSION_DEEPZOOM = '_files';
+
+    /**
+     * Extension added to a file to store data for Deepzoom.
+     *
+     * @var string
+     */
+    const FOLDER_EXTENSION_DEEPZOOM_FILE = '.dzi';
+
     /**
      * Extension added to a folder name to store data and tiles for Zoomify.
      *
@@ -22,6 +36,7 @@ class TileBuilder extends AbstractPlugin
      * @param string $filepath The path to the image.
      * @param string $destination The directory where to store the tiles.
      * @param array $params The processor to use or the path to a command.
+     * @return array Info on result, the tile dir and the tile data file if any.
      */
     public function __invoke($source, $destination, array $params = [])
     {
@@ -41,23 +56,30 @@ class TileBuilder extends AbstractPlugin
 
         $params['destinationRemove'] = true;
 
+        if (empty($params['storageId'])) {
+            $params['storageId'] = pathinfo($source, PATHINFO_FILENAME);
+        }
+
+        $result = [];
         $tileType = $params['tile_type'];
         unset($params['tile_type']);
         switch ($tileType) {
             case 'deepzoom':
-                $this->deepzoom($source, $destination, $params);
+                $result['result'] = $this->deepzoom($source, $destination, $params);
+                $result['tile_dir'] = $destination . DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_DEEPZOOM;
+                $result['tile_file'] = $destination . DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_DEEPZOOM_FILE;
                 break;
             case 'zoomify':
-                if (empty($params['storageId'])) {
-                    $params['storageId'] = pathinfo($source, PATHINFO_FILENAME);
-                }
-                $destination .= DIRECTORY_SEPARATOR . $params['storageId'] . self::FOLDER_EXTENSION_ZOOMIFY;
-                $this->zoomify($source, $destination, $params);
+                $destination .= DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_ZOOMIFY;
+                $result['result'] = $this->zoomify($source, $destination, $params);
+                $result['tile_dir'] = $destination;
                 break;
             default:
                 throw new InvalidArgumentException(new Message(
                     'The type of tiling "%s" is not supported by the tile builder.', $tileType)); // @translate
         }
+
+        return $result;
     }
 
     /**
@@ -70,6 +92,7 @@ class TileBuilder extends AbstractPlugin
      */
     protected function deepzoom($source, $destination, $params)
     {
+        // This direct autoload avoid to load useless class in Omeka.
         require_once dirname(dirname(dirname(dirname(__DIR__))))
             . DIRECTORY_SEPARATOR . 'vendor'
             . DIRECTORY_SEPARATOR . 'daniel-km'
@@ -91,6 +114,7 @@ class TileBuilder extends AbstractPlugin
      */
     protected function zoomify($source, $destination, $params)
     {
+        // This direct autoload avoid to load useless class in Omeka.
         require_once dirname(dirname(dirname(dirname(__DIR__))))
             . DIRECTORY_SEPARATOR . 'vendor'
             . DIRECTORY_SEPARATOR . 'daniel-km'
