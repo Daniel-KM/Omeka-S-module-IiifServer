@@ -1,6 +1,6 @@
 {
   "name": "iiifserver",
-  "version": "3.5.1",
+  "version": "3.5.9",
   "description": "IIIF Server (module for Omeka S)",
   "main": "index.js",
   "scripts": {

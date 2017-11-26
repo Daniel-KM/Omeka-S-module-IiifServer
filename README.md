@@ -200,6 +200,9 @@ The image server has two roles.
   free viewers, like the [OpenLayers Zoom]. They are manageable by the module
   [Archive Repertory].
 
+  The tiles are created via a background job from the media "Tile" (in item edit
+  view).
+
 Note about the display of tiled and simple images
 
 When created, the tiles are displayed via their native format, so only viewers
@@ -275,6 +278,8 @@ TODO / Bugs
   displayed only when the first item contains an image.
 - Separate IIIF Server (creation of manifests and media infos) and image server
   (tiling and display compliant with iiif specifications).
+- Create thumbnails from the tiled image, not from the original.
+- Support curl when allow_url_fopen and allow_url_include are forbidden.
 
 
 Warning
