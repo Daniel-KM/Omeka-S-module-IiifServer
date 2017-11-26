@@ -134,9 +134,19 @@ class Module extends AbstractModule
             }
         }
 
-        $this->createTilesMainDir();
+        $module = $moduleManager->getModule('ArchiveRepertory');
+        if ($module) {
+            $version = $module->getDb('version');
+            // Check if installed.
+            if (empty($version)) {
+                // Nothing to do.
+            } elseif (version_compare($version, '3.15.4', '<')) {
+                throw new ModuleCannotInstallException(
+                    $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
+            }
+        }
 
-        $this->registerArchiveRepertory($serviceLocator);
+        $this->createTilesMainDir();
 
         foreach ($this->settings as $name => $value) {
             $settings->set($name, $value);
@@ -160,12 +170,6 @@ class Module extends AbstractModule
             $messenger = new Messenger();
             $messenger->addWarning(
                 'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
-        }
-
-        $ingesters = $settings->get('archive_repertory_ingesters');
-        if ($ingesters && isset($ingesters['tile'])) {
-            unset($ingesters['tile']);
-            $settings->set('archive_repertory_ingesters', $ingesters);
         }
 
         foreach ($this->settings as $name => $value) {
@@ -232,6 +236,23 @@ class Module extends AbstractModule
             }
             $settings->delete('iiifserver_manifest_force_https');
         }
+
+        if (version_compare($oldVersion, '3.5.9', '<')) {
+            $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
+            $t = $serviceLocator->get('MvcTranslator');
+            $messenger = new Messenger();
+            $module = $moduleManager->getModule('ArchiveRepertory');
+            if ($module) {
+                $version = $module->getDb('version');
+                // Check if installed.
+                if (empty($version)) {
+                    // Nothing to do.
+                } elseif (version_compare($version, '3.15.4', '<')) {
+                    throw new ModuleCannotInstallException(
+                        $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
+                }
+            }
+        }
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
@@ -252,8 +273,6 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer)
     {
         $serviceLocator = $this->getServiceLocator();
-
-        $this->registerArchiveRepertory($serviceLocator);
 
         $formElementManager = $serviceLocator->get('FormElementManager');
         $form = $formElementManager->get(ConfigForm::class);
@@ -374,32 +393,6 @@ class Module extends AbstractModule
         $filepath = $tileDir . DIRECTORY_SEPARATOR . $storageId . '_zdata';
         if (file_exists($filepath) && is_dir($filepath)) {
             $this->rrmdir($filepath);
-        }
-    }
-
-    /**
-     * Helper to register the tile for ArchiveRepertory.
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     */
-    protected function registerArchiveRepertory(ServiceLocatorInterface $serviceLocator)
-    {
-        $settings = $serviceLocator->get('Omeka\Settings');
-        $ingesters = $settings->get('archive_repertory_ingesters');
-        if (!empty($ingesters)) {
-            $ingesters['tile'] = [
-                'path' => 'tile',
-                'extension' => [
-                    '.dzi',
-                    '.js',
-                    // The classes are not available before the end of install.
-                    // TileInfo::FOLDER_EXTENSION_DEEPZOOM,
-                    '_files',
-                    // TileInfo::FOLDER_EXTENSION_ZOOMIFY,
-                    '_zdata',
-                ],
-            ];
-            $settings->set('archive_repertory_ingesters', $ingesters);
         }
     }
 

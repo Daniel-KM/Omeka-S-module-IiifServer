@@ -343,4 +343,20 @@ return [
             ],
         ],
     ],
+    'archiverepertory' => [
+        'ingesters' => [
+            'tile' => [
+                'path' => 'tile',
+                'extension' => [
+                    '.dzi',
+                    '.js',
+                    // The classes are not available before the end of install.
+                    // TileInfo::FOLDER_EXTENSION_DEEPZOOM,
+                    '_files',
+                    // TileInfo::FOLDER_EXTENSION_ZOOMIFY,
+                    '_zdata',
+                ],
+            ],
+        ],
+    ],
 ];
