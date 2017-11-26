@@ -146,7 +146,7 @@ class Module extends AbstractModule
             }
         }
 
-        $this->createTilesMainDir();
+        $this->createTilesMainDir($serviceLocator);
 
         foreach ($this->settings as $name => $value) {
             $settings->set($name, $value);
@@ -220,7 +220,7 @@ class Module extends AbstractModule
     {
         if (version_compare($oldVersion, '3.5.1', '<')) {
             $settings = $serviceLocator->get('Omeka\Settings');
-            $this->createTilesMainDir();
+            $this->createTilesMainDir($serviceLocator);
             $settings->set('iiifserver_image_tile_dir',
                 $this->settings['iiifserver_image_tile_dir']);
             $settings->set('iiifserver_image_tile_type',
@@ -328,12 +328,13 @@ class Module extends AbstractModule
         return $processors;
     }
 
-    protected function createTilesMainDir()
+    protected function createTilesMainDir(ServiceLocatorInterface $serviceLocator)
     {
-        // The local store "files" is hardcoded".
-        $dir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $this->settings['iiifserver_image_tile_dir'];
+        // The local store "files" may be hard-coded.
+        $config = include __DIR__ . '/config/module.config.php';
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $dir = $basePath . DIRECTORY_SEPARATOR . $defaultSettings['iiifserver_image_tile_dir'];
 
         // Check if the directory exists in the archive.
         if (file_exists($dir)) {
