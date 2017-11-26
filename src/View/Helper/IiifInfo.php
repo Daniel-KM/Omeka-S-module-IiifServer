@@ -54,7 +54,7 @@ class IiifInfo extends AbstractHelper
 
     public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
     }
 

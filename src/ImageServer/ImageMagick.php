@@ -92,7 +92,7 @@ class ImageMagick extends AbstractImageServer
      */
     public function __construct(TempFileFactory $tempFileFactory, $store, $commandLineArgs)
     {
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->store = $store;
         $this->cli = $commandLineArgs['cli'];
         $this->convertPath = $commandLineArgs['convertPath'];

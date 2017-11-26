@@ -75,7 +75,7 @@ class Imagick extends AbstractImageServer
             throw new Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
         }
 
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->store = $store;
         $this->_supportedFormats = array_intersect($this->_supportedFormats, \Imagick::queryFormats());
     }

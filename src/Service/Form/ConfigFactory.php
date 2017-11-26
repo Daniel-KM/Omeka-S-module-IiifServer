@@ -12,7 +12,7 @@ class ConfigFactory implements FactoryInterface
         $settings = $container->get('Omeka\Settings');
         $api = $container->get('Omeka\ApiManager');
 
-        $form = new Config;
+        $form = new Config(null, $options);
         $form->setSettings($settings);
         $form->setApi($api);
         return $form;

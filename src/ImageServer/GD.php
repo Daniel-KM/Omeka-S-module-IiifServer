@@ -84,7 +84,7 @@ class GD extends AbstractImageServer
             $this->_supportedFormats['image/webp'] = false;
         }
 
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->store = $store;
     }
 

@@ -74,11 +74,11 @@ class ImageController extends AbstractActionController
      */
     protected $commandLineArgs;
 
-   /**
-    * Full path to the files.
-    *
-    * @var string
-    */
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
     protected $basePath;
 
     public function __construct(
@@ -89,7 +89,7 @@ class ImageController extends AbstractActionController
         array $commandLineArgs,
         $basePath
     ) {
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->store = $store;
         $this->moduleManager = $moduleManager;
         $this->translator = $translator;

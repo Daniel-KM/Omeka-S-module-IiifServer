@@ -70,7 +70,7 @@ class ImageServer implements LoggerAwareInterface, TranslatorAwareInterface
         array $commandLineArgs,
         Settings $settings
     ) {
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->store = $store;
         $this->commandLineArgs = $commandLineArgs;
         $creatorClass = $settings->get('iiifserver_image_creator', 'Auto');

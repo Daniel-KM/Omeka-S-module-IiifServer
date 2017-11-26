@@ -54,7 +54,7 @@ class IiifManifest extends AbstractHelper
 
     public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
-        $this->tempFileFactory= $tempFileFactory;
+        $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
     }
 
@@ -129,7 +129,7 @@ class IiifManifest extends AbstractHelper
         // TODO Manage filter and escape?
         $metadata = [];
         foreach ($item->values() as $term => $propertyData) {
-            $valueMetadata =  [];
+            $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {
                 return $v->type() === 'resource'
@@ -300,7 +300,7 @@ class IiifManifest extends AbstractHelper
                 $mediaSequenceElement = $this->_iiifMediaSequenceThreejs(
                     $media,
                     ['label' => $label, 'metadata' => $metadata, 'files' => $images]
-                    );
+                );
                 $mediaSequencesElements[] = $mediaSequenceElement;
             }
         }
