@@ -1,8 +1,7 @@
+/build
+/node_modules
+/vendor
 .DS_Store
 .php_cs.cache
-build
-composer.phar
 composer.lock
 debug.log
-node_modules
-vendor

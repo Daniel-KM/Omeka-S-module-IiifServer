@@ -41,21 +41,14 @@ by default in most servers. If not, the image server will use the command line
 
 * From the zip
 
-Download the zipped release, not the zipped source, uncompress it in the `modules`
+Download the last release [`IiifServer.zip`] from the list of releases (the
+master does not contain the dependencies), uncompress it in the `modules`
 directory, and rename the module folder `IiifServer`.
-
-The zip is created with this command: `gulp zip --no-dev`.
 
 * From the source and for development:
 
 If the module was installed from the source, check if the name of the folder of
 the module is `IiifServer`, go to the root of the module, and run either:
-
-```
-    gulp init
-```
-
-or
 
 ```
     composer install
@@ -129,13 +122,6 @@ The module creates manifests with all the metadata of each record. The event
 `uv.manifest` can be used to modify the exposed data of a manifest for items and
 collections. For example, it is possible to modify the citation, to remove some
 metadata or to change the thumbnail.
-
-* Using Zoomify format
-
-The Zoomify format is supported since the version 2.2.2 of OpenSeadragon, that
-is not yet available in the default assets of Omeka. Simply build it from the
-sources and replace the file `application/asset/js/openseadragon/openseadragon.min.js`
-with it. Else, set the mode "IIIF" for images tiled with this format.
 
 
 IIIF Server
@@ -357,6 +343,7 @@ Copyright
 [GD]: https://secure.php.net/manual/en/book.image.php
 [Imagick]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
+[`IiifServer.zip`]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Ark]: https://github.com/BibLibre/omeka-s-module-Ark
 [Clean Url]: https://github.com/BibLibre/omeka-s-module-CleanUrl

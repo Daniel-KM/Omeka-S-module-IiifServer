@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/Daniel-KM/Omeka-S-module-IiifServer"
   },
-  "author": "",
+  "author": "Daniel Berthereau",
   "license": "CECILL-2.1",
   "bugs": {
     "url": "https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues"
