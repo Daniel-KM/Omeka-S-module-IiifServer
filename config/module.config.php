@@ -24,7 +24,7 @@ return [
     ],
     'form_elements' => [
         'factories' => [
-            'IiifServer\Form\Config' => Service\Form\ConfigFactory::class,
+            'IiifServer\Form\ConfigForm' => Service\Form\ConfigFormFactory::class,
         ],
     ],
     'controllers' => [
@@ -357,6 +357,22 @@ return [
                     '_zdata',
                 ],
             ],
+        ],
+    ],
+    'iiifserver' => [
+        'settings' => [
+            'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
+            'iiifserver_manifest_attribution_property' => '',
+            'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
+            'iiifserver_manifest_license_property' => 'dcterms:license',
+            'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
+            'iiifserver_manifest_logo_default' => '',
+            'iiifserver_manifest_force_url_from' => '',
+            'iiifserver_manifest_force_url_to' => '',
+            'iiifserver_image_creator' => 'Auto',
+            'iiifserver_image_max_size' => 10000000,
+            'iiifserver_image_tile_dir' => 'tile',
+            'iiifserver_image_tile_type' => 'deepzoom',
         ],
     ],
 ];

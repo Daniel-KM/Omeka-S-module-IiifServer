@@ -12,3 +12,4 @@ foreach ($fieldsets as $fieldset):
     <?php echo $this->formCollection($fieldset, false); ?>
 </fieldset>
 <?php endforeach; ?>
+<?php echo $this->formRow($form->get('csrf')); ?>

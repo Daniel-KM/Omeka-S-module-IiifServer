@@ -30,13 +30,13 @@
 
 namespace IiifServer;
 
-use IiifServer\Form\Config as ConfigForm;
+use IiifServer\Form\ConfigForm;
 // use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
-use Zend\EventManager\Event as ZendEvent;
+use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
@@ -45,21 +45,6 @@ use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
-    protected $settings = [
-        'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
-        'iiifserver_manifest_attribution_property' => '',
-        'iiifserver_manifest_attribution_default' => 'Provided by Example Organization',
-        'iiifserver_manifest_license_property' => 'dcterms:license',
-        'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
-        'iiifserver_manifest_logo_default' => '',
-        'iiifserver_manifest_force_url_from' => '',
-        'iiifserver_manifest_force_url_to' => '',
-        'iiifserver_image_creator' => 'Auto',
-        'iiifserver_image_max_size' => 10000000,
-        'iiifserver_image_tile_dir' => 'tile',
-        'iiifserver_image_tile_type' => 'deepzoom',
-    ];
-
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
@@ -102,6 +87,9 @@ class Module extends AbstractModule
 
         $processors = $this->listProcessors($serviceLocator);
 
+        $config = include __DIR__ . '/config/module.config.php';
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+
         // Convert settings from old releases of Universal Viewer, if installed.
         $module = $moduleManager->getModule('UniversalViewer');
         if ($module) {
@@ -129,7 +117,7 @@ class Module extends AbstractModule
                     'universalviewer_iiif_creator' => 'iiifserver_image_creator',
                     'universalviewer_iiif_max_size' => 'iiifserver_image_max_size',
                 ] as $uvSetting => $iiifSetting) {
-                    $this->settings[$iiifSetting] = $settings->get($uvSetting);
+                    $defaultSettings[$iiifSetting] = $settings->get($uvSetting);
                 }
             }
         }
@@ -148,7 +136,7 @@ class Module extends AbstractModule
 
         $this->createTilesMainDir($serviceLocator);
 
-        foreach ($this->settings as $name => $value) {
+        foreach ($defaultSettings as $name => $value) {
             $settings->set($name, $value);
         }
     }
@@ -172,12 +160,26 @@ class Module extends AbstractModule
                 'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
         }
 
-        foreach ($this->settings as $name => $value) {
-            $settings->delete($name);
+        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
+    }
+
+    protected function manageSettings($settings, $process, $key = 'settings')
+    {
+        $config = require __DIR__ . '/config/module.config.php';
+        $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
+        foreach ($defaultSettings as $name => $value) {
+            switch ($process) {
+                case 'install':
+                    $settings->set($name, $value);
+                    break;
+                case 'uninstall':
+                    $settings->delete($name);
+                    break;
+            }
         }
     }
 
-    public function warnUninstall(ZendEvent $event)
+    public function warnUninstall(Event $event)
     {
         $view = $event->getTarget();
         $module = $view->vars()->module;
@@ -219,12 +221,14 @@ class Module extends AbstractModule
     public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
     {
         if (version_compare($oldVersion, '3.5.1', '<')) {
+            $config = require __DIR__ . '/config/module.config.php';
+            $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
             $settings = $serviceLocator->get('Omeka\Settings');
             $this->createTilesMainDir($serviceLocator);
             $settings->set('iiifserver_image_tile_dir',
-                $this->settings['iiifserver_image_tile_dir']);
+                $defaultSettings['iiifserver_image_tile_dir']);
             $settings->set('iiifserver_image_tile_type',
-                $this->settings['iiifserver_image_tile_type']);
+                $defaultSettings['iiifserver_image_tile_type']);
         }
 
         if (version_compare($oldVersion, '3.5.8', '<')) {
@@ -264,7 +268,7 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
-            'Omeka\Entity\Media',
+            \Omeka\Entity\Media::class,
             'entity.remove.post',
             [$this, 'deleteMediaTiles']
         );
@@ -272,33 +276,51 @@ class Module extends AbstractModule
 
     public function getConfigForm(PhpRenderer $renderer)
     {
-        $serviceLocator = $this->getServiceLocator();
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $settings = $services->get('Omeka\Settings');
+        $formElementManager = $services->get('FormElementManager');
 
-        $formElementManager = $serviceLocator->get('FormElementManager');
+        $data = [];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        foreach ($defaultSettings as $name => $value) {
+            $data['iiifserver_manifest'][$name] = $settings->get($name);
+            $data['iiifserver_image'][$name] = $settings->get($name);
+        }
+
         $form = $formElementManager->get(ConfigForm::class);
-
-        // In this form, fieldsets are only used for the view.
-        $vars = [];
-        $vars['form'] = $form;
-        return $renderer->render('iiif-server/module/config.phtml', $vars);
+        $form->init();
+        $form->setData($data);
+        return $renderer->render('iiif-server/module/config.phtml', [
+            'form' => $form,
+        ]);
     }
 
     public function handleConfigForm(AbstractController $controller)
     {
-        $serviceLocator = $this->getServiceLocator();
-        $settings = $serviceLocator->get('Omeka\Settings');
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $settings = $services->get('Omeka\Settings');
 
         $params = $controller->getRequest()->getPost();
-        // Manage fieldsets of params automatically (only used for the view).
+
+        $form = $this->getServiceLocator()->get('FormElementManager')
+            ->get(ConfigForm::class);
+        $form->init();
+        $form->setData($params);
+        if (!$form->isValid()) {
+            $controller->messenger()->addErrors($form->getMessages());
+            return false;
+        }
+
+        array_walk_recursive($params, function($v, $k) use (&$params) { $params[$k] = $v; });
+        unset($params['iiifserver_manifest']);
+        unset($params['iiifserver_image']);
+
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
         foreach ($params as $name => $value) {
-            if (isset($this->settings[$name])) {
+            if (isset($defaultSettings[$name])) {
                 $settings->set($name, $value);
-            } elseif (is_array($value)) {
-                foreach ($value as $subname => $subvalue) {
-                    if (isset($this->settings[$subname])) {
-                        $settings->set($subname, $subvalue);
-                    }
-                }
             }
         }
     }
@@ -368,7 +390,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function deleteMediaTiles(ZendEvent $event)
+    public function deleteMediaTiles(Event $event)
     {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');

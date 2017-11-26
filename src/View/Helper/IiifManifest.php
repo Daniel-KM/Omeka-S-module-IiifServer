@@ -455,7 +455,7 @@ class IiifManifest extends AbstractHelper
     /**
      * Create an IIIF thumbnail object from an Omeka file.
      *
-     * @param Omeka\Api\Representation\MediaRepresentation $media
+     * @param \Omeka\Api\Representation\MediaRepresentation $media
      * @return Standard object|null
      */
     protected function _iiifThumbnail(MediaRepresentation $media)
