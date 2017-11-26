@@ -5,6 +5,7 @@ use IiifServer\Media\Ingester\Tile;
 use IiifServer\Mvc\Controller\Plugin\TileBuilder;
 use Interop\Container\ContainerInterface;
 use Omeka\File\Thumbnailer\ImageMagick;
+use Omeka\Service\Exception\ConfigException;
 use Omeka\Stdlib\Cli;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
@@ -28,6 +29,10 @@ class TileFactory implements FactoryInterface
         $params['tile_dir'] = $settings->get('iiifserver_image_tile_dir');
         $params['tile_type'] = $settings->get('iiifserver_image_tile_type');
 
+        if (empty($params['tile_dir'])) {
+            throw new ConfigException('The tile dir is not defined.');
+        }
+
         $processor = $settings->get('iiifserver_image_creator');
         $params['processor'] = $processor === 'Auto' ? '' : $processor;
 
@@ -37,11 +42,15 @@ class TileFactory implements FactoryInterface
         $params['convertPath'] = $this->getConvertPath($cli, $convertDir);
         $params['executeStrategy'] = $config['cli']['execute_strategy'];
 
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+
         return new Tile(
             $validator,
             $uploader,
             $tileBuilder,
-            $params);
+            $params,
+            $basePath
+        );
     }
 
     /**

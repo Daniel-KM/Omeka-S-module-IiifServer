@@ -2,6 +2,7 @@
 namespace IiifServer\Service\Media\Renderer;
 
 use IiifServer\Media\Renderer\Tile;
+use Omeka\Service\Exception\ConfigException;
 use Zend\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
 
@@ -16,6 +17,9 @@ class TileFactory implements FactoryInterface
     {
         $settings = $services->get('Omeka\Settings');
         $tileDir = $settings->get('iiifserver_image_tile_dir');
+        if (empty($tileDir)) {
+            throw new ConfigException('The tile dir is not defined.');
+        }
         return new Tile($tileDir);
     }
 }

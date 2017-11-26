@@ -25,7 +25,7 @@ class ImageControllerFactory implements FactoryInterface
         $commandLineArgs['convertPath'] = $this->getConvertPath($cli, $convertDir);
         $commandLineArgs['executeStrategy'] = $config['cli']['execute_strategy'];
 
-        $basePath = OMEKA_PATH . DIRECTORY_SEPARATOR . 'files';
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
         $controller = new ImageController(
             $tempFileFactory,

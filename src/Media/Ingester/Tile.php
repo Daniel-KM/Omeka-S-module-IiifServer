@@ -35,29 +35,30 @@ class Tile implements IngesterInterface
      */
     protected $tileParams;
 
+    /**
+     * @var string
+     */
+    protected $basePath;
+
     public function __construct(
         Validator $validator,
         Uploader $uploader,
         TileBuilder $tileBuilder,
-        array $tileParams
+        array $tileParams,
+        $basePath
     ) {
         $this->validator = $validator;
         $this->uploader = $uploader;
         $this->tileBuilder = $tileBuilder;
         $this->tileParams = $tileParams;
+        $this->basePath = $basePath;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getLabel()
     {
         return 'Tiler'; // @translate
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getRenderer()
     {
         return 'tile';
@@ -118,12 +119,10 @@ class Tile implements IngesterInterface
         }
 
         $storagePath = $this->getStoragePath('original', $media->getFilename());
-        $source = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
+        $source = $this->basePath
             . DIRECTORY_SEPARATOR . $storagePath;
 
-        $tileDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
+        $tileDir = $this->basePath
             . DIRECTORY_SEPARATOR . $this->tileParams['tile_dir'];
 
         $params = $this->tileParams;
@@ -133,9 +132,6 @@ class Tile implements IngesterInterface
         $tileBuilder($source, $tileDir, $params);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function form(PhpRenderer $view, array $options = [])
     {
         $fileInput = new File('tile[__index__]');
@@ -173,7 +169,7 @@ class Tile implements IngesterInterface
      * Pass the $errorStore object if an error should raise an API validation
      * error.
      *
-     * @see Omeka\File\Validator
+     * @see \Omeka\File\Validator
      *
      * @param TempFile $tempFile
      * @param ErrorStore|null $errorStore

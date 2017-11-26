@@ -30,6 +30,7 @@
 namespace IiifServer\Mvc\Controller\Plugin;
 
 use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\File\Exception\ConfigException;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class TileInfo extends AbstractPlugin
@@ -78,16 +79,19 @@ class TileInfo extends AbstractPlugin
         $services = $media->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
         $viewHelpers = $services->get('ViewHelperManager');
+        $basePath = $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
         $tileDir = $settings->get('iiifserver_image_tile_dir');
+        if (empty($tileDir)) {
+            throw new ConfigException('The tile dir is not defined.');
+        }
 
-        $this->tileBaseDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $tileDir;
+        $this->tileBaseDir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
 
         // A full url avoids some complexity when Omeka is not the root of the
         // server.
         $serverUrl = $viewHelpers->get('ServerUrl');
+        // The local store base path is totally different from url base path.
         $basePath = $viewHelpers->get('BasePath');
         $this->tileBaseUrl = $serverUrl() . $basePath('files' . '/' . $tileDir);
 

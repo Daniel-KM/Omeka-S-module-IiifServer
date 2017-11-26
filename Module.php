@@ -146,18 +146,23 @@ class Module extends AbstractModule
         $settings = $serviceLocator->get('Omeka\Settings');
 
         // Nuke all the tiles.
-        $tileDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
-
-        // A security check.
-        $removable = $tileDir == realpath($tileDir);
-        if ($removable) {
-            $this->rrmdir($dir);
-        } else {
+        $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $tileDIr = $settings->get('iiifserver_image_tile_dir');
+        if (empty($tileDir)) {
             $messenger = new Messenger();
-            $messenger->addWarning(
-                'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
+            $messenger->addWarning('The tile dir is not defined and was not removed.'); // @translate
+        } else {
+            $tileDir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
+
+            // A security check.
+            $removable = $tileDir == realpath($tileDir);
+            if ($removable) {
+                $this->rrmdir($dir);
+            } else {
+                $messenger = new Messenger();
+                $messenger->addWarning(
+                    'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
+            }
         }
 
         $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
@@ -190,15 +195,18 @@ class Module extends AbstractModule
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
 
-        $tileDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
-
-        $removable = $tileDir == realpath($tileDir);
-        if ($removable) {
-            $message = 'All tiles will be removed!'; // @translate
+        $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $tileDir = $settings->get('iiifserver_image_tile_dir');
+        if (empty($tileDir)) {
+            $message = new Message('The tile dir is not defined and won’t be removed.'); // @translate
         } else {
-            $message = new Message('The tile dir "%d" is not a real path and cannot be removed.', $tileDir); // @translate
+            $tileDir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
+            $removable = $tileDir == realpath($tileDir);
+            if ($removable) {
+                $message = 'All tiles will be removed!'; // @translate
+            } else {
+                $message = new Message('The tile dir "%d" is not a real path and cannot be removed.', $tileDir); // @translate
+            }
         }
 
         // TODO Add a checkbox to let the choice to remove or not.
@@ -356,7 +364,13 @@ class Module extends AbstractModule
         $config = include __DIR__ . '/config/module.config.php';
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
         $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $dir = $basePath . DIRECTORY_SEPARATOR . $defaultSettings['iiifserver_image_tile_dir'];
+        $tileDir = $defaultSettings['iiifserver_image_tile_dir'];
+        if (empty($tileDir)) {
+            throw new ModuleCannotInstallException(new Message(
+                'The tile dir is not defined.', $dir)); // @translate
+        }
+
+        $dir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
 
         // Check if the directory exists in the archive.
         if (file_exists($dir)) {
@@ -394,9 +408,15 @@ class Module extends AbstractModule
     {
         $serviceLocator = $this->getServiceLocator();
         $settings = $serviceLocator->get('Omeka\Settings');
-        $tileDir = OMEKA_PATH
-            . DIRECTORY_SEPARATOR . 'files'
-            . DIRECTORY_SEPARATOR . $settings->get('iiifserver_image_tile_dir');
+        $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $tileDir = $settings->get('iiifserver_image_tile_dir');
+        if (empty($tileDir)) {
+            $logger = $serviceLocator->get('Omeka\logger');
+            $logger->err(new Message('Tile dir is not defined, so media tiles cannot be removed.')); // @translate
+            return;
+        }
+
+        $tileDir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
 
         // Remove all files and folders, whatever the format or the source.
         $media = $event->getTarget();
