@@ -31,6 +31,7 @@
 namespace IiifServer\ImageServer;
 
 use IiifServer\AbstractImageServer;
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
 
 /**
@@ -63,7 +64,7 @@ class Auto extends AbstractImageServer
      *
      * Note: Check for the imagick extension at creation.
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct(
         TempFileFactory $tempFileFactory,

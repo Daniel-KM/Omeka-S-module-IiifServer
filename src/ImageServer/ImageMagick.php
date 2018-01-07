@@ -30,8 +30,9 @@
 namespace IiifServer\ImageServer;
 
 use IiifServer\AbstractImageServer;
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
-use Omeka\Stdlib\Cli;
+use Zend\Log\Logger;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -88,7 +89,7 @@ class ImageMagick extends AbstractImageServer
      * @param TempFileFactory $tempFileFactory
      * @param StoreInterface $store
      * @param array $commandLineArgs
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct(TempFileFactory $tempFileFactory, $store, $commandLineArgs)
     {

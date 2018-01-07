@@ -31,6 +31,7 @@
 namespace IiifServer\ImageServer;
 
 use IiifServer\AbstractImageServer;
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
 use Zend\Log\Logger;
 
@@ -67,13 +68,13 @@ class GD extends AbstractImageServer
      *
      * @param TempFileFactory $tempFileFactory
      * @param StoreInterface $store
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct(TempFileFactory $tempFileFactory, $store)
     {
         $t = $this->getTranslator();
         if (!extension_loaded('gd')) {
-            throw new Exception($t->translate('The transformation of images via GD requires the PHP extension "gd".'));
+            throw new \Exception($t->translate('The transformation of images via GD requires the PHP extension "gd".'));
         }
 
         $gdInfo = gd_info();

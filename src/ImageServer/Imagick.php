@@ -31,7 +31,9 @@
 namespace IiifServer\ImageServer;
 
 use IiifServer\AbstractImageServer;
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
+use Zend\Log\Logger;
 
 /**
  * Helper to create an image from another one with IIIF arguments.
@@ -66,13 +68,13 @@ class Imagick extends AbstractImageServer
      *
      * @param TempFileFactory $tempFileFactory
      * @param StoreInterface $store
-     * @throws Exception
+     * @throws \Exception
      */
     public function __construct(TempFileFactory $tempFileFactory, $store)
     {
         $t = $this->getTranslator();
         if (!extension_loaded('imagick')) {
-            throw new Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
+            throw new \Exception($t->translate('The transformation of images via ImageMagick requires the PHP extension "imagick".'));
         }
 
         $this->tempFileFactory = $tempFileFactory;
