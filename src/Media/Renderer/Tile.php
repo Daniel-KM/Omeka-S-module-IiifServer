@@ -78,7 +78,7 @@ class Tile implements RendererInterface
                 $media->id());
         }
 
-        $data['prefixUrl'] = $view->assetUrl('vendor/openseadragon/images/', 'Omeka');
+        $data['prefixUrl'] = $view->assetUrl('vendor/openseadragon/images/', 'Omeka', false, false);
 
         if (isset($options['data'])) {
             $data = array_merge($data, $options['data']);
