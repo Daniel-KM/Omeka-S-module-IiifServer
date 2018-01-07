@@ -299,7 +299,7 @@ class Module extends AbstractModule
         $form = $formElementManager->get(ConfigForm::class);
         $form->init();
         $form->setData($data);
-        return $renderer->render('iiif-server/module/config.phtml', [
+        return $renderer->render('iiif-server/module/config', [
             'form' => $form,
         ]);
     }

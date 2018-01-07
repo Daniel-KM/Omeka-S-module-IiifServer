@@ -257,7 +257,7 @@ class IiifInfo extends AbstractHelper
      * @param string $filepath This should be an image (no check here).
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
-     * @see IiifServer\Controller\ImageController::_getWidthAndHeight()
+     * @see \IiifServer\Controller\ImageController::_getWidthAndHeight()
      * @todo Refactorize.
      */
     protected function _getWidthAndHeight($filepath)

@@ -1053,9 +1053,8 @@ class IiifManifest extends AbstractHelper
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
      *
-     * @see UniversalViewer_View_Helper_IiifManifest::_getImageSize()
-     * @see UniversalViewer_View_Helper_IiifInfo::_getImageSize()
-     * @see UniversalViewer_ImageController::_getImageSize()
+     * @see IiifInfo::_getImageSize()
+     * @see \IiifServer\Controller\ImageController::_getImageSize()
      * @todo Refactorize.
      */
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
@@ -1091,7 +1090,7 @@ class IiifManifest extends AbstractHelper
      * @param string $filepath This should be an image (no check here).
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
-     * @see IiifServer\Controller\ImageController::_getWidthAndHeight()
+     * @see \IiifServer\Controller\ImageController::_getWidthAndHeight()
      * @todo Refactorize.
      */
     protected function _getWidthAndHeight($filepath)
