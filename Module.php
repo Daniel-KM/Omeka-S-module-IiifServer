@@ -88,7 +88,7 @@ class Module extends AbstractModule
         $processors = $this->listProcessors($serviceLocator);
 
         $config = include __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
 
         // Convert settings from old releases of Universal Viewer, if installed.
         $module = $moduleManager->getModule('UniversalViewer');
@@ -168,7 +168,7 @@ class Module extends AbstractModule
         $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
     }
 
-    protected function manageSettings($settings, $process, $key = 'settings')
+    protected function manageSettings($settings, $process, $key = 'config')
     {
         $config = require __DIR__ . '/config/module.config.php';
         $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
@@ -230,7 +230,7 @@ class Module extends AbstractModule
     {
         if (version_compare($oldVersion, '3.5.1', '<')) {
             $config = require __DIR__ . '/config/module.config.php';
-            $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+            $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
             $settings = $serviceLocator->get('Omeka\Settings');
             $this->createTilesMainDir($serviceLocator);
             $settings->set('iiifserver_image_tile_dir',
@@ -290,7 +290,7 @@ class Module extends AbstractModule
         $formElementManager = $services->get('FormElementManager');
 
         $data = [];
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         foreach ($defaultSettings as $name => $value) {
             $data['iiifserver_manifest'][$name] = $settings->get($name);
             $data['iiifserver_image'][$name] = $settings->get($name);
@@ -325,7 +325,7 @@ class Module extends AbstractModule
         unset($params['iiifserver_manifest']);
         unset($params['iiifserver_image']);
 
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         foreach ($params as $name => $value) {
             if (isset($defaultSettings[$name])) {
                 $settings->set($name, $value);
@@ -362,7 +362,7 @@ class Module extends AbstractModule
     {
         // The local store "files" may be hard-coded.
         $config = include __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['settings'];
+        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $tileDir = $defaultSettings['iiifserver_image_tile_dir'];
         if (empty($tileDir)) {

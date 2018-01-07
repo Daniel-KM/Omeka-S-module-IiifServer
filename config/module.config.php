@@ -360,7 +360,7 @@ return [
         ],
     ],
     'iiifserver' => [
-        'settings' => [
+        'config' => [
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
