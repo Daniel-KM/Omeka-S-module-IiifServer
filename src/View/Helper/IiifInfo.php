@@ -63,15 +63,11 @@ class IiifInfo extends AbstractHelper
      *
      * @todo Replace all data by standard classes.
      *
-     * @param Record|int|null $record
+     * @param MediaRepresentation|null $media
      * @return Object|null
      */
     public function __invoke(MediaRepresentation $media)
     {
-        if (empty($media)) {
-            return null;
-        }
-
         if (strpos($media->mediaType(), 'image/') === 0) {
             $sizes = [];
             $availableTypes = ['medium', 'large', 'original'];

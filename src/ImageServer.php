@@ -30,6 +30,7 @@
 
 namespace IiifServer;
 
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
 use Omeka\Settings\Settings;
 use Zend\I18n\Translator\TranslatorAwareInterface;

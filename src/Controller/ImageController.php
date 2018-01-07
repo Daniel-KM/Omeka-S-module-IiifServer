@@ -33,6 +33,7 @@ namespace IiifServer\Controller;
 use Exception;
 use IiifServer\ImageServer;
 use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
 use Omeka\Module\Manager as ModuleManager;
 use Omeka\Mvc\Exception\NotFoundException;

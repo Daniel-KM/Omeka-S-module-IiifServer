@@ -30,6 +30,7 @@
 
 namespace IiifServer\Controller;
 
+use Omeka\File\Store\StoreInterface;
 use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
