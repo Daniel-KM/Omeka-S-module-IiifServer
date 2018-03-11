@@ -777,7 +777,7 @@ class IiifManifest extends AbstractHelper
         $mseRenderings = [];
         // Only one rendering currently: the file itself, but it
         // may be converted to multiple format: high and low
-        // resolution, webm...
+        // resolution, webm…
         $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();
@@ -838,7 +838,7 @@ class IiifManifest extends AbstractHelper
         $mseRenderings = [];
         // Only one rendering currently: the file itself, but it
         // may be converted to multiple format: high and low
-        // resolution, webm...
+        // resolution, webm…
         $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();

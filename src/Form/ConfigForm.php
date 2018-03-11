@@ -38,7 +38,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Property to use for Description', // @translate
                 'info' => $this->translate('If any, the first metadata of the record will be added in all manifests and viewers for main description.') // @translate
                     . ' ' . $this->translate('It’s recommended to use "Dublin Core:Bibliographic Citation".'), // @translate
-                'empty_option' => 'Select a property...', // @translate
+                'empty_option' => 'Select a property…', // @translate
                 'term_as_value' => true,
             ],
             'attributes' => [
@@ -53,7 +53,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'options' => [
                 'label' => 'Property to use for Attribution', // @translate
                 'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.', // @translate
-                'empty_option' => 'Select a property...', // @translate
+                'empty_option' => 'Select a property…', // @translate
                 'term_as_value' => true,
             ],
             'attributes' => [
@@ -79,7 +79,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Property to use for license', // @translate
                 'info' => $this->translate('If any, the first metadata of the resource will be added in all manifests and viewers to indicate the rights.') // @translate
                     . ' ' . $this->translate('It’s recommended to use "dcterms:license".'), // @translate
-                'empty_option' => 'Select a property...', // @translate
+                'empty_option' => 'Select a property…', // @translate
                 'term_as_value' => true,
             ],
             'attributes' => [

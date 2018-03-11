@@ -141,7 +141,7 @@ class MediaController extends AbstractActionController
         }
 
         // A check is added if the file is local: the source can be a local file
-        // or an external one (Amazon S3...).
+        // or an external one (Amazon S3…).
         switch (get_class($this->store)) {
             case \Omeka\File\Store\Local::class:
                 $filepath = $basePath

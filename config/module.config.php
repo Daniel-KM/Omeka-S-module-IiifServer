@@ -56,7 +56,7 @@ return [
     ],
     'router' => [
         'routes' => [
-            // @todo It is recommended to use a true identifier (ark, urn...], not an internal id.
+            // @todo It is recommended to use a true identifier (ark, urn…], not an internal id.
 
             // @link http://iiif.io/api/presentation/2.0
             // Collection     {scheme}://{host}/{prefix}/collection/{name}
