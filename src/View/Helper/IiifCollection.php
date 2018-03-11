@@ -106,7 +106,7 @@ class IiifCollection extends AbstractHelper
         }
         $manifest['license'] = $license;
 
-        $attributionProperty = $this->view->setting('iiifserver_attribution_property');
+        $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal']));
         }
