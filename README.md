@@ -336,7 +336,7 @@ Copyright
 [IIIF specifications]: http://iiif.io/api/
 [IIP Image]: http://iipimage.sourceforge.net
 [OpenSeadragon]: https://openseadragon.github.io
-[Universal Viewer plugin for Omeka]: https://github.com/Daniel-KM/UniversalViewer4Omeka
+[Universal Viewer plugin for Omeka]: https://github.com/Daniel-KM/Omeka-plugin-UniversalViewer
 [BibLibre]: https://github.com/biblibre
 [OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
 [Omeka Classic]: https://omeka.org
@@ -351,7 +351,7 @@ Copyright
 [Deep Zoom]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Deep Zoom Image]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Zoomify]: http://www.zoomify.com/
-[OpenLayers Zoom]: https://github.com/Daniel-KM/OpenLayersZoom
+[OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
 [OpenLayers]: https://openlayers.org/
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [threejs]: https://threejs.org
