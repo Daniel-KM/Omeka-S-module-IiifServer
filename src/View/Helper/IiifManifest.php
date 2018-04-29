@@ -217,7 +217,7 @@ class IiifManifest extends AbstractHelper
             $mediaType = $media->mediaType();
             // Images files.
             // Internal: has_derivative is not only for images.
-            if (strpos($mediaType, 'image/') === 0) {
+            if ($mediaType && strpos($mediaType, 'image/') === 0) {
                 $images[] = $media;
             }
             // Non-images files.
@@ -281,11 +281,15 @@ class IiifManifest extends AbstractHelper
         // download section.
         if ($totalImages || $isThreejs) {
             foreach ($nonImages as $media) {
-                switch ($media->mediaType()) {
+                $mediaType = $media->mediaType();
+                switch ($mediaType) {
+                    case '':
+                        break;
+
                     case 'application/pdf':
                         $render = [];
                         $render['@id'] = $media->originalUrl();
-                        $render['format'] = $media->mediaType();
+                        $render['format'] = $mediaType;
                         $render['label'] = $translate('Download as PDF');
                         $render = (object) $render;
                         $rendering[] = $render;
@@ -308,7 +312,11 @@ class IiifManifest extends AbstractHelper
         // Else, check if non-images are managed (special content, as pdf).
         else {
             foreach ($nonImages as $media) {
-                switch ($media->mediaType()) {
+                $mediaType = $media->mediaType();
+                switch ($mediaType) {
+                    case '':
+                        break;
+
                     case 'application/pdf':
                         $mediaSequenceElement = $this->_iiifMediaSequencePdf(
                             $media,
@@ -319,7 +327,7 @@ class IiifManifest extends AbstractHelper
                         // file is already available for download in the pdf viewer.
                         break;
 
-                    case strpos($media->mediaType(), 'audio/') === 0:
+                    case strpos($mediaType, 'audio/') === 0:
                     // case 'audio/ogg':
                     // case 'audio/mp3':
                         $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
@@ -330,9 +338,9 @@ class IiifManifest extends AbstractHelper
                         // Rendering files are automatically added for download.
                         break;
 
-                    // TODO Check/support the media type "application//octet-stream".
-                    // case 'application//octet-stream':
-                    case strpos($media->mediaType(), 'video/') === 0:
+                    // TODO Check/support the media type "application/octet-stream".
+                    // case 'application/octet-stream':
+                    case strpos($mediaType, 'video/') === 0:
                     // case 'video/webm':
                         $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
                             $media,
@@ -1060,7 +1068,15 @@ class IiifManifest extends AbstractHelper
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
     {
         // Check if this is an image.
-        if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
+        if (empty($media)) {
+            return [
+                'width' => null,
+                'height' => null,
+            ];
+        }
+
+        $mediaType = $media->mediaType();
+        if (empty($mediaType) || strpos($mediaType, 'image/') !== 0) {
             return [
                 'width' => null,
                 'height' => null,
