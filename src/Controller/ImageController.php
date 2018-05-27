@@ -756,9 +756,8 @@ class ImageController extends AbstractActionController
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
      *
-     * @see UniversalViewer_View_Helper_IiifManifest::_getImageSize()
-     * @see UniversalViewer_View_Helper_IiifInfo::_getImageSize()
-     * @see UniversalViewer_ImageController::_getImageSize()
+     * @see \IiifServer\View\Helper\IiifManifest::_getImageSize()
+     * @see \IiifServer\View\Helper\IiifInfo::_getImageSize()
      * @todo Refactorize.
      */
     protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
@@ -785,12 +784,12 @@ class ImageController extends AbstractActionController
     /**
      * Get the path to an original or derivative file for an image.
      *
-     * @param File $file
+     * @param MediaRepresentation $media
      * @param string $derivativeType
      * @return string|null Null if not exists.
-     * @see UniversalViewer_View_Helper_IiifInfo::_getImagePath()
+     * @see \IiifServer\View\Helper\IiifInfo::_getImagePath()
      */
-    protected function _getImagePath($media, $derivativeType = 'original')
+    protected function _getImagePath(MediaRepresentation $media, $derivativeType = 'original')
     {
         // Check if the file is an image.
         if (strpos($media->mediaType(), 'image/') === 0) {
@@ -829,7 +828,7 @@ class ImageController extends AbstractActionController
      * @param string $filepath This should be an image (no check here).
      * @return array Associative array of width and height of the image file.
      * If the file is not an image, the width and the height will be null.
-     * @see UniversalViewer_View_Helper_IiifInfo::_getWidthAndHeight()
+     * @see \IiifServer\View\Helper\IiifInfo::_getWidthAndHeight()
      * @todo Refactorize.
      */
     protected function _getWidthAndHeight($filepath)
