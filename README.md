@@ -4,8 +4,9 @@ IIIF Server (module for Omeka S)
 [![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer)
 
 [IIIF Server] is a module for [Omeka S] that integrates the [IIIF specifications]
-and a simple [IIP Image] server to allow to process and share instantly images
-of any size and medias (pdf, audio, video, 3D...) in the desired formats.
+and a simple image server (similar to a basic [IIP Image]) to allow to process
+and share instantly images of any size and medias (pdf, audio, video, 3D...) in
+the desired formats.
 
 The full specifications of the [International Image Interoperability Framework]
 standard are supported (level 2), so any widget that supports it can use it.
