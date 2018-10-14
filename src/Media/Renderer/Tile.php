@@ -229,7 +229,7 @@ OUTPUT;
     {
         $squaleFactors = [];
         $maxSize = max($width, $height);
-        $total = (integer) ceil($maxSize / $tileSize);
+        $total = (int) ceil($maxSize / $tileSize);
         $factor = 1;
         while ($factor / 2 <= $total) {
             $squaleFactors[] = $factor;

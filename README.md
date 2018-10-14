@@ -75,13 +75,13 @@ Then, you have to add the following rules, adapted to your needs, to the file
 
 ```
 # CORS access for some files.
-<FilesMatch "\.json$">
-    <IfModule mod_headers.c>
+<IfModule mod_headers.c>
+    <FilesMatch "\.json$">
         Header add Access-Control-Allow-Origin "*"
         Header add Access-Control-Allow-Headers "origin, x-requested-with, content-type"
         Header add Access-Control-Allow-Methods "GET, POST, OPTIONS"
-    </IfModule>
-</FilesMatch>
+    </FilesMatch>
+</IfModule>
 ```
 
 It is recommended to use the main config of the server, for example  with the
@@ -327,7 +327,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2017
+* Copyright Daniel Berthereau, 2015-2018
 * Copyright BibLibre, 2016-2017
 
 

@@ -165,11 +165,11 @@ class TileInfo extends AbstractPlugin
         $tilingData['media_path'] = '';
         $tilingData['url_base'] = $this->tileBaseUrl;
         $tilingData['path_base'] = $this->tileBaseDir;
-        $tilingData['size'] = (integer) $data['@attributes']['TileSize'];
-        $tilingData['overlap'] = (integer) $data['@attributes']['Overlap'];
+        $tilingData['size'] = (int) $data['@attributes']['TileSize'];
+        $tilingData['overlap'] = (int) $data['@attributes']['Overlap'];
         $tilingData['total'] = null;
-        $tilingData['source']['width'] = (integer) $data['Size']['@attributes']['Width'];
-        $tilingData['source']['height'] = (integer) $data['Size']['@attributes']['Height'];
+        $tilingData['source']['width'] = (int) $data['Size']['@attributes']['Width'];
+        $tilingData['source']['height'] = (int) $data['Size']['@attributes']['Height'];
         $tilingData['format'] = $data['@attributes']['Format'];
         return $tilingData;
     }
@@ -194,11 +194,11 @@ class TileInfo extends AbstractPlugin
         $tilingData['media_path'] = '';
         $tilingData['url_base'] = $this->tileBaseUrl;
         $tilingData['path_base'] = $this->tileBaseDir;
-        $tilingData['size'] = (integer) $data['TileSize'];
-        $tilingData['overlap'] = (integer) $data['Overlap'];
+        $tilingData['size'] = (int) $data['TileSize'];
+        $tilingData['overlap'] = (int) $data['Overlap'];
         $tilingData['total'] = null;
-        $tilingData['source']['width'] = (integer) $data['Size']['Width'];
-        $tilingData['source']['height'] = (integer) $data['Size']['Height'];
+        $tilingData['source']['width'] = (int) $data['Size']['Width'];
+        $tilingData['source']['height'] = (int) $data['Size']['Height'];
         $tilingData['format'] = $data['Format'];
         return $tilingData;
     }
@@ -224,11 +224,11 @@ class TileInfo extends AbstractPlugin
         $tilingData['media_path'] = '';
         $tilingData['url_base'] = $this->tileBaseUrl;
         $tilingData['path_base'] = $this->tileBaseDir;
-        $tilingData['size'] = (integer) $properties['TILESIZE'];
+        $tilingData['size'] = (int) $properties['TILESIZE'];
         $tilingData['overlap'] = 0;
-        $tilingData['total'] = (integer) $properties['NUMTILES'];
-        $tilingData['source']['width'] = (integer) $properties['WIDTH'];
-        $tilingData['source']['height'] = (integer) $properties['HEIGHT'];
+        $tilingData['total'] = (int) $properties['NUMTILES'];
+        $tilingData['source']['width'] = (int) $properties['WIDTH'];
+        $tilingData['source']['height'] = (int) $properties['HEIGHT'];
         $tilingData['format'] = isset($properties['FORMAT'])
             ? $properties['FORMAT']
             : 'jpg';

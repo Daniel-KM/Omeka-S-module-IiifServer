@@ -80,7 +80,7 @@ return [
             // required to avoid confusion with a normal collection.
             // This route should be set before the "iiifserver_presentation_collection".
             'iiifserver_presentation_collection_list' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/collection/:id',
                     'constraints' => [
@@ -99,7 +99,7 @@ return [
             // "{id}.json", etc. Here, an empty name is used, and a second route is added.
             // Invert the names of the route to use the generic name for the manifest itself.
             'iiifserver_presentation_collection' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/collection/:id',
                     'constraints' => [
@@ -113,7 +113,7 @@ return [
                 ],
             ],
             'iiifserver_presentation_collection_redirect' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/collection/:id/manifest',
                     'constraints' => [
@@ -127,7 +127,7 @@ return [
                 ],
             ],
             'iiifserver_presentation_item' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/:id/manifest',
                     'constraints' => [
@@ -142,7 +142,7 @@ return [
             ],
             // The redirection is not required for presentation, but a forward is possible.
             'iiifserver_presentation_item_redirect' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/:id',
                     'constraints' => [
@@ -157,7 +157,7 @@ return [
             ],
             // A redirect to the info.json is required by the specification.
             'iiifserver_image' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif-img/:id',
                     'constraints' => [
@@ -171,7 +171,7 @@ return [
                 ],
             ],
             'iiifserver_image_info' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif-img/:id/info.json',
                     'constraints' => [
@@ -190,7 +190,7 @@ return [
             // processed after it.
             // TODO Simplify to any number of sub elements.
             'iiifserver_image_bad' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
                     'constraints' => [
@@ -210,7 +210,7 @@ return [
             ],
             // Warning: the format is separated with a ".", not a "/".
             'iiifserver_image_url' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
                     'constraints' => [
@@ -230,7 +230,7 @@ return [
             ],
             // A redirect to the info.json is required by the specification.
             'iiifserver_media' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/ixif-media/:id',
                     'constraints' => [
@@ -244,7 +244,7 @@ return [
                 ],
             ],
             'iiifserver_media_info' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/ixif-media/:id/info.json',
                     'constraints' => [
@@ -262,7 +262,7 @@ return [
             // This route should be set before the iiifserver_media in order to be
             // processed after it.
             'iiifserver_media_bad' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/ixif-media/:id:.:format',
                     'constraints' => [
@@ -278,7 +278,7 @@ return [
             ],
             // Warning: the format is separated with a ".", not a "/".
             'iiifserver_media_url' => [
-                'type' => 'Segment',
+                'type' => \Zend\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/ixif-media/:id:.:format',
                     'constraints' => [
@@ -302,7 +302,7 @@ return [
             // compatibility with the old schemes used by the plugin for Omeka 2
             // before the version 2.4.2.
             // 'iiifserver_presentation_classic' => [
-            //     'type' => 'Segment',
+            //     'type' => \Zend\Router\Http\Segment::class,
             //     'options' => [
             //         'route' => '/:resourcename/presentation/:id',
             //         'constraints' => [
@@ -317,7 +317,7 @@ return [
             //     ],
             // ],
             // 'iiifserver_presentation_manifest_classic' => [
-            //     'type' => 'Segment',
+            //     'type' => \Zend\Router\Http\Segment::class,
             //     'options' => [
             //         'route' => '/:resourcename/presentation/:id/manifest',
             //         'constraints' => [
