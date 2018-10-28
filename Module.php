@@ -55,9 +55,9 @@ class Module extends AbstractModule
         parent::onBootstrap($event);
 
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
-        $acl->allow(null, 'IiifServer\Controller\Presentation');
-        $acl->allow(null, 'IiifServer\Controller\Image');
-        $acl->allow(null, 'IiifServer\Controller\Media');
+        $acl->allow(null, Controller\PresentationController::class);
+        $acl->allow(null, Controller\ImageController::class);
+        $acl->allow(null, Controller\MediaController::class);
     }
 
     public function install(ServiceLocatorInterface $serviceLocator)

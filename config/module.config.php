@@ -24,16 +24,16 @@ return [
     ],
     'form_elements' => [
         'factories' => [
-            'IiifServer\Form\ConfigForm' => Service\Form\ConfigFormFactory::class,
+            Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
     ],
     'controllers' => [
         'invokables' => [
-            'IiifServer\Controller\Presentation' => Controller\PresentationController::class,
+            Controller\PresentationController::class => Controller\PresentationController::class,
         ],
         'factories' => [
-            'IiifServer\Controller\Image' => Service\Controller\ImageControllerFactory::class,
-            'IiifServer\Controller\Media' => Service\Controller\MediaControllerFactory::class,
+            Controller\ImageController::class => Service\Controller\ImageControllerFactory::class,
+            Controller\MediaController::class => Service\Controller\MediaControllerFactory::class,
         ],
     ],
     'controller_plugins' => [
@@ -88,7 +88,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Presentation',
+                        'controller' => Controller\PresentationController::class,
                         'action' => 'list',
                     ],
                 ],
@@ -107,7 +107,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Presentation',
+                        'controller' => Controller\PresentationController::class,
                         'action' => 'collection',
                     ],
                 ],
@@ -121,7 +121,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Presentation',
+                        'controller' => Controller\PresentationController::class,
                         'action' => 'collection',
                     ],
                 ],
@@ -135,7 +135,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Presentation',
+                        'controller' => Controller\PresentationController::class,
                         'action' => 'item',
                     ],
                 ],
@@ -150,7 +150,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Presentation',
+                        'controller' => Controller\PresentationController::class,
                         'action' => 'item',
                     ],
                 ],
@@ -165,7 +165,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Image',
+                        'controller' => Controller\ImageController::class,
                         'action' => 'index',
                     ],
                 ],
@@ -179,7 +179,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Image',
+                        'controller' => Controller\ImageController::class,
                         'action' => 'info',
                     ],
                 ],
@@ -203,7 +203,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Image',
+                        'controller' => Controller\ImageController::class,
                         'action' => 'bad',
                     ],
                 ],
@@ -223,7 +223,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Image',
+                        'controller' => Controller\ImageController::class,
                         'action' => 'fetch',
                     ],
                 ],
@@ -238,7 +238,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Media',
+                        'controller' => Controller\MediaController::class,
                         'action' => 'index',
                     ],
                 ],
@@ -252,7 +252,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Media',
+                        'controller' => Controller\MediaController::class,
                         'action' => 'info',
                     ],
                 ],
@@ -271,7 +271,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Media',
+                        'controller' => Controller\MediaController::class,
                         'action' => 'bad',
                     ],
                 ],
@@ -287,7 +287,7 @@ return [
                     ],
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => 'Media',
+                        'controller' => Controller\MediaController::class,
                         'action' => 'fetch',
                     ],
                 ],
@@ -311,7 +311,7 @@ return [
             //         ],
             //         'defaults' => [
             //             '__NAMESPACE__' => 'IiifServer\Controller',
-            //             'controller' => 'Presentation',
+            //             'controller' => Controller\PresentationController::class,
             //             'action' => 'manifest',
             //         ],
             //     ],
@@ -326,7 +326,7 @@ return [
             //         ],
             //         'defaults' => [
             //             '__NAMESPACE__' => 'IiifServer\Controller',
-            //             'controller' => 'Presentation',
+            //             'controller' => Controller\PresentationController::class,
             //             'action' => 'manifest',
             //         ],
             //     ],
