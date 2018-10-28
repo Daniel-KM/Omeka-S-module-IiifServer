@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2018 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -296,8 +296,9 @@ class TileServer extends AbstractPlugin
             // In IIIF, levels start at the tile size.
             $numLevels -= (int) log($cellSize, 2);
             $squaleFactors = $this->getScaleFactors($numLevels);
-            $maxSize = max($source['width'], $source['height']);
-            $total = (int) ceil($maxSize / $tileInfo['size']);
+            // TODO Find why maxSize and total were needed.
+            // $maxSize = max($source['width'], $source['height']);
+            // $total = (int) ceil($maxSize / $tileInfo['size']);
             // If level is set, count is not set and useless.
             $level = isset($level) ? $level : 0;
             $count = isset($count) ? $count : 0;
@@ -396,7 +397,7 @@ class TileServer extends AbstractPlugin
     /**
      * Return the tile group of a tile from level, position and size.
      *
-     * @link https://github.com/openlayers/ol3/blob/master/src/ol/source/zoomifysource.js
+     * @link https://github.com/openlayers/openlayers/blob/v4.0.0/src/ol/source/zoomify.js
      *
      * @param array $image
      * @param array $tile
@@ -445,12 +446,10 @@ class TileServer extends AbstractPlugin
         $tierSizeInTiles[] = [1, 1];
         $tierSizeInTiles = array_reverse($tierSizeInTiles);
 
-        $resolutions = [1];
         $tileCountUpToTier = [0];
         for ($i = 1, $ii = count($tierSizeInTiles); $i < $ii; $i++) {
-            $resolutions[] = 1 << $i;
             $tileCountUpToTier[] =
-            $tierSizeInTiles[$i - 1][0] * $tierSizeInTiles[$i - 1][1]
+                $tierSizeInTiles[$i - 1][0] * $tierSizeInTiles[$i - 1][1]
                 + $tileCountUpToTier[$i - 1];
         }
 
@@ -473,7 +472,7 @@ class TileServer extends AbstractPlugin
     protected function getWidthAndHeight($filepath)
     {
         if (file_exists($filepath)) {
-            list($width, $height, $type, $attr) = getimagesize($filepath);
+            list($width, $height) = getimagesize($filepath);
             return [
                 'width' => $width,
                 'height' => $height,

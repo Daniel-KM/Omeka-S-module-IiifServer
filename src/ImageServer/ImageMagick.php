@@ -98,8 +98,6 @@ class ImageMagick extends AbstractImageServer
         $this->cli = $commandLineArgs['cli'];
         $this->convertPath = $commandLineArgs['convertPath'];
 
-        $t = $this->getTranslator();
-
         // TODO Get the true list of supported formats.
         // $this->_supportedFormats = array_intersect($this->_supportedFormats, \Imagick::queryFormats());
     }

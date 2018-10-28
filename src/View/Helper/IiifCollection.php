@@ -81,7 +81,7 @@ class IiifCollection extends AbstractHelper
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
         $metadata = [];
-        foreach ($itemSet->values() as $term => $value) {
+        foreach ($itemSet->values() as $value) {
             $metadata[] = (object) [
                 'label' => $value['alternate_label'] ?: $value['property']->label(),
                 'value' => count($value['values']) > 1

@@ -128,7 +128,7 @@ class IiifManifest extends AbstractHelper
         // Prepare the metadata of the record.
         // TODO Manage filter and escape?
         $metadata = [];
-        foreach ($item->values() as $term => $propertyData) {
+        foreach ($item->values() as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {
