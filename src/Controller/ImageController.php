@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2018 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -36,7 +36,6 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\Store\StoreInterface;
 use Omeka\File\TempFileFactory;
 use Omeka\Module\Manager as ModuleManager;
-use Omeka\Mvc\Exception\NotFoundException;
 use Zend\I18n\Translator\TranslatorInterface;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
@@ -128,21 +127,14 @@ class ImageController extends AbstractActionController
     /**
      * Send "info.json" for the current file.
      *
-     * @internal The info is managed by the ImageControler because it indicates
+     * The info is managed by the ImageControler because it indicates
      * capabilities of the IIIF server for the request of a file.
      */
     public function infoAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
-        }
-
-        $response = $this->api()->read('media', $id);
-        $media = $response->getContent();
-        if (empty($media)) {
-            throw new NotFoundException;
-        }
+        $media = $this->api()->read('media', $id)->getContent();
 
         $iiifInfo = $this->viewHelpers()->get('iiifInfo');
         $info = $iiifInfo($media);
@@ -155,12 +147,9 @@ class ImageController extends AbstractActionController
      */
     public function fetchAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-        $response = $this->api()->read('media', $id);
-        $media = $response->getContent();
-        if (empty($media)) {
-            throw new NotFoundException;
-        }
+        $media = $this->api()->read('media', $id)->getContent();
 
         $response = $this->getResponse();
 

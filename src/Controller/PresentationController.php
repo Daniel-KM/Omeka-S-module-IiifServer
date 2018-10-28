@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2018 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -47,15 +47,16 @@ class PresentationController extends AbstractActionController
         $this->forward('manifest');
     }
 
+    /**
+     * This method is kept for ixif compatibility with old Omeka Classic urls.
+     *
+     * @throws NotFoundException
+     * @return \Zend\View\Model\JsonModel
+     */
     public function manifestAction()
     {
-        $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
-        }
-
         // Map iiif resources with Omeka Classic and Omeka S records.
-        $matchingResources = [
+        $mapResourceNames = [
             'item' => 'items',
             'items' => 'items',
             'item-set' => 'item_sets',
@@ -66,30 +67,20 @@ class PresentationController extends AbstractActionController
             'collections' => 'item_sets',
         ];
         $resourceName = $this->params('resourcename');
-        if (!isset($matchingResources[$resourceName])) {
+        if (!isset($mapResourceNames[$resourceName])) {
             throw new NotFoundException;
         }
-        $resourceName = $matchingResources[$resourceName];
 
-        if ($resource->resourceName() == 'item_sets') {
-            return $this->collectionAction();
-        } else {
-            return $this->itemAction();
-        }
+        return $mapResourceNames[$resourceName] === 'item_sets'
+            ? $this->collectionAction()
+            : $this->itemAction();
     }
 
     public function collectionAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
-        }
-
-        $response = $this->api()->read('item_sets', $id);
-        $resource = $response->getContent();
-        if (empty($resource)) {
-            throw new NotFoundException;
-        }
+        $resource = $this->api()->read('item_sets', $id)->getContent();
 
         $iiifCollection = $this->viewHelpers()->get('iiifCollection');
         $manifest = $iiifCollection($resource);
@@ -124,6 +115,7 @@ class PresentationController extends AbstractActionController
             'Omeka\Entity\Media' => 'media',
         ];
 
+        // TODO Use the adapter / get representation directly instead re-query result (but keep possible duplicate).
         $qb = $conn->createQueryBuilder()
             ->select('id, resource_type')
             ->from('resource', 'resource')
@@ -134,10 +126,12 @@ class PresentationController extends AbstractActionController
 
         // The loop is done with identifiers to keep original order and possible
         // duplicates.
+        $api = $this->api();
         $identifiers = array_intersect($identifiers, array_keys($resourceIds));
+        $resources = [];
         foreach ($identifiers as $id) {
-            $response = $this->api()->read($map[$resourceIds[$id]], $id);
-            $resources[] = $response->getContent();
+            // Not found exception is automatically thrown.
+            $resources[] = $api->read($map[$resourceIds[$id]], $id)->getContent();
         }
 
         if (empty($resources)) {
@@ -152,16 +146,9 @@ class PresentationController extends AbstractActionController
 
     public function itemAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
-        }
-
-        $response = $this->api()->read('items', $id);
-        $resource = $response->getContent();
-        if (empty($resource)) {
-            throw new NotFoundException;
-        }
+        $resource = $this->api()->read('items', $id)->getContent();
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
         $manifest = $iiifManifest($resource);

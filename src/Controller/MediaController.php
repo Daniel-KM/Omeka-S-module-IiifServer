@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2018 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -31,7 +31,6 @@
 namespace IiifServer\Controller;
 
 use Omeka\File\Store\StoreInterface;
-use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
@@ -74,21 +73,14 @@ class MediaController extends AbstractActionController
     /**
      * Send "info.json" for the current file.
      *
-     * @internal The info is managed by the MediaControler because it indicates
+     * The info is managed by the MediaControler because it indicates
      * capabilities of the IXIF server for the request of a file.
      */
     public function infoAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
-        }
-
-        $response = $this->api()->read('media', $id);
-        $media = $response->getContent();
-        if (empty($media)) {
-            throw new NotFoundException;
-        }
+        $media = $this->api()->read('media', $id)->getContent();
 
         $iiifInfo = $this->viewHelpers()->get('iiifInfo');
         $info = $iiifInfo($media);
@@ -117,13 +109,9 @@ class MediaController extends AbstractActionController
      */
     public function fetchAction()
     {
+        // Not found exception is automatically thrown.
         $id = $this->params('id');
-
-        $response = $this->api()->read('media', $id);
-        $media = $response->getContent();
-        if (empty($media)) {
-            throw new NotFoundException;
-        }
+        $media = $this->api()->read('media', $id)->getContent();
 
         $response = $this->getResponse();
 
@@ -144,7 +132,7 @@ class MediaController extends AbstractActionController
         // or an external one (Amazon S3…).
         switch (get_class($this->store)) {
             case \Omeka\File\Store\Local::class:
-                $filepath = $basePath
+                $filepath = $this->basePath
                     . DIRECTORY_SEPARATOR . $this->getStoragePath('original', $media->filename());
                 if (!file_exists($filepath) || filesize($filepath) == 0) {
                     $response->setStatusCode(500);
@@ -175,7 +163,7 @@ class MediaController extends AbstractActionController
      *
      * @param string $prefix The storage prefix
      * @param string $name The file name, or basename if extension is passed
-     * @param null|string $extension The file extension
+     * @param string|null $extension The file extension
      * @return string
      * @todo Refactorize.
      */
