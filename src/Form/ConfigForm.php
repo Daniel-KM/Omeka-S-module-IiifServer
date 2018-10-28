@@ -16,7 +16,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
     public function init()
     {
-        $processors = $this->listProcessors();
+        $processors = $this->listImageProcessors();
 
         $this->add([
             'name' => 'iiifserver_manifest',
@@ -232,11 +232,11 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     /**
      * Check and return the list of available processors.
      *
-     * @todo Merge with IiifServer\Module::listProcessors()
+     * @todo Merge with IiifServer\Module::listImageProcessors()
      *
      * @return array Associative array of available processors.
      */
-    protected function listProcessors()
+    protected function listImageProcessors()
     {
         $processors = [];
         $processors['Auto'] = 'Automatic (GD when possible, else Imagick, else command line)'; // @translate

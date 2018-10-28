@@ -31,7 +31,6 @@
 namespace IiifServer;
 
 use IiifServer\Form\ConfigForm;
-// use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
@@ -85,7 +84,12 @@ class Module extends AbstractModule
                     . ' ' . $t->translate('See module’s installation documentation.')); // @translate
         }
 
-        $processors = $this->listProcessors($serviceLocator);
+        $processors = $this->listImageProcessors($serviceLocator);
+        if (empty($processors)) {
+            throw new ModuleCannotInstallException(
+                $t->translate('The module requires an image processor (ImageMagick, Imagick or GD).') // @translate
+                    . ' ' . $t->translate('See module’s installation documentation.')); // @translate
+        }
 
         $config = include __DIR__ . '/config/module.config.php';
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
@@ -147,7 +151,7 @@ class Module extends AbstractModule
 
         // Nuke all the tiles.
         $basePath = $serviceLocator->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $tileDIr = $settings->get('iiifserver_image_tile_dir');
+        $tileDir = $settings->get('iiifserver_image_tile_dir');
         if (empty($tileDir)) {
             $messenger = new Messenger();
             $messenger->addWarning('The tile dir is not defined and was not removed.'); // @translate
@@ -157,7 +161,7 @@ class Module extends AbstractModule
             // A security check.
             $removable = $tileDir == realpath($tileDir);
             if ($removable) {
-                $this->rrmdir($dir);
+                $this->rrmdir($tileDir);
             } else {
                 $messenger = new Messenger();
                 $messenger->addWarning(
@@ -228,43 +232,7 @@ class Module extends AbstractModule
 
     public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
     {
-        if (version_compare($oldVersion, '3.5.1', '<')) {
-            $config = require __DIR__ . '/config/module.config.php';
-            $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
-            $settings = $serviceLocator->get('Omeka\Settings');
-            $this->createTilesMainDir($serviceLocator);
-            $settings->set('iiifserver_image_tile_dir',
-                $defaultSettings['iiifserver_image_tile_dir']);
-            $settings->set('iiifserver_image_tile_type',
-                $defaultSettings['iiifserver_image_tile_type']);
-        }
-
-        if (version_compare($oldVersion, '3.5.8', '<')) {
-            $settings = $serviceLocator->get('Omeka\Settings');
-            $forceHttps = $settings->get('iiifserver_manifest_force_https');
-            if ($forceHttps) {
-                $settings->set('iiifserver_manifest_force_url_from', 'http:');
-                $settings->set('iiifserver_manifest_force_url_to', 'https:');
-            }
-            $settings->delete('iiifserver_manifest_force_https');
-        }
-
-        if (version_compare($oldVersion, '3.5.9', '<')) {
-            $moduleManager = $serviceLocator->get('Omeka\ModuleManager');
-            $t = $serviceLocator->get('MvcTranslator');
-            $messenger = new Messenger();
-            $module = $moduleManager->getModule('ArchiveRepertory');
-            if ($module) {
-                $version = $module->getDb('version');
-                // Check if installed.
-                if (empty($version)) {
-                    // Nothing to do.
-                } elseif (version_compare($version, '3.15.4', '<')) {
-                    throw new ModuleCannotInstallException(
-                        $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
-                }
-            }
-        }
+        require_once 'data/scripts/upgrade.php';
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
@@ -334,16 +302,14 @@ class Module extends AbstractModule
     }
 
     /**
-     * Check and return the list of available processors.
+     * Check and return the list of available image processors.
      *
-     * @return array Associative array of available processors.
+     * @param ServiceLocatorInterface $services
+     * @return array Associative array of available image processors.
      */
-    protected function listProcessors(ServiceLocatorInterface $serviceLocator = null)
+    protected function listImageProcessors(ServiceLocatorInterface $services)
     {
-        if ($serviceLocator === null) {
-            $serviceLocator = $this->getServiceLocator();
-        }
-        $translator = $serviceLocator->get('MvcTranslator');
+        $translator = $services->get('MvcTranslator');
 
         $processors = [];
         $processors['Auto'] = $translator->translate('Automatic'); // @translate
@@ -353,7 +319,7 @@ class Module extends AbstractModule
         if (extension_loaded('imagick')) {
             $processors['Imagick'] = 'Imagick';
         }
-        // TODO Check if available.
+        // TODO Check if ImageMagick cli is available.
         $processors['ImageMagick'] = 'ImageMagick';
         return $processors;
     }
