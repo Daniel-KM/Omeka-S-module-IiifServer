@@ -20,6 +20,7 @@ return [
         'factories' => [
             'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
             'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
+            'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
         ],
     ],
     'form_elements' => [
@@ -42,6 +43,9 @@ return [
             'tileBuilder' => Mvc\Controller\Plugin\TileBuilder::class,
             'tileInfo' => Mvc\Controller\Plugin\TileInfo::class,
             'tileServer' => Mvc\Controller\Plugin\TileServer::class,
+        ],
+        'factories' => [
+            'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
         ],
     ],
     'media_ingesters' => [

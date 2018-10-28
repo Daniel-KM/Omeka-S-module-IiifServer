@@ -1,7 +1,5 @@
 <?php
-namespace DownloadManager;
-
-use Omeka\Module\Exception\ModuleCannotInstallException;
+namespace IiifServer;
 
 /**
  * @var Module $this
@@ -51,7 +49,7 @@ if (version_compare($oldVersion, '3.5.9', '<')) {
         if (empty($version)) {
             // Nothing to do.
         } elseif (version_compare($version, '3.15.4', '<')) {
-            throw new ModuleCannotInstallException(
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException(
                 $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
         }
     }

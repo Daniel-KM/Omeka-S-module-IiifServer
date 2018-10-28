@@ -362,7 +362,8 @@ class ImageController extends AbstractActionController
         $transform['source']['filepath'] = $this->_getImagePath($media, 'original');
         $transform['source']['media_type'] = $media->mediaType();
 
-        list($sourceWidth, $sourceHeight) = array_values($this->_getImageSize($media, 'original'));
+        $imageSize = $this->imageSize($media, 'original');
+        list($sourceWidth, $sourceHeight) = $imageSize ? array_values($imageSize) : [null, null];
         $transform['source']['width'] = $sourceWidth;
         $transform['source']['height'] = $sourceHeight;
 
@@ -515,7 +516,8 @@ class ImageController extends AbstractActionController
                     foreach ($availableTypes as $imageType) {
                         $filepath = $this->_getImagePath($media, $imageType);
                         if ($filepath) {
-                            list($testWidth, $testHeight) = array_values($this->_getImageSize($media, $imageType));
+                            $imageSize = $this->imageSize($media, $imageType);
+                            list($testWidth, $testHeight) = $imageSize ? array_values($imageSize) : [null, null];
                             if ($destinationWidth == $testWidth && $destinationHeight == $testHeight) {
                                 $transform['size']['feature'] = 'full';
                                 // Change the source file to avoid a transformation.
@@ -649,7 +651,8 @@ class ImageController extends AbstractActionController
 
         // Currently, the check is done only on fullsize.
         $derivativeType = 'large';
-        list($derivativeWidth, $derivativeHeight) = array_values($this->_getImageSize($media, $derivativeType));
+        $imageSize = $this->imageSize($media, $derivativeType);
+        list($derivativeWidth, $derivativeHeight) = $imageSize ? array_values($imageSize) : [null, null];
         switch ($transform['size']['feature']) {
             case 'sizeByW':
             case 'sizeByH':
@@ -738,39 +741,6 @@ class ImageController extends AbstractActionController
     }
 
     /**
-     * Get an array of the width and height of the image file.
-     *
-     * @param MediaRepresentation $media
-     * @param string $imageType
-     * @return array Associative array of width and height of the image file.
-     * If the file is not an image, the width and the height will be null.
-     *
-     * @see \IiifServer\View\Helper\IiifManifest::_getImageSize()
-     * @see \IiifServer\View\Helper\IiifInfo::_getImageSize()
-     * @todo Refactorize.
-     */
-    protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
-    {
-        // Check if this is an image.
-        if (empty($media) || strpos($media->mediaType(), 'image/') !== 0) {
-            return [
-                'width' => null,
-                'height' => null,
-            ];
-        }
-
-        $filepath = $this->_mediaFilePath($media, $imageType);
-
-        $result = $this->_getWidthAndHeight($filepath);
-
-        if (empty($result['width']) || empty($result['height'])) {
-            throw new Exception("Failed to get image resolution: $filepath");
-        }
-
-        return $result;
-    }
-
-    /**
      * Get the path to an original or derivative file for an image.
      *
      * @param MediaRepresentation $media
@@ -809,47 +779,5 @@ class ImageController extends AbstractActionController
     protected function getStoragePath($prefix, $name, $extension = null)
     {
         return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
-    }
-
-    /**
-     * Helper to get width and height of an image.
-     *
-     * @param string $filepath This should be an image (no check here).
-     * @return array Associative array of width and height of the image file.
-     * If the file is not an image, the width and the height will be null.
-     * @see \IiifServer\View\Helper\IiifInfo::_getWidthAndHeight()
-     * @todo Refactorize.
-     */
-    protected function _getWidthAndHeight($filepath)
-    {
-        // An internet path.
-        if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
-            $tempFile = $this->tempFileFactory->build();
-            $tempPath = $tempFile->getTempPath();
-            $tempFile->delete();
-            $result = file_put_contents($tempPath, $filepath);
-            if ($result !== false) {
-                list($width, $height) = getimagesize($tempPath);
-                unlink($tempPath);
-                return [
-                    'width' => $width,
-                    'height' => $height,
-                ];
-            }
-            unlink($tempPath);
-        }
-        // A normal path.
-        elseif (file_exists($filepath)) {
-            list($width, $height) = getimagesize($filepath);
-            return [
-                'width' => $width,
-                'height' => $height,
-            ];
-        }
-
-        return [
-            'width' => null,
-            'height' => null,
-        ];
     }
 }

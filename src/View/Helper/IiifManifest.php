@@ -30,7 +30,6 @@
 
 namespace IiifServer\View\Helper;
 
-use Exception;
 use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -468,11 +467,11 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifThumbnail(MediaRepresentation $media)
     {
-        $imageSize = $this->_getImageSize($media, 'square');
-        list($width, $height) = array_values($imageSize);
-        if (empty($width) || empty($height)) {
+        $imageSize = $this->getView()->imageSize($media, 'square');
+        if (empty($imageSize)) {
             return;
         }
+        list($width, $height) = array_values($imageSize);
 
         $thumbnail = [];
 
@@ -521,13 +520,10 @@ class IiifManifest extends AbstractHelper
      */
     protected function _iiifImage(MediaRepresentation $media, $index, $canvasUrl, $width = null, $height = null)
     {
-        if (empty($media)) {
-            return;
-        }
-
+        $view = $this->getView();
         if (empty($width) || empty($height)) {
-            $sizeFile = $this->_getImageSize($media, 'original');
-            list($width, $height) = array_values($sizeFile);
+            $imageSize = $view->imageSize($media, 'original');
+            list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
         }
 
         $image = [];
@@ -545,8 +541,8 @@ class IiifManifest extends AbstractHelper
 
         // This is a tiled image.
         if ($iiifTileInfo) {
-            $largeSize = $this->_getImageSize($media, 'large');
-            list($widthLarge, $heightLarge) = array_values($largeSize);
+            $imageSize = $view->imageSize($media, 'large');
+            list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
             $imageUrl = $this->view->url(
                 'iiifserver_image',
                 [
@@ -646,7 +642,8 @@ class IiifManifest extends AbstractHelper
 
         // Size of canvas should be the double of small images (< 1200 px), but
         // only when more than image is used by a canvas.
-        list($width, $height) = array_values($this->_getImageSize($media, 'original'));
+        $imageSize = $this->getView()->imageSize($media, 'original');
+        list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
         $canvas['width'] = $width;
         $canvas['height'] = $height;
 
@@ -678,7 +675,7 @@ class IiifManifest extends AbstractHelper
         $placeholder = 'img/thumbnails/placeholder-image.png';
         $canvas['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
 
-        $imageSize = $this->_getWidthAndHeight(OMEKA_PATH . '/modules/IiifServer/asset/' . $placeholder);
+        $imageSize = $this->getWidthAndHeight(OMEKA_PATH . '/modules/IiifServer/asset/' . $placeholder) ?: ['width' => null, 'height' => null];
         $canvas['width'] = $imageSize['width'];
         $canvas['height'] = $imageSize['height'];
 
@@ -1054,62 +1051,13 @@ class IiifManifest extends AbstractHelper
     }
 
     /**
-     * Get an array of the width and height of the image file.
-     *
-     * @param MediaRepresentation $media
-     * @param string $imageType
-     * @return array Associative array of width and height of the image file.
-     * If the file is not an image, the width and the height will be null.
-     *
-     * @see IiifInfo::_getImageSize()
-     * @see \IiifServer\Controller\ImageController::_getImageSize()
-     * @todo Refactorize.
-     */
-    protected function _getImageSize(MediaRepresentation $media, $imageType = 'original')
-    {
-        // Check if this is an image.
-        if (empty($media)) {
-            return [
-                'width' => null,
-                'height' => null,
-            ];
-        }
-
-        $mediaType = $media->mediaType();
-        if (empty($mediaType) || strpos($mediaType, 'image/') !== 0) {
-            return [
-                'width' => null,
-                'height' => null,
-            ];
-        }
-
-        // The storage adapter should be checked for external storage.
-        if ($imageType == 'original') {
-            $storagePath = $this->getStoragePath($imageType, $media->filename());
-        } else {
-            $storagePath = $this->getStoragePath($imageType, $media->storageId(), 'jpg');
-        }
-        $filepath = $this->basePath
-            . DIRECTORY_SEPARATOR . $storagePath;
-        $result = $this->_getWidthAndHeight($filepath);
-
-        if (empty($result['width']) || empty($result['height'])) {
-            throw new Exception("Failed to get image resolution: $filepath");
-        }
-
-        return $result;
-    }
-
-    /**
      * Helper to get width and height of an image.
      *
      * @param string $filepath This should be an image (no check here).
-     * @return array Associative array of width and height of the image file.
-     * If the file is not an image, the width and the height will be null.
-     * @see \IiifServer\Controller\ImageController::_getWidthAndHeight()
-     * @todo Refactorize.
+     * @return array|null Associative array of width and height of the image
+     * file, else null.
      */
-    protected function _getWidthAndHeight($filepath)
+    protected function getWidthAndHeight($filepath)
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
@@ -1118,27 +1066,28 @@ class IiifManifest extends AbstractHelper
             $tempFile->delete();
             $result = file_put_contents($tempPath, $filepath);
             if ($result !== false) {
-                list($width, $height) = getimagesize($tempPath);
-                unlink($tempPath);
-                return [
-                    'width' => $width,
-                    'height' => $height,
-                ];
+                $result = getimagesize($tempPath);
+                if ($result) {
+                    list($width, $height) = $result;
+                }
             }
             unlink($tempPath);
         }
         // A normal path.
         elseif (file_exists($filepath)) {
-            list($width, $height) = getimagesize($filepath);
-            return [
-                'width' => $width,
-                'height' => $height,
-            ];
+            $result = getimagesize($filepath);
+            if ($result) {
+                list($width, $height) = $result;
+            }
+        }
+
+        if (empty($width) || empty($height)) {
+            return null;
         }
 
         return [
-            'width' => null,
-            'height' => null,
+            'width' => $width,
+            'height' => $height,
         ];
     }
 }
