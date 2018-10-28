@@ -367,7 +367,7 @@ class Module extends AbstractModule
         $tileDir = $defaultSettings['iiifserver_image_tile_dir'];
         if (empty($tileDir)) {
             throw new ModuleCannotInstallException(new Message(
-                'The tile dir is not defined.', $dir)); // @translate
+                'The tile dir is not defined.', $tileDir)); // @translate
         }
 
         $dir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
@@ -395,7 +395,7 @@ class Module extends AbstractModule
             'The tiles will be saved in the directory "%s".', $dir));
 
         @copy(
-            $baseDir. DIRECTORY_SEPARATOR . 'index.html',
+            $basePath. DIRECTORY_SEPARATOR . 'index.html',
             $dir . DIRECTORY_SEPARATOR . 'index.html');
     }
 
