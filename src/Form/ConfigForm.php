@@ -40,6 +40,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'term_as_value' => true,
             ],
             'attributes' => [
+                'id' => 'iiifserver-manifest-description-property',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select a property…', // @translate
             ],
@@ -55,6 +56,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'term_as_value' => true,
             ],
             'attributes' => [
+                'id' => 'iiifserver-manifest-attribution-property',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select a property…', // @translate
             ],
@@ -67,6 +69,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Default attribution', // @translate
                 'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
                     . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-attribution-default',
             ],
         ]);
 
@@ -81,6 +86,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'term_as_value' => true,
             ],
             'attributes' => [
+                'id' => 'iiifserver-manifest-license-property',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select a property…', // @translate
             ],
@@ -93,6 +99,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Default license', // @translate
                 'info' => 'If any, and if there is no metadata for the element above, this text will be added in all manifests and viewers to indicate the license.',  // @translate
             ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-license-default',
+            ],
         ]);
 
         $manifestFieldset->add([
@@ -101,6 +110,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'options' => [
                 'label' => 'Logo', // @translate
                 'info' => 'If any, this url to an image will be used as logo and displayed in the right panel of the Universal Viewer.',  // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-logo-default',
             ],
         ]);
 
@@ -112,6 +124,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'info' => $this->translate('When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url.')
                     . ' ' . $this->translate('For example, when the server is secured, the "http:" urls may be replaced by "https:".'), // @translate
             ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-force-url-from',
+            ],
         ]);
 
         $manifestFieldset->add([
@@ -119,6 +134,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'type' => Element\Text::class,
             'options' => [
                 'label' => 'Force base of url (to)', // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-force-url-to',
             ],
         ]);
 
@@ -152,6 +170,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     . ' ' . $this->translate('Beyond this limit, the plugin will require a tiled image.') // @translate
                     . ' ' . $this->translate('Let empty to allow processing of any image.'), // @translate
             ],
+            'attributes' => [
+                'id' => 'iiifserver-image-max-size',
+            ],
         ]);
 
         $valueOptions = [
@@ -167,6 +188,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     . ' ' . $this->translate('Zoomify is an %sold format%s that was largely supported by proprietary softwares and free viewers.') // @translate
                         . ' ' . $this->translate('All formats are served as native by default, but may be served as IIIF too when a viewer request it.'), // @translate
                 'value_options' => $valueOptions,
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-image-tile-type',
             ],
         ]);
 
