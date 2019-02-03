@@ -24,10 +24,14 @@ $settings = $services->get('Omeka\Settings');
 
 if (version_compare($oldVersion, '3.5.1', '<')) {
     $this->createTilesMainDir($serviceLocator);
-    $settings->set('iiifserver_image_tile_dir',
-        $defaultSettings['iiifserver_image_tile_dir']);
-    $settings->set('iiifserver_image_tile_type',
-        $defaultSettings['iiifserver_image_tile_type']);
+    $settings->set(
+        'iiifserver_image_tile_dir',
+        $defaultSettings['iiifserver_image_tile_dir']
+    );
+    $settings->set(
+        'iiifserver_image_tile_type',
+        $defaultSettings['iiifserver_image_tile_type']
+    );
 }
 
 if (version_compare($oldVersion, '3.5.8', '<')) {
@@ -50,7 +54,15 @@ if (version_compare($oldVersion, '3.5.9', '<')) {
             // Nothing to do.
         } elseif (version_compare($version, '3.15.4', '<')) {
             throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
+                $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).') // @translate
+            );
         }
     }
+}
+
+if (version_compare($oldVersion, '3.5.12', '<')) {
+    $settings->set(
+        'iiifserver_manifest_media_metadata',
+        $defaultSettings['iiifserver_manifest_media_metadata']
+    );
 }

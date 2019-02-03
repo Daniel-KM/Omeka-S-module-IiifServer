@@ -47,7 +47,9 @@ class TileBuilder extends AbstractPlugin
 
         if (!is_file($source) || !is_readable($source)) {
             throw new InvalidArgumentException(new Message(
-                'Source file "%s" is not readable.', $source)); // @translate
+                'Source file "%s" is not readable.', // @translate
+                $source
+            ));
         }
 
         if (empty($destination)) {
@@ -76,7 +78,9 @@ class TileBuilder extends AbstractPlugin
                 break;
             default:
                 throw new InvalidArgumentException(new Message(
-                    'The type of tiling "%s" is not supported by the tile builder.', $tileType)); // @translate
+                    'The type of tiling "%s" is not supported by the tile builder.', // @translate
+                    $tileType
+                ));
         }
 
         return $result;

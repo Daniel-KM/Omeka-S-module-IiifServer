@@ -212,9 +212,9 @@ class IiifManifest extends AbstractHelper
                 if ($mediaType == 'application/json') {
                     $jsonFiles[] = $media;
                 }
-                  // Check if this is a json file for old Omeka or old imports.
-                  elseif ($mediaType == 'text/plain') {
-                      // Currently, the extension is "txt", even for json files.
+                // Check if this is a json file for old Omeka or old imports.
+                elseif ($mediaType == 'text/plain') {
+                    // Currently, the extension is "txt", even for json files.
                     // switch (strtolower($media->extension())) {
                     //   case 'json':
                     //       $jsonFiles[] = $media;
@@ -223,7 +223,7 @@ class IiifManifest extends AbstractHelper
                     if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'json') {
                         $jsonFiles[] = $media;
                     }
-                  }
+                }
             }
         }
         unset($medias);

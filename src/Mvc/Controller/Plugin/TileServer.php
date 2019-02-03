@@ -103,10 +103,19 @@ class TileServer extends AbstractPlugin
         }
 
         // To manage Windows, the same path cannot be used for url and local.
-        $relativeUrl = sprintf('%d/%d_%d.jpg',
-            $data['level'], $data['column'], $data['row']);
-        $relativePath = sprintf('%d%s%d_%d.jpg',
-            $data['level'], DIRECTORY_SEPARATOR, $data['column'], $data['row']);
+        $relativeUrl = sprintf(
+            '%d/%d_%d.jpg',
+            $data['level'],
+            $data['column'],
+            $data['row']
+        );
+        $relativePath = sprintf(
+            '%d%s%d_%d.jpg',
+            $data['level'],
+            DIRECTORY_SEPARATOR,
+            $data['column'],
+            $data['row']
+        );
 
         return $this->serveTiles($tileInfo, $data, $relativeUrl, $relativePath);
     }
@@ -141,10 +150,21 @@ class TileServer extends AbstractPlugin
         }
 
         // To manage Windows, the same path cannot be used for url and local.
-        $relativeUrl = sprintf('TileGroup%d/%d-%d-%d.jpg',
-            $tileGroup, $data['level'], $data['column'], $data['row']);
-        $relativePath = sprintf('TileGroup%d%s%d-%d-%d.jpg',
-            $tileGroup, DIRECTORY_SEPARATOR, $data['level'], $data['column'], $data['row']);
+        $relativeUrl = sprintf(
+            'TileGroup%d/%d-%d-%d.jpg',
+            $tileGroup,
+            $data['level'],
+            $data['column'],
+            $data['row']
+        );
+        $relativePath = sprintf(
+            'TileGroup%d%s%d-%d-%d.jpg',
+            $tileGroup,
+            DIRECTORY_SEPARATOR,
+            $data['level'],
+            $data['column'],
+            $data['row']
+        );
 
         return $this->serveTiles($tileInfo, $data, $relativeUrl, $relativePath);
     }

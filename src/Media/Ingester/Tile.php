@@ -186,7 +186,8 @@ class Tile implements IngesterInterface
             if ($errorStore) {
                 $errorStore->addError('tile', sprintf(
                     'Error validating "%s". The file to tile should be an image, not "%s".', // @translate
-                    $tempFile->getSourceName(), $tempFile->getMediaType()
+                    $tempFile->getSourceName(),
+                    $tempFile->getMediaType()
                 ));
             }
         }

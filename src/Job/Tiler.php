@@ -151,7 +151,8 @@ SQL;
         if ($result && empty($result['result'])) {
             throw new RuntimeException(new Message(
                 'An error occurred during the tiling of media #%d.', // @translate
-                $mediaId));
+                $mediaId
+            ));
         }
     }
 

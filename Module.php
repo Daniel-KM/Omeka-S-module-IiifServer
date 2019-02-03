@@ -81,14 +81,16 @@ class Module extends AbstractModule
         if (!file_exists($checkDeepzoom) || !file_exists($checkZoomify)) {
             throw new ModuleCannotInstallException(
                 $t->translate('You should run "composer install" from the root of the module, or install a release with the dependencies.') // @translate
-                    . ' ' . $t->translate('See module’s installation documentation.')); // @translate
+                    . ' ' . $t->translate('See module’s installation documentation.') // @translate
+            );
         }
 
         $processors = $this->listImageProcessors($serviceLocator);
         if (empty($processors)) {
             throw new ModuleCannotInstallException(
                 $t->translate('The module requires an image processor (ImageMagick, Imagick or GD).') // @translate
-                    . ' ' . $t->translate('See module’s installation documentation.')); // @translate
+                    . ' ' . $t->translate('See module’s installation documentation.') // @translate
+            );
         }
 
         $config = include __DIR__ . '/config/module.config.php';
@@ -104,11 +106,13 @@ class Module extends AbstractModule
             } elseif (version_compare($version, '3.4.3', '<')) {
                 $messenger->addWarning(
                     $t->translate('Warning: The module Universal Viewer was not upgraded to version 3.4.3.') // @translate
-                    . ' ' . $t->translate('The settings are set to default.'));
+                    . ' ' . $t->translate('The settings are set to default.') // @translate
+                );
             } elseif (version_compare($version, '3.4.3', '=')) {
                 $messenger->addSuccess(
                     $t->translate('The settings were upgraded from Universal Viewer 3.4.3.') // @translate
-                    . ' ' . $t->translate('You can now upgrade Universal Viewer to 3.5.')); // @translate
+                    . ' ' . $t->translate('You can now upgrade Universal Viewer to 3.5.') // @translate
+                );
 
                 foreach ([
                     'universalviewer_manifest_description_property' => 'iiifserver_manifest_description_property',
@@ -134,7 +138,8 @@ class Module extends AbstractModule
                 // Nothing to do.
             } elseif (version_compare($version, '3.15.4', '<')) {
                 throw new ModuleCannotInstallException(
-                    $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).')); // @translate
+                    $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).') // @translate
+                );
             }
         }
 
@@ -165,7 +170,9 @@ class Module extends AbstractModule
             } else {
                 $messenger = new Messenger();
                 $messenger->addWarning(
-                    'The tile dir "%s" is not a real path and was not removed.', $tileDir); // @translate
+                    'The tile dir "%s" is not a real path and was not removed.', // @translate
+                    $tileDir
+                );
             }
         }
 
@@ -224,7 +231,8 @@ class Module extends AbstractModule
             $html .= '<p>';
             $html .= new Message(
                 'To keep the tiles, rename the dir "%s" before and after uninstall.', // @translate
-                $tileDir);
+                $tileDir
+            );
             $html .= '</p>';
         }
         echo $html;
@@ -290,7 +298,9 @@ class Module extends AbstractModule
 
         $params = $form->getData();
 
-        array_walk_recursive($params, function($v, $k) use (&$params) { $params[$k] = $v; });
+        array_walk_recursive($params, function ($v, $k) use (&$params) {
+            $params[$k] = $v;
+        });
         unset($params['iiifserver_manifest']);
         unset($params['iiifserver_image']);
 
@@ -333,7 +343,9 @@ class Module extends AbstractModule
         $tileDir = $defaultSettings['iiifserver_image_tile_dir'];
         if (empty($tileDir)) {
             throw new ModuleCannotInstallException(new Message(
-                'The tile dir is not defined.', $tileDir)); // @translate
+                'The tile dir is not defined.', // @translate
+                $tileDir
+            ));
         }
 
         $dir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
@@ -342,27 +354,36 @@ class Module extends AbstractModule
         if (file_exists($dir)) {
             if (!is_dir($dir)) {
                 throw new ModuleCannotInstallException(new Message(
-                    'The directory "%s" cannot be created: a file exists.', $dir)); // @translate
+                    'The directory "%s" cannot be created: a file exists.', // @translate
+                    $dir
+                ));
             }
             if (!is_writeable($dir)) {
                 throw new ModuleCannotInstallException(new Message(
-                    'The directory "%s" is not writeable.', $dir)); // @translate
+                    'The directory "%s" is not writeable.', // @translate
+                    $dir
+                ));
             }
         } else {
             $result = mkdir($dir, 0755, true);
             if (!$result) {
                 throw new ModuleCannotInstallException(new Message(
-                    'The directory "%s" cannot be created.', $dir)); // @translate
+                    'The directory "%s" cannot be created.', // @translate
+                    $dir
+                ));
             }
         }
 
         $messenger = new Messenger();
         $messenger->addSuccess(new Message(
-            'The tiles will be saved in the directory "%s".', $dir));
+            'The tiles will be saved in the directory "%s".', // @translate
+            $dir
+        ));
 
         @copy(
             $basePath . DIRECTORY_SEPARATOR . 'index.html',
-            $dir . DIRECTORY_SEPARATOR . 'index.html');
+            $dir . DIRECTORY_SEPARATOR . 'index.html'
+        );
     }
 
     /**
