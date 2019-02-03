@@ -30,6 +30,10 @@ modules (the IIIF server and the widget Universal Viewer). It integrates the
 tiler [Zoomify] that was used the plugin [OpenLayers Zoom] for [Omeka Classic]
 and another tiler to support the [Deep Zoom Image] tile format.
 
+The IIIF manifests can be displayed with many viewers, the integrated [OpenSeeDragon],
+the [Universal Viewer], the advanced [Mirador], or the ligher and themable [Diva],
+or any other IIIF compatible viewer.
+
 
 Installation
 ------------
@@ -107,15 +111,15 @@ See below the notes for more info.
 
 If you are harvesting data (via OAI-PMH, for instance) from another system where
 images are hosted and exposed via IIIF, you can use a configurable metadata
-field to supply the manifest to the Universal Viewer. In this case, no images
-are hosted in the Omeka record, but one of the metadata fields has the URL of
-the manifest hosted on another server.
+field to supply the manifest to the viewer (Universal Viewer, Mirador or Diva).
+In this case, no images are hosted in the Omeka record, but one of the metadata
+fields has the URL of the manifest hosted on another server.
 
 For example, you could set the alternative manifest element to "Dublin Core:Has Format"
 in the module configuration, and then put a URL like "https://example.com/iiif/HI-SK20161207-0009/manifest"
-in the specified element of a record. The Universal Viewer included on that
-record’s display page will use that manifest URL to retrieve images and metadata
-for the viewer.
+in the specified element of a record. The viewer included on that record’s
+display page will use that manifest URL to retrieve images and metadata for the
+viewer.
 
 * Filtering data of manifests [TODO]
 
@@ -214,7 +218,7 @@ the one of the media, not the item.
 
 The creation of manifests for 3D models is fully supported by the widget and
 natively managed since the release 2.3 of [Universal Viewer] via the [threejs]
-library.
+library. The other viewers integrated in Omeka doesn’t support 3D.
 
 * Possible requirement
 
@@ -327,7 +331,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2018
+* Copyright Daniel Berthereau, 2015-2019
 * Copyright BibLibre, 2016-2017
 
 
@@ -340,6 +344,9 @@ Copyright
 [Universal Viewer plugin for Omeka]: https://github.com/Daniel-KM/Omeka-plugin-UniversalViewer
 [BibLibre]: https://github.com/biblibre
 [OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
+[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Mirador]: https://github.com/Daniel-KM/Omeka-S-module-Mirador
+[Diva]: https://github.com/Daniel-KM/Omeka-S-module-Diva
 [Omeka Classic]: https://omeka.org
 [GD]: https://secure.php.net/manual/en/book.image.php
 [Imagick]: https://php.net/manual/en/book.imagick.php
@@ -352,9 +359,7 @@ Copyright
 [Deep Zoom]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Deep Zoom Image]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Zoomify]: http://www.zoomify.com/
-[OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
 [OpenLayers]: https://openlayers.org/
-[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [threejs]: https://threejs.org
 [Archive Repertory]: https://github.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
 [Deepzoom library]: https://github.com/Daniel-KM/LibraryDeepzoom
