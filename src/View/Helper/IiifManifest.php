@@ -124,20 +124,7 @@ class IiifManifest extends AbstractHelper
         // The base url for some other ids.
         $this->_baseUrl = dirname($url);
 
-        // Prepare the metadata of the record.
-        // TODO Manage filter and escape?
-        $metadata = [];
-        foreach ($item->values() as $propertyData) {
-            $valueMetadata = [];
-            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
-            $valueValues = array_filter(array_map(function ($v) {
-                return $v->type() === 'resource'
-                    ? $this->view->iiifUrl($v->valueResource())
-                    : (string) $v;
-            }, $propertyData['values']), 'strlen');
-            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
-        }
+        $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
         $label = $item->displayTitle('') ?: $this->view->iiifUrl($item);
@@ -459,6 +446,30 @@ class IiifManifest extends AbstractHelper
         return $manifest;
     }
 
+    /***
+     * Prepare the metadata of a resource.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return array
+     */
+    protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
+    {
+        // TODO Manage filter and escape or only globally?
+        $metadata = [];
+        foreach ($resource->values() as $propertyData) {
+            $valueMetadata = [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) {
+                return $v->type() === 'resource'
+                    ? $this->view->iiifUrl($v->valueResource())
+                    : (string) $v;
+            }, $propertyData['values']), 'strlen');
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
+        }
+        return $metadata;
+    }
+
     /**
      * Create an IIIF thumbnail object from an Omeka file.
      *
@@ -652,6 +663,14 @@ class IiifManifest extends AbstractHelper
         $images = [];
         $images[] = $image;
         $canvas['images'] = $images;
+
+        $mediaMetadata = $this->getView()->setting('iiifserver_manifest_media_metadata');
+        if ($mediaMetadata) {
+            $metadata = $this->iiifMetadata($media);
+            if ($metadata) {
+                $canvas['metadata'] = $metadata;
+            }
+        }
 
         $canvas = (object) $canvas;
 

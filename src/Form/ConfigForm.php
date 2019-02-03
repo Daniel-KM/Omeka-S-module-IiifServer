@@ -105,6 +105,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_media_metadata',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Append media metadata', // @translate
+                'info' => 'Append descriptive metadata of the media, if any, for example details about each page of a book.',  // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-media-metadata',
+            ],
+        ]);
+
+        $manifestFieldset->add([
             'name' => 'iiifserver_manifest_logo_default',
             'type' => Element\Url::class,
             'options' => [
