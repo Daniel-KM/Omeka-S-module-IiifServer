@@ -361,7 +361,7 @@ class Module extends AbstractModule
             'The tiles will be saved in the directory "%s".', $dir));
 
         @copy(
-            $basePath. DIRECTORY_SEPARATOR . 'index.html',
+            $basePath . DIRECTORY_SEPARATOR . 'index.html',
             $dir . DIRECTORY_SEPARATOR . 'index.html');
     }
 

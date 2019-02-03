@@ -2,9 +2,7 @@
 namespace IiifServer\Form;
 
 use Omeka\Form\Element\PropertySelect;
-use Zend\Form\Element\Text;
-use Zend\Form\Element\Url;
-use Zend\Form\Element\Select;
+use Zend\Form\Element;
 use Zend\Form\Fieldset;
 use Zend\Form\Form;
 use Zend\I18n\Translator\TranslatorAwareInterface;
@@ -38,12 +36,12 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Property to use for Description', // @translate
                 'info' => $this->translate('If any, the first metadata of the record will be added in all manifests and viewers for main description.') // @translate
                     . ' ' . $this->translate('It’s recommended to use "Dublin Core:Bibliographic Citation".'), // @translate
-                'empty_option' => 'Select a property…', // @translate
+                'empty_option' => '',
                 'term_as_value' => true,
             ],
             'attributes' => [
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select a property', // @translate
+                'data-placeholder' => 'Select a property…', // @translate
             ],
         ]);
 
@@ -53,18 +51,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'options' => [
                 'label' => 'Property to use for Attribution', // @translate
                 'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.', // @translate
-                'empty_option' => 'Select a property…', // @translate
+                'empty_option' => '',
                 'term_as_value' => true,
             ],
             'attributes' => [
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select a property', // @translate
+                'data-placeholder' => 'Select a property…', // @translate
             ],
         ]);
 
         $manifestFieldset->add([
             'name' => 'iiifserver_manifest_attribution_default',
-            'type' => Text::class,
+            'type' => Element\Text::class,
             'options' => [
                 'label' => 'Default attribution', // @translate
                 'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
@@ -79,18 +77,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'label' => 'Property to use for license', // @translate
                 'info' => $this->translate('If any, the first metadata of the resource will be added in all manifests and viewers to indicate the rights.') // @translate
                     . ' ' . $this->translate('It’s recommended to use "dcterms:license".'), // @translate
-                'empty_option' => 'Select a property…', // @translate
+                'empty_option' => '',
                 'term_as_value' => true,
             ],
             'attributes' => [
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select a property', // @translate
+                'data-placeholder' => 'Select a property…', // @translate
             ],
         ]);
 
         $manifestFieldset->add([
             'name' => 'iiifserver_manifest_license_default',
-            'type' => Text::class,
+            'type' => Element\Text::class,
             'options' => [
                 'label' => 'Default license', // @translate
                 'info' => 'If any, and if there is no metadata for the element above, this text will be added in all manifests and viewers to indicate the license.',  // @translate
@@ -99,7 +97,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $manifestFieldset->add([
             'name' => 'iiifserver_manifest_logo_default',
-            'type' => Url::class,
+            'type' => Element\Url::class,
             'options' => [
                 'label' => 'Logo', // @translate
                 'info' => 'If any, this url to an image will be used as logo and displayed in the right panel of the Universal Viewer.',  // @translate
@@ -108,7 +106,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $manifestFieldset->add([
             'name' => 'iiifserver_manifest_force_url_from',
-            'type' => Text::class,
+            'type' => Element\Text::class,
             'options' => [
                 'label' => 'Force base of url (from)', // @translate
                 'info' => $this->translate('When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url.')
@@ -118,7 +116,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $manifestFieldset->add([
             'name' => 'iiifserver_manifest_force_url_to',
-            'type' => Text::class,
+            'type' => Element\Text::class,
             'options' => [
                 'label' => 'Force base of url (to)', // @translate
             ],
@@ -136,7 +134,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $imageFieldset->add([
             'name' => 'iiifserver_image_creator',
-            'type' => Select::class,
+            'type' => Element\Select::class,
             'options' => [
                 'label' => 'Image processor', // @translate
                 'info' => $this->translate('Generally, GD is a little faster than ImageMagick, but ImageMagick manages more formats.') // @translate
@@ -147,7 +145,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $imageFieldset->add([
             'name' => 'iiifserver_image_max_size',
-            'type' => Text::class,
+            'type' => Element\Text::class,
             'options' => [
                 'label' => 'Max dynamic size for images', // @translate
                 'info' => $this->translate('Set the maximum size in bytes for the dynamic processing of images.') // @translate
@@ -162,7 +160,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ];
         $imageFieldset->add([
             'name' => 'iiifserver_image_tile_type',
-            'type' => Select::class,
+            'type' => Element\Select::class,
             'options' => [
                 'label' => 'Tiling type', // @translate
                 'info' => $this->translate('Deep Zoom Image is a %sfree proprietary format%s from Microsoft largely supported.') // @translate
