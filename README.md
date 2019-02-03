@@ -30,7 +30,7 @@ modules (the IIIF server and the widget Universal Viewer). It integrates the
 tiler [Zoomify] that was used the plugin [OpenLayers Zoom] for [Omeka Classic]
 and another tiler to support the [Deep Zoom Image] tile format.
 
-The IIIF manifests can be displayed with many viewers, the integrated [OpenSeeDragon],
+The IIIF manifests can be displayed with many viewers, the integrated [OpenSeadragon],
 the [Universal Viewer], the advanced [Mirador], or the ligher and themable [Diva],
 or any other IIIF compatible viewer.
 
@@ -316,23 +316,14 @@ The module uses the [Deepzoom library] and [Zoomify library], the first based on
 (license [GNU/GPL]). See files inside the folder `vendor` for more information.
 
 
-Contact
--------
-
-See documentation on the IIIF on its site.
-
-Current maintainers of the plugin for Omeka 2 and the module for Omeka S:
-* Daniel Berthereau (see [Daniel-KM])
-
-First version of this plugin was built for the [Bibliothèque patrimoniale] of
-[Mines ParisTech].
-
-
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2019
+* Copyright Daniel Berthereau, 2015-2019 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
+
+First version of this plugin was built for the [Bibliothèque patrimoniale] of
+[Mines ParisTech].
 
 
 [IIIF Server]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer
