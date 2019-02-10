@@ -152,6 +152,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ],
         ]);
 
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_force_tile_jpeg',
+            'type' => Element\Text::class,
+            'options' => [
+                'label' => 'Force jpeg for tiled tiff and jpeg2000', // @translate
+                'info' => 'In some cases, an issue can occur with tiled tiff and metadata of the media should be updated to "image/jpeg".', // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-force-tiled-jpeg',
+            ],
+        ]);
+
         $this->add([
             'name' => 'iiifserver_image',
             'type' => Fieldset::class,

@@ -568,9 +568,11 @@ class IiifManifest extends AbstractHelper
             );
             $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
 
+            $forceTileJpeg = $this->view->setting('iiifserver_manifest_force_tile_jpeg');
+
             $imageResource['@id'] = $imageUrl;
             $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
+            $imageResource['format'] = $forceTileJpeg ? 'image/jpeg' : $media->mediaType();
             $imageResource['width'] = $width;
             $imageResource['height'] = $height;
 
