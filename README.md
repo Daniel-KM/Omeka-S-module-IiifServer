@@ -40,7 +40,7 @@ Installation
 
 PHP should be installed with the extension `exif` in order to get the size of
 images. This is the case for all major distributions and providers. At least one
-of the php extensions `[GD]` or `[Imagick]` are recommended. They are installed
+of the php extensions [`GD`] or [`Imagick`] are recommended. They are installed
 by default in most servers. If not, the image server will use the command line
 [ImageMagick] tool `convert`.
 
@@ -342,8 +342,8 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mirador]: https://github.com/Daniel-KM/Omeka-S-module-Mirador
 [Diva]: https://github.com/Daniel-KM/Omeka-S-module-Diva
 [Omeka Classic]: https://omeka.org
-[GD]: https://secure.php.net/manual/en/book.image.php
-[Imagick]: https://php.net/manual/en/book.imagick.php
+[`GD`]: https://secure.php.net/manual/en/book.image.php
+[`Imagick`]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
 [`IiifServer.zip`]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
