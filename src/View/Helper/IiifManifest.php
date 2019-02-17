@@ -568,9 +568,23 @@ class IiifManifest extends AbstractHelper
             );
             $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
 
+            $formats = [
+                'image/jpeg' => 'image/jpeg',
+                'image/png' => 'image/png',
+                'image/gif' => 'image/gif',
+                'image/webp' => 'image/webp',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+            ];
+
             $imageResource['@id'] = $imageUrl;
             $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
+            $imageResource['format'] = isset($iiifTileInfo['format']) && isset($formats[strtolower($iiifTileInfo['format'])])
+                ? $formats[strtolower($iiifTileInfo['format'])]
+                : 'image/jpeg';
             $imageResource['width'] = $width;
             $imageResource['height'] = $height;
 
