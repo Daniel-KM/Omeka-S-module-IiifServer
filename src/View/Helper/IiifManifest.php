@@ -446,7 +446,7 @@ class IiifManifest extends AbstractHelper
         return $manifest;
     }
 
-    /***
+    /**
      * Prepare the metadata of a resource.
      *
      * @param AbstractResourceEntityRepresentation $resource
@@ -1067,20 +1067,6 @@ class IiifManifest extends AbstractHelper
         $tile['width'] = $tileSize;
         $tile['scaleFactors'] = $squaleFactors;
         return $tile;
-    }
-
-    /**
-     * Get a storage path.
-     *
-     * @param string $prefix The storage prefix
-     * @param string $name The file name, or basename if extension is passed
-     * @param null|string $extension The file extension
-     * @return string
-     * @todo Refactorize.
-     */
-    protected function getStoragePath($prefix, $name, $extension = null)
-    {
-        return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
     }
 
     /**

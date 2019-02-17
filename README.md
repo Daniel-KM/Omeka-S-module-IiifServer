@@ -5,7 +5,7 @@ IIIF Server (module for Omeka S)
 
 [IIIF Server] is a module for [Omeka S] that integrates the [IIIF specifications]
 and a simple image server (similar to a basic [IIP Image]) to allow to process
-and share instantly images of any size and medias (pdf, audio, video, 3D...) in
+and share instantly images of any size and medias (pdf, audio, video, 3D…) in
 the desired formats.
 
 The full specifications of the [International Image Interoperability Framework]
@@ -139,7 +139,7 @@ To view the json-ld manifests created for each resources of Omeka S, simply try
 these urls (replace :id by a true id):
 
 - https://example.org/iiif/collection/:id for item sets;
-- https://example.org/iiif/collection/:id,:id,:id,:id... for multiple resources;
+- https://example.org/iiif/collection/:id,:id,:id,:id… for multiple resources;
 - https://example.org/iiif/:id/manifest for items;
 - https://example.org/iiif-img/:id/info.json for images files;
 - https://example.org/iiif-img/:id/:region/:size/:rotation/:quality.:format for

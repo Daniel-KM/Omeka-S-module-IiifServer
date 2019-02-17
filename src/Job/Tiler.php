@@ -18,8 +18,6 @@ class Tiler extends AbstractJob
         $config = $services->get('Config');
         $cli = $services->get('Omeka\Cli');
         $settings = $services->get('Omeka\Settings');
-        $logger = $services->get('Omeka\Logger');
-        $api = $services->get('Omeka\ApiManager');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
         $tileDir = $settings->get('iiifserver_image_tile_dir');

@@ -30,7 +30,6 @@
 
 namespace IiifServer\Controller;
 
-use Exception;
 use IiifServer\ImageServer;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\Store\StoreInterface;

@@ -63,6 +63,8 @@ class IiifInfo extends AbstractHelper
      *
      * @todo Replace all data by standard classes.
      *
+     * @see https://iiif.io/api/image/2.1
+     *
      * @param MediaRepresentation|null $media
      * @return Object|null
      */
@@ -109,17 +111,17 @@ class IiifInfo extends AbstractHelper
             // because only default formats, qualities and supports are supported
             // currently.
             /*
-            $profileDetails = array();
-            $profileDetails['format'] = array('jpg');
-            $profileDetails['qualities'] = array('default');
-            $profileDetails['supports'] = array('sizeByWhListed');
+            $profileDetails = [];
+            $profileDetails['format'] = ['image/jpeg'];
+            $profileDetails['qualities'] = ['default'];
+            $profileDetails['supports'] = ['sizeByWhListed'];
             $profileDetails = (object) $profileDetails;
             $profile[] = $profileDetails;
             */
 
             // Exemple of service, useless currently.
             /*
-            $service = array();
+            $service = [];
             $service['@context'] = 'http://iiif.io/api/annex/service/physdim/1/context.json';
             $service['profile'] = 'http://iiif.io/api/annex/service/physdim';
             $service['physicalScale'] = 0.0025;
@@ -138,8 +140,6 @@ class IiifInfo extends AbstractHelper
                 $info['tiles'] = $tiles;
             }
             $info['profile'] = $profile;
-            // Useless currently.
-            // $info['service'] = $service;
         }
 
         // Else non-image file.
@@ -192,19 +192,5 @@ class IiifInfo extends AbstractHelper
         $tile['width'] = $tileSize;
         $tile['scaleFactors'] = $squaleFactors;
         return $tile;
-    }
-
-    /**
-     * Get a storage path.
-     *
-     * @param string $prefix The storage prefix
-     * @param string $name The file name, or basename if extension is passed
-     * @param null|string $extension The file extension
-     * @return string
-     * @todo Refactorize.
-     */
-    protected function getStoragePath($prefix, $name, $extension = null)
-    {
-        return sprintf('%s/%s%s', $prefix, $name, $extension ? ".$extension" : null);
     }
 }
