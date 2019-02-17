@@ -49,6 +49,7 @@ return [
         ],
         'factories' => [
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
+            'tiler' => Service\ControllerPlugin\TilerFactory::class,
         ],
     ],
     'media_ingesters' => [

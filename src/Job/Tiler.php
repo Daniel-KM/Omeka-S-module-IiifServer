@@ -1,82 +1,35 @@
 <?php
 namespace IiifServer\Job;
 
-use IiifServer\Mvc\Controller\Plugin\TileBuilder;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\File\Thumbnailer\ImageMagick;
 use Omeka\Job\AbstractJob;
 use Omeka\Job\Exception\InvalidArgumentException;
 use Omeka\Job\Exception\RuntimeException;
-use Omeka\Stdlib\Cli;
 use Omeka\Stdlib\Message;
 
 class Tiler extends AbstractJob
 {
     public function perform()
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $cli = $services->get('Omeka\Cli');
-        $settings = $services->get('Omeka\Settings');
-        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-
-        $tileDir = $settings->get('iiifserver_image_tile_dir');
-        if (empty($tileDir)) {
-            throw new InvalidArgumentException('The tile dir is not defined.'); // @translate
-        }
-
-        // Get the storage path of the source to use for the tiling.
         $media = $this->getMedia();
         if (empty($media)) {
             throw new InvalidArgumentException('The media to tile cannot be identified.'); // @translate
         }
 
-        $source = $basePath
-            . DIRECTORY_SEPARATOR . 'original'
-            . DIRECTORY_SEPARATOR . $media->filename();
-        if (!file_exists($source)) {
+        // Get the storage path of the source to use for the tiling.
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $sourcePath = $basePath . '/original/' . $media->filename();
+        if (!file_exists($sourcePath)) {
             $this->endJob();
             throw new InvalidArgumentException('The media file to tile cannot be found.'); // @translate
         }
 
-        $params = [];
-        $params['tile_dir'] = $tileDir;
-        $params['tile_type'] = $settings->get('iiifserver_image_tile_type');
-
-        $processor = $settings->get('iiifserver_image_creator');
-        $params['processor'] = $processor === 'Auto' ? '' : $processor;
-
-        $convertDir = $config['thumbnails']['thumbnailer_options']['imagemagick_dir'];
-        $params['convertPath'] = $this->getConvertPath($cli, $convertDir);
-        $params['executeStrategy'] = $config['cli']['execute_strategy'];
-
-        // When a specific store or Archive Repertory are used, the storage id
-        // may contain a subdir, so it should be added. There is no change with
-        // the default simple storage id.
-        $storageId = $media->storageId();
-        $params['storageId'] = basename($storageId);
-        $tileDir = $basePath . DIRECTORY_SEPARATOR . $tileDir;
-        $tileDir = dirname($tileDir . DIRECTORY_SEPARATOR . $storageId);
-
-        $tileBuilder = new TileBuilder();
-        $result = $tileBuilder($source, $tileDir, $params);
+        $tiler = $services->get('ControllerPluginManager')->get('tiler');
+        $result = $tiler($media);
 
         $this->endJob($result);
-    }
-
-    /**
-     * Get the path to the ImageMagick "convert" command.
-     *
-     * @param Cli $cli
-     * @param string $convertDir
-     * @return string
-     */
-    protected function getConvertPath(Cli $cli, $convertDir)
-    {
-        $convertPath = $convertDir
-            ? $cli->validateCommand($convertDir, ImageMagick::CONVERT_COMMAND)
-            : $cli->getCommandPath(ImageMagick::CONVERT_COMMAND);
-        return (string) $convertPath;
     }
 
     /**
@@ -86,13 +39,25 @@ class Tiler extends AbstractJob
      */
     protected function getMedia()
     {
-        // If no media, the default process may be not finished, so wait 60 sec.
+        // If no media, the default process may be not finished, so wait 120 sec.
         $mediaId = $this->getMediaIdViaSql();
         if (empty($mediaId)) {
-            sleep(60);
+            sleep(30);
             $mediaId = $this->getMediaIdViaSql();
             if (empty($mediaId)) {
-                return;
+                sleep(30);
+                $mediaId = $this->getMediaIdViaSql();
+                if (empty($mediaId)) {
+                    sleep(30);
+                    $mediaId = $this->getMediaIdViaSql();
+                    if (empty($mediaId)) {
+                        sleep(30);
+                        $mediaId = $this->getMediaIdViaSql();
+                        if (empty($mediaId)) {
+                            return;
+                        }
+                    }
+                }
             }
         }
 
