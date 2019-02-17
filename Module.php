@@ -309,6 +309,9 @@ class Module extends AbstractModule
 
         $params = $form->getData();
 
+        $bulk = $params['iiifserver_bulk_tiler'];
+        unset($params['iiifserver_bulk_tiler']);
+
         array_walk_recursive($params, function ($v, $k) use (&$params) {
             $params[$k] = $v;
         });
@@ -320,6 +323,37 @@ class Module extends AbstractModule
         foreach ($params as $name => $value) {
             $settings->set($name, $value);
         }
+
+        $params = $bulk;
+        if (empty($params['process']) || $params['process'] !== $controller->translate('Process')) {
+            return;
+        }
+
+        if (empty($params['query'])) {
+            $message = 'A query is needed to run the bulk tiler.'; // @translate
+            $controller->messenger()->addWarning($message);
+            return;
+        }
+
+        $query = [];
+        parse_str($params['query'], $query);
+        unset($query['submit']);
+        $params['query'] = $query;
+
+        unset($params['process']);
+
+        $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+        $job = $dispatcher->dispatch(\IiifServer\Job\BulkTiler::class, $params);
+        $message = new Message(
+            'Creating tiles for images attached to specified items, in background (%sjob #%d%s)', // @translate
+            sprintf('<a href="%s">',
+                htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+            ),
+            $job->getId(),
+            '</a>'
+        );
+        $message->setEscapeHtml(false);
+        $controller->messenger()->addSuccess($message);
     }
 
     /**

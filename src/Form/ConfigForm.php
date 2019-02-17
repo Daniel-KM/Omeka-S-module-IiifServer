@@ -206,6 +206,42 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ],
         ]);
 
+        $this->add([
+            'name' => 'iiifserver_bulk_tiler',
+            'type' => Fieldset::class,
+            'options' => [
+                'label' => 'Bulk tiler', // @translate
+                'info' => 'Imported files can be tiled via a background job.', // @translate
+            ],
+        ]);
+        $bulkFieldset = $this->get('iiifserver_bulk_tiler');
+
+        $bulkFieldset->add([
+            'name' => 'query',
+            'type' => Element\Text::class,
+            'options' => [
+                'label' => 'Query', // @translate
+                'info' => $this->translate('This query will be used to select all items whose attached images will be tiled in the background.') // @translate
+                    . ' ' . $this->translate('Warning: The renderer of all tiled images will be set to "tile".'), // @translate
+                'documentation' => 'https://omeka.org/s/docs/user-manual/sites/site_pages/#browse-preview',
+            ],
+            'attributes' => [
+                'id' => 'query',
+            ],
+        ]);
+
+        $bulkFieldset->add([
+            'name' => 'process',
+            'type' => Element\Submit::class,
+            'options' => [
+                'label' => 'Run in background', // @translate
+            ],
+            'attributes' => [
+                'id' => 'process',
+                'value' => 'Process', // @translate
+            ],
+        ]);
+
         $inputFilter = $this->getInputFilter();
 
         $manifestFilter = $inputFilter->get('iiifserver_manifest');
@@ -253,6 +289,12 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
         $imageFilter->add([
             'name' => 'iiifserver_image_tile_type',
+            'required' => false,
+        ]);
+
+        $bulkFieldset = $inputFilter->get('iiifserver_bulk_tiler');
+        $bulkFieldset->add([
+            'name' => 'query',
             'required' => false,
         ]);
     }
