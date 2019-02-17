@@ -24,7 +24,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'info' => $this->translate('The module creates manifests with the properties from each resource (item set, item and media).') // @translate
                     . ' ' . $this->translate('The properties below are used when some metadata are missing.') // @translate
                     . ' ' . $this->translate('In all cases, empty properties are not set.') // @translate
-                    /*. ' ' . 'Futhermore, the event "iiif.manifest" is available to change any data.' */, // @translate
+                    . ' ' . $this->translate('Futhermore, the event "iiifserver.manifest" is available to change any data.'), // @translate
             ],
         ]);
         $manifestFieldset = $this->get('iiifserver_manifest');
@@ -196,9 +196,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'type' => Element\Select::class,
             'options' => [
                 'label' => 'Tiling type', // @translate
-                'info' => $this->translate('Deep Zoom Image is a %sfree proprietary format%s from Microsoft largely supported.') // @translate
-                    . ' ' . $this->translate('Zoomify is an %sold format%s that was largely supported by proprietary softwares and free viewers.') // @translate
-                        . ' ' . $this->translate('All formats are served as native by default, but may be served as IIIF too when a viewer request it.'), // @translate
+                'info' => $this->translate('Deep Zoom Image is a free proprietary format from Microsoft largely supported.') // @translate
+                    . ' ' . $this->translate('Zoomify is an old format that was largely supported by proprietary softwares and free viewers.') // @translate
+                    . ' ' . $this->translate('All formats are served as native by default, but may be served as IIIF too when a viewer request it.'), // @translate
                 'value_options' => $valueOptions,
             ],
             'attributes' => [
