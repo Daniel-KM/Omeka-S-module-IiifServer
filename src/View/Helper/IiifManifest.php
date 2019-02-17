@@ -522,6 +522,8 @@ class IiifManifest extends AbstractHelper
     /**
      * Create an IIIF image object from an Omeka file.
      *
+     * @todo Use the IiifInfo (short version of info.json of the image).
+     *
      * @param MediaRepresentation $media
      * @param int $index Used to set the standard name of the image.
      * @param string $canvasUrl Used to set the value for "on".
@@ -545,97 +547,56 @@ class IiifManifest extends AbstractHelper
         // There is only one image (parallel is not managed currently).
         $imageResource = [];
 
-        $tiles = [];
+        // According to https://iiif.io/api/presentation/2.1/#image-resources,
+        // "the URL may be the complete URL to a particular size of the image
+        // content", so the large one here, and it's always a jpeg.
+        $imageSize = $view->imageSize($media, 'large');
+        list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
+        $imageUrl = $this->view->url(
+            'iiifserver_image_url',
+            [
+                'id' => $media->id(),
+                'region' => 'full',
+                'size' => $widthLarge . ',' . $heightLarge,
+                'rotation' => 0,
+                'quality' => 'default',
+                'format' => 'jpg',
+            ],
+            ['force_canonical' => true]
+        );
+        $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
+
+        $imageResource['@id'] = $imageUrl;
+        $imageResource['@type'] = 'dctypes:Image';
+        $imageResource['format'] = 'image/jpeg';
+        $imageResource['width'] = $width;
+        $imageResource['height'] = $height;
+
+        $imageUrlService = $this->view->url(
+            'iiifserver_image',
+            ['id' => $media->id()],
+            ['force_canonical' => true]
+        );
+        $imageUrlService = $this->view->iiifForceBaseUrlIfRequired($imageUrlService);
+        $imageResourceService = [];
+        $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
+        $imageResourceService['@id'] = $imageUrlService;
+        $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
+
         $tileInfo = new TileInfo();
         $tilingData = $tileInfo($media);
         $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
-
-        // This is a tiled image.
         if ($iiifTileInfo) {
-            $imageSize = $view->imageSize($media, 'large');
-            list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
-            $imageUrl = $this->view->url(
-                'iiifserver_image',
-                [
-                    'id' => $media->id(),
-                    'region' => 'full',
-                    'size' => $widthLarge . ',' . $heightLarge,
-                    'rotation' => 0,
-                    'quality' => 'default',
-                    'format' => 'jpg',
-                ],
-                ['force_canonical' => true]
-            );
-            $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
-
-            $formats = [
-                'image/jpeg' => 'image/jpeg',
-                'image/png' => 'image/png',
-                'image/gif' => 'image/gif',
-                'image/webp' => 'image/webp',
-                'jpg' => 'image/jpeg',
-                'jpeg' => 'image/jpeg',
-                'png' => 'image/png',
-                'gif' => 'image/gif',
-                'webp' => 'image/webp',
-            ];
-
-            $imageResource['@id'] = $imageUrl;
-            $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = isset($iiifTileInfo['format']) && isset($formats[strtolower($iiifTileInfo['format'])])
-                ? $formats[strtolower($iiifTileInfo['format'])]
-                : 'image/jpeg';
-            $imageResource['width'] = $width;
-            $imageResource['height'] = $height;
-
-            $imageUrl = $this->view->url(
-                'iiifserver_image',
-                ['id' => $media->id()],
-                ['force_canonical' => true]
-            );
-            $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
-
-            $imageResourceService = [];
-            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
-            $imageResourceService['@id'] = $imageUrl;
-            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-            $imageResourceService['width'] = $width;
-            $imageResourceService['height'] = $height;
-
             $tiles = [];
             $tiles[] = $iiifTileInfo;
             $imageResourceService['tiles'] = $tiles;
-
-            $imageResourceService = (object) $imageResourceService;
-
-            $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
+            $imageResourceService['width'] = $width;
+            $imageResourceService['height'] = $height;
         }
 
-        // Simple light image.
-        else {
-            $imageResource['@id'] = $media->originalUrl();
-            $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
-            $imageResource['width'] = $width;
-            $imageResource['height'] = $height;
-
-            $imageResourceService = [];
-            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
-
-            $imageUrl = $this->view->url(
-                'iiifserver_image',
-                ['id' => $media->id()],
-                ['force_canonical' => true]
-            );
-            $imageUrl = $this->view->iiifForceBaseUrlIfRequired($imageUrl);
-            $imageResourceService['@id'] = $imageUrl;
-            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-            $imageResourceService = (object) $imageResourceService;
-
-            $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
-        }
+        $imageResourceService = (object) $imageResourceService;
+        $imageResource['service'] = $imageResourceService;
+        $imageResource = (object) $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;
@@ -666,7 +627,7 @@ class IiifManifest extends AbstractHelper
         $canvas['thumbnail'] = $this->_iiifThumbnail($media);
 
         // Size of canvas should be the double of small images (< 1200 px), but
-        // only when more than image is used by a canvas.
+        // only when more than one image is used by a canvas.
         $imageSize = $this->getView()->imageSize($media, 'original');
         list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
         $canvas['width'] = $width;
