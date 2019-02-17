@@ -231,6 +231,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $bulkFieldset->add([
+            'name' => 'remove_destination',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Remove existing tiles', // @translate
+                'info' => 'If checked, existing tiles will be removed, else they will be skipped.',  // @translate
+            ],
+            'attributes' => [
+                'id' => 'remove-destination',
+            ],
+        ]);
+
+        $bulkFieldset->add([
             'name' => 'process',
             'type' => Element\Submit::class,
             'options' => [
@@ -295,6 +307,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         $bulkFieldset = $inputFilter->get('iiifserver_bulk_tiler');
         $bulkFieldset->add([
             'name' => 'query',
+            'required' => false,
+        ]);
+        $bulkFieldset->add([
+            'name' => 'remove_destination',
             'required' => false,
         ]);
     }

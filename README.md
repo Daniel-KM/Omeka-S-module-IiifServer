@@ -197,7 +197,10 @@ The image server has two roles.
   The tiles are created via a background job from the media "Tile" (in item edit
   view).
 
-Note about the display of tiled and simple images
+  The tiles can be created in bulk via a job, that can be run via a button in
+  the config form of the module.
+
+* Display of tiled and simple images
 
 When created, the tiles are displayed via their native format, so only viewers
 that support them can display them. [OpenSeadragon], the viewer integrated by
@@ -271,7 +274,7 @@ TODO / Bugs
 - When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image.
 - Separate IIIF Server (creation of manifests and media infos) and image server
-  (tiling and display compliant with iiif specifications).
+  (tiling and display compliant with iiif specifications) (#6).
 - Create thumbnails from the tiled image, not from the original.
 - Support curl when allow_url_fopen and allow_url_include are forbidden.
 

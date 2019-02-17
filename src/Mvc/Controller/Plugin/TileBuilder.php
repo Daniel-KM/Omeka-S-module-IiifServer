@@ -56,7 +56,7 @@ class TileBuilder extends AbstractPlugin
             throw new InvalidArgumentException('Destination is empty.'); // @translate
         }
 
-        $params['destinationRemove'] = true;
+        $params['destinationRemove'] = !empty($params['destinationRemove']);
 
         if (empty($params['storageId'])) {
             $params['storageId'] = pathinfo($source, PATHINFO_FILENAME);
@@ -67,13 +67,13 @@ class TileBuilder extends AbstractPlugin
         unset($params['tile_type']);
         switch ($tileType) {
             case 'deepzoom':
-                $result['result'] = $this->deepzoom($source, $destination, $params);
+                $factory = new DeepzoomFactory;
                 $result['tile_dir'] = $destination . DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_DEEPZOOM;
                 $result['tile_file'] = $destination . DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_DEEPZOOM_FILE;
                 break;
             case 'zoomify':
+                $factory = new ZoomifyFactory;
                 $destination .= DIRECTORY_SEPARATOR . basename($params['storageId']) . self::FOLDER_EXTENSION_ZOOMIFY;
-                $result['result'] = $this->zoomify($source, $destination, $params);
                 $result['tile_dir'] = $destination;
                 break;
             default:
@@ -83,35 +83,17 @@ class TileBuilder extends AbstractPlugin
                 ));
         }
 
+        if (!$params['destinationRemove']) {
+            if (is_dir($result['tile_dir'])) {
+                $result['result'] = true;
+                $result['skipped'] = true;
+                return $result;
+            }
+        }
+
+        $processor = $factory($params);
+        $result['result'] = $processor->process($source, $destination);
+
         return $result;
-    }
-
-    /**
-     * Passed a file name, it will initilize the deepzoom and cut the tiles.
-     *
-     * @param string $source The path to the image.
-     * @param string $destination The directory where to store the tiles.
-     * @param array $params The params for the graphic processor.
-     * @return bool
-     */
-    protected function deepzoom($source, $destination, $params)
-    {
-        $factory = new DeepzoomFactory;
-        $processor = $factory($params);
-        return $processor->process($source, $destination);
-    }
-
-    /**
-     * Passed a file name, it will initilize the zoomify and cut the tiles.
-     *
-     * @param string $source The path to the image.
-     * @param string $destination The directory where to store the tiles.
-     * @param array $params The params for the graphic processor.
-     */
-    protected function zoomify($source, $destination, $params)
-    {
-        $factory = new ZoomifyFactory;
-        $processor = $factory($params);
-        return $processor->process($source, $destination);
     }
 }

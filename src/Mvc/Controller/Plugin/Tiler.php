@@ -33,10 +33,11 @@ class Tiler extends AbstractPlugin
      * Tile a media.
      *
      * @var MediaRepresentation $media
+     * @var bool $removeDestination
      * @return array|bool False on error, else data about tiling, with a boolean
      * for key "result".
      */
-    public function __invoke(MediaRepresentation $media)
+    public function __invoke(MediaRepresentation $media, $removeDestination = false)
     {
         if (!$media->hasOriginal()
             || strtok($media->mediaType(), '/') !== 'image'
@@ -55,17 +56,21 @@ class Tiler extends AbstractPlugin
             return false;
         }
 
+        $params = $this->params;
+
         // When a specific store or Archive Repertory are used, the storage id
         // may contain a subdir, so it should be added. There is no change with
         // the default simple storage id.
         $storageId = $media->storageId();
-        $this->params['storageId'] = basename($storageId);
-        $tileDir = $this->params['basePath'] . DIRECTORY_SEPARATOR . $this->params['tile_dir'];
+        $params['storageId'] = basename($storageId);
+        $tileDir = $params['basePath'] . DIRECTORY_SEPARATOR . $params['tile_dir'];
         $tileDir = dirname($tileDir . DIRECTORY_SEPARATOR . $storageId);
+
+        $params['destinationRemove'] = $removeDestination;
 
         $tileBuilder = new TileBuilder();
         try {
-            $result = $tileBuilder($sourcePath, $tileDir, $this->params);
+            $result = $tileBuilder($sourcePath, $tileDir, $params);
         } catch (\Exception $e) {
             $message = new Message(
                 'The tiler failed: %s', // @translate

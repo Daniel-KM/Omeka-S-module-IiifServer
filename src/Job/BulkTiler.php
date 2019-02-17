@@ -33,6 +33,7 @@ class BulkTiler extends AbstractJob
         $repository = $entityManager->getRepository(\Omeka\Entity\Media::class);
 
         $query = $this->getArg('query', []);
+        $removeDestination = $this->getArg('remove_destination', false);
 
         $response = $api->search('items', $query);
         $totalToProcess = $response->getTotalResults();
@@ -57,9 +58,11 @@ class BulkTiler extends AbstractJob
         ));
 
         $offset = 0;
+        $totalImages = 0;
         $totalProcessed = 0;
         $totalSucceed = 0;
         $totalFailed = 0;
+        $totalSkipped = 0;
         while (true) {
             /** @var \Omeka\Api\Representation\ItemRepresentation[] $items */
             $items = $api
@@ -83,31 +86,40 @@ class BulkTiler extends AbstractJob
                     if ($media->hasOriginal()
                         && strtok($media->mediaType(), '/') === 'image'
                     ) {
+                        ++$totalImages;
                         $logger->info(new Message(
                             'Starting tiling media #%d.', // @translate
                             $media->id()
                         ));
-                        $result = $tiler($media);
+                        $result = $tiler($media, $removeDestination);
                         if ($result && !empty($result['result'])) {
-                            $renderer = $media->renderer();
-                            if ($renderer !== 'tile') {
-                                // $api->update('media', $media->id(), ['renderer' => 'tile'], [], ['isPartial' => true]);
-                                /** @var \Omeka\Entity\Media $mediaEntity  */
-                                $mediaEntity = $repository->find($media->id());
-                                $mediaEntity->setRenderer('tile');
-                                $entityManager->persist($mediaEntity);
-                                $entityManager->flush();
+                            if (!empty($result['skipped'])) {
                                 $logger->info(new Message(
-                                    'Renderer "%s" of media #%d updated to "tile".', // @translate
-                                    $renderer,
+                                    'Media #%d skipped: already tiled.', // @translate
                                     $media->id()
                                 ));
+                                ++$totalSkipped;
+                            } else {
+                                $renderer = $media->renderer();
+                                if ($renderer !== 'tile') {
+                                    // $api->update('media', $media->id(), ['renderer' => 'tile'], [], ['isPartial' => true]);
+                                    /** @var \Omeka\Entity\Media $mediaEntity  */
+                                    $mediaEntity = $repository->find($media->id());
+                                    $mediaEntity->setRenderer('tile');
+                                    $entityManager->persist($mediaEntity);
+                                    $entityManager->flush();
+                                    $logger->info(new Message(
+                                        'Renderer "%s" of media #%d updated to "tile".', // @translate
+                                        $renderer,
+                                        $media->id()
+                                    ));
+                                }
+                                $logger->info(new Message(
+                                    'End tiling media #%d.', // @translate
+                                    $media->id()
+                                ));
+                                ++$totalSucceed;
                             }
-                            $logger->info(new Message(
-                                'End tiling media #%d.', // @translate
-                                $media->id()
-                            ));
-                            ++$totalSucceed;
                         } else {
                             $logger->error(new Message(
                                 'Error during tiling of media #%d.', // @translate
@@ -128,11 +140,13 @@ class BulkTiler extends AbstractJob
         }
 
         $logger->info(new Message(
-            'End of bulk tiling: %d/%d items processed, %d files tiled, %d errors.', // @translate
+            'End of bulk tiling: %d/%d items processed, %d files tiled, %d errors, %d skipped on a total of %d images.', // @translate
             $totalProcessed,
             $totalToProcess,
             $totalSucceed,
-            $totalFailed
+            $totalFailed,
+            $totalSkipped,
+            $totalImages
         ));
     }
 }
