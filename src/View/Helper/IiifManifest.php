@@ -158,22 +158,33 @@ class IiifManifest extends AbstractHelper
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
-        // TODO To parameter or to extract from metadata.
         /*
-        $metadata['service'] = array(
+        // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
+        $manifest['service'] = [
+            '@context' => $this->view->url('api-context'),
+            '@id' => $item->apiUrl(),
+            'format' =>'application/ld+json',
+            // TODO What is the profile of Omeka json-ld?
+            // 'profile' => '',
+        ];
+        $manifest['service'] = [
             '@context' =>'http://example.org/ns/jsonld/context.json',
             '@id' => 'http://example.org/service/example',
             'profile' => 'http://example.org/docs/example-service.html',
-        );
+        ];
         */
 
-        // TODO To parameter or to extract from metadata (Dublin Core Relation).
-        /*
-        $metadata['seeAlso'] = array(
-            '@id' => 'http://www.example.org/library/catalog/book1.marc',
-            'format' =>'application/marc',
-        );
-        */
+        $manifest['related'] = [
+            '@id' => $this->view->publicResourceUrl($item, true),
+            'format' => 'text/html',
+        ];
+
+        $manifest['seeAlso'] = [
+            '@id' => $item->apiUrl(),
+            'format' => 'application/ld+json',
+            // TODO What is the profile of Omeka json-ld?
+            // 'profile' => '',
+        ];
 
         $withins = [];
         foreach ($item->itemSets() as $itemSet) {
@@ -242,7 +253,7 @@ class IiifManifest extends AbstractHelper
 
                 // TODO Add other content.
                 /*
-                $otherContent = array();
+                $otherContent = [];
                 $otherContent = (object) $otherContent;
 
                 $canvas->otherContent = $otherContent;
@@ -345,6 +356,7 @@ class IiifManifest extends AbstractHelper
         }
 
         // Thumbnail of the whole work.
+        // TODO Use resource thumbnail (> Omeka 1.3).
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $isThreejs);
 
         // Prepare sequences.
@@ -398,7 +410,7 @@ class IiifManifest extends AbstractHelper
             /*
             if (empty($rendering)) {
                 $placeholder = 'img/placeholder-default.jpg';
-                $render = array();
+                $render = [];
                 $render['@id'] = $this->view->assetUrl($placeholder, 'IiifServer');
                 $render['format'] = 'image/jpeg';
                 $render['label'] = $translate('Unsupported content.');
@@ -988,6 +1000,7 @@ class IiifManifest extends AbstractHelper
             // $medias = $response->getContent();
             // $media = reset($medias);
 
+            // TODO Use resource thumbnail (> Omeka 1.3).
             $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
                 ->get('Omeka\Connection');
             $qb = $conn->createQueryBuilder()

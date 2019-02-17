@@ -21,6 +21,9 @@ return [
             'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
             'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
+            // Currently in module Next and in a pull request for core.
+            'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
+            'publicResourceUrl' => Service\ViewHelper\PublicResourceUrlFactory::class,
         ],
     ],
     'form_elements' => [

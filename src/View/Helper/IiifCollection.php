@@ -117,10 +117,38 @@ class IiifCollection extends AbstractHelper
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
+        // TODO Use resource thumbnail (> Omeka 1.3).
         // $manifest['thumbnail'] = $thumbnail;
         // $manifest['service'] = $service;
-        // TODO To parameter or to extract from metadata (Dublin Core Relation).
-        // $manifest['seeAlso'] = $seeAlso;
+
+        /*
+         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
+         $manifest['service'] = [
+             '@context' => $this->view->url('api-context'),
+             '@id' => $itemSet->apiUrl(),
+             'format' =>'application/ld+json',
+             // TODO What is the profile of Omeka json-ld?
+             // 'profile' => '',
+         ];
+         $manifest['service'] = [
+             '@context' =>'http://example.org/ns/jsonld/context.json',
+             '@id' => 'http://example.org/service/example',
+             'profile' => 'http://example.org/docs/example-service.html',
+         ];
+         */
+
+        $manifest['related'] = [
+            '@id' => $this->view->publicResourceUrl($itemSet, true),
+            'format' => 'text/html',
+        ];
+
+        $manifest['seeAlso'] = [
+            '@id' => $itemSet->apiUrl(),
+            'format' => 'application/ld+json',
+            // TODO What is the profile of Omeka json-ld?
+            // 'profile' => '',
+        ];
+
         // TODO Use within with collection tree.
         // $manifest['within'] = $within;
 

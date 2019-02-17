@@ -99,6 +99,30 @@ class IiifCollectionList extends AbstractHelper
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
+        /*
+        // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
+        $manifest['service'] = [
+             '@context' => $this->view->url('api-context'),
+            '@id' => $this->view->url('api', $query, [], true),
+             'format' =>'application/ld+json',
+             // TODO What is the profile of Omeka json-ld?
+             // 'profile' => '',
+         ];
+        */
+
+        /*
+        // TODO Reuses  the original query to provide public and api url (search results).
+        $manifest['related'] = [
+            '@id' => $this->view->url('resources', $query, [], true),
+            'format' => 'text/html',
+        ];
+
+        $manifest['seeAlso'] = [
+            '@id' => $this->view->url('api', $query, [], true),
+            'format' => 'application/ld+json',
+        ];
+        */
+
         // List of the manifest of each record. IIIF v2.0 separates collections
         // and items, so the global order is not kept for them.
         $collections = [];
