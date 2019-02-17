@@ -616,7 +616,7 @@ class IiifManifest extends AbstractHelper
     {
         $canvas = [];
 
-        $titleFile = $media->value('dcterms:title', ['type' => 'literal']);
+        $titleFile = $media->displayTitle();
         $canvasUrl = $this->_baseUrl . '/canvas/p' . $index;
 
         $canvas['@id'] = $canvasUrl;
