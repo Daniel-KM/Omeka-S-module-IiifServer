@@ -162,6 +162,16 @@ class IiifInfo extends AbstractHelper
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';
         }
 
+        // Give possibility to customize the info.json.
+        // TODO Manifest (info) should be a true object, with many sub-objects.
+        $manifest = &$info;
+        $resource = $media;
+        $type = 'file';
+        $triggerHelper = $this->view->plugin('trigger');
+        $params = compact('manifest', 'resource', 'type');
+        $params = $triggerHelper('iiifserver.manifest', $params, true);
+        $info = $params['manifest'];
+
         $info = (object) $info;
         return $info;
     }

@@ -113,6 +113,15 @@ class IiifCollectionList extends AbstractHelper
         $manifest['collections'] = $collections;
         $manifest['manifests'] = $manifests;
 
+        // Give possibility to customize the manifest.
+        // TODO Manifest should be a true object, with many sub-objects.
+        $resource = &$resources;
+        $type = 'collection_list';
+        $triggerHelper = $this->view->plugin('trigger');
+        $params = compact('manifest', 'resource', 'type');
+        $params = $triggerHelper('iiifserver.manifest', $params, true);
+        $manifest = $params['manifest'];
+
         // Remove all empty values (there is no "0" or "null" at first level).
         $manifest = array_filter($manifest);
 
