@@ -128,6 +128,6 @@ class TileBuilder extends AbstractPlugin
 
         $factory = new ZoomifyFactory;
         $processor = $factory($params);
-        $processor->process($source, $destination);
+        return $processor->process($source, $destination);
     }
 }
