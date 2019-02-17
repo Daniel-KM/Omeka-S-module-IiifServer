@@ -96,14 +96,6 @@ class TileBuilder extends AbstractPlugin
      */
     protected function deepzoom($source, $destination, $params)
     {
-        // This direct autoload avoid to load useless class in Omeka.
-        require_once dirname(dirname(dirname(dirname(__DIR__))))
-            . DIRECTORY_SEPARATOR . 'vendor'
-            . DIRECTORY_SEPARATOR . 'daniel-km'
-            . DIRECTORY_SEPARATOR . 'deepzoom'
-            . DIRECTORY_SEPARATOR . 'src'
-            . DIRECTORY_SEPARATOR . 'DeepzoomFactory.php';
-
         $factory = new DeepzoomFactory;
         $processor = $factory($params);
         return $processor->process($source, $destination);
@@ -118,14 +110,6 @@ class TileBuilder extends AbstractPlugin
      */
     protected function zoomify($source, $destination, $params)
     {
-        // This direct autoload avoid to load useless class in Omeka.
-        require_once dirname(dirname(dirname(dirname(__DIR__))))
-            . DIRECTORY_SEPARATOR . 'vendor'
-            . DIRECTORY_SEPARATOR . 'daniel-km'
-            . DIRECTORY_SEPARATOR . 'zoomify'
-            . DIRECTORY_SEPARATOR . 'src'
-            . DIRECTORY_SEPARATOR . 'ZoomifyFactory.php';
-
         $factory = new ZoomifyFactory;
         $processor = $factory($params);
         return $processor->process($source, $destination);

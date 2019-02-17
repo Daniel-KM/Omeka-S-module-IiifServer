@@ -140,6 +140,7 @@ SQL;
         }
 
         // Clean media data. They cannot be updated via api, so use a query.
+        // TODO Use doctrine repository.
         $mediaId = (int) $mediaId;
         $connection = $this->getServiceLocator()->get('Omeka\Connection');
         $sql = <<<SQL

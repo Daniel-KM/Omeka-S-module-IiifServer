@@ -37,6 +37,7 @@ use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
+use Zend\ModuleManager\ModuleManager;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -44,6 +45,11 @@ use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
+    public function init(ModuleManager $moduleManager)
+    {
+        require_once __DIR__ . '/vendor/autoload.php';
+    }
+
     public function getConfig()
     {
         return include __DIR__ . '/config/module.config.php';
