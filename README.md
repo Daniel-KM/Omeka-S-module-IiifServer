@@ -274,7 +274,7 @@ TODO / Bugs
 - When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image.
 - Separate IIIF Server (creation of manifests and media infos) and image server
-  (tiling and display compliant with iiif specifications) (#6).
+  (tiling and display compliant with iiif specifications) ([#6]).
 - Create thumbnails from the tiled image, not from the original.
 - Support curl when allow_url_fopen and allow_url_include are forbidden.
 
@@ -362,6 +362,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Deepzoom library]: https://github.com/Daniel-KM/LibraryDeepzoom
 [Zoomify library]: https://github.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
+[#6]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/6
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
