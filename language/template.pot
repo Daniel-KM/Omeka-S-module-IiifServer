@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-18 00:00+0100\n"
+"POT-Creation-Date: 2019-03-04 00:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,11 +53,11 @@ msgstr ""
 msgid "You can now upgrade Universal Viewer to 3.5."
 msgstr ""
 
-#: Module.php:328
+#: Module.php:331
 msgid "Process"
 msgstr ""
 
-#: Module.php:370
+#: Module.php:373
 msgid "Automatic"
 msgstr ""
 
@@ -173,66 +173,66 @@ msgstr ""
 msgid "It’s recommended to use \"dcterms:license\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:136
+#: src/Form/ConfigForm.php:184
 msgid ""
 "When a proxy or a firewall is used, or when the config is specific, it may "
 "be needed to change the base url."
 msgstr ""
 
-#: src/Form/ConfigForm.php:137
+#: src/Form/ConfigForm.php:185
 msgid ""
 "For example, when the server is secured, the \"http:\" urls may be replaced "
 "by \"https:\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:170
+#: src/Form/ConfigForm.php:218
 msgid ""
 "Generally, GD is a little faster than ImageMagick, but ImageMagick manages "
 "more formats."
 msgstr ""
 
-#: src/Form/ConfigForm.php:171
+#: src/Form/ConfigForm.php:219
 msgid ""
 "Nevertheless, the performance depends on your installation and your server."
 msgstr ""
 
-#: src/Form/ConfigForm.php:181
+#: src/Form/ConfigForm.php:229
 msgid "Set the maximum size in bytes for the dynamic processing of images."
 msgstr ""
 
-#: src/Form/ConfigForm.php:182
+#: src/Form/ConfigForm.php:230
 msgid "Beyond this limit, the plugin will require a tiled image."
 msgstr ""
 
-#: src/Form/ConfigForm.php:183
+#: src/Form/ConfigForm.php:231
 msgid "Let empty to allow processing of any image."
 msgstr ""
 
-#: src/Form/ConfigForm.php:199
+#: src/Form/ConfigForm.php:247
 msgid ""
 "Deep Zoom Image is a free proprietary format from Microsoft largely "
 "supported."
 msgstr ""
 
-#: src/Form/ConfigForm.php:200
+#: src/Form/ConfigForm.php:248
 msgid ""
 "Zoomify is an old format that was largely supported by proprietary softwares "
 "and free viewers."
 msgstr ""
 
-#: src/Form/ConfigForm.php:201
+#: src/Form/ConfigForm.php:249
 msgid ""
 "All formats are served as native by default, but may be served as IIIF too "
 "when a viewer request it."
 msgstr ""
 
-#: src/Form/ConfigForm.php:224
+#: src/Form/ConfigForm.php:272
 msgid ""
 "This query will be used to select all items whose attached images will be "
 "tiled in the background."
 msgstr ""
 
-#: src/Form/ConfigForm.php:225
+#: src/Form/ConfigForm.php:273
 msgid "Warning: The renderer of all tiled images will be set to \"tile\"."
 msgstr ""
 
@@ -279,11 +279,11 @@ msgstr ""
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest.php:688
+#: src/View/Helper/IiifManifest.php:702
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest.php:936
+#: src/View/Helper/IiifManifest.php:950
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -321,42 +321,42 @@ msgstr ""
 msgid "To keep the tiles, rename the dir \"%s\" before and after uninstall."
 msgstr ""
 
-#: Module.php:333
+#: Module.php:336
 msgid "A query is needed to run the bulk tiler."
 msgstr ""
 
-#: Module.php:348
+#: Module.php:351
 #, php-format
 msgid ""
 "Creating tiles for images attached to specified items, in background (%sjob #"
 "%d%s)"
 msgstr ""
 
-#: Module.php:391 src/Service/ControllerPlugin/TilerFactory.php:17
+#: Module.php:394 src/Service/ControllerPlugin/TilerFactory.php:17
 msgid "The tile dir is not defined."
 msgstr ""
 
-#: Module.php:402
+#: Module.php:405
 #, php-format
 msgid "The directory \"%s\" cannot be created: a file exists."
 msgstr ""
 
-#: Module.php:408
+#: Module.php:411
 #, php-format
 msgid "The directory \"%s\" is not writeable."
 msgstr ""
 
-#: Module.php:416
+#: Module.php:419
 #, php-format
 msgid "The directory \"%s\" cannot be created."
 msgstr ""
 
-#: Module.php:424
+#: Module.php:427
 #, php-format
 msgid "The tiles will be saved in the directory \"%s\"."
 msgstr ""
 
-#: Module.php:447
+#: Module.php:450
 msgid "Tile dir is not defined, so media tiles cannot be removed."
 msgstr ""
 
@@ -402,94 +402,106 @@ msgid ""
 msgstr ""
 
 #: src/Form/ConfigForm.php:111
-msgid "Append media metadata"
+msgid "Limit properties for collection in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:112
-msgid ""
-"Append descriptive metadata of the media, if any, for example details about "
-"each page of a book."
+#: src/Form/ConfigForm.php:112 src/Form/ConfigForm.php:132
+#: src/Form/ConfigForm.php:152
+msgid "If empty, all public values will be output."
 msgstr ""
 
-#: src/Form/ConfigForm.php:123
+#: src/Form/ConfigForm.php:123 src/Form/ConfigForm.php:143
+#: src/Form/ConfigForm.php:163
+msgid "Select one or more properties…"
+msgstr ""
+
+#: src/Form/ConfigForm.php:131
+msgid "Limit properties for item in manifest"
+msgstr ""
+
+#: src/Form/ConfigForm.php:151
+msgid "Limit properties for media in manifest"
+msgstr ""
+
+#: src/Form/ConfigForm.php:171
 msgid "Logo"
 msgstr ""
 
-#: src/Form/ConfigForm.php:124
+#: src/Form/ConfigForm.php:172
 msgid ""
 "If any, this url to an image will be used as logo and displayed in the right "
 "panel of the Universal Viewer."
 msgstr ""
 
-#: src/Form/ConfigForm.php:135
+#: src/Form/ConfigForm.php:183
 msgid "Force base of url (from)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:148
+#: src/Form/ConfigForm.php:196
 msgid "Force base of url (to)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:159
+#: src/Form/ConfigForm.php:207
 msgid "Image server"
 msgstr ""
 
-#: src/Form/ConfigForm.php:160
+#: src/Form/ConfigForm.php:208
 msgid "Images may be processed internally before to be sent to browser."
 msgstr ""
 
-#: src/Form/ConfigForm.php:169
+#: src/Form/ConfigForm.php:217
 msgid "Image processor"
 msgstr ""
 
-#: src/Form/ConfigForm.php:180
+#: src/Form/ConfigForm.php:228
 msgid "Max dynamic size for images"
 msgstr ""
 
-#: src/Form/ConfigForm.php:191
+#: src/Form/ConfigForm.php:239
 msgid "Deep Zoom Image"
 msgstr ""
 
-#: src/Form/ConfigForm.php:192
+#: src/Form/ConfigForm.php:240
 msgid "Zoomify"
 msgstr ""
 
-#: src/Form/ConfigForm.php:198
+#: src/Form/ConfigForm.php:246
 msgid "Tiling type"
 msgstr ""
 
-#: src/Form/ConfigForm.php:213
+#: src/Form/ConfigForm.php:261
 msgid "Bulk tiler"
 msgstr ""
 
-#: src/Form/ConfigForm.php:214
+#: src/Form/ConfigForm.php:262
 msgid "Imported files can be tiled via a background job."
 msgstr ""
 
-#: src/Form/ConfigForm.php:237
+#: src/Form/ConfigForm.php:285
 msgid "Remove existing tiles"
 msgstr ""
 
-#: src/Form/ConfigForm.php:238
+#: src/Form/ConfigForm.php:286
 msgid "If checked, existing tiles will be removed, else they will be skipped."
 msgstr ""
 
-#: src/Form/ConfigForm.php:249
+#: src/Form/ConfigForm.php:297
 msgid "Run in background"
 msgstr ""
 
-#: src/Form/ConfigForm.php:334
+#: src/Form/ConfigForm.php:394
 msgid "Automatic (GD when possible, else Imagick, else command line)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:336
+#: src/Form/ConfigForm.php:396
 msgid "GD (php extension)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:339
+#: src/Form/ConfigForm.php:399
 msgid "Imagick (php extension)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:341
+#: src/Form/ConfigForm.php:401
 msgid "ImageMagick (command line)"
 msgstr ""
 
