@@ -374,7 +374,6 @@ return [
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
             'iiifserver_manifest_license_property' => 'dcterms:license',
             'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
-            'iiifserver_manifest_media_metadata' => true,
             'iiifserver_manifest_properties_collection' => [],
             'iiifserver_manifest_properties_item' => [],
             'iiifserver_manifest_properties_media' => [],

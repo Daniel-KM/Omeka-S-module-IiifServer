@@ -66,3 +66,20 @@ if (version_compare($oldVersion, '3.5.12', '<')) {
         $defaultSettings['iiifserver_manifest_media_metadata']
     );
 }
+
+if (version_compare($oldVersion, '3.5.14', '<')) {
+    $settings->set(
+        'iiifserver_manifest_collection_properties',
+        $defaultSettings['iiifserver_manifest_collection_properties']
+    );
+    $settings->set(
+        'iiifserver_manifest_item_properties',
+        $defaultSettings['iiifserver_manifest_item_properties']
+    );
+    $value = $settings->delete('iiifserver_manifest_media_metadata');
+    $settings->set(
+        'iiifserver_manifest_media_properties',
+        $value === '0' ? ['none'] : $defaultSettings['iiifserver_manifest_media_properties']
+    );
+    $settings->delete('iiifserver_manifest_media_metadata');
+}

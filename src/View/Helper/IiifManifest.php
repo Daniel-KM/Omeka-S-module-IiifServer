@@ -470,6 +470,8 @@ class IiifManifest extends AbstractHelper
     /**
      * Prepare the metadata of a resource.
      *
+     * @todo Factorize with IiifCollection.
+     *
      * @param AbstractResourceEntityRepresentation $resource
      * @return array
      */
@@ -485,8 +487,12 @@ class IiifManifest extends AbstractHelper
             return [];
         }
 
-        $metadata = [];
         $properties = $this->view->setting($map[$jsonLdType]);
+        if ($properties === ['none']) {
+            return [];
+        }
+
+        $metadata = [];
         $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
         foreach ($values as $propertyData) {
             $valueMetadata = [];
@@ -671,12 +677,9 @@ class IiifManifest extends AbstractHelper
         $images[] = $image;
         $canvas['images'] = $images;
 
-        $mediaMetadata = $this->getView()->setting('iiifserver_manifest_media_metadata');
-        if ($mediaMetadata) {
-            $metadata = $this->iiifMetadata($media);
-            if ($metadata) {
-                $canvas['metadata'] = $metadata;
-            }
+        $metadata = $this->iiifMetadata($media);
+        if ($metadata) {
+            $canvas['metadata'] = $metadata;
         }
 
         $canvas = (object) $canvas;

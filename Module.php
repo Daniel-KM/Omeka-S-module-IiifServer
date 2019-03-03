@@ -314,6 +314,13 @@ class Module extends AbstractModule
 
         $params = $params['iiifserver_manifest'] + $params['iiifserver_image'];
 
+        // Specific options.
+        foreach (['iiifserver_manifest_collection_properties', 'iiifserver_manifest_item_properties', 'iiifserver_manifest_media_properties'] as $key) {
+            $params[$key] = empty($params[$key]) || in_array('', $params[$key])
+                ? []
+                : (in_array('none', $params[$key]) ? ['none'] : $params[$key]);
+        }
+
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         $params = array_intersect_key($params, $defaultSettings);
         foreach ($params as $name => $value) {

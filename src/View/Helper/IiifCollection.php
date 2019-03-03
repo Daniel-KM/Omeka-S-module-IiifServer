@@ -215,8 +215,12 @@ class IiifCollection extends AbstractHelper
      */
     protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
     {
-        $metadata = [];
         $properties = $this->view->setting('iiifserver_manifest_properties_collection');
+        if ($properties === ['none']) {
+            return [];
+        }
+
+        $metadata = [];
         $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
         foreach ($values as $propertyData) {
             $valueMetadata = [];

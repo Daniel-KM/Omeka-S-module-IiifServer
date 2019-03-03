@@ -105,24 +105,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $manifestFieldset->add([
-            'name' => 'iiifserver_manifest_media_metadata',
-            'type' => Element\Checkbox::class,
-            'options' => [
-                'label' => 'Append media metadata', // @translate
-                'info' => 'Append descriptive metadata of the media, if any, for example details about each page of a book.',  // @translate
-            ],
-            'attributes' => [
-                'id' => 'iiifserver-manifest-media-metadata',
-            ],
-        ]);
-
-        $manifestFieldset->add([
             'name' => 'iiifserver_manifest_properties_collection',
             'type' => PropertySelect::class,
             'options' => [
                 'label' => 'Limit properties for collection in manifest', // @translate
                 'info' => 'If empty, all public values will be output.', // @translate
-                'empty_option' => '', // @translate
+                'empty_option' => 'All', // @translate
+                'prepend_value_options' => [
+                    'none' => 'None', // @translate
+                ],
                 'term_as_value' => true,
             ],
             'attributes' => [
@@ -139,7 +130,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'options' => [
                 'label' => 'Limit properties for item in manifest', // @translate
                 'info' => 'If empty, all public values will be output.', // @translate
-                'empty_option' => '', // @translate
+                'empty_option' => 'All', // @translate
+                'prepend_value_options' => [
+                    'none' => 'None', // @translate
+                ],
                 'term_as_value' => true,
             ],
             'attributes' => [
@@ -156,7 +150,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'options' => [
                 'label' => 'Limit properties for media in manifest', // @translate
                 'info' => 'If empty, all public values will be output.', // @translate
-                'empty_option' => '', // @translate
+                'empty_option' => 'All', // @translate
+                'prepend_value_options' => [
+                    'none' => 'None', // @translate
+                ],
                 'term_as_value' => true,
             ],
             'attributes' => [
