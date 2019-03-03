@@ -78,17 +78,7 @@ class IiifCollection extends AbstractHelper
 
         $manifest = array_merge($manifest, $this->buildManifestBase($itemSet));
 
-        // Prepare the metadata of the record.
-        // TODO Manage filter and escape?
-        $metadata = [];
-        foreach ($itemSet->values() as $value) {
-            $metadata[] = (object) [
-                'label' => $value['alternate_label'] ?: $value['property']->label(),
-                'value' => count($value['values']) > 1
-                    ? array_map('strval', $value['values'])
-                    : (string) reset($value['values']),
-            ];
-        }
+        $metadata = $this->iiifMetadata($itemSet);
         $manifest['metadata'] = $metadata;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -213,5 +203,32 @@ class IiifCollection extends AbstractHelper
         $manifest['label'] = $resource->displayTitle();
 
         return $manifest;
+    }
+
+    /**
+     * Prepare the metadata of a resource.
+     *
+     * @todo Factorize with IiifManifest.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return array
+     */
+    protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
+    {
+        $metadata = [];
+        $properties = $this->view->setting('iiifserver_manifest_properties_collection');
+        $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+        foreach ($values as $propertyData) {
+            $valueMetadata = [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) {
+                return $v->type() === 'resource'
+                    ? $this->view->iiifUrl($v->valueResource())
+                    : (string) $v;
+            }, $propertyData['values']), 'strlen');
+                $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+                $metadata[] = (object) $valueMetadata;
+        }
+        return $metadata;
     }
 }

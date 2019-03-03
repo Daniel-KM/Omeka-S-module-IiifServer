@@ -475,9 +475,20 @@ class IiifManifest extends AbstractHelper
      */
     protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
     {
-        // TODO Manage filter and escape or only globally?
+        $jsonLdType = $resource->getResourceJsonLdType();
+        $map = [
+            'o:ItemSet' => 'iiifserver_manifest_properties_collection',
+            'o:Item' => 'iiifserver_manifest_properties_item',
+            'o:Media' => 'iiifserver_manifest_properties_media',
+        ];
+        if (!isset($map[$jsonLdType])) {
+            return [];
+        }
+
         $metadata = [];
-        foreach ($resource->values() as $propertyData) {
+        $properties = $this->view->setting($map[$jsonLdType]);
+        $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+        foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {

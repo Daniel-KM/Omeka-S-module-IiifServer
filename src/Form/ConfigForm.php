@@ -117,6 +117,57 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_properties_collection',
+            'type' => PropertySelect::class,
+            'options' => [
+                'label' => 'Limit properties for collection in manifest', // @translate
+                'info' => 'If empty, all public values will be output.', // @translate
+                'empty_option' => '', // @translate
+                'term_as_value' => true,
+            ],
+            'attributes' => [
+                'id' => 'iiifserver_manifest_properties_collection',
+                'class' => 'chosen-select',
+                'multiple' => true,
+                'data-placeholder' => 'Select one or more properties…', // @translate
+            ],
+        ]);
+
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_properties_item',
+            'type' => PropertySelect::class,
+            'options' => [
+                'label' => 'Limit properties for item in manifest', // @translate
+                'info' => 'If empty, all public values will be output.', // @translate
+                'empty_option' => '', // @translate
+                'term_as_value' => true,
+            ],
+            'attributes' => [
+                'id' => 'iiifserver_manifest_properties_item',
+                'class' => 'chosen-select',
+                'multiple' => true,
+                'data-placeholder' => 'Select one or more properties…', // @translate
+            ],
+        ]);
+
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_properties_media',
+            'type' => PropertySelect::class,
+            'options' => [
+                'label' => 'Limit properties for media in manifest', // @translate
+                'info' => 'If empty, all public values will be output.', // @translate
+                'empty_option' => '', // @translate
+                'term_as_value' => true,
+            ],
+            'attributes' => [
+                'id' => 'iiifserver_manifest_properties_media',
+                'class' => 'chosen-select',
+                'multiple' => true,
+                'data-placeholder' => 'Select one or more properties…', // @translate
+            ],
+        ]);
+
+        $manifestFieldset->add([
             'name' => 'iiifserver_manifest_logo_default',
             'type' => Element\Url::class,
             'options' => [
@@ -275,6 +326,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
         $manifestFilter->add([
             'name' => 'iiifserver_manifest_license_default',
+            'required' => false,
+        ]);
+        $manifestFilter->add([
+            'name' => 'iiifserver_manifest_properties_collection',
+            'required' => false,
+        ]);
+        $manifestFilter->add([
+            'name' => 'iiifserver_manifest_properties_item',
+            'required' => false,
+        ]);
+        $manifestFilter->add([
+            'name' => 'iiifserver_manifest_properties_media',
             'required' => false,
         ]);
         $manifestFilter->add([

@@ -312,11 +312,7 @@ class Module extends AbstractModule
         $bulk = $params['iiifserver_bulk_tiler'];
         unset($params['iiifserver_bulk_tiler']);
 
-        array_walk_recursive($params, function ($v, $k) use (&$params) {
-            $params[$k] = $v;
-        });
-        unset($params['iiifserver_manifest']);
-        unset($params['iiifserver_image']);
+        $params = $params['iiifserver_manifest'] + $params['iiifserver_image'];
 
         $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
         $params = array_intersect_key($params, $defaultSettings);
