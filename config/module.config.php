@@ -374,10 +374,11 @@ return [
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
             'iiifserver_manifest_license_property' => 'dcterms:license',
             'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
+            'iiifserver_manifest_logo_default' => '',
+            'iiifserver_manifest_html_descriptive' => true,
             'iiifserver_manifest_properties_collection' => [],
             'iiifserver_manifest_properties_item' => [],
             'iiifserver_manifest_properties_media' => [],
-            'iiifserver_manifest_logo_default' => '',
             'iiifserver_manifest_force_url_from' => '',
             'iiifserver_manifest_force_url_to' => '',
             'iiifserver_image_creator' => 'Auto',

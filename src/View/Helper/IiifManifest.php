@@ -492,8 +492,22 @@ class IiifManifest extends AbstractHelper
             return [];
         }
 
-        $metadata = [];
         $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+
+        return $this->view->setting('iiifserver_manifest_html_descriptive')
+            ? $this->valuesAsHtml($values)
+            : $this->valuesAsPlainText($values);
+    }
+
+    /**
+     * List values as plain text descriptive metadata.
+     *
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+     * @return array
+     */
+    protected function valuesAsPlainText(array $values)
+    {
+        $metadata = [];
         foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
@@ -501,6 +515,27 @@ class IiifManifest extends AbstractHelper
                 return $v->type() === 'resource'
                     ? $this->view->iiifUrl($v->valueResource())
                     : (string) $v;
+            }, $propertyData['values']), 'strlen');
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
+        }
+        return $metadata;
+    }
+
+    /**
+     * List values as descriptive metadata, with links for resources and uris.
+     *
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+     * @return array
+     */
+    protected function valuesAsHtml(array $values)
+    {
+        $metadata = [];
+        foreach ($values as $propertyData) {
+            $valueMetadata = [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) {
+                return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
             $metadata[] = (object) $valueMetadata;

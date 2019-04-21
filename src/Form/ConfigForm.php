@@ -105,6 +105,31 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_logo_default',
+            'type' => Element\Url::class,
+            'options' => [
+                'label' => 'Logo', // @translate
+                'info' => 'If any, this url to an image will be used as logo and displayed in the right panel of the Universal Viewer.',  // @translate
+            ],
+            'attributes' => [
+                'id' => 'iiifserver-manifest-logo-default',
+            ],
+        ]);
+
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_html_descriptive',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Link for descriptive metadata', // @translate
+                'info' => 'Some viewers display urls (for resources and uris) as plain text. This option presents them as a html link.',  // @translate
+                'documentation' => 'https://iiif.io/api/presentation/2.1/#descriptive-properties',
+            ],
+            'attributes' => [
+                'id' => 'iiifserver_manifest_html_descriptive',
+            ],
+        ]);
+
+        $manifestFieldset->add([
             'name' => 'iiifserver_manifest_properties_collection',
             'type' => PropertySelect::class,
             'options' => [
@@ -161,18 +186,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'class' => 'chosen-select',
                 'multiple' => true,
                 'data-placeholder' => 'Select one or more properties…', // @translate
-            ],
-        ]);
-
-        $manifestFieldset->add([
-            'name' => 'iiifserver_manifest_logo_default',
-            'type' => Element\Url::class,
-            'options' => [
-                'label' => 'Logo', // @translate
-                'info' => 'If any, this url to an image will be used as logo and displayed in the right panel of the Universal Viewer.',  // @translate
-            ],
-            'attributes' => [
-                'id' => 'iiifserver-manifest-logo-default',
             ],
         ]);
 
