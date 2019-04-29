@@ -291,6 +291,15 @@ class IiifManifest extends AbstractHelper
                         $render = (object) $render;
                         $rendering[] = $render;
                         break;
+						
+					case 'text/xml':
+                        $render = [];
+                        $render['@id'] = $media->originalUrl();
+                        $render['format'] = $mediaType;
+                        $render['label'] = $translate('Download as XML');
+                        $render = (object) $render;
+                        $rendering[] = $render;
+                        break;
                 }
                 // TODO Add alto files and search.
                 // TODO Add other content.
