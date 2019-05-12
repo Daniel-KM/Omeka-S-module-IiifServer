@@ -291,8 +291,8 @@ class IiifManifest extends AbstractHelper
                         $render = (object) $render;
                         $rendering[] = $render;
                         break;
-						
-					case 'text/xml':
+
+                    case 'text/xml':
                         $render = [];
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
