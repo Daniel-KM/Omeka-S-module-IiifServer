@@ -517,12 +517,13 @@ class IiifManifest extends AbstractHelper
     protected function valuesAsPlainText(array $values)
     {
         $metadata = [];
+        $publicResourceUrl = $this->view->plugin('publicResourceUrl');
         foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
-            $valueValues = array_filter(array_map(function ($v) {
+            $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
                 return $v->type() === 'resource'
-                    ? $this->view->iiifUrl($v->valueResource())
+                    ? $publicResourceUrl($v->valueResource(), true)
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
@@ -540,10 +541,17 @@ class IiifManifest extends AbstractHelper
     protected function valuesAsHtml(array $values)
     {
         $metadata = [];
+        $publicResourceUrl = $this->view->plugin('publicResourceUrl');
         foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
-            $valueValues = array_filter(array_map(function ($v) {
+            $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
+                if ($v->type() === 'resource') {
+                    $r = $v->valueResource();
+                    return '<a class="resource-link" href="' . $publicResourceUrl($r, true) . '">'
+                        . '<span class="resource-name">' . $r->displayTitle() . '</span>'
+                        . '</a>';
+                }
                 return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
