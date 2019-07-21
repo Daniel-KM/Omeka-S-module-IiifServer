@@ -9,7 +9,7 @@ class BulkTiler extends AbstractJob
     /**
      * Limit for the loop to avoid heavy sql requests.
      *
-     * @var integer
+     * @var int
      */
     const SQL_LIMIT = 25;
 

@@ -230,8 +230,8 @@ class IiifCollection extends AbstractHelper
                     ? $this->view->iiifUrl($v->valueResource())
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
-                $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-                $metadata[] = (object) $valueMetadata;
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
         }
         return $metadata;
     }
