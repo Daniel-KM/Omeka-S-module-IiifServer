@@ -282,6 +282,7 @@ class Module extends AbstractModule
             // Prepare the values to be set in two fieldsets.
             $data['iiifserver_manifest'][$name] = $settings->get($name, $value);
             $data['iiifserver_image'][$name] = $settings->get($name, $value);
+            $data['iiifserver_external_image_server'][$name] = $settings->get($name);
         }
 
         $form->init();
@@ -312,7 +313,7 @@ class Module extends AbstractModule
         $bulk = $params['iiifserver_bulk_tiler'];
         unset($params['iiifserver_bulk_tiler']);
 
-        $params = $params['iiifserver_manifest'] + $params['iiifserver_image'];
+        $params = $params['iiifserver_manifest'] + $params['iiifserver_image'] + $params['iiifserver_external_image_server'];
 
         // Specific options.
         foreach (['iiifserver_manifest_collection_properties', 'iiifserver_manifest_item_properties', 'iiifserver_manifest_media_properties'] as $key) {

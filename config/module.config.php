@@ -385,6 +385,9 @@ return [
             'iiifserver_image_max_size' => 10000000,
             'iiifserver_image_tile_dir' => 'tile',
             'iiifserver_image_tile_type' => 'deepzoom',
+            'iiifserver_external_image_server_base_url' => '',
+            'iiifserver_external_image_server_compliance_level' => '',
+            'iiifserver_external_image_server_api_version' => 'Version 2',
         ],
     ],
 ];

@@ -268,6 +268,58 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $this->add([
+            'name' => 'iiifserver_external_image_server',
+            'type' => Fieldset::class,
+            'options' => [
+                'label' => 'Third-party IIIF Image Server', // @translate
+                'info' => 'Serve images using a third-party IIIF image server, instead of the internal one that comes with this module.', // @translate
+            ],
+        ]);
+        $extImageServerFieldset = $this->get('iiifserver_external_image_server');
+
+        $extImageServerFieldset->add([
+            'name' => 'iiifserver_external_image_server_base_url',
+            'type' => Element\Url::class,
+            'options' => [
+                'label' => 'Base URL of the IIIF Image Server', // @translate
+                'info' => 'Indicate the root url of your image server (e.g. https://my-domain.org/iiif)',  // @translate
+            ],
+            'attributes' => [
+                'placeholder' => 'e.g. https://example.org/iiif', // @translate
+            ],
+        ]);
+
+        $valueOptionsComplianceLevel = [
+            'iiif_image_level0' => 'Level 0', // @translate
+            'iiif_image_level1' => 'Level 1', // @translate
+            'iiif_image_level2' => 'Level 2', // @translate
+        ];
+        $extImageServerFieldset->add([
+            'name' => 'iiifserver_external_image_server_compliance_level',
+            'type' => Element\Select::class,
+            'options' => [
+                'label' => 'Compliance level of the server with the IIIF Image API', // @translate
+                'info' => 'Specify which level of the Image API the server supports. See: https://iiif.io/api/image/2.1/#compliance-levels',  // @translate
+                'empty_option' => 'Select IIIF Image API compliance level...',
+                'value_options' => $valueOptionsComplianceLevel,
+            ],
+        ]);
+
+        $valueOptionsApiVersion = [
+            'iiif_image_api_version_2' => 'Version 2',
+            'iiif_image_api_version_3' => 'Version 3',
+        ];
+        $extImageServerFieldset->add([
+            'name' => 'iiifserver_external_image_server_api_version',
+            'type' => Element\Select::class,
+            'options' => [
+                'label' => 'IIIF Image API version', // @translate
+                'info' => 'Indicate the version of the Image API supported by the server that you want to use',  // @translate
+                'value_options' => $valueOptionsApiVersion,
+            ],
+        ]);
+
+        $this->add([
             'name' => 'iiifserver_bulk_tiler',
             'type' => Fieldset::class,
             'options' => [
@@ -374,6 +426,20 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
         $imageFilter->add([
             'name' => 'iiifserver_image_tile_type',
+            'required' => false,
+        ]);
+
+        $extImageServerFilter = $inputFilter->get('iiifserver_external_image_server');
+        $extImageServerFilter->add([
+            'name' => 'iiifserver_external_image_server_base_url',
+            'required' => false,
+        ]);
+        $extImageServerFilter->add([
+            'name' => 'iiifserver_external_image_server_compliance_level',
+            'required' => false,
+        ]);
+        $extImageServerFilter->add([
+            'name' => 'iiifserver_external_image_server_api_version',
             'required' => false,
         ]);
 
