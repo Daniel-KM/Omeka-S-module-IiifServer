@@ -56,7 +56,7 @@ If the module was installed from the source, check if the name of the folder of
 the module is `IiifServer`, go to the root of the module, and run either:
 
 ```
-    composer install
+composer install
 ```
 
 Then install it like any other Omeka module.
@@ -107,7 +107,7 @@ Options for the IIIF server can be changed in the helpers "IiifCollection.php",
 
 See below the notes for more info.
 
-* Using externally supplied IIIF manifest and images
+### Using externally supplied IIIF manifest and images
 
 If you are harvesting data (via OAI-PMH, for instance) from another system where
 images are hosted and exposed via IIIF, you can use a configurable metadata
@@ -121,7 +121,20 @@ in the specified element of a record. The viewer included on that record’s
 display page will use that manifest URL to retrieve images and metadata for the
 viewer.
 
-* Customize data of manifests
+### Using a third-party IIIF Image server
+
+You might also want to use a dedicated third-party image server (for instance one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers) of the IIIF community), instead of the [internal image server](#image-server) that comes with this module. If so, you need to fill in some settings in the "Third-party IIIF Image Server" section of the module configuration:
+
+- _Base URL of your IIIF image server_: this is the base url endpoint where the image server is able to handle image requests. As soon as you indicate a URL in this field, it will take precedence over the image server provided by the IiifServer module and will be used in the IIIF Manifests (i.e. every `service` field that refers to an Image API endpoint will now point to your image server).
+- _Compliance level of your image server_ with respect to the IIIF Image API (level 0, 1 or 2)
+- _Version of the Image API supported by your server_ (you must choose between version 2 or 3)
+ 
+**Important notes:**
+- you first need to configure your image server separately and make sure it supports the source formats of the images you want to serve (see their respective documentation). 
+- you must configure it in such a way that it is able to serve images from the Omeka S `files/original` folder.
+- the images must have been imported into Omeka S beforehand and properly associated with their items.
+
+### Customize data of manifests
 
 The module creates manifests with all the metadata of each record. The event
 `iiifserver.manifest` can be used to modify the exposed data of a manifest for
