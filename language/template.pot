@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-04 00:00+0100\n"
+"POT-Creation-Date: 2019-10-28 00:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -173,66 +173,66 @@ msgstr ""
 msgid "It’s recommended to use \"dcterms:license\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:184
+#: src/Form/ConfigForm.php:197
 msgid ""
 "When a proxy or a firewall is used, or when the config is specific, it may "
 "be needed to change the base url."
 msgstr ""
 
-#: src/Form/ConfigForm.php:185
+#: src/Form/ConfigForm.php:198
 msgid ""
 "For example, when the server is secured, the \"http:\" urls may be replaced "
 "by \"https:\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:218
+#: src/Form/ConfigForm.php:231
 msgid ""
 "Generally, GD is a little faster than ImageMagick, but ImageMagick manages "
 "more formats."
 msgstr ""
 
-#: src/Form/ConfigForm.php:219
+#: src/Form/ConfigForm.php:232
 msgid ""
 "Nevertheless, the performance depends on your installation and your server."
 msgstr ""
 
-#: src/Form/ConfigForm.php:229
+#: src/Form/ConfigForm.php:242
 msgid "Set the maximum size in bytes for the dynamic processing of images."
 msgstr ""
 
-#: src/Form/ConfigForm.php:230
+#: src/Form/ConfigForm.php:243
 msgid "Beyond this limit, the plugin will require a tiled image."
 msgstr ""
 
-#: src/Form/ConfigForm.php:231
+#: src/Form/ConfigForm.php:244
 msgid "Let empty to allow processing of any image."
 msgstr ""
 
-#: src/Form/ConfigForm.php:247
+#: src/Form/ConfigForm.php:260
 msgid ""
 "Deep Zoom Image is a free proprietary format from Microsoft largely "
 "supported."
 msgstr ""
 
-#: src/Form/ConfigForm.php:248
+#: src/Form/ConfigForm.php:261
 msgid ""
 "Zoomify is an old format that was largely supported by proprietary softwares "
 "and free viewers."
 msgstr ""
 
-#: src/Form/ConfigForm.php:249
+#: src/Form/ConfigForm.php:262
 msgid ""
 "All formats are served as native by default, but may be served as IIIF too "
 "when a viewer request it."
 msgstr ""
 
-#: src/Form/ConfigForm.php:272
+#: src/Form/ConfigForm.php:285
 msgid ""
 "This query will be used to select all items whose attached images will be "
 "tiled in the background."
 msgstr ""
 
-#: src/Form/ConfigForm.php:273
+#: src/Form/ConfigForm.php:286
 msgid "Warning: The renderer of all tiled images will be set to \"tile\"."
 msgstr ""
 
@@ -279,11 +279,15 @@ msgstr ""
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest.php:702
+#: src/View/Helper/IiifManifest.php:299
+msgid "Download as XML"
+msgstr ""
+
+#: src/View/Helper/IiifManifest.php:754
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest.php:950
+#: src/View/Helper/IiifManifest.php:1002
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -402,106 +406,116 @@ msgid ""
 msgstr ""
 
 #: src/Form/ConfigForm.php:111
-msgid "Limit properties for collection in manifest"
-msgstr ""
-
-#: src/Form/ConfigForm.php:112 src/Form/ConfigForm.php:132
-#: src/Form/ConfigForm.php:152
-msgid "If empty, all public values will be output."
-msgstr ""
-
-#: src/Form/ConfigForm.php:123 src/Form/ConfigForm.php:143
-#: src/Form/ConfigForm.php:163
-msgid "Select one or more properties…"
-msgstr ""
-
-#: src/Form/ConfigForm.php:131
-msgid "Limit properties for item in manifest"
-msgstr ""
-
-#: src/Form/ConfigForm.php:151
-msgid "Limit properties for media in manifest"
-msgstr ""
-
-#: src/Form/ConfigForm.php:171
 msgid "Logo"
 msgstr ""
 
-#: src/Form/ConfigForm.php:172
+#: src/Form/ConfigForm.php:112
 msgid ""
 "If any, this url to an image will be used as logo and displayed in the right "
 "panel of the Universal Viewer."
 msgstr ""
 
-#: src/Form/ConfigForm.php:183
-msgid "Force base of url (from)"
+#: src/Form/ConfigForm.php:123
+msgid "Link for descriptive metadata"
+msgstr ""
+
+#: src/Form/ConfigForm.php:124
+msgid ""
+"Some viewers display urls (for resources and uris) as plain text. This "
+"option presents them as a html link."
+msgstr ""
+
+#: src/Form/ConfigForm.php:136
+msgid "Limit properties for collection in manifest"
+msgstr ""
+
+#: src/Form/ConfigForm.php:137 src/Form/ConfigForm.php:157
+#: src/Form/ConfigForm.php:177
+msgid "If empty, all public values will be output."
+msgstr ""
+
+#: src/Form/ConfigForm.php:148 src/Form/ConfigForm.php:168
+#: src/Form/ConfigForm.php:188
+msgid "Select one or more properties…"
+msgstr ""
+
+#: src/Form/ConfigForm.php:156
+msgid "Limit properties for item in manifest"
+msgstr ""
+
+#: src/Form/ConfigForm.php:176
+msgid "Limit properties for media in manifest"
 msgstr ""
 
 #: src/Form/ConfigForm.php:196
+msgid "Force base of url (from)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:209
 msgid "Force base of url (to)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:207
+#: src/Form/ConfigForm.php:220
 msgid "Image server"
 msgstr ""
 
-#: src/Form/ConfigForm.php:208
+#: src/Form/ConfigForm.php:221
 msgid "Images may be processed internally before to be sent to browser."
 msgstr ""
 
-#: src/Form/ConfigForm.php:217
+#: src/Form/ConfigForm.php:230
 msgid "Image processor"
 msgstr ""
 
-#: src/Form/ConfigForm.php:228
+#: src/Form/ConfigForm.php:241
 msgid "Max dynamic size for images"
 msgstr ""
 
-#: src/Form/ConfigForm.php:239
+#: src/Form/ConfigForm.php:252
 msgid "Deep Zoom Image"
 msgstr ""
 
-#: src/Form/ConfigForm.php:240
+#: src/Form/ConfigForm.php:253
 msgid "Zoomify"
 msgstr ""
 
-#: src/Form/ConfigForm.php:246
+#: src/Form/ConfigForm.php:259
 msgid "Tiling type"
 msgstr ""
 
-#: src/Form/ConfigForm.php:261
+#: src/Form/ConfigForm.php:274
 msgid "Bulk tiler"
 msgstr ""
 
-#: src/Form/ConfigForm.php:262
+#: src/Form/ConfigForm.php:275
 msgid "Imported files can be tiled via a background job."
 msgstr ""
 
-#: src/Form/ConfigForm.php:285
+#: src/Form/ConfigForm.php:298
 msgid "Remove existing tiles"
 msgstr ""
 
-#: src/Form/ConfigForm.php:286
+#: src/Form/ConfigForm.php:299
 msgid "If checked, existing tiles will be removed, else they will be skipped."
 msgstr ""
 
-#: src/Form/ConfigForm.php:297
+#: src/Form/ConfigForm.php:310
 msgid "Run in background"
 msgstr ""
 
-#: src/Form/ConfigForm.php:394
+#: src/Form/ConfigForm.php:407
 msgid "Automatic (GD when possible, else Imagick, else command line)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:396
+#: src/Form/ConfigForm.php:409
 msgid "GD (php extension)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:399
+#: src/Form/ConfigForm.php:412
 msgid "Imagick (php extension)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:401
+#: src/Form/ConfigForm.php:414
 msgid "ImageMagick (command line)"
 msgstr ""
 
