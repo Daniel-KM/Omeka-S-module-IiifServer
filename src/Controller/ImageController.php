@@ -113,13 +113,11 @@ class ImageController extends AbstractActionController
     public function badAction()
     {
         $response = $this->getResponse();
-
         $response->setStatusCode(400);
 
         $view = new ViewModel;
         $view->setVariable('message', $this->translate('The IIIF server cannot fulfill the request: the arguments are incorrect.'));
-        $view->setTemplate('public/image/error');
-
+        $view->setTemplate('iiif-server/image/error');
         return $view;
     }
 
@@ -157,7 +155,7 @@ class ImageController extends AbstractActionController
             $response->setStatusCode(501);
             $view = new ViewModel;
             $view->setVariable('message', $this->translate('The source file is not an image.'));
-            $view->setTemplate('public/image/error');
+            $view->setTemplate('iiif-server/image/error');
             return $view;
         }
 
@@ -167,7 +165,7 @@ class ImageController extends AbstractActionController
         if (empty($transform)) {
             // The message is set in view.
             $response->setStatusCode(400);
-            $this->_view->setTemplate('public/image/error');
+            $this->_view->setTemplate('iiif-server/image/error');
             return $this->_view;
         }
 
@@ -273,7 +271,7 @@ class ImageController extends AbstractActionController
                         $response->setStatusCode(500);
                         $view = new ViewModel;
                         $view->setVariable('message', $this->translate('The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the file is not tiled for dynamic processing.'));
-                        $view->setTemplate('public/image/error');
+                        $view->setTemplate('iiif-server/image/error');
                         return $view;
                     }
                     $imagePath = $this->_transformImage($transform);
@@ -303,7 +301,7 @@ class ImageController extends AbstractActionController
                 $response->setStatusCode(500);
                 $view = new ViewModel;
                 $view->setVariable('message', $this->translate('The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found or empty.'));
-                $view->setTemplate('public/image/error');
+                $view->setTemplate('iiif-server/image/error');
                 return $view;
             }
 
@@ -322,7 +320,7 @@ class ImageController extends AbstractActionController
             $response->setStatusCode(500);
             $view = new ViewModel;
             $view->setVariable('message', $this->translate('The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is empty or not found.'));
-            $view->setTemplate('public/image/error');
+            $view->setTemplate('iiif-server/image/error');
             return $view;
         }
     }

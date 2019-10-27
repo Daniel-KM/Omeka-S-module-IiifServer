@@ -94,13 +94,11 @@ class MediaController extends AbstractActionController
     public function badAction()
     {
         $response = $this->getResponse();
-
         $response->setStatusCode(400);
 
         $view = new ViewModel;
         $view->setVariable('message', $this->translate('The IIIF server cannot fulfill the request: the arguments are incorrect.'));
-        $view->setTemplate('public/image/error');
-
+        $view->setTemplate('iiif-server/image/error');
         return $view;
     }
 
@@ -123,8 +121,7 @@ class MediaController extends AbstractActionController
 
             $view = new viewModel;
             $view->setVariable('message', $this->translate('The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the requested format is not supported.'));
-            $view->setTemplate('public/image/error');
-
+            $view->setTemplate('iiif-server/image/error');
             return $view;
         }
 
@@ -139,8 +136,7 @@ class MediaController extends AbstractActionController
 
                     $view = new ViewModel;
                     $view->setVariable('message', $this->translate('The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.'));
-                    $view->setTemplate('public/image/error');
-
+                    $view->setTemplate('iiif-server/image/error');
                     return $view;
                 }
                 break;
