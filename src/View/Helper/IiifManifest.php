@@ -158,6 +158,17 @@ class IiifManifest extends AbstractHelper
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
+        $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifSearch');
+        if ( $iiifSearch ) {
+            $manifest['service'] = [
+                '@context' =>'http://iiif.io/api/search/0/context.json',
+                '@id' => $iiifSearch . $item->id(),
+                "profile" => "http://iiif.io/api/search/0/search",
+                "label" => "Search within this manifest"
+            ];
+        }
+
+
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
         $manifest['service'] = [

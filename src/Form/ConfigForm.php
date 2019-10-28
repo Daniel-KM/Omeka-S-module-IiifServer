@@ -213,6 +213,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ],
         ]);
 
+        $manifestFieldset->add([
+            'name' => 'iiifserver_manifest_service_iiifSearch',
+            'type' => Element\Url::class,
+            'options' => [
+                'label' => 'IIIF Search url', // @translate
+                'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the Universal Viewer.',  // @translate
+            ],
+        ]);
+
         $this->add([
             'name' => 'iiifserver_image',
             'type' => Fieldset::class,
@@ -360,6 +369,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
         $manifestFilter->add([
             'name' => 'iiifserver_manifest_force_url_to',
+            'required' => false,
+        ]);
+        $manifestFilter->add([
+            'name' => 'iiifserver_manifest_service_iiifSearch',
             'required' => false,
         ]);
 
