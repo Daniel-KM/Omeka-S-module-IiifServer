@@ -386,6 +386,7 @@ return [
             'iiifserver_image_tile_dir' => 'tile',
             'iiifserver_image_tile_type' => 'deepzoom',
             'iiifserver_manifest_service_iiifSearch' => '',
+            'iiifserver_manifest_service_iiifSearch_extractOcr' => false,
         ],
     ],
 ];

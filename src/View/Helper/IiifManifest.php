@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifSearch\View\Helper\IiifSearch;
 use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -160,12 +161,27 @@ class IiifManifest extends AbstractHelper
 
         $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifSearch');
         if ( $iiifSearch ) {
-            $manifest['service'] = [
-                '@context' =>'http://iiif.io/api/search/0/context.json',
-                '@id' => $iiifSearch . $item->id(),
-                "profile" => "http://iiif.io/api/search/0/search",
-                "label" => "Search within this manifest"
-            ];
+            $searchServiceAvailable = true;
+            $iiifSearchExtractOcr = $this->view->setting('iiifserver_manifest_service_iiifSearch_extractOcr');
+            if ($iiifSearchExtractOcr) {
+                // Checking if item has at least an XML file that will allow search
+                $searchServiceAvailable = false;
+                foreach ( $item->media() as $media ) {
+                    $mediaType = $media->mediaType();
+                    if (($mediaType == 'application/xml') || ($mediaType == 'text/xml')) {
+                        $searchServiceAvailable = true;
+                    }
+                }
+            }
+
+            if ($searchServiceAvailable) {
+                $manifest['service'] = [
+                    '@context' => 'http://iiif.io/api/search/0/context.json',
+                    '@id' => $iiifSearch . $item->id(),
+                    "profile" => "http://iiif.io/api/search/0/search",
+                    "label" => "Search within this manifest"
+                ];
+            }
         }
 
 
