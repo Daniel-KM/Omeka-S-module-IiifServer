@@ -169,7 +169,9 @@ class IiifManifest extends AbstractHelper
             $extractOcrModule = $moduleManager->getModule("ExtractOcr");
 
             // Checking if module ExtractOcr is installed
-            if ($extractOcrModule->getState() == ModuleManager::STATE_ACTIVE) {
+            if ($extractOcrModule
+                && $extractOcrModule->getState() === ModuleManager::STATE_ACTIVE
+            ) {
                 // Checking if item has at least an XML file that will allow search
                 $searchServiceAvailable = false;
                 foreach ( $item->media() as $media ) {
