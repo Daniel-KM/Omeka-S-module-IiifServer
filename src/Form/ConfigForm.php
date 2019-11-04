@@ -214,24 +214,13 @@ class ConfigForm extends Form implements TranslatorAwareInterface
         ]);
 
         $manifestFieldset->add([
-            'name' => 'iiifserver_manifest_service_iiifSearch',
+            'name' => 'iiifserver_manifest_service_iiifsearch',
             'type' => Element\Url::class,
             'options' => [
                 'label' => 'IIIF Search url', // @translate
                 'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the Universal Viewer.',  // @translate
             ],
         ]);
-
-        $manifestFieldset->add([
-            'name' => 'iiifserver_manifest_service_iiifSearch_extractOcr',
-            'type' => Element\Checkbox::class,
-            'options' => [
-                'label' => 'IIIF Search provided by ExtractOcr module', // @translate
-                'info' => 'If you use IiifSearch & ExtractOcr modules to provide IiifSearch results, check this box to disable the search box when there is no OCR.',  // @translate
-            ],
-        ]);
-
-
 
         $this->add([
             'name' => 'iiifserver_image',
@@ -383,11 +372,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             'required' => false,
         ]);
         $manifestFilter->add([
-            'name' => 'iiifserver_manifest_service_iiifSearch',
-            'required' => false,
-        ]);
-        $manifestFilter->add([
-            'name' => 'iiifserver_manifest_service_iiifSearch_extractOcr',
+            'name' => 'iiifserver_manifest_service_iiifsearch',
             'required' => false,
         ]);
 

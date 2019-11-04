@@ -37,6 +37,7 @@ use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
+use Omeka\Module\Manager as ModuleManager;
 
 class IiifManifest extends AbstractHelper
 {
@@ -159,11 +160,16 @@ class IiifManifest extends AbstractHelper
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
-        $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifSearch');
+        $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifsearch');
+
         if ( $iiifSearch ) {
             $searchServiceAvailable = true;
-            $iiifSearchExtractOcr = $this->view->setting('iiifserver_manifest_service_iiifSearch_extractOcr');
-            if ($iiifSearchExtractOcr) {
+
+            $moduleManager = $item->getServiceLocator()->get('Omeka\ModuleManager');
+            $extractOcrModule = $moduleManager->getModule("ExtractOcr");
+
+            // Checking if module ExtractOcr is installed
+            if ($extractOcrModule->getState() == ModuleManager::STATE_ACTIVE) {
                 // Checking if item has at least an XML file that will allow search
                 $searchServiceAvailable = false;
                 foreach ( $item->media() as $media ) {

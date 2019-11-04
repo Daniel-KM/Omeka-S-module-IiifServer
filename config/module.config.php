@@ -385,8 +385,7 @@ return [
             'iiifserver_image_max_size' => 10000000,
             'iiifserver_image_tile_dir' => 'tile',
             'iiifserver_image_tile_type' => 'deepzoom',
-            'iiifserver_manifest_service_iiifSearch' => '',
-            'iiifserver_manifest_service_iiifSearch_extractOcr' => false,
+            'iiifserver_manifest_service_iiifsearch' => '',
         ],
     ],
 ];
