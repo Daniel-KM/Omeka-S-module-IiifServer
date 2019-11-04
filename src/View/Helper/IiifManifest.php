@@ -30,12 +30,14 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifSearch\View\Helper\IiifSearch;
 use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
+use Omeka\Module\Manager as ModuleManager;
 
 class IiifManifest extends AbstractHelper
 {
@@ -157,6 +159,37 @@ class IiifManifest extends AbstractHelper
         $manifest['attribution'] = $attribution;
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
+
+        $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifsearch');
+
+        if ( $iiifSearch ) {
+            $searchServiceAvailable = true;
+
+            $moduleManager = $item->getServiceLocator()->get('Omeka\ModuleManager');
+            $extractOcrModule = $moduleManager->getModule("ExtractOcr");
+
+            // Checking if module ExtractOcr is installed
+            if ($extractOcrModule->getState() == ModuleManager::STATE_ACTIVE) {
+                // Checking if item has at least an XML file that will allow search
+                $searchServiceAvailable = false;
+                foreach ( $item->media() as $media ) {
+                    $mediaType = $media->mediaType();
+                    if (($mediaType == 'application/xml') || ($mediaType == 'text/xml')) {
+                        $searchServiceAvailable = true;
+                    }
+                }
+            }
+
+            if ($searchServiceAvailable) {
+                $manifest['service'] = [
+                    '@context' => 'http://iiif.io/api/search/0/context.json',
+                    '@id' => $iiifSearch . $item->id(),
+                    "profile" => "http://iiif.io/api/search/0/search",
+                    "label" => "Search within this manifest"
+                ];
+            }
+        }
+
 
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
