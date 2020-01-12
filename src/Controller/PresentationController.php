@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2018 Daniel Berthereau
+ * Copyright 2015-2020 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -44,7 +44,9 @@ class PresentationController extends AbstractActionController
      */
     public function indexAction()
     {
-        $this->forward('manifest');
+        $params = $this->params()->fromRoute();
+        $params['action'] = 'manifest';
+        return $this->forward()->dispatch(__CLASS__, $params);
     }
 
     /**
