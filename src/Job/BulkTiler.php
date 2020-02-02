@@ -121,7 +121,7 @@ class BulkTiler extends AbstractJob
                                 ++$totalSucceed;
                             }
                         } else {
-                            $logger->error(new Message(
+                            $logger->err(new Message(
                                 'Error during tiling of media #%d.', // @translate
                                 $media->id()
                             ));
