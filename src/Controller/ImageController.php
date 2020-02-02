@@ -281,11 +281,12 @@ class ImageController extends AbstractActionController
 
         // Redirect to the url when an existing file is available.
         if ($imageUrl) {
-            // Header for CORS, required for access of IIIF.
-            $response->getHeaders()->addHeaderLine('access-control-allow-origin', '*');
-            // Recommanded by feature "profileLinkHeader".
-            $response->getHeaders()->addHeaderLine('Link', '<http://iiif.io/api/image/2/level2.json>;rel="profile"');
-            $response->getHeaders()->addHeaderLine('Content-Type', $transform['format']['feature']);
+            $response->getHeaders()
+                // Header for CORS, required for access of IIIF.
+                ->addHeaderLine('access-control-allow-origin', '*')
+                // Recommanded by feature "profileLinkHeader".
+                ->addHeaderLine('Link', '<http://iiif.io/api/image/2/level2.json>;rel="profile"')
+                ->addHeaderLine('Content-Type', $transform['format']['feature']);
 
             // Redirect (302/307) to the url of the file.
             // TODO This is a local file (normal server, except iiip server): use 200.
@@ -305,11 +306,12 @@ class ImageController extends AbstractActionController
                 return $view;
             }
 
-            // Header for CORS, required for access of IIIF.
-            $response->getHeaders()->addHeaderLine('access-control-allow-origin', '*');
-            // Recommanded by feature "profileLinkHeader".
-            $response->getHeaders()->addHeaderLine('Link', '<http://iiif.io/api/image/2/level2.json>;rel="profile"');
-            $response->getHeaders()->addHeaderLine('Content-Type', $transform['format']['feature']);
+            $response->getHeaders()
+                // Header for CORS, required for access of IIIF.
+                ->addHeaderLine('access-control-allow-origin', '*')
+                // Recommanded by feature "profileLinkHeader".
+                ->addHeaderLine('Link', '<http://iiif.io/api/image/2/level2.json>;rel="profile"')
+                ->addHeaderLine('Content-Type', $transform['format']['feature']);
 
             $response->setContent($output);
             return $response;
