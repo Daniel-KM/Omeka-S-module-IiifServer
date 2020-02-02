@@ -180,6 +180,13 @@ The image server has two roles.
   to select the library to use according to your server and your documents or to
   let the module chooses automagically.
 
+  In case of big files, it is recommended to use the command line version of
+  ImageMagick, that is not limited by the php memory.
+
+  Furthermore, the limit of the size (10000000 bytes by default) can be
+  increased if you have enough memory, so images won't appear blurry even if
+  they are not tiled.
+
 * Creation of tiles
 
   For big images that are not stored in a versatile format and cannot be
