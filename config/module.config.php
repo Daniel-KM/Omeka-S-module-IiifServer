@@ -21,6 +21,7 @@ return [
             // Currently in module Next and in a pull request for core.
             'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
             'publicResourceUrl' => Service\ViewHelper\PublicResourceUrlFactory::class,
+            'tileInfo' => Service\ViewHelper\TileInfoFactory::class,
         ],
     ],
     'form_elements' => [

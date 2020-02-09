@@ -30,8 +30,6 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifSearch\View\Helper\IiifSearch;
-use IiifServer\Mvc\Controller\Plugin\TileInfo;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
@@ -191,7 +189,6 @@ class IiifManifest extends AbstractHelper
                 ];
             }
         }
-
 
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
@@ -700,8 +697,7 @@ class IiifManifest extends AbstractHelper
         $imageResourceService['@id'] = $imageUrlService;
         $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
 
-        $tileInfo = new TileInfo();
-        $tilingData = $tileInfo($media);
+        $tilingData = $view->tileInfo($media);
         $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
         if ($iiifTileInfo) {
             $tiles = [];
