@@ -30,20 +30,22 @@
 
 namespace IiifServer;
 
+if (!class_exists(\Generic\AbstractModule::class)) {
+    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
+        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
+        : __DIR__ . '/src/Generic/AbstractModule.php';
+}
+
+use Generic\AbstractModule;
 use IiifServer\Form\ConfigForm;
-use Omeka\Module\AbstractModule;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
-use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
-    public function getConfig()
-    {
-        return include __DIR__ . '/config/module.config.php';
-    }
+    const NAMESPACE = __NAMESPACE__;
 
     public function onBootstrap(MvcEvent $event)
     {
@@ -59,96 +61,41 @@ class Module extends AbstractModule
             );
     }
 
-    public function install(ServiceLocatorInterface $serviceLocator)
-    {
-        $settings = $serviceLocator->get('Omeka\Settings');
-        $config = include __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
-        foreach ($defaultSettings as $name => $value) {
-            $settings->set($name, $value);
-        }
-    }
-
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->manageSettings($serviceLocator->get('Omeka\Settings'), 'uninstall');
-    }
-
-    protected function manageSettings($settings, $process, $key = 'config')
-    {
-        $config = require __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
-        foreach ($defaultSettings as $name => $value) {
-            switch ($process) {
-                case 'install':
-                    $settings->set($name, $value);
-                    break;
-                case 'uninstall':
-                    $settings->delete($name);
-                    break;
-            }
-        }
-    }
-
-    public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
-    {
-        require_once 'data/scripts/upgrade.php';
-    }
-
     public function getConfigForm(PhpRenderer $renderer)
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $settings = $services->get('Omeka\Settings');
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
-
-        $data = [];
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
-        foreach ($defaultSettings as $name => $value) {
-            // Prepare the values to be set in two fieldsets.
-            $data['iiifserver_manifest'][$name] = $settings->get($name, $value);
-        }
-
-        $form->init();
-        $form->setData($data);
-        return $renderer->render('iiif-server/module/config', [
-            'form' => $form,
-        ]);
+        $translate = $renderer->plugin('translate');
+        return '<p>'
+            . $translate('The module creates manifests with the properties from each resource (item set, item and media).') // @translate
+            . ' ' . $translate('The properties below are used when some metadata are missing.') // @translate
+            . ' ' . $translate('In all cases, empty properties are not set.') // @translate
+            . ' ' . $translate('Futhermore, the event "iiifserver.manifest" is available to change any data.') // @translate
+            . '</p>'
+            . parent::getConfigForm($renderer);
     }
 
     public function handleConfigForm(AbstractController $controller)
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
-        $settings = $services->get('Omeka\Settings');
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
-
-        $params = $controller->getRequest()->getPost();
-
-        $form->init();
-        $form->setData($params);
-        if (!$form->isValid()) {
-            $controller->messenger()->addErrors($form->getMessages());
+        if (!parent::handleConfigForm($controller)) {
             return false;
         }
 
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $form = $services->get('FormElementManager')->get(ConfigForm::class);
+        $params = $controller->getRequest()->getPost();
+
+        // Form is already validated in parent.
+        $form->init();
+        $form->setData($params);
+        $form->isValid();
         $params = $form->getData();
-
-        unset($params['iiifserver_bulk_tiler']);
-
-        $params = $params['iiifserver_manifest'];
 
         // Specific options.
         foreach (['iiifserver_manifest_collection_properties', 'iiifserver_manifest_item_properties', 'iiifserver_manifest_media_properties'] as $key) {
-            $params[$key] = empty($params[$key]) || in_array('', $params[$key])
+            $value = empty($params[$key]) || in_array('', $params[$key])
                 ? []
                 : (in_array('none', $params[$key]) ? ['none'] : $params[$key]);
-        }
-
-        $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
-        $params = array_intersect_key($params, $defaultSettings);
-        foreach ($params as $name => $value) {
-            $settings->set($name, $value);
+            $settings->set($key, $value);
         }
     }
 }
