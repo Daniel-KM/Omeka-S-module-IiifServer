@@ -90,14 +90,18 @@ class ImageSize extends AbstractPlugin
             $tempFile = $this->tempFileFactory->build();
             $tempPath = $tempFile->getTempPath();
             $tempFile->delete();
-            $result = file_put_contents($tempPath, $filepath);
-            if ($result !== false) {
-                $result = getimagesize($tempPath);
+            $handle = @fopen($filepath, 'rb');
+            if ($handle) {
+                $result = file_put_contents($tempPath, $handle);
+                @fclose($handle);
                 if ($result) {
-                    list($width, $height) = $result;
+                    $result = getimagesize($tempPath);
+                    if ($result) {
+                        list($width, $height) = $result;
+                    }
                 }
+                unlink($tempPath);
             }
-            unlink($tempPath);
         }
         // A normal path.
         elseif (file_exists($filepath)) {
