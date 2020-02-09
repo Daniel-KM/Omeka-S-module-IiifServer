@@ -116,7 +116,7 @@ class IiifManifest extends AbstractHelper
         ];
 
         $url = $this->view->url(
-            'iiifserver_presentation_item',
+            'iiifserver/item',
             ['id' => $item->id()],
             ['force_canonical' => true]
         );
@@ -224,7 +224,7 @@ class IiifManifest extends AbstractHelper
         $withins = [];
         foreach ($item->itemSets() as $itemSet) {
             $within = $this->view->url(
-                'iiifserver_presentation_collection',
+                'iiifserver/collection',
                 ['id' => $itemSet->id()],
                 ['force_canonical' => true]
             );

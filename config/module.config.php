@@ -56,86 +56,90 @@ return [
             // Layer          {scheme}://{host}/{prefix}/{identifier}/layer/{name}
             // Content        {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
-            // Special route for the dynamic collections, search or browse pages.
-            // The first letter "c", "i", or "m" is used to distinct collections, items and
-            // media and is not required when the identifier is always unique for all of
-            // resources. The default letter is "i", so it is not required when all ids are
-            // items (the most common case). If the list contains only one id, the comma is
-            // required to avoid confusion with a normal collection.
-            // This route should be set before the "iiifserver_presentation_collection".
-            'iiifserver_presentation_collection_list' => [
-                'type' => \Zend\Router\Http\Segment::class,
+            'iiifserver' => [
+                'type' => \Zend\Router\Http\Literal::class,
                 'options' => [
-                    'route' => '/iiif/collection/:id',
-                    'constraints' => [
-                        'id' => '(?:[cim]?\-?\d+\,?)+',
-                    ],
+                    'route' => '/iiif',
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
-                        'action' => 'list',
+                        'action' => 'index',
                     ],
                 ],
-            ],
+                'may_terminate' => false,
+                'child_routes' => [
+                    // Special route for the dynamic collections, search or browse pages.
+                    // The first letter "c", "i", or "m" is used to distinct collections, items and
+                    // media and is not required when the identifier is always unique for all of
+                    // resources. The default letter is "i", so it is not required when all ids are
+                    // items (the most common case). If the list contains only one id, the comma is
+                    // required to avoid confusion with a normal collection.
+                    // This route should be set before the "iiifserver/collection".
+                    'collection-list' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/collection/:id',
+                            'constraints' => [
+                                'id' => '(?:[cim]?\-?\d+\,?)+',
+                            ],
+                            'defaults' => [
+                                'action' => 'list',
+                            ],
+                        ],
+                    ],
 
-            // For collections, the spec doesn't specify a name for the manifest itself.
-            // Libraries use an empty name or "manifests", "manifest.json", "manifest",
-            // "{id}.json", etc. Here, an empty name is used, and a second route is added.
-            // Invert the names of the route to use the generic name for the manifest itself.
-            'iiifserver_presentation_collection' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/collection/:id',
-                    'constraints' => [
-                        'id' => '\d+',
+                    // For collections, the spec doesn't specify a name for the manifest itself.
+                    // Libraries use an empty name or "manifests", "manifest.json", "manifest",
+                    // "{id}.json", etc. Here, an empty name is used, and a second route is added.
+                    // Invert the names of the route to use the generic name for the manifest itself.
+                    'collection' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/collection/:id',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'collection',
+                            ],
+                        ],
                     ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'collection',
+                    'collection-manifest' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/collection/:id/manifest',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'collection',
+                            ],
+                        ],
                     ],
-                ],
-            ],
-            'iiifserver_presentation_collection_redirect' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/collection/:id/manifest',
-                    'constraints' => [
-                        'id' => '\d+',
+                    'item' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id/manifest',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'item',
+                            ],
+                        ],
                     ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'collection',
-                    ],
-                ],
-            ],
-            'iiifserver_presentation_item' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/:id/manifest',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'item',
-                    ],
-                ],
-            ],
-            // The redirection is not required for presentation, but a forward is possible.
-            'iiifserver_presentation_item_redirect' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/:id',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'item',
+                    // The redirection is not required for presentation, but a forward is possible.
+                    'id' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'item',
+                            ],
+                        ],
                     ],
                 ],
             ],

@@ -77,9 +77,8 @@ class IiifCollectionList extends AbstractHelper
         $translate = $this->getView()->plugin('translate');
 
         $identifier = $this->buildIdentifierForList($resources);
-        $route = 'iiifserver_presentation_collection_list';
         $url = $this->view->url(
-            $route,
+            'iiifserver/collection-list',
             ['id' => $identifier],
             ['force_canonical' => true]
         );
@@ -171,7 +170,7 @@ class IiifCollectionList extends AbstractHelper
             $type = 'sc:Collection';
         } else {
             $url = $this->view->url(
-                'iiifserver_presentation_item',
+                'iiifserver/item',
                 ['id' => $resource->id()],
                 ['force_canonical' => true]
             );
