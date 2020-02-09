@@ -45,10 +45,14 @@ class IiifUrl extends AbstractHelper
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
+        $resourceName = $resource->resourceName();
+        if ($resourceName === 'media') {
+            return $this->view->iiifImageUrl('imageserver/info', ['id' => $resource->id()]);
+        }
+
         $mapRouteNames = [
             'item_sets' => 'iiifserver_presentation_collection',
             'items' => 'iiifserver_presentation_item',
-            'media' => 'iiifserver_image_info',
         ];
         $url = $this->view->url(
             $mapRouteNames[$resource->resourceName()],
