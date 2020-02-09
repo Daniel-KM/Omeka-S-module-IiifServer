@@ -198,6 +198,7 @@ return [
             'iiifserver_manifest_properties_item' => [],
             'iiifserver_manifest_properties_media' => [],
             'iiifserver_manifest_service_image' => '',
+            'iiifserver_manifest_service_media' => '',
             // TODO Remove url_from and url_to with external image server? But it fixes proxy issues too.
             'iiifserver_manifest_force_url_from' => '',
             'iiifserver_manifest_force_url_to' => '',

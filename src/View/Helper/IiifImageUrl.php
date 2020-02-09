@@ -15,6 +15,11 @@ class IiifImageUrl extends AbstractHelper
     /**
      * @var string
      */
+    protected $serviceMedia;
+
+    /**
+     * @var string
+     */
     protected $forceFrom;
 
     /**
@@ -39,6 +44,7 @@ class IiifImageUrl extends AbstractHelper
 
     /**
      * @param string $serviceImage
+     * @param string $serviceMedia
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
      * @param string $baseUrlImage
@@ -47,6 +53,7 @@ class IiifImageUrl extends AbstractHelper
      */
     public function __construct(
         $serviceImage,
+        $serviceMedia,
         $forceUrlFrom,
         $forceUrlTo,
         $baseUrlImage,
@@ -54,6 +61,7 @@ class IiifImageUrl extends AbstractHelper
         Url $urlHelper
     ) {
         $this->serviceImage = $serviceImage;
+        $this->serviceMedia = $serviceMedia;
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
         $this->baseUrlImage = $baseUrlImage;
@@ -75,7 +83,12 @@ class IiifImageUrl extends AbstractHelper
         $helper = $this->urlHelper;
         $url = $helper($route, $params, ['force_canonical' => true]);
 
-        if ($this->serviceImage) {
+        $isMedia = strtok($route, '/') === 'mediaserver';
+        if ($isMedia) {
+            if ($this->serviceMedia) {
+                return str_replace($this->baseUrlMedia, $this->serviceMedia, $url);
+            }
+        } elseif ($this->serviceImage) {
             return str_replace($this->baseUrlImage, $this->serviceImage, $url);
         }
 
