@@ -15,6 +15,7 @@ return [
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [
+            'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
             'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             // Currently in module Next and in a pull request for core.
