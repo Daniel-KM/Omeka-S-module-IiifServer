@@ -56,7 +56,7 @@ class Module extends AbstractModule
             ->allow(
                 null,
                 [
-                    Controller\PresentationController::class,
+                    \IiifServer\Controller\PresentationController::class,
                 ]
             );
     }
@@ -75,14 +75,23 @@ class Module extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
-        if (!parent::handleConfigForm($controller)) {
-            return false;
-        }
-
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
         $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $params = $controller->getRequest()->getPost();
+
+        if (empty($params['iiifserver_manifest_service_image'])) {
+            $moduleManager = $services->get('Omeka\ModuleManager');
+            $module = $moduleManager->getModule('ImageServer');
+            if (!$module) {
+                $controller->messenger()->addErrors('The module requires an external iiif compliant image server or the module Image Server.'); // @translate
+                return false;
+            }
+        }
+
+        if (!parent::handleConfigForm($controller)) {
+            return false;
+        }
 
         // Form is already validated in parent.
         $form->init();

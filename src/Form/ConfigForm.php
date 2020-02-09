@@ -175,6 +175,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_service_image',
+                'type' => Element\Url::class,
+                'options' => [
+                    'label' => 'IIIF Image base url', // @translate
+                    'info' => 'This url will be used to create the image parts of the manifests. The module ImageServer is automatically managed, but not external image servers.',  // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_force_url_from',
                 'type' => Element\Text::class,
                 'options' => [
@@ -203,7 +212,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Url::class,
                 'options' => [
                     'label' => 'IIIF Search url', // @translate
-                    'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the Universal Viewer.',  // @translate
+                    'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the viewer.',  // @translate
                 ],
             ])
         ;
@@ -236,6 +245,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_service_image',
                 'required' => false,
             ])
             ->add([
