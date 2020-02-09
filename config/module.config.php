@@ -18,7 +18,6 @@ return [
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [
-            'iiifInfo' => Service\ViewHelper\IiifInfoFactory::class,
             'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             // Currently in module Next and in a pull request for core.
@@ -35,31 +34,13 @@ return [
         'invokables' => [
             Controller\PresentationController::class => Controller\PresentationController::class,
         ],
-        'factories' => [
-            Controller\ImageController::class => Service\Controller\ImageControllerFactory::class,
-            Controller\MediaController::class => Service\Controller\MediaControllerFactory::class,
-        ],
     ],
     'controller_plugins' => [
         'invokables' => [
             'jsonLd' => Mvc\Controller\Plugin\JsonLd::class,
-            'tileBuilder' => Mvc\Controller\Plugin\TileBuilder::class,
-            'tileInfo' => Mvc\Controller\Plugin\TileInfo::class,
-            'tileServer' => Mvc\Controller\Plugin\TileServer::class,
         ],
         'factories' => [
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
-            'tiler' => Service\ControllerPlugin\TilerFactory::class,
-        ],
-    ],
-    'media_ingesters' => [
-        'factories' => [
-            'tile' => Service\Media\Ingester\TileFactory::class,
-        ],
-    ],
-    'media_renderers' => [
-        'factories' => [
-            'tile' => Service\Media\Renderer\TileFactory::class,
         ],
     ],
     'router' => [
@@ -76,9 +57,6 @@ return [
             // Range          {scheme}://{host}/{prefix}/{identifier}/range/{name}
             // Layer          {scheme}://{host}/{prefix}/{identifier}/layer/{name}
             // Content        {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
-
-            // @link http://iiif.io/api/image/2.0
-            // Image          {scheme}://{server}{/prefix}/{identifier}
 
             // Special route for the dynamic collections, search or browse pages.
             // The first letter "c", "i", or "m" is used to distinct collections, items and
@@ -163,148 +141,6 @@ return [
                     ],
                 ],
             ],
-            // A redirect to the info.json is required by the specification.
-            'iiifserver_image' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif-img/:id',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\ImageController::class,
-                        'action' => 'index',
-                    ],
-                ],
-            ],
-            'iiifserver_image_info' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif-img/:id/info.json',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\ImageController::class,
-                        'action' => 'info',
-                    ],
-                ],
-            ],
-            // This route is a garbage collector that allows to return an error 400 or 501 to
-            // invalid or not implemented requests, as required by specification.
-            // This route should be set before the iiifserver_image in order to be
-            // processed after it.
-            // TODO Simplify to any number of sub elements.
-            'iiifserver_image_bad' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
-                    'constraints' => [
-                        'id' => '\d+',
-                        'region' => '.+',
-                        'size' => '.+',
-                        'rotation' => '.+',
-                        'quality' => '.+',
-                        'format' => '.+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\ImageController::class,
-                        'action' => 'bad',
-                    ],
-                ],
-            ],
-            // Warning: the format is separated with a ".", not a "/".
-            'iiifserver_image_url' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif-img/:id/:region/:size/:rotation/:quality:.:format',
-                    'constraints' => [
-                        'id' => '\d+',
-                        'region' => 'full|\d+,\d+,\d+,\d+|pct:\d+\.?\d*,\d+\.?\d*,\d+\.?\d*,\d+\.?\d*',
-                        'size' => 'full|\d+,\d*|\d*,\d+|pct:\d+\.?\d*|!\d+,\d+',
-                        'rotation' => '\!?(?:(?:[0-2]?[0-9]?[0-9]|3[0-5][0-9])(?:\.\d*)?|360)',
-                        'quality' => 'default|color|gray|bitonal',
-                        'format' => 'jpg|png|gif',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\ImageController::class,
-                        'action' => 'fetch',
-                    ],
-                ],
-            ],
-            // A redirect to the info.json is required by the specification.
-            'iiifserver_media' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/ixif-media/:id',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\MediaController::class,
-                        'action' => 'index',
-                    ],
-                ],
-            ],
-            'iiifserver_media_info' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/ixif-media/:id/info.json',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\MediaController::class,
-                        'action' => 'info',
-                    ],
-                ],
-            ],
-            // This route is a garbage collector that allows to return an error 400 or 501 to
-            // invalid or not implemented requests, as required by specification.
-            // This route should be set before the iiifserver_media in order to be
-            // processed after it.
-            'iiifserver_media_bad' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/ixif-media/:id:.:format',
-                    'constraints' => [
-                        'id' => '\d+',
-                        'format' => '.+',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\MediaController::class,
-                        'action' => 'bad',
-                    ],
-                ],
-            ],
-            // Warning: the format is separated with a ".", not a "/".
-            'iiifserver_media_url' => [
-                'type' => \Zend\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/ixif-media/:id:.:format',
-                    'constraints' => [
-                        'id' => '\d+',
-                        'format' => 'pdf|mp3|ogg|mp4|webm|ogv',
-                    ],
-                    'defaults' => [
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\MediaController::class,
-                        'action' => 'fetch',
-                    ],
-                ],
-            ],
-
-            // For IxIF, some json files should be available to describe media for context.
-            // This is not used currently: the Wellcome uris are kept because they are set
-            // for main purposes in IiifServer.
-            // @link https://gist.github.com/tomcrane/7f86ac08d3b009c8af7c
 
             // If really needed, the two next routes may be uncommented to keep
             // compatibility with the old schemes used by the plugin for Omeka 2
@@ -351,22 +187,6 @@ return [
             ],
         ],
     ],
-    'archiverepertory' => [
-        'ingesters' => [
-            'tile' => [
-                'path' => 'tile',
-                'extension' => [
-                    '.dzi',
-                    '.js',
-                    // The classes are not available before the end of install.
-                    // TileInfo::FOLDER_EXTENSION_DEEPZOOM,
-                    '_files',
-                    // TileInfo::FOLDER_EXTENSION_ZOOMIFY,
-                    '_zdata',
-                ],
-            ],
-        ],
-    ],
     'iiifserver' => [
         'config' => [
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
@@ -381,10 +201,6 @@ return [
             'iiifserver_manifest_properties_media' => [],
             'iiifserver_manifest_force_url_from' => '',
             'iiifserver_manifest_force_url_to' => '',
-            'iiifserver_image_creator' => 'Auto',
-            'iiifserver_image_max_size' => 10000000,
-            'iiifserver_image_tile_dir' => 'tile',
-            'iiifserver_image_tile_type' => 'deepzoom',
             'iiifserver_manifest_service_iiifsearch' => '',
         ],
     ],
