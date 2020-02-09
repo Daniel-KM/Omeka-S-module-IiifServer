@@ -62,6 +62,7 @@ return [
                 'options' => [
                     'route' => '/iiif',
                     'defaults' => [
+                        '__API__' => true,
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
                         'action' => 'index',
