@@ -1,8 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
- * Copyright 2016-2017 BibLibre
+ * Copyright 2020 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -31,38 +30,64 @@
 namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\ItemRepresentation;
+use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
 
-class IiifManifest extends AbstractHelper
+class IiifManifest30 extends AbstractHelper
 {
     /**
-     * Get the IIIF manifest for the specified resource.
+     * @var TempFileFactory
+     */
+    protected $tempFileFactory;
+
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    public function __construct(TempFileFactory $tempFileFactory, $basePath)
+    {
+        $this->tempFileFactory = $tempFileFactory;
+        $this->basePath = $basePath;
+    }
+
+    /**
+     * Get the IIIF manifest for the specified resource (API Presentation 3.0).
      *
      * @param AbstractResourceEntityRepresentation $resource
-     * @param string $version
      * @return Object|null
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null)
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
-        $view = $this->getView();
-
-        if (is_null($version)) {
-            $version = $view->setting('iiifserver_manifest_version', '2.1');
-        } else {
-            $version = $version === '3.0' ? '3.0' : '2.1';
-        }
-
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
-            return $version === '3.0'
-                ? $view->iiifManifest30($resource)
-                :  $view->iiifManifest21($resource);
+            return $this->buildManifestItem($resource);
         }
 
         if ($resourceName == 'item_sets') {
-            return $version === '3.0'
-                ? $view->iiifCollection30($resource)
-                : $view->iiifCollection21($resource);
+            return $this->view->iiifCollection30($resource);
         }
+    }
+
+    /**
+     * Get the IIIF manifest for the specified item.
+     *
+     * @param ItemRepresentation $item
+     * @return Object|null. The object corresponding to the manifest.
+     */
+    protected function buildManifestItem(ItemRepresentation $item)
+    {
+        // Prepare values needed for the manifest. Empty values will be removed.
+        // Some are required.
+        $manifest = [
+            '@context' => 'http://iiif.io/api/presentation/3/context.json',
+            'id' => 'TODO',
+            'type' => 'Manifest',
+        ];
+
+        return (object) $manifest;
     }
 }

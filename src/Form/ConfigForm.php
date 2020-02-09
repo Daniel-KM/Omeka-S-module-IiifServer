@@ -15,6 +15,22 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     {
         $this
             ->add([
+                'name' => 'iiifserver_manifest_version',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Default api version (manifest)', // @translate
+                    'info' => 'Set the version of the manifest to provide.', // @translate
+                    'value_options' => [
+                        '2.1' => '2.1', // @translate
+                        '3.0' => '3.0', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_version',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_description_property',
                 'type' => PropertySelect::class,
                 'options' => [

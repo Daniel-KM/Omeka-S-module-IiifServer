@@ -10,13 +10,19 @@ return [
     'view_helpers' => [
         'invokables' => [
             'iiifCollection' => View\Helper\IiifCollection::class,
+            'iiifCollection21' => View\Helper\IiifCollection21::class,
+            'iiifCollection30' => View\Helper\IiifCollection30::class,
             'iiifCollectionList' => View\Helper\IiifCollectionList::class,
+            'iiifCollectionList21' => View\Helper\IiifCollectionList21::class,
+            'iiifCollectionList30' => View\Helper\IiifCollectionList30::class,
+            'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [
             'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
-            'iiifManifest' => Service\ViewHelper\IiifManifestFactory::class,
+            'iiifManifest21' => Service\ViewHelper\IiifManifest21Factory::class,
+            'iiifManifest30' => Service\ViewHelper\IiifManifest30Factory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             // Currently in module Next and in a pull request for core.
             'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
@@ -193,6 +199,7 @@ return [
     ],
     'iiifserver' => [
         'config' => [
+            'iiifserver_manifest_version' => '2.1',
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate

@@ -2,20 +2,17 @@
 
 namespace IiifServer\Service\ViewHelper;
 
-use IiifServer\View\Helper\IiifManifest;
+use IiifServer\View\Helper\IiifManifest21;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
-/**
- * Service factory for the api view helper.
- */
-class IiifManifestFactory implements FactoryInterface
+class IiifManifest21Factory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $tempFileFactory = $services->get('Omeka\File\TempFileFactory');
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        return new IiifManifest($tempFileFactory, $basePath);
+        return new IiifManifest21($tempFileFactory, $basePath);
     }
 }
