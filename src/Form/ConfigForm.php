@@ -19,7 +19,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Default api version (manifest)', // @translate
-                    'info' => 'Set the version of the manifest to provide.', // @translate
+                    'info' => 'Set the version of the manifest to provide. Note that the version is automatically selected when a request specifies it.', // @translate
                     'value_options' => [
                         '2.1' => '2.1', // @translate
                         '3.0' => '3.0', // @translate
