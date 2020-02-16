@@ -132,6 +132,11 @@ abstract class AbstractResourceType implements \JsonSerializable
     protected $resource;
 
     /**
+     * @var array
+     */
+    protected $options;
+
+    /**
      * @var ArrayObject
      */
     protected $manifest;
@@ -148,11 +153,13 @@ abstract class AbstractResourceType implements \JsonSerializable
 
     /**
      * @param AbstractResourceEntityRepresentation $resource
+     * @param array $options
      * @return self
      */
-    public function __construct(AbstractResourceEntityRepresentation $resource)
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         $this->resource = $resource;
+        $this->options = $options;
         $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');

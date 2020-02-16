@@ -135,6 +135,31 @@ class PresentationController extends AbstractActionController
         return $this->iiifJsonLd($manifest, $version);
     }
 
+    public function canvasAction()
+    {
+        // Not found exception is automatically thrown.
+        $id = $this->params('id');
+        try {
+            $resource = $this->api()->read('items', $id)->getContent();
+            $version = '3.0';
+            $name = $this->params('name');
+            $index = preg_replace('/[^0-9]/', '', $name);
+            $resource = $this->api()->read('media', $name)->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            $resource = $this->api()->read('media', $id)->getContent();
+            $version = '2.1';
+            $name = $this->params('name');
+            $index = preg_replace('/[^0-9]/', '', $name);
+        }
+
+        // $version = $this->requestedVersion();
+
+        $iiifCanvas = $this->viewHelpers()->get('iiifCanvas');
+        $canvas = $iiifCanvas($resource, $index, $version);
+
+        return $this->iiifJsonLd($canvas, $version);
+    }
+
     protected function requestedVersion()
     {
         $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();

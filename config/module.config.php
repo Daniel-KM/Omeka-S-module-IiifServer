@@ -16,6 +16,9 @@ return [
             'iiifCollectionList21' => View\Helper\IiifCollectionList21::class,
             'iiifCollectionList30' => View\Helper\IiifCollectionList30::class,
             'iiifManifest' => View\Helper\IiifManifest::class,
+            'iiifCanvas' => View\Helper\IiifCanvas::class,
+            'iiifCanvas21' => View\Helper\IiifCanvas21::class,
+            'iiifCanvas30' => View\Helper\IiifCanvas30::class,
             'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
@@ -146,6 +149,20 @@ return [
                             ],
                             'defaults' => [
                                 'action' => 'manifest',
+                            ],
+                        ],
+                    ],
+                    // In 2.1, canvas id is meida id and name is p + index.
+                    // In 3.0, canvas id is item id and name is media id.
+                    'canvas' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id/canvas/:name',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'canvas',
                             ],
                         ],
                     ],

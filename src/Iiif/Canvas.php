@@ -29,6 +29,10 @@
 
 namespace IiifServer\Iiif;
 
+use IiifServer\View\Helper\ImageSize;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\MediaRepresentation;
+
 /**
  *@link https://iiif.io/api/presentation/3.0/#53-canvas
  */
@@ -96,4 +100,116 @@ class Canvas extends AbstractResourceType
         'together' => self::NOT_ALLOWED,
         'unordered' => self::NOT_ALLOWED,
     ];
+
+    /**
+     * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
+     *
+     * @var array
+     */
+    protected $orderedKeys = [
+        '@context' => null,
+        'id' => null,
+        'type' => null,
+        'label' => null,
+        'height' => null,
+        'width' => null,
+        'duration' => null,
+        'items' => null,
+        'annotations' => null,
+    ];
+
+    /**
+     * @var string
+     */
+    protected $index;
+
+    /**
+     * @var ImageSize
+     */
+    protected $imageSizeHelper;
+
+    /**
+     * @param AbstractResourceEntityRepresentation $resource
+     * @param array $options
+     * @return self
+     */
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    {
+        if (!($resource instanceof MediaRepresentation)) {
+            throw new \RuntimeException(
+                'A media is required to build a canvas.'
+            );
+        }
+        if (!isset($options['index'])) {
+            throw new \RuntimeException(
+                'Missing index for canvas.'
+            );
+        }
+        $this->index = $options['index'];
+
+        parent::__construct($resource, $options);
+
+        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
+        $this->imageSizeHelper = $viewHelpers->get('imageSize');
+    }
+
+    public function getLabel()
+    {
+        // TODO Store the use of the fallback to avoid to copy the parent.
+
+        $template = $this->resource->resourceTemplate();
+        if ($template && $template->titleProperty()) {
+            $values = $this->resource->value($template->titleProperty()->term(), ['all' => true, 'default' => []]);
+            if (empty($values)) {
+                $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+            }
+        } else {
+            $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+        }
+        return new ValueLanguage($values, true);
+    }
+
+    public function getId()
+    {
+        $helper = $this->urlHelper;
+        $url = $helper(
+            'iiifserver/canvas',
+            [
+                'id' => $this->resource->item()->id(),
+                'name' => $this->resource->id(),
+            ],
+            ['force_canonical' => true]
+        );
+        $helper = $this->iiifForceBaseUrlIfRequired;
+        return $helper($url);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getHeight()
+    {
+        $size = $this->imageSize();
+        return $size ? $size['height'] : null;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getWidth()
+    {
+        $size = $this->imageSize();
+        return $size ? $size['width'] : null;
+    }
+
+    protected function imageSize($type = 'original')
+    {
+        static $size;
+
+        if (is_null($size)) {
+            $helper = $this->imageSizeHelper;
+            $size = $helper($this->resource, $type) ?: false;
+        }
+        return $size;
+    }
 }
