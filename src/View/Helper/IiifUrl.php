@@ -51,8 +51,8 @@ class IiifUrl extends AbstractHelper
         }
 
         $mapRouteNames = [
-            'item_sets' => 'iiifserver_presentation_collection',
-            'items' => 'iiifserver_presentation_item',
+            'item_sets' => 'iiifserver/collection',
+            'items' => 'iiifserver/item',
         ];
         $url = $this->view->url(
             $mapRouteNames[$resource->resourceName()],

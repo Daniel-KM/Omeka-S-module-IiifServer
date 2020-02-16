@@ -163,7 +163,7 @@ class IiifCollectionList21 extends AbstractHelper
         $manifest = [];
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('iiifserver_presentation_collection', [
+            $url = $this->view->url('iiifserver/collection', [
                 'id' => $resource->id(),
             ]);
 

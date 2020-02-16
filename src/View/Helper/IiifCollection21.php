@@ -179,7 +179,7 @@ class IiifCollection21 extends AbstractHelper
 
         if ($resourceName == 'item_sets') {
             $url = $this->view->url(
-                'iiifserver_presentation_collection',
+                'iiifserver/collection',
                 ['id' => $resource->id()],
                 ['force_canonical' => true]
             );
@@ -187,7 +187,7 @@ class IiifCollection21 extends AbstractHelper
             $type = 'sc:Collection';
         } else {
             $url = $this->view->url(
-                'iiifserver_presentation_item',
+                'iiifserver/item',
                 ['id' => $resource->id()],
                 ['force_canonical' => true]
             );
