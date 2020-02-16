@@ -49,35 +49,6 @@ class PresentationController extends AbstractActionController
         return $this->forward()->dispatch(__CLASS__, $params);
     }
 
-    /**
-     * This method is kept for ixif compatibility with old Omeka Classic urls.
-     *
-     * @throws NotFoundException
-     * @return \Zend\View\Model\JsonModel
-     */
-    public function manifestAction()
-    {
-        // Map iiif resources with Omeka Classic and Omeka S records.
-        $mapResourceNames = [
-            'item' => 'items',
-            'items' => 'items',
-            'item-set' => 'item_sets',
-            'item-sets' => 'item_sets',
-            'item_set' => 'item_sets',
-            'item_sets' => 'item_sets',
-            'collection' => 'item_sets',
-            'collections' => 'item_sets',
-        ];
-        $resourceName = $this->params('resourcename');
-        if (!isset($mapResourceNames[$resourceName])) {
-            throw new NotFoundException;
-        }
-
-        return $mapResourceNames[$resourceName] === 'item_sets'
-            ? $this->collectionAction()
-            : $this->itemAction();
-    }
-
     public function collectionAction()
     {
         // Not found exception is automatically thrown.
@@ -150,7 +121,7 @@ class PresentationController extends AbstractActionController
         return $this->iiifJsonLd($manifest, $version);
     }
 
-    public function itemAction()
+    public function manifestAction()
     {
         // Not found exception is automatically thrown.
         $id = $this->params('id');

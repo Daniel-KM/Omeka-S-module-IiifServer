@@ -52,7 +52,7 @@ return [
         'routes' => [
             // @todo It is recommended to use a true identifier (ark, urn…], not an internal id.
 
-            // @link http://iiif.io/api/presentation/2.0
+            // @link https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
             // Collection     {scheme}://{host}/{prefix}/collection/{name}
             // Manifest       {scheme}://{host}/{prefix}/{identifier}/manifest
             // Sequence       {scheme}://{host}/{prefix}/{identifier}/sequence/{name}
@@ -124,20 +124,8 @@ return [
                             ],
                         ],
                     ],
-                    'item' => [
-                        'type' => \Zend\Router\Http\Segment::class,
-                        'options' => [
-                            'route' => '/:id/manifest',
-                            'constraints' => [
-                                'id' => '\d+',
-                            ],
-                            'defaults' => [
-                                'action' => 'item',
-                            ],
-                        ],
-                    ],
                     // The redirection is not required for presentation, but a forward is possible.
-                    'id' => [
+                    'manifest-id' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
                             'route' => '/:id',
@@ -145,46 +133,24 @@ return [
                                 'id' => '\d+',
                             ],
                             'defaults' => [
-                                'action' => 'item',
+                                'action' => 'manifest',
+                            ],
+                        ],
+                    ],
+                    'manifest' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id/manifest',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'manifest',
                             ],
                         ],
                     ],
                 ],
             ],
-
-            // If really needed, the two next routes may be uncommented to keep
-            // compatibility with the old schemes used by the plugin for Omeka 2
-            // before the version 2.4.2.
-            // 'iiifserver_presentation_classic' => [
-            //     'type' => \Zend\Router\Http\Segment::class,
-            //     'options' => [
-            //         'route' => '/:resourcename/presentation/:id',
-            //         'constraints' => [
-            //             'resourcename' => 'item|items|item\-set|item_set|collection|item\-sets|item_sets|collections',
-            //             'id' => '\d+',
-            //         ],
-            //         'defaults' => [
-            //             '__NAMESPACE__' => 'IiifServer\Controller',
-            //             'controller' => Controller\PresentationController::class,
-            //             'action' => 'manifest',
-            //         ],
-            //     ],
-            // ],
-            // 'iiifserver_presentation_manifest_classic' => [
-            //     'type' => \Zend\Router\Http\Segment::class,
-            //     'options' => [
-            //         'route' => '/:resourcename/presentation/:id/manifest',
-            //         'constraints' => [
-            //             'resourcename' => 'item|items|item\-set|item_set|collection|item\-sets|item_sets|collections',
-            //             'id' => '\d+',
-            //         ],
-            //         'defaults' => [
-            //             '__NAMESPACE__' => 'IiifServer\Controller',
-            //             'controller' => Controller\PresentationController::class,
-            //             'action' => 'manifest',
-            //         ],
-            //     ],
-            // ],
 
             /** @deprecated */
             // For compatibility with old modules UniversalViewer, Mirador and Diva, keep some deprecated routes.
@@ -227,7 +193,7 @@ return [
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
-                        'action' => 'item',
+                        'action' => 'manifest',
                     ],
                 ],
             ],
@@ -241,7 +207,7 @@ return [
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
-                        'action' => 'item',
+                        'action' => 'manifest',
                     ],
                 ],
             ],

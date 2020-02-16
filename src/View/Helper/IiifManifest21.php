@@ -114,7 +114,7 @@ class IiifManifest21 extends AbstractHelper
         ];
 
         $url = $this->view->url(
-            'iiifserver/item',
+            'iiifserver/manifest',
             ['id' => $item->id()],
             ['force_canonical' => true]
         );

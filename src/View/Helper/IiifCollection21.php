@@ -187,7 +187,7 @@ class IiifCollection21 extends AbstractHelper
             $type = 'sc:Collection';
         } else {
             $url = $this->view->url(
-                'iiifserver/item',
+                'iiifserver/manifest',
                 ['id' => $resource->id()],
                 ['force_canonical' => true]
             );

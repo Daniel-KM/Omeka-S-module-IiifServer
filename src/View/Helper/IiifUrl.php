@@ -52,7 +52,7 @@ class IiifUrl extends AbstractHelper
 
         $mapRouteNames = [
             'item_sets' => 'iiifserver/collection',
-            'items' => 'iiifserver/item',
+            'items' => 'iiifserver/manifest',
         ];
         $url = $this->view->url(
             $mapRouteNames[$resource->resourceName()],
