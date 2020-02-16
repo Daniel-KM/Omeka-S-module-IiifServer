@@ -185,6 +185,66 @@ return [
             //         ],
             //     ],
             // ],
+
+            /** @deprecated */
+            // For compatibility with old modules UniversalViewer, Mirador and Diva, keep some deprecated routes.
+            'iiifserver_presentation_collection_list' => [
+                'type' => \Zend\Router\Http\Segment::class,
+                'options' => [
+                    'route' => '/iiif/collection/:id',
+                    'constraints' => [
+                        'id' => '(?:[cim]?\-?\d+\,?)+',
+                    ],
+                    'defaults' => [
+                        '__API__' => true,
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\PresentationController::class,
+                        'action' => 'list',
+                    ],
+                ],
+            ],
+            'iiifserver_presentation_collection' => [
+                'type' => \Zend\Router\Http\Segment::class,
+                'options' => [
+                    'route' => '/iiif/collection/:id',
+                    'constraints' => [
+                        'id' => '\d+',
+                    ],
+                    'defaults' => [
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\PresentationController::class,
+                        'action' => 'collection',
+                    ],
+                ],
+            ],
+            'iiifserver_presentation_item' => [
+                'type' => \Zend\Router\Http\Segment::class,
+                'options' => [
+                    'route' => '/iiif/:id/manifest',
+                    'constraints' => [
+                        'id' => '\d+',
+                    ],
+                    'defaults' => [
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\PresentationController::class,
+                        'action' => 'item',
+                    ],
+                ],
+            ],
+            'iiifserver_presentation_item_redirect' => [
+                'type' => \Zend\Router\Http\Segment::class,
+                'options' => [
+                    'route' => '/iiif/:id',
+                    'constraints' => [
+                        'id' => '\d+',
+                    ],
+                    'defaults' => [
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\PresentationController::class,
+                        'action' => 'item',
+                    ],
+                ],
+            ],
         ],
     ],
     'translator' => [
