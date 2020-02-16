@@ -202,6 +202,15 @@ class Canvas extends AbstractResourceType
         return $size ? $size['width'] : null;
     }
 
+    /**
+     * As the process converts Omeka resource, there is only one file by canvas.
+     */
+    public function getItems()
+    {
+        $item = new AnnotationPage($this->resource);
+        return [$item];
+    }
+
     protected function imageSize($type = 'original')
     {
         static $size;
