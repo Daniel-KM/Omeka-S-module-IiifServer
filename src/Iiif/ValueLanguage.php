@@ -39,6 +39,11 @@ class ValueLanguage implements  \JsonSerializable
     protected $values;
 
     /**
+     * @@var string
+     */
+    protected $fallbackId;
+
+    /**
      * @var ArrayObject
      */
     protected $output;
@@ -49,13 +54,15 @@ class ValueLanguage implements  \JsonSerializable
      * @link https://iiif.io/api/presentation/3.0/#44-language-of-property-values
      *
      * @param \Omeka\Api\Representation\ValueRepresentation|\Omeka\Api\Representation\ValueRepresentation[] $values
+     * @param string $fallbackId
      */
-    public function __construct($values)
+    public function __construct($values, $fallbackId = null)
     {
         if (!is_array($values)) {
             $values = [$values];
         }
         $this->values = $values;
+        $this->fallbackId = $fallbackId;
     }
 
     public function getData()
@@ -65,16 +72,20 @@ class ValueLanguage implements  \JsonSerializable
         }
 
         $this->output = new ArrayObject;
-        foreach ($this->values as $value) {
-            $lang = $value->lang() ?: 'none';
-            $this->output[$lang][] = (string) $value;
-        }
 
-        // Keep none at last.
-        if (count($this->output) > 1 && isset($this->output['none'])) {
-            $none = $this->output['none'];
-            unset($this->output['none']);
-            $this->output['none'] = $none;
+        if (count($this->values)) {
+            foreach ($this->values as $value) {
+                $lang = $value->lang() ?: 'none';
+                $this->output[$lang][] = (string) $value;
+            }
+            // Keep none at last.
+            if (count($this->output) > 1 && isset($this->output['none'])) {
+                $none = $this->output['none'];
+                unset($this->output['none']);
+                $this->output['none'] = $none;
+            }
+        } elseif ($this->fallbackId) {
+            $this->output['none'][] = '[' . $this->fallbackId .']';
         }
 
         return $this->output;
