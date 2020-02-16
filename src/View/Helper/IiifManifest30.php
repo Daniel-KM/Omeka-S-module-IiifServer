@@ -29,6 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\Manifest;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\File\TempFileFactory;
@@ -68,7 +69,7 @@ class IiifManifest30 extends AbstractHelper
         }
 
         if ($resourceName == 'item_sets') {
-            return $this->view->iiifCollection30($resource);
+            return $this->getView()->iiifCollection30($resource);
         }
     }
 
@@ -80,14 +81,15 @@ class IiifManifest30 extends AbstractHelper
      */
     protected function buildManifestItem(ItemRepresentation $item)
     {
-        // Prepare values needed for the manifest. Empty values will be removed.
-        // Some are required.
-        $manifest = [
-            '@context' => 'http://iiif.io/api/presentation/3/context.json',
-            'id' => 'TODO',
-            'type' => 'Manifest',
-        ];
+        $manifest = new Manifest($item);
 
-        return (object) $manifest;
+        // Give possibility to customize the manifest.
+        $resource = $item;
+        $type = 'item';
+        $triggerHelper = $this->getView()->plugin('trigger');
+        $params = compact('', 'manifest', 'resource', 'type');
+        $params = $triggerHelper('iiifserver.manifest', $params, true);
+
+        return $manifest->jsonSerialize();
     }
 }
