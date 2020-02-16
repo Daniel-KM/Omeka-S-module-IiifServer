@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use IiifServer\View\Helper\ImageSize;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
@@ -38,6 +37,8 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Canvas extends AbstractResourceType
 {
+    use TraitImage;
+
     protected $type = 'Canvas';
 
     protected $keys = [
@@ -121,14 +122,9 @@ class Canvas extends AbstractResourceType
     ];
 
     /**
-     * @var string
+     * @var \Omeka\Api\Representation\MediaRepresentation
      */
-    protected $index;
-
-    /**
-     * @var ImageSize
-     */
-    protected $imageSizeHelper;
+    protected $resource;
 
     /**
      * @param AbstractResourceEntityRepresentation $resource
@@ -151,8 +147,7 @@ class Canvas extends AbstractResourceType
 
         parent::__construct($resource, $options);
 
-        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
-        $this->imageSizeHelper = $viewHelpers->get('imageSize');
+        $this->initImage();
     }
 
     public function getLabel()
@@ -187,40 +182,11 @@ class Canvas extends AbstractResourceType
     }
 
     /**
-     * @return int|null
-     */
-    public function getHeight()
-    {
-        $size = $this->imageSize();
-        return $size ? $size['height'] : null;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getWidth()
-    {
-        $size = $this->imageSize();
-        return $size ? $size['width'] : null;
-    }
-
-    /**
      * As the process converts Omeka resource, there is only one file by canvas.
      */
     public function getItems()
     {
-        $item = new AnnotationPage($this->resource);
+        $item = new AnnotationPage($this->resource, $this->options);
         return [$item];
-    }
-
-    protected function imageSize($type = 'original')
-    {
-        static $size;
-
-        if (is_null($size)) {
-            $helper = $this->imageSizeHelper;
-            $size = $helper($this->resource, $type) ?: false;
-        }
-        return $size;
     }
 }

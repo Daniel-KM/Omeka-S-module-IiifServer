@@ -97,6 +97,11 @@ class AnnotationPage extends AbstractResourceType
         'unordered' => self::NOT_ALLOWED,
     ];
 
+    /**
+     * @var \Omeka\Api\Representation\MediaRepresentation
+     */
+    protected $resource;
+
     public function getId()
     {
         $helper = $this->urlHelper;
