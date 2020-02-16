@@ -198,6 +198,14 @@ abstract class AbstractResourceType implements \JsonSerializable
             return $v === self::REQUIRED;
         });
 
+        $intersect = array_intersect_key($keys, $output);
+        if (count($keys) !== count($intersect)) {
+            $missingKeys = array_keys(array_diff_key($keys, $intersect));
+            throw new \RuntimeException(
+                sprintf('Missing required keys for resource type "%1$s": "%2$s".', $this->getType(), implode('", "', $missingKeys))
+            );
+        }
+
         return (object) $output;
     }
 
