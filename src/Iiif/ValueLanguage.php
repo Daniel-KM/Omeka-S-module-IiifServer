@@ -30,8 +30,9 @@
 namespace IiifServer\Iiif;
 
 use ArrayObject;
+use JsonSerializable;
 
-class ValueLanguage implements  \JsonSerializable
+class ValueLanguage implements JsonSerializable
 {
     /**
      * @@var \Omeka\Api\Representation\ValueRepresentation[]
@@ -96,6 +97,9 @@ class ValueLanguage implements  \JsonSerializable
         if (is_null($this->output)) {
             $this->getData();
         }
-        return (object) $this->output;
+
+        return count($this->output)
+            ? (object) $this->output
+            : null;
     }
 }

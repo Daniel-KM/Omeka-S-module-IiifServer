@@ -31,6 +31,7 @@ namespace IiifServer\Iiif;
 
 use ArrayObject;
 use Doctrine\Common\Inflector\Inflector;
+use JsonSerializable;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
@@ -39,7 +40,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  * @todo Use JsonLdSerializable?
  * @author Daniel Berthereau
  */
-abstract class AbstractResourceType implements \JsonSerializable
+abstract class AbstractResourceType implements JsonSerializable
 {
     const REQUIRED = 'required';
     const RECOMMENDED = 'recommended';
@@ -176,6 +177,8 @@ abstract class AbstractResourceType implements \JsonSerializable
     public function getData()
     {
         $this->manifest = new ArrayObject;
+
+        // TODO Remove useless context from sub-objects.
         $this->manifest['@context'] = $this->getContext();
 
         $keys = array_filter($this->keys, function($v) {
@@ -198,7 +201,15 @@ abstract class AbstractResourceType implements \JsonSerializable
     {
         // Remove useless values (there is no "0", "null" or empty array at
         // first level).
-        $output = array_filter($this->getData()->getArrayCopy());
+        $output = array_filter($this->getData()->getArrayCopy(), function($v) {
+            if ($v instanceof ArrayObject) {
+                return (bool) $v->count();
+            }
+            if ($v instanceof JsonSerializable) {
+                return (bool) $v->jsonSerialize();
+            }
+            return !empty($v);
+        });
 
         // Check if all required data are present.
         $keys = array_filter($this->keys, function($v) {
