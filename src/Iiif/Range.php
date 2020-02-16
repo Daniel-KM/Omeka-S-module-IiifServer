@@ -37,6 +37,8 @@ class Range extends AbstractResourceType
     protected $type = 'Range';
 
     protected $keys = [
+        '@context' => self::OPTIONAL,
+
         // Descriptive and rights properties.
         'label' => self::RECOMMENDED,
         'metadata' => self::OPTIONAL,

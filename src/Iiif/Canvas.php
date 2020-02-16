@@ -41,6 +41,8 @@ class Canvas extends AbstractResourceType
     protected $type = 'Canvas';
 
     protected $keys = [
+        '@context' => self::OPTIONAL,
+
         // Descriptive and rights properties.
         'label' => self::RECOMMENDED,
         'metadata' => self::OPTIONAL,

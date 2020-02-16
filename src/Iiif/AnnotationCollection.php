@@ -37,6 +37,8 @@ class AnnotationCollection extends AbstractResourceType
     protected $type = 'AnnotationCollection';
 
     protected $keys = [
+        '@context' => self::NOT_ALLOWED,
+
         // Descriptive and rights properties.
         'label' => self::RECOMMENDED,
         'metadata' => self::OPTIONAL,

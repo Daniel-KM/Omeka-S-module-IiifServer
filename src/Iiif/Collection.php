@@ -37,6 +37,8 @@ class Collection extends AbstractResourceType
     protected $type = 'Collection';
 
     protected $keys = [
+        '@context' => self::REQUIRED,
+
         // Descriptive and rights properties.
         'label' => self::REQUIRED,
         'metadata' => self::RECOMMENDED,

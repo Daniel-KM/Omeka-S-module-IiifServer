@@ -60,6 +60,8 @@ abstract class AbstractResourceType implements JsonSerializable
      * @var array
      */
     protected $keys = [
+        '@context' => self::NOT_ALLOWED,
+
         // Descriptive and rights properties.
         'label' => self::NOT_ALLOWED,
         'metadata' => self::NOT_ALLOWED,
@@ -178,15 +180,12 @@ abstract class AbstractResourceType implements JsonSerializable
     {
         $this->manifest = new ArrayObject;
 
-        // TODO Remove useless context from sub-objects.
-        $this->manifest['@context'] = $this->getContext();
-
         $keys = array_filter($this->keys, function($v) {
             return $v !== self::NOT_ALLOWED;
         });
 
         foreach (array_keys($keys) as $key) {
-            $method = 'get' . Inflector::classify($key);
+            $method = 'get' . Inflector::classify(str_replace('@', '', $key));
             if (method_exists($this, $method)) {
                 $this->manifest[$key] = $this->$method();
             }
@@ -210,6 +209,8 @@ abstract class AbstractResourceType implements JsonSerializable
             }
             return !empty($v);
         });
+
+        // TODO Remove useless context from sub-objects.
 
         // Check if all required data are present.
         $keys = array_filter($this->keys, function($v) {

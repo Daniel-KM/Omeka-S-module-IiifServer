@@ -37,6 +37,8 @@ class Manifest extends AbstractResourceType
     protected $type = 'Manifest';
 
     protected $keys = [
+        '@context' => self::REQUIRED,
+
         // Descriptive and rights properties.
         'label' => self::REQUIRED,
         'metadata' => self::RECOMMENDED,

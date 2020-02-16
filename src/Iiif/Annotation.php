@@ -37,6 +37,8 @@ class Annotation extends AbstractResourceType
     protected $type = 'Annotation';
 
     protected $keys = [
+        '@context' => self::NOT_ALLOWED,
+
         // Descriptive and rights properties.
         'label' => self::OPTIONAL,
         'metadata' => self::OPTIONAL,

@@ -37,6 +37,8 @@ class AnnotationPage extends AbstractResourceType
     protected $type = 'AnnotationPage';
 
     protected $keys = [
+        '@context' => self::NOT_ALLOWED,
+
         // Descriptive and rights properties.
         'label' => self::OPTIONAL,
         'metadata' => self::OPTIONAL,

@@ -37,6 +37,8 @@ class ContentResources extends AbstractResourceType
     protected $type = 'ContentResources';
 
     protected $keys = [
+        '@context' => self::NOT_ALLOWED,
+
         // Descriptive and rights properties.
         'label' => self::OPTIONAL,
         'metadata' => self::OPTIONAL,
