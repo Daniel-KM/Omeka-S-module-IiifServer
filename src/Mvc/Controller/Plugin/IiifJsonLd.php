@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2020 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -32,30 +32,39 @@ namespace IiifServer\Mvc\Controller\Plugin;
 
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
-class JsonLd extends AbstractPlugin
+class IiifJsonLd extends AbstractPlugin
 {
-    public function __invoke($data)
+    public function __invoke($data, $version = null)
     {
         $controller = $this->getController();
-
         $request = $controller->getRequest();
         $response = $controller->getResponse();
 
-        // According to specification, the response should be json, except if
-        // client asks json-ld.
-        $accept = $request->getHeader('Accept');
-        if ($accept && $accept->hasMediaType('application/ld+json')) {
-            $response->getHeaders()->addHeaderLine('Content-Type', 'application/ld+json; charset=utf-8', true);
-        }
-        // Default to json with a link to json-ld.
-        else {
-            // TODO Remove json ld keys if client ask json.
-            $response->getHeaders()->addHeaderLine('Content-Type', 'application/json; charset=utf-8', true);
-            $response->getHeaders()->addHeaderLine('Link', '<http://iiif.io/api/image/2/context.json>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"', true);
+        $headers = $response->getHeaders();
+
+        if ($version === '3.0') {
+            $headers
+                ->addHeaderLine('Content-Type', 'application/ld+json;profile="http://iiif.io/api/presentation/3/context.json"', true);
+        } else {
+            // According to specification for 2.1, the response should be json,
+            // except if client asks json-ld.
+            $accept = $request->getHeader('Accept');
+            if ($accept && $accept->hasMediaType('application/ld+json')) {
+                $headers
+                    ->addHeaderLine('Content-Type', 'application/ld+json; charset=utf-8', true);
+            }
+            // Default to json with a link to json-ld.
+            else {
+                // TODO Remove json ld keys if client ask json.
+                $headers
+                    ->addHeaderLine('Content-Type', 'application/json; charset=utf-8', true)
+                    ->addHeaderLine('Link', '<http://iiif.io/api/presentation/2/context.json>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"', true);
+            }
         }
 
         // Header for CORS, required for access of IIIF.
-        $response->getHeaders()->addHeaderLine('Access-Control-Allow-Origin', '*');
+        $headers->addHeaderLine('Access-Control-Allow-Origin', '*');
+
         //$response->clearBody();
         $body = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $response->setContent($body);

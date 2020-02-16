@@ -42,7 +42,7 @@ return [
     ],
     'controller_plugins' => [
         'invokables' => [
-            'jsonLd' => Mvc\Controller\Plugin\JsonLd::class,
+            'iiifJsonLd' => Mvc\Controller\Plugin\IiifJsonLd::class,
         ],
         'factories' => [
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,

@@ -84,10 +84,12 @@ class PresentationController extends AbstractActionController
         $id = $this->params('id');
         $resource = $this->api()->read('item_sets', $id)->getContent();
 
-        $iiifCollection = $this->viewHelpers()->get('iiifCollection');
-        $manifest = $iiifCollection($resource);
+        $version = $this->requestedVersion();
 
-        return $this->jsonLd($manifest);
+        $iiifCollection = $this->viewHelpers()->get('iiifCollection');
+        $manifest = $iiifCollection($resource, $version);
+
+        return $this->iiifJsonLd($manifest, $version);
     }
 
     public function listAction()
@@ -140,10 +142,12 @@ class PresentationController extends AbstractActionController
             throw new NotFoundException;
         }
 
-        $iiifCollectionList = $this->viewHelpers()->get('iiifCollectionList');
-        $manifest = $iiifCollectionList($resources);
+        $version = $this->requestedVersion();
 
-        return $this->jsonLd($manifest);
+        $iiifCollectionList = $this->viewHelpers()->get('iiifCollectionList');
+        $manifest = $iiifCollectionList($resources, $version);
+
+        return $this->iiifJsonLd($manifest, $version);
     }
 
     public function itemAction()
@@ -152,9 +156,23 @@ class PresentationController extends AbstractActionController
         $id = $this->params('id');
         $resource = $this->api()->read('items', $id)->getContent();
 
-        $iiifManifest = $this->viewHelpers()->get('iiifManifest');
-        $manifest = $iiifManifest($resource);
+        $version = $this->requestedVersion();
 
-        return $this->jsonLd($manifest);
+        $iiifManifest = $this->viewHelpers()->get('iiifManifest');
+        $manifest = $iiifManifest($resource, $version);
+
+        return $this->iiifJsonLd($manifest, $version);
+    }
+
+    protected function requestedVersion()
+    {
+        $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
+        if (strpos($accept, 'iiif.io/api/presentation/3/context.json')) {
+            return '3.0';
+        }
+        if (strpos($accept, 'iiif.io/api/presentation/2/context.json')) {
+            return '2.1';
+        }
+        return null;
     }
 }
