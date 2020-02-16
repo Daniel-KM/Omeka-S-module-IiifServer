@@ -160,6 +160,17 @@ class PresentationController extends AbstractActionController
         return $this->iiifJsonLd($canvas, $version);
     }
 
+    public function genericAction()
+    {
+        $type = $this->params('type');
+        if ($type === 'canvas' && $this->params('name')) {
+            return $this->canvasAction();
+        }
+        throw new NotFoundException(
+            sprintf('The type "%s" is currently only managed as uri, not url', $type)
+        );
+    }
+
     protected function requestedVersion()
     {
         $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();

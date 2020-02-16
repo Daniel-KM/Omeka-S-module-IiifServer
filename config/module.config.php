@@ -79,6 +79,20 @@ return [
                 ],
                 'may_terminate' => false,
                 'child_routes' => [
+                    // A generic way to build url for all uri, even not urls.
+                    'uri' => [
+                        'type' => \Zend\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id/:type[/:name]',
+                            'constraints' => [
+                                'id' => '\d+',
+                                'type' => 'annotation-page|annotation-collection|annotation|canvas|collection|content-resources|manifest|range',
+                            ],
+                            'defaults' => [
+                                'action' => 'generic',
+                            ],
+                        ],
+                    ],
                     // Special route for the dynamic collections, search or browse pages.
                     // The first letter "c", "i", or "m" is used to distinct collections, items and
                     // media and is not required when the identifier is always unique for all of
@@ -194,6 +208,7 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
+                        '__API__' => true,
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
                         'action' => 'collection',
@@ -208,6 +223,7 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
+                        '__API__' => true,
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
                         'action' => 'manifest',
@@ -222,6 +238,7 @@ return [
                         'id' => '\d+',
                     ],
                     'defaults' => [
+                        '__API__' => true,
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
                         'action' => 'manifest',
