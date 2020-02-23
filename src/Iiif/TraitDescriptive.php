@@ -86,20 +86,17 @@ trait TraitDescriptive
     }
 
     /**
-     * @return ValueLanguage|null
+     * @return ValueLanguage
      */
     public function getSummary()
     {
-        $template = $this->resource->resourceTemplate();
-        if ($template && $template->descriptionProperty()) {
-            $values = $this->resource->value($template->descriptionProperty()->term(), ['all' => true, 'default' => []]);
-            if (empty($values)) {
-                $values = $this->resource->value('dcterms:description', ['all' => true, 'default' => []]);
-            }
-        } else {
-            $values = $this->resource->value('dcterms:description', ['all' => true, 'default' => []]);
+        $helper = $this->setting;
+        $summaryProperty = $helper('iiifserver_manifest_description_property');
+        $values = [];
+        if ($summaryProperty) {
+            $values = $this->resource->value($summaryProperty, ['all' => true, 'default' => []]);
         }
-        return new ValueLanguage($values);
+        return new ValueLanguage($values, true);
     }
 
     /**
