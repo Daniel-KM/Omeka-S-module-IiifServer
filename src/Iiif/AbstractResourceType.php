@@ -91,6 +91,7 @@ abstract class AbstractResourceType implements JsonSerializable
         'seeAlso' => self::NOT_ALLOWED,
         'service' => self::NOT_ALLOWED,
         'homepage' => self::NOT_ALLOWED,
+        'logo' => self::NOT_ALLOWED,
         'rendering' => self::NOT_ALLOWED,
         'partOf' => self::NOT_ALLOWED,
         'start' => self::NOT_ALLOWED,
@@ -222,7 +223,7 @@ abstract class AbstractResourceType implements JsonSerializable
             return !empty($v);
         });
 
-        // TODO Remove useless context from sub-objects.
+        // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
 
         // Check if all required data are present.
         $keys = array_filter($this->keys, function($v) {

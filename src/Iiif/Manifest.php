@@ -29,6 +29,8 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+
 /**
  * @link https://iiif.io/api/presentation/3.0/#52-manifest
  */
@@ -36,6 +38,7 @@ class Manifest extends AbstractResourceType
 {
     use TraitImage;
     use TraitDescriptive;
+    use TraitLinking;
 
     protected $type = 'Manifest';
 
@@ -71,6 +74,7 @@ class Manifest extends AbstractResourceType
         'seeAlso' => self::OPTIONAL,
         'service' => self::OPTIONAL,
         'homepage' => self::OPTIONAL,
+        'logo' => self::OPTIONAL,
         'rendering' => self::OPTIONAL,
         'partOf' => self::OPTIONAL,
         'start' => self::OPTIONAL,
@@ -137,6 +141,13 @@ class Manifest extends AbstractResourceType
 
         'annotations' => null,
     ];
+
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    {
+        parent::__construct($resource, $options);
+        $this->initImage();
+        $this->initLinking();
+    }
 
     public function getId()
     {

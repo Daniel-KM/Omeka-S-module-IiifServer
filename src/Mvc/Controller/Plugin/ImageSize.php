@@ -35,7 +35,8 @@ class ImageSize extends AbstractPlugin
      *
      * @todo Store size in the data of the media.
      *
-     * @param MediaRepresentation|AssetRepresentation $image
+     * @param MediaRepresentation|AssetRepresentation|string $image Can be a
+     * media, an asset, a url or a filepath.
      * @param string $imageType
      * @throws RuntimeException
      * @return array|null Associative array of width and height of the image
@@ -49,7 +50,7 @@ class ImageSize extends AbstractPlugin
         if ($image instanceof AssetRepresentation) {
             return $this->sizeAsset($image);
         }
-        return null;
+        return $this->sizeFile($image);
     }
 
     /**
@@ -105,6 +106,24 @@ class ImageSize extends AbstractPlugin
                 $storagePath));
         }
 
+        return $result;
+    }
+
+    /**
+     * Get an array of the width and height of the image file from a file.
+     *
+     * @param string $file Filepath or url
+     * @throws RuntimeException
+     * @return array|null Associative array of width and height of the image
+     * file, else null.
+     */
+    protected function sizeFile($file)
+    {
+        $result = $this->getWidthAndHeight($file);
+        if (empty($result)) {
+            throw new RuntimeException(new Message('Failed to get image resolution: %s', // @translate
+                $file));
+        }
         return $result;
     }
 

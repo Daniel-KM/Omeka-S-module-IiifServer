@@ -114,7 +114,7 @@ class IiifCollection21 extends AbstractHelper
         /*
          // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
          $manifest['service'] = [
-             '@context' => $this->view->url('api-context'),
+             '@context' => $this->view->url('api-context', [], ['force_canonical' => true]),
              '@id' => $itemSet->apiUrl(),
              'format' =>'application/ld+json',
              // TODO What is the profile of Omeka json-ld?

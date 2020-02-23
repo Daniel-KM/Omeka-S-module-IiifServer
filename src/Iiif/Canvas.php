@@ -127,11 +127,6 @@ class Canvas extends AbstractResourceType
      */
     protected $resource;
 
-    /**
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param array $options
-     * @return self
-     */
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         if (!($resource instanceof MediaRepresentation)) {
@@ -143,6 +138,7 @@ class Canvas extends AbstractResourceType
         parent::__construct($resource, $options);
 
         $this->initImage();
+        // TODO Add linking properties when not in manifest.
     }
 
     public function getLabel()
