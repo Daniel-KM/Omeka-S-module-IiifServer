@@ -30,28 +30,15 @@
 namespace IiifServer\Iiif;
 
 use ArrayObject;
-use Doctrine\Common\Inflector\Inflector;
-use JsonSerializable;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * Manage the IIIF resource types (iiif v3.0).
  *
- * @todo Use JsonLdSerializable?
  * @author Daniel Berthereau
  */
-abstract class AbstractResourceType implements JsonSerializable
+abstract class AbstractResourceType extends AbstractType
 {
-    const REQUIRED = 'required';
-    const RECOMMENDED = 'recommended';
-    const OPTIONAL = 'optional';
-    const NOT_ALLOWED = 'not_allowed';
-
-    /**
-     * @var string
-     */
-    protected $type;
-
     /**
      * List of keys for the resource type.
      *
@@ -189,58 +176,6 @@ abstract class AbstractResourceType implements JsonSerializable
         return $this->resource;
     }
 
-    public function getData()
-    {
-        $this->manifest = new ArrayObject;
-
-        $keys = array_filter($this->keys, function($v) {
-            return $v !== self::NOT_ALLOWED;
-        });
-
-        foreach (array_keys($keys) as $key) {
-            $method = 'get' . Inflector::classify(str_replace('@', '', $key));
-            if (method_exists($this, $method)) {
-                $this->manifest[$key] = $this->$method();
-            }
-        }
-
-        $this->orderKeys();
-
-        return $this->manifest;
-    }
-
-    public function jsonSerialize()
-    {
-        // Remove useless values (there is no "0", "null" or empty array at
-        // first level).
-        $output = array_filter($this->getData()->getArrayCopy(), function($v) {
-            if ($v instanceof ArrayObject) {
-                return (bool) $v->count();
-            }
-            if ($v instanceof JsonSerializable) {
-                return (bool) $v->jsonSerialize();
-            }
-            return !empty($v);
-        });
-
-        // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
-
-        // Check if all required data are present.
-        $keys = array_filter($this->keys, function($v) {
-            return $v === self::REQUIRED;
-        });
-
-        $intersect = array_intersect_key($keys, $output);
-        if (count($keys) !== count($intersect)) {
-            $missingKeys = array_keys(array_diff_key($keys, $intersect));
-            throw new \RuntimeException(
-                sprintf('Missing required keys for resource type "%1$s": "%2$s".', $this->getType(), implode('", "', $missingKeys))
-            );
-        }
-
-        return (object) $output;
-    }
-
     public function getContext()
     {
         return 'http://iiif.io/api/presentation/3/context.json';
@@ -264,24 +199,10 @@ abstract class AbstractResourceType implements JsonSerializable
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    abstract public function getId();
-
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getId()
     {
-        return (string) $this->type;
-    }
-
-    protected function orderKeys()
-    {
-        $array = $this->manifest->getArrayCopy();
-        $this->manifest->exchangeArray(
-            array_replace(array_intersect_key($this->orderedKeys, $array), $array)
-        );
-        return $this;
+        return null;
     }
 }
