@@ -38,6 +38,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 class Canvas extends AbstractResourceType
 {
     use TraitImage;
+    use TraitDescriptive;
 
     protected $type = 'Canvas';
 
@@ -157,7 +158,7 @@ class Canvas extends AbstractResourceType
         } else {
             $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
         }
-        return new ValueLanguage($values, true);
+        return new ValueLanguage($values, false, '[' . $this->resource->id() . ']');
     }
 
     public function getId()

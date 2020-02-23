@@ -31,6 +31,7 @@ namespace IiifServer\Iiif;
 
 use ArrayObject;
 use JsonSerializable;
+use Omeka\Api\Representation\ValueRepresentation;
 
 class ValueLanguage implements JsonSerializable
 {
@@ -42,7 +43,12 @@ class ValueLanguage implements JsonSerializable
     /**
      * @@var string
      */
-    protected $fallbackId;
+    protected $allowHtml;
+
+    /**
+     * @@var string
+     */
+    protected $fallback;
 
     /**
      * @var ArrayObject
@@ -54,52 +60,92 @@ class ValueLanguage implements JsonSerializable
      *
      * @link https://iiif.io/api/presentation/3.0/#44-language-of-property-values
      *
-     * @param \Omeka\Api\Representation\ValueRepresentation|\Omeka\Api\Representation\ValueRepresentation[] $values
-     * @param string $fallbackId
+     * @param ValueRepresentation|ValueRepresentation[]|array $values When the
+     *   first value is not a ValueRepresentation, the values are returned directly.
+     * @param bool $allowHtml Html is allowed only in summary, metadata value
+     *   and requiredStatement.
+     * @param array|string $fallback
      */
-    public function __construct($values, $fallbackId = null)
+    public function __construct($values, $allowHtml = false, $fallback = null)
     {
         if (!is_array($values)) {
             $values = [$values];
         }
+
         $this->values = $values;
-        $this->fallbackId = $fallbackId;
+        $this->allowHtml = $allowHtml;
+        $this->fallback = $fallback;
+
+        $this->prepareOutput();
     }
 
-    public function getData()
+    /**
+     * Get all the data as array.
+     *
+     * @return ArrayObject
+     */
+    public function data()
     {
-        if ($this->output !== null) {
-            return $this->output;
-        }
+        return $this->output;
+    }
 
+    /**
+     * Get the languages keys.
+     *
+     * @return array
+     */
+    public function langs()
+    {
+        return array_keys($this->output->getArrayCopy());
+    }
+
+    /**
+     * @return int
+     */
+    public function count()
+    {
+        return $this->output->count();
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->output->count()
+            ? (object) $this->output
+            : null;
+    }
+
+    protected function prepareOutput()
+    {
         $this->output = new ArrayObject;
 
         if (count($this->values)) {
-            foreach ($this->values as $value) {
-                $lang = $value->lang() ?: 'none';
-                $this->output[$lang][] = (string) $value;
+            $first = reset($this->values);
+            if (gettype($first) === 'object' && $first instanceof ValueRepresentation) {
+                if ($this->allowHtml) {
+                    foreach ($this->values as $value) {
+                        $lang = $value->lang() ?: 'none';
+                        $this->output[$lang][] = $value->asHtml();
+                    }
+                } else {
+                    foreach ($this->values as $value) {
+                        $lang = $value->lang() ?: 'none';
+                        $this->output[$lang][] = strip_tags($value);
+                    }
+                }
+            } else {
+                $this->output->exchangeArray($this->values);
             }
+
             // Keep none at last.
             if (count($this->output) > 1 && isset($this->output['none'])) {
                 $none = $this->output['none'];
                 unset($this->output['none']);
                 $this->output['none'] = $none;
             }
-        } elseif ($this->fallbackId) {
-            $this->output['none'][] = '[' . $this->fallbackId .']';
+        } elseif ($this->fallback) {
+            $this->output['none'][] = $this->fallback;
         }
 
         return $this->output;
-    }
-
-    public function jsonSerialize()
-    {
-        if (is_null($this->output)) {
-            $this->getData();
-        }
-
-        return count($this->output)
-            ? (object) $this->output
-            : null;
     }
 }

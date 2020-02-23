@@ -155,6 +155,16 @@ abstract class AbstractResourceType implements JsonSerializable
     protected $iiifForceBaseUrlIfRequired;
 
     /**
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
+     * @var \IiifServer\View\Helper\PublicResourceUrl
+     */
+    protected $publicResourceUrl;
+
+    /**
      * @param AbstractResourceEntityRepresentation $resource
      * @param array $options
      * @return self
@@ -166,6 +176,8 @@ abstract class AbstractResourceType implements JsonSerializable
         $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
+        $this->setting = $viewHelpers->get('setting');
+        $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 
     /**
