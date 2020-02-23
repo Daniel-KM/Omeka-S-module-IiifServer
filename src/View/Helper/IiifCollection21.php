@@ -226,7 +226,7 @@ class IiifCollection21 extends AbstractHelper
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {
-                return $v->type() === 'resource'
+                return strpos($v->type(), 'resource') === 0
                     ? $this->view->iiifUrl($v->valueResource())
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
