@@ -41,11 +41,24 @@ trait TraitImage
      */
     protected $iiifImageUrl;
 
+    /**
+     * @var bool
+     */
+    private $isImage;
+
     public function initImage()
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->imageSizeHelper = $viewHelpers->get('imageSize');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+        // TODO Clean or remove this.
+        $this->isImage = $this->resource->primaryMedia()
+            && strtok($this->resource->primaryMedia()->mediaType(), '/') === 'image';
+    }
+
+    protected function isImage()
+    {
+        return $this->isImage;
     }
 
     /**
@@ -119,12 +132,17 @@ trait TraitImage
 
     public function imageSize($type = 'original')
     {
-        static $size;
+        static $sizes = [];
 
-        if (is_null($size)) {
-            $helper = $this->imageSizeHelper;
-            $size = $helper($this->resource, $type) ?: false;
+        if (!$this->isImage()) {
+            return null;
         }
-        return $size;
+
+        if (!array_key_exists($type, $sizes)) {
+            $helper = $this->imageSizeHelper;
+            $sizes[$type] = $helper($this->resource->primaryMedia(), $type) ?: null;
+        }
+
+        return $sizes[$type];
     }
 }
