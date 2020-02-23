@@ -66,7 +66,58 @@ trait TraitImage
         return $size ? $size['width'] : null;
     }
 
-    protected function imageSize($type = 'original')
+    public function getThumbnail()
+    {
+        /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
+        $thumbnailAsset = $this->resource->thumbnail();
+        $primaryMedia = $this->resource->primaryMedia();
+        if (!$thumbnailAsset && !$primaryMedia) {
+            return null;
+        }
+
+        $helper = $this->imageSizeHelper;
+        if ($thumbnailAsset) {
+            $image = $thumbnailAsset;
+            $size = $helper($thumbnailAsset);
+            // FIXME The image server doesn't know the resource id when it's an item. Neither the extension.
+            $id = $primaryMedia ? $primaryMedia->id() : $this->resource->id();
+        } else {
+            $image = $primaryMedia;
+            $size = $helper($primaryMedia, 'medium');
+            $id = $primaryMedia->id();
+        }
+
+        if (empty($size)) {
+            return null;
+        }
+
+        $helper = $this->iiifImageUrl;
+        $imageUrl = $helper(
+            'imageserver/media',
+            [
+                'id' => $id,
+                'region' => 'full',
+                'size' => $size['width'] . ',' . $size['height'],
+                'rotation' => 0,
+                'quality' => 'default',
+                'format' => 'jpg',
+            ]
+        );
+
+        $thumbnail = [
+            'id' => $imageUrl,
+            'type' => 'Image',
+            'format' => $image->mediaType(),
+            'width' => $size['width'],
+            'height' => $size['height'],
+        ];
+
+        return [
+            (object) $thumbnail,
+        ];
+    }
+
+    public function imageSize($type = 'original')
     {
         static $size;
 

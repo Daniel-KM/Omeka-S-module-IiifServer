@@ -34,6 +34,7 @@ namespace IiifServer\Iiif;
  */
 class Manifest extends AbstractResourceType
 {
+    use TraitImage;
     use TraitDescriptive;
 
     protected $type = 'Manifest';

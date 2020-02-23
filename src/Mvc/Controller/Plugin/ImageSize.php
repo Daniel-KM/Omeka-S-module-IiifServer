@@ -1,11 +1,12 @@
 <?php
 namespace IiifServer\Mvc\Controller\Plugin;
 
-use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 use Omeka\Mvc\Exception\RuntimeException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\Api\Representation\AssetRepresentation;
 
 class ImageSize extends AbstractPlugin
 {
@@ -34,13 +35,33 @@ class ImageSize extends AbstractPlugin
      *
      * @todo Store size in the data of the media.
      *
+     * @param MediaRepresentation|AssetRepresentation $image
+     * @param string $imageType
+     * @throws RuntimeException
+     * @return array|null Associative array of width and height of the image
+     * file, else null.
+     */
+    public function __invoke($image, $imageType = 'original')
+    {
+        if ($image instanceof MediaRepresentation) {
+            return $this->sizeMedia($image, $imageType);
+        }
+        if ($image instanceof AssetRepresentation) {
+            return $this->sizeAsset($image);
+        }
+        return null;
+    }
+
+    /**
+     * Get an array of the width and height of the image file from a media.
+     *
      * @param MediaRepresentation $media
      * @param string $imageType
      * @throws RuntimeException
      * @return array|null Associative array of width and height of the image
      * file, else null.
      */
-    public function __invoke(MediaRepresentation $media, $imageType = 'original')
+    protected function sizeMedia(MediaRepresentation $media, $imageType = 'original')
     {
         // Check if this is an image.
         if (strtok($media->mediaType(), '/') !== 'image') {
@@ -51,6 +72,30 @@ class ImageSize extends AbstractPlugin
         $storagePath = $imageType == 'original'
             ? $this->getStoragePath($imageType, $media->filename())
             : $this->getStoragePath($imageType, $media->storageId(), 'jpg');
+        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+        $result = $this->getWidthAndHeight($filepath);
+
+        // This is an image, but failed to get the resolution.
+        if (empty($result)) {
+            throw new RuntimeException(new Message('Failed to get image resolution: %s', // @translate
+                $storagePath));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get an array of the width and height of the image file from an asset.
+     *
+     * @param AssetRepresentation $asset
+     * @throws RuntimeException
+     * @return array|null Associative array of width and height of the image
+     * file, else null.
+     */
+    protected function sizeAsset(AssetRepresentation $asset)
+    {
+        // The storage adapter should be checked for external storage.
+        $storagePath = $this->getStoragePath('asset', $asset->filename());
         $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
         $result = $this->getWidthAndHeight($filepath);
 
