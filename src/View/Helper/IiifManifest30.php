@@ -85,9 +85,10 @@ class IiifManifest30 extends AbstractHelper
 
         // Give possibility to customize the manifest.
         $resource = $item;
+        $format = 'manifest';
         $type = 'item';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'manifest', 'resource', 'type');
+        $params = compact('', 'format', 'manifest', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
         return $manifest->jsonSerialize();

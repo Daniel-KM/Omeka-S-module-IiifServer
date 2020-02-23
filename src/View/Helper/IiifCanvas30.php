@@ -47,11 +47,11 @@ class IiifCanvas30 extends AbstractHelper
         $canvas = new Canvas($media, ['index' => $index]);
 
         // Give possibility to customize the manifest.
-        $manifest = $canvas;
         $resource = $media;
+        $format = 'canvas';
         $type = 'media';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'manifest', 'resource', 'type');
+        $params = compact('', 'format', 'canvas', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
         return $canvas->jsonSerialize();
