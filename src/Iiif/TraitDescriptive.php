@@ -36,6 +36,7 @@ trait TraitDescriptive
      *
      * @todo Remove setting iiifserver_manifest_html_descriptive for v3.0.
      * @todo Remove publicResourceUrl for v3.0?
+     * @todo Remove some settings for v3.0.
      * @todo Use displayValues() or the event?
      *
      * @return array
@@ -85,7 +86,7 @@ trait TraitDescriptive
     }
 
     /**
-     * @return ValueLanguage
+     * @return ValueLanguage|null
      */
     public function getSummary()
     {
@@ -99,5 +100,67 @@ trait TraitDescriptive
             $values = $this->resource->value('dcterms:description', ['all' => true, 'default' => []]);
         }
         return new ValueLanguage($values);
+    }
+
+    /**
+     * @return ValueLanguage[]
+     */
+    public function getRequiredStatement()
+    {
+        $helper = $this->setting;
+
+        $license = [];
+        $licenseProperty = $helper('iiifserver_manifest_attribution_property');
+        if ($licenseProperty) {
+            $license = $this->resource->value($licenseProperty, ['all' => true, 'default' => []]);
+        }
+
+        if (empty($license)) {
+            $default = $helper('iiifserver_manifest_attribution_default');
+            if ($default) {
+                $license = ['none' => [$default]];
+            } else {
+                return null;
+            }
+        }
+
+        $metadataValue = new ValueLanguage($license, true);
+        if (!$metadataValue->count()) {
+            return $metadataValue;
+        }
+
+        $propertyLabel = 'Attribution';
+
+        $labels = [];
+        foreach ($metadataValue->langs() as $lang) {
+            $labels[$lang][] = $propertyLabel;
+        }
+        $metadataLabel = new ValueLanguage($labels);
+
+        return (object) [
+            'label' => $metadataLabel,
+            'value' => $metadataValue,
+        ];
+    }
+
+    /**
+     * @return string The string must be an url.
+     */
+    public function getRights()
+    {
+        $helper = $this->setting;
+
+        $license = [];
+        $licenseProperty = $helper('iiifserver_license_property');
+        if ($licenseProperty) {
+            $license = $this->resource->value($licenseProperty);
+        }
+
+        $license = $license
+            ? (string) $license
+            : $helper('iiifserver_manifest_license_default');
+        return strpos($license, 'http') === 0
+            ? $license
+            : null;
     }
 }
