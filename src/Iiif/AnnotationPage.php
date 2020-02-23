@@ -117,4 +117,16 @@ class AnnotationPage extends AbstractResourceType
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);
     }
+
+    /**
+     * As the process converts Omeka resource, there is only one file by canvas.
+     *
+     * The canvas can have multiple items, for example when a page is composed
+     * of fragments.
+     */
+    public function getItems()
+    {
+        $item = new Annotation($this->resource, $this->options);
+        return [$item];
+    }
 }

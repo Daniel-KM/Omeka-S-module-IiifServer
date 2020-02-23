@@ -138,12 +138,6 @@ class Canvas extends AbstractResourceType
                 'A media is required to build a canvas.'
             );
         }
-        if (!isset($options['index'])) {
-            throw new \RuntimeException(
-                'Missing index for canvas.'
-            );
-        }
-        $this->index = $options['index'];
 
         parent::__construct($resource, $options);
 

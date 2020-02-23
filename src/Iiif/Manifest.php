@@ -146,4 +146,16 @@ class Manifest extends AbstractResourceType
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);
     }
+
+    /**
+     * As the process converts Omeka resource, there is only one file by canvas.
+     */
+    public function getItems()
+    {
+        $items = [];
+        foreach ($this->resource->media() as $media) {
+            $items[] = new Canvas($media, ['index' => $media->id()]);
+        }
+        return $items;
+    }
 }

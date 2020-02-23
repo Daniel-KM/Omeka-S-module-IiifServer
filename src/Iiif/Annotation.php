@@ -95,7 +95,26 @@ class Annotation extends AbstractResourceType
         'thumbnail-nav' => self::NOT_ALLOWED,
         'together' => self::NOT_ALLOWED,
         'unordered' => self::NOT_ALLOWED,
+
+        // Not in specification, but required to build the manifest.
+        'motivation' => self::REQUIRED,
+        'body' => self::REQUIRED,
+        'target' => self::REQUIRED,
     ];
+
+    protected $orderedKeys = [
+        '@context' => null,
+        'id' => null,
+        'type' => null,
+        'motivation' => null,
+        'body' => null,
+        'target' => null,
+    ];
+
+    /**
+     * @var \Omeka\Api\Representation\MediaRepresentation
+     */
+    protected $resource;
 
     public function getId()
     {
@@ -105,6 +124,35 @@ class Annotation extends AbstractResourceType
             [
                 'id' => $this->resource->item()->id(),
                 'type' => 'annotation',
+                'name' => $this->resource->id(),
+            ],
+            ['force_canonical' => true]
+        );
+        $helper = $this->iiifForceBaseUrlIfRequired;
+        return $helper($url);
+    }
+
+    public function getMotivation()
+    {
+        return 'painting';
+    }
+
+    public function getBody()
+    {
+        return new Annotation\Body($this->resource, [
+            'type' => 'Image',
+            'motivation' => $this->getMotivation(),
+        ]);
+    }
+
+    public function getTarget()
+    {
+        $helper = $this->urlHelper;
+        $url = $helper(
+            'iiifserver/uri',
+            [
+                'id' => $this->resource->item()->id(),
+                'type' => 'canvas',
                 'name' => $this->resource->id(),
             ],
             ['force_canonical' => true]
