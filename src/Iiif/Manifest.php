@@ -163,12 +163,18 @@ class Manifest extends AbstractResourceType
 
     /**
      * As the process converts Omeka resource, there is only one file by canvas.
+     *
+     * The items that are not images are set in key rendering.
+     *
+     * @return array
      */
     public function getItems()
     {
         $items = [];
         foreach ($this->resource->media() as $media) {
-            $items[] = new Canvas($media, ['index' => $media->id()]);
+            if (strtok($media->mediaType(), '/') === 'image') {
+                $items[] = new Canvas($media, ['index' => $media->id()]);
+            }
         }
         return $items;
     }

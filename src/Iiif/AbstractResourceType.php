@@ -78,11 +78,13 @@ abstract class AbstractResourceType extends AbstractType
         'timeMode' => self::NOT_ALLOWED,
 
         // Linking properties.
+        // External linking.
         'seeAlso' => self::NOT_ALLOWED,
         'service' => self::NOT_ALLOWED,
         'homepage' => self::NOT_ALLOWED,
         'logo' => self::NOT_ALLOWED,
         'rendering' => self::NOT_ALLOWED,
+        // Internal linking.
         'partOf' => self::NOT_ALLOWED,
         'start' => self::NOT_ALLOWED,
         'supplementary' => self::NOT_ALLOWED,
