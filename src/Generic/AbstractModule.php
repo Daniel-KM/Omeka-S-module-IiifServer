@@ -645,9 +645,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      */
     public function stringToList($string)
     {
-        return array_filter(array_map('trim', explode("\n", $this->fixEndOfLine($string))), function ($v) {
-            return (bool) strlen($v);
-        });
+        return array_filter(array_map('trim', explode("\n", $this->fixEndOfLine($string))), 'strlen');
     }
 
     /**
