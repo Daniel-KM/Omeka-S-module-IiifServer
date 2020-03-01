@@ -80,8 +80,9 @@ class Range extends AbstractResourceType
         'items' => self::REQUIRED,
         'structures' => self::NOT_ALLOWED,
         'annotations' => self::OPTIONAL,
+    ];
 
-        // Behavior values.
+    protected $behaviors = [
         'auto-advance' => self::OPTIONAL,
         'continuous' => self::OPTIONAL,
         'facing-pages' => self::NOT_ALLOWED,

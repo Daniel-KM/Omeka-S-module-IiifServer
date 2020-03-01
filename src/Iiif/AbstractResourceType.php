@@ -48,6 +48,7 @@ abstract class AbstractResourceType extends AbstractType
      */
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
+
         'id' => self::NOT_ALLOWED,
         'type' => self::NOT_ALLOWED,
 
@@ -93,8 +94,10 @@ abstract class AbstractResourceType extends AbstractType
         'items' => self::NOT_ALLOWED,
         'structures' => self::NOT_ALLOWED,
         'annotations' => self::NOT_ALLOWED,
+    ];
 
-        // Behavior values.
+    // Behavior values.
+    protected $behaviors = [
         'auto-advance' => self::NOT_ALLOWED,
         'continuous' => self::NOT_ALLOWED,
         'facing-pages' => self::NOT_ALLOWED,

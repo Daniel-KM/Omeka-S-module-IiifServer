@@ -93,8 +93,9 @@ class Canvas extends AbstractResourceType
         'items' => self::RECOMMENDED,
         'structures' => self::NOT_ALLOWED,
         'annotations' => self::OPTIONAL,
+    ];
 
-        // Behavior values.
+    protected $behaviors = [
         'auto-advance' => self::OPTIONAL,
         'continuous' => self::NOT_ALLOWED,
         'facing-pages' => self::OPTIONAL,

@@ -80,24 +80,10 @@ class AnnotationPage extends AbstractResourceType
         'items' => self::RECOMMENDED,
         'structures' => self::NOT_ALLOWED,
         'annotations' => self::NOT_ALLOWED,
+    ];
 
-        // Behavior values.
-        'auto-advance' => self::NOT_ALLOWED,
-        'continuous' => self::NOT_ALLOWED,
-        'facing-pages' => self::NOT_ALLOWED,
-        'individuals' => self::NOT_ALLOWED,
-        'multi-part' => self::NOT_ALLOWED,
-        'no-auto-advance' => self::NOT_ALLOWED,
-        'no-nav' => self::NOT_ALLOWED,
-        'no-repeat' => self::NOT_ALLOWED,
-        'non-paged' => self::NOT_ALLOWED,
+    protected $behaviors = [
         'hidden' => self::OPTIONAL,
-        'paged' => self::NOT_ALLOWED,
-        'repeat' => self::NOT_ALLOWED,
-        'sequence' => self::NOT_ALLOWED,
-        'thumbnail-nav' => self::NOT_ALLOWED,
-        'together' => self::NOT_ALLOWED,
-        'unordered' => self::NOT_ALLOWED,
     ];
 
     /**
