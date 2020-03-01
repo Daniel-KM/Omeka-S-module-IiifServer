@@ -48,6 +48,8 @@ abstract class AbstractResourceType extends AbstractType
      */
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
+        'id' => self::NOT_ALLOWED,
+        'type' => self::NOT_ALLOWED,
 
         // Descriptive and rights properties.
         'label' => self::NOT_ALLOWED,
@@ -63,8 +65,9 @@ abstract class AbstractResourceType extends AbstractType
         'accompanyingCanvas' => self::NOT_ALLOWED,
 
         // Technical properties.
-        'id' => self::NOT_ALLOWED,
-        'type' => self::NOT_ALLOWED,
+        // Id and type are set above to avoid ordering by default.
+        // 'id' => self::NOT_ALLOWED,
+        // 'type' => self::NOT_ALLOWED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         'height' => self::NOT_ALLOWED,
@@ -106,15 +109,6 @@ abstract class AbstractResourceType extends AbstractType
         'thumbnail-nav' => self::NOT_ALLOWED,
         'together' => self::NOT_ALLOWED,
         'unordered' => self::NOT_ALLOWED,
-    ];
-
-    /**
-     * @var array
-     */
-    protected $orderedKeys = [
-        '@context' => null,
-        'id' => null,
-        'type' => null,
     ];
 
     /**
