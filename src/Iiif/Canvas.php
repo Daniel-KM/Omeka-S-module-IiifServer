@@ -42,8 +42,16 @@ class Canvas extends AbstractResourceType
 
     protected $type = 'Canvas';
 
+    /**
+     * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
+     *
+     * @var array
+     */
     protected $keys = [
         '@context' => self::OPTIONAL,
+
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
 
         // Descriptive and rights properties.
         'label' => self::RECOMMENDED,
@@ -60,8 +68,8 @@ class Canvas extends AbstractResourceType
         'accompanyingCanvas' => self::OPTIONAL,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         // Height and width should be set together.
@@ -103,23 +111,6 @@ class Canvas extends AbstractResourceType
         'thumbnail-nav' => self::NOT_ALLOWED,
         'together' => self::NOT_ALLOWED,
         'unordered' => self::NOT_ALLOWED,
-    ];
-
-    /**
-     * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
-     *
-     * @var array
-     */
-    protected $orderedKeys = [
-        '@context' => null,
-        'id' => null,
-        'type' => null,
-        'label' => null,
-        'height' => null,
-        'width' => null,
-        'duration' => null,
-        'items' => null,
-        'annotations' => null,
     ];
 
     /**

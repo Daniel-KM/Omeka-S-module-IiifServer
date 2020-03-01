@@ -39,6 +39,9 @@ class AnnotationCollection extends AbstractResourceType
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
 
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
+
         // Descriptive and rights properties.
         'label' => self::RECOMMENDED,
         'metadata' => self::OPTIONAL,
@@ -53,8 +56,8 @@ class AnnotationCollection extends AbstractResourceType
         'accompanyingCanvas' => self::NOT_ALLOWED,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         'height' => self::NOT_ALLOWED,

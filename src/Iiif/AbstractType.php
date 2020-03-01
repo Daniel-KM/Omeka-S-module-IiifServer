@@ -53,18 +53,11 @@ abstract class AbstractType implements JsonSerializable
     protected $type;
 
     /**
-     * List of keys for the type.
+     * List of ordered keys for the type.
      *
      * @var array
      */
     protected $keys = [];
-
-    /**
-     * Allows to reorder the keys. Useless if order is the same than keys.
-     *
-     * @var array
-     */
-    protected $orderedKeys = [];
 
     /**
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation
@@ -88,8 +81,6 @@ abstract class AbstractType implements JsonSerializable
                 $this->manifest[$key] = $this->$method();
             }
         }
-
-        $this->orderKeys();
 
         return $this->manifest;
     }
@@ -132,16 +123,5 @@ abstract class AbstractType implements JsonSerializable
     public function getType()
     {
         return (string) $this->type;
-    }
-
-    protected function orderKeys()
-    {
-        if ($this->orderedKeys) {
-            $array = $this->manifest->getArrayCopy();
-            $this->manifest->exchangeArray(
-                array_replace(array_intersect_key($this->orderedKeys, $array), $array)
-            );
-        }
-        return $this;
     }
 }

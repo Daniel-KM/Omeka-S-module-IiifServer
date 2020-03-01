@@ -42,8 +42,16 @@ class Manifest extends AbstractResourceType
 
     protected $type = 'Manifest';
 
+    /**
+     * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
+     *
+     * @var array
+     */
     protected $keys = [
         '@context' => self::REQUIRED,
+
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
 
         // Descriptive and rights properties.
         'label' => self::REQUIRED,
@@ -59,8 +67,8 @@ class Manifest extends AbstractResourceType
         'accompanyingCanvas' => self::OPTIONAL,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         'height' => self::NOT_ALLOWED,
@@ -102,44 +110,6 @@ class Manifest extends AbstractResourceType
         'thumbnail-nav' => self::NOT_ALLOWED,
         'together' => self::OPTIONAL,
         'unordered' => self::OPTIONAL,
-    ];
-
-    /**
-     * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
-     *
-     * @var array
-     */
-    protected $orderedKeys = [
-        '@context' => null,
-        'id' => null,
-        'type' => null,
-        'label' => null,
-        'metadata' => null,
-        'summary' => null,
-
-        'thumbnail' => null,
-
-        'viewingDirection' => null,
-        'behavior' => null,
-        'navDate' => null,
-
-        'rights' => null,
-        'requiredStatement' => null,
-        'logo' => null,
-        'homepage' => null,
-        'service' => null,
-        'seeAlso' => null,
-        'rendering' => null,
-        'partOf' => null,
-        'start' => null,
-        'id' => null,
-        'type' => null,
-
-        'items' => null,
-
-        'structures' => null,
-
-        'annotations' => null,
     ];
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)

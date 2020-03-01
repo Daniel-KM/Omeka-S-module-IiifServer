@@ -39,6 +39,14 @@ class Annotation extends AbstractResourceType
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
 
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
+
+        // Not in specification, but required to build the manifest.
+        'motivation' => self::REQUIRED,
+        'body' => self::REQUIRED,
+        'target' => self::REQUIRED,
+
         // Descriptive and rights properties.
         'label' => self::OPTIONAL,
         'metadata' => self::OPTIONAL,
@@ -53,8 +61,8 @@ class Annotation extends AbstractResourceType
         'accompanyingCanvas' => self::NOT_ALLOWED,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         'height' => self::NOT_ALLOWED,
@@ -95,20 +103,6 @@ class Annotation extends AbstractResourceType
         'thumbnail-nav' => self::NOT_ALLOWED,
         'together' => self::NOT_ALLOWED,
         'unordered' => self::NOT_ALLOWED,
-
-        // Not in specification, but required to build the manifest.
-        'motivation' => self::REQUIRED,
-        'body' => self::REQUIRED,
-        'target' => self::REQUIRED,
-    ];
-
-    protected $orderedKeys = [
-        '@context' => null,
-        'id' => null,
-        'type' => null,
-        'motivation' => null,
-        'body' => null,
-        'target' => null,
     ];
 
     /**

@@ -60,15 +60,6 @@ class Body extends AbstractResourceType
         'width' => self::RECOMMENDED,
     ];
 
-    protected $orderedKeys = [
-        'id' => null,
-        'type' => null,
-        'format' => null,
-        'service' => null,
-        'height' => null,
-        'width' => null,
-    ];
-
     /**
      * @var \Omeka\Api\Representation\MediaRepresentation
      */

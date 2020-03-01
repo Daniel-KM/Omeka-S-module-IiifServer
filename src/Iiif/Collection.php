@@ -39,6 +39,9 @@ class Collection extends AbstractResourceType
     protected $keys = [
         '@context' => self::REQUIRED,
 
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
+
         // Descriptive and rights properties.
         'label' => self::REQUIRED,
         'metadata' => self::RECOMMENDED,
@@ -53,8 +56,8 @@ class Collection extends AbstractResourceType
         'accompanyingCanvas' => self::OPTIONAL,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         'height' => self::NOT_ALLOWED,

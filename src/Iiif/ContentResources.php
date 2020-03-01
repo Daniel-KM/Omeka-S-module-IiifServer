@@ -31,6 +31,8 @@ namespace IiifServer\Iiif;
 
 /**
  *@link https://iiif.io/api/presentation/3.0/#57-content-resources
+ *
+ * They are "specific resources" too.
  */
 class ContentResources extends AbstractResourceType
 {
@@ -38,6 +40,9 @@ class ContentResources extends AbstractResourceType
 
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
+
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
 
         // Descriptive and rights properties.
         'label' => self::OPTIONAL,
@@ -53,8 +58,8 @@ class ContentResources extends AbstractResourceType
         'accompanyingCanvas' => self::NOT_ALLOWED,
 
         // Technical properties.
-        'id' => self::REQUIRED,
-        'type' => self::REQUIRED,
+        // 'id' => self::REQUIRED,
+        // 'type' => self::REQUIRED,
         'format' => self::OPTIONAL,
         'profile' => self::OPTIONAL,
         'height' => self::OPTIONAL,
