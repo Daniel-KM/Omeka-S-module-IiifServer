@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2020 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -76,12 +76,11 @@ class IiifCollectionList21 extends AbstractHelper
 
         $translate = $this->getView()->plugin('translate');
 
-        $identifier = $this->buildIdentifierForList($resources);
-        $url = $this->view->url(
-            'iiifserver/collection-list',
-            ['id' => $identifier],
-            ['force_canonical' => true]
-        );
+        $identifiers = $this->buildIdentifierForList($resources);
+        $url = $this->view->url('iiifserver/set', [], [
+            'query' => ['id' => $identifiers],
+            'force_canonical' => true,
+        ]);
         $url = $this->view->iiifForceBaseUrlIfRequired($url);
         $manifest['@id'] = $url;
 
@@ -189,31 +188,17 @@ class IiifCollectionList21 extends AbstractHelper
     }
 
     /**
-     * Helper to create an identifier from a list of records.
-     *
-     * The dynamic identifier is a flat list of ids: "5,1,2,3".
-     * If there is only one id, a comma is added to avoid to have the same route
-     * than the collection itself.
-     * In all cases the order of records is kept.
+     * Helper to list all resource ids.
      *
      * @todo Merge with IiifServer\View\Helper\UniversalViewer::buildIdentifierForList()
      *
      * @param array $resources
      * @return string
      */
-    protected function buildIdentifierForList($resources)
+    protected function buildIdentifierForList(array $resources)
     {
-        $identifiers = [];
-        foreach ($resources as $resource) {
-            $identifiers[] = $resource->id();
-        }
-
-        $identifier = implode(',', $identifiers);
-
-        if (count($identifiers) == 1) {
-            $identifier .= ',';
-        }
-
-        return $identifier;
+        return array_map(function($v) {
+            return $v->id();
+        }, $resources);
     }
 }

@@ -79,7 +79,7 @@ return [
                 ],
                 'may_terminate' => false,
                 'child_routes' => [
-                    // A generic way to build url for all uri, even not urls.
+                    // A generic way to build url for all uri, even if they are not managed urls.
                     'uri' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
@@ -93,19 +93,23 @@ return [
                             ],
                         ],
                     ],
+                    // @deprecated Use route "iiif/set" below instead: "/iiif/set?id[]=xx".
+                    //
                     // Special route for the dynamic collections, search or browse pages.
-                    // The first letter "c", "i", or "m" is used to distinct collections, items and
-                    // media and is not required when the identifier is always unique for all of
-                    // resources. The default letter is "i", so it is not required when all ids are
-                    // items (the most common case). If the list contains only one id, the comma is
-                    // required to avoid confusion with a normal collection.
+                    // If the list contains only one id, the comma is required to avoid confusion
+                    // with a normal collection.
+                    // For compatibility with Omeka Classic requests, the id may be prefixed
+                    // by a letter "c", "i", "f", or "m" to distinct collections, items and files/media.
+                    // It is not required when the identifier is always unique for all of  resources.
+                    // The default letter is "i", so it is not required when all ids are items (the
+                    // most common case).
                     // This route should be set before the "iiifserver/collection".
                     'collection-list' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
                             'route' => '/collection/:id',
                             'constraints' => [
-                                'id' => '(?:[cim]?\-?\d+\,?)+',
+                                'id' => '(?:[cimf]?\-?\d+\,?)+',
                             ],
                             'defaults' => [
                                 'action' => 'list',
@@ -180,11 +184,24 @@ return [
                             ],
                         ],
                     ],
+
+                    // Special route for the dynamic collections, search or browse pages.
+                    // This route is not standard.
+                    'set' => [
+                        'type' => \Zend\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/set',
+                            // The ids are in the query: "id[]=1&id[]=2".
+                            'defaults' => [
+                                'action' => 'list',
+                            ],
+                        ],
+                    ],
                 ],
             ],
 
             /** @deprecated */
-            // For compatibility with old modules UniversalViewer, Mirador and Diva, keep some deprecated routes.
+            // Keep some deprecated routes for compatibility with old modules UniversalViewer, Mirador and Diva.
             'iiifserver_presentation_collection_list' => [
                 'type' => \Zend\Router\Http\Segment::class,
                 'options' => [

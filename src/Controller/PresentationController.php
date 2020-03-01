@@ -65,15 +65,21 @@ class PresentationController extends AbstractActionController
 
     public function listAction()
     {
-        $id = $this->params('id');
-        if (empty($id)) {
-            throw new NotFoundException;
+        $params = $this->params();
+        $identifiers = $params->fromQuery('id');
+
+        // Compatibility with old comma-separated list.
+        if (empty($identifiers)) {
+            $id = $params->fromRoute('id');
+            if (empty($id)) {
+                throw new NotFoundException;
+            }
+
+            // For compatibility with old urls from Omeka Classic.
+            $id = preg_replace('/[^0-9,]/', '', $id);
+
+            $identifiers = array_filter(explode(',', $id));
         }
-
-        // For compatibility with old urls from Omeka Classic.
-        $id = preg_replace('/[^0-9,]/', '', $id);
-
-        $identifiers = array_filter(explode(',', $id));
 
         // Extract the resources from the identifier.
 
