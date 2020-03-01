@@ -77,28 +77,54 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_license_property',
+                'name' => 'iiifserver_manifest_rights',
+                'type' => Element\Select::class,
+                'options' => [
+                    'label' => 'Rights', // @translate
+                    'value_options' => [
+                        'none' => 'No mention', // @translate
+                        'text' => 'Specified text below (only for iiif 2.0)', // @translate
+                        'url' => 'Specified license below', // @translate
+                        'property' => 'Specified property below', // @translate
+                        'property_or_text' => 'Property if any, else specified license text (only for iiif 2.0)', // @translate
+                        'property_or_url' => 'Property if any, else specified license', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_rights',
+                    'class' => 'chosen-select',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_rights_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for license', // @translate
-                    'info' => $this->translate('If any, the first metadata of the resource will be added in all manifests and viewers to indicate the rights.') // @translate
-                        . ' ' . $this->translate('It’s recommended to use "dcterms:license".'), // @translate
+                    'label' => 'Property to use for rights (license)', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-license-property',
+                    'id' => 'iiifserver-manifest-rights-property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
             ])
-
+            ->add([
+                'name' => 'iiifserver_manifest_rights_url',
+                'type' => Element\Url::class,
+                'options' => [
+                    'label' => 'Url of the license', // @translate
+                    'info' => 'The license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_rights_url',
+                ],
+            ])
             ->add([
                 'name' => 'iiifserver_manifest_license_default',
                 'type' => Element\Text::class,
                 'options' => [
-                    'label' => 'Default license', // @translate
-                    'info' => 'If any, and if there is no metadata for the element above, this text will be added in all manifests and viewers to indicate the license.',  // @translate
+                    'label' => 'Default license text (only for iiif 2.0)', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver-manifest-license-default',
@@ -262,7 +288,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_license_property',
+                'name' => 'iiifserver_manifest_rights_property',
                 'required' => false,
             ])
             ->add([

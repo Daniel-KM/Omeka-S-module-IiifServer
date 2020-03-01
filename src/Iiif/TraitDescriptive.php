@@ -31,6 +31,8 @@ namespace IiifServer\Iiif;
 
 trait TraitDescriptive
 {
+    use TraitRights;
+
     /**
      * List metadata of the resource.
      *
@@ -126,7 +128,7 @@ trait TraitDescriptive
             return $metadataValue;
         }
 
-        $propertyLabel = 'Attribution';
+        $propertyLabel = 'Attribution'; // @translate
 
         $labels = [];
         foreach ($metadataValue->langs() as $lang) {
@@ -138,26 +140,5 @@ trait TraitDescriptive
             'label' => $metadataLabel,
             'value' => $metadataValue,
         ];
-    }
-
-    /**
-     * @return string The string must be an url.
-     */
-    public function getRights()
-    {
-        $helper = $this->setting;
-
-        $license = [];
-        $licenseProperty = $helper('iiifserver_license_property');
-        if ($licenseProperty) {
-            $license = $this->resource->value($licenseProperty);
-        }
-
-        $license = $license
-            ? (string) $license
-            : $helper('iiifserver_manifest_license_default');
-        return strpos($license, 'http') === 0
-            ? $license
-            : null;
     }
 }

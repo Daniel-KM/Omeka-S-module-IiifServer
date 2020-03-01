@@ -280,7 +280,9 @@ return [
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
-            'iiifserver_manifest_license_property' => 'dcterms:license',
+            'iiifserver_manifest_rights' => 'property_or_url',
+            'iiifserver_manifest_rights_property' => 'dcterms:license',
+            'iiifserver_manifest_rights_url' => 'http://rightsstatements.org/vocab/CNE/1.0/',
             'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
             'iiifserver_manifest_logo_default' => '',
             'iiifserver_manifest_html_descriptive' => true,
