@@ -24,9 +24,10 @@ class ImageSize extends AbstractHelper
     /**
      * Get an array of the width and height of the image file from a media.
      *
-     * @todo Store size in the data of the media.
+     * @todo Store size in the data of the media. Or use numeric properties (with units).
      *
-     * @param \Omeka\Api\Representation\MediaRepresentation|\Omeka\Api\Representation\AssetRepresentation $image
+     * @param \Omeka\Api\Representation\MediaRepresentation|\Omeka\Api\Representation\AssetRepresentation|string $image Can
+     * be a media, an asset, an url or a filepath.
      * @param string $imageType
      * @throws RuntimeException
      * @return array|null Associative array of width and height of the image
@@ -34,9 +35,9 @@ class ImageSize extends AbstractHelper
      */
     public function __invoke($image, $imageType = 'original')
     {
-        $imageSizePlugin = $this->imageSizePlugin;
+        $imageSize = $this->imageSizePlugin;
         try {
-            return $imageSizePlugin($image, $imageType);
+            return $imageSize($image, $imageType);
         } catch (RuntimeException $e) {
             throw new Exception\RuntimeException($e->getMessage());
         }

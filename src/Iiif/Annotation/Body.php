@@ -46,7 +46,7 @@ class Body extends AbstractResourceType
         'type' => self::REQUIRED,
         'format' => self::REQUIRED,
         // These keys are required or not allowed according to the type (image,
-        // audio, or video).
+        // audio, or video). See construct.
         'service' => self::RECOMMENDED,
         'height' => self::RECOMMENDED,
         'width' => self::RECOMMENDED,
@@ -77,6 +77,20 @@ class Body extends AbstractResourceType
     {
         $this->contentResource = $options['content'];
         unset($options['content']);
+
+        if ($this->contentResource->isImage()) {
+            $this->keys['height'] = self::REQUIRED;
+            $this->keys['width'] = self::REQUIRED;
+            $this->keys['duration'] = self::NOT_ALLOWED;
+        } elseif ($this->contentResource->isVideo()) {
+            $this->keys['height'] = self::REQUIRED;
+            $this->keys['width'] = self::REQUIRED;
+            $this->keys['duration'] = self::REQUIRED;
+        } elseif ($this->contentResource->isAudio()) {
+            $this->keys['height'] = self::NOT_ALLOWED;
+            $this->keys['width'] = self::NOT_ALLOWED;
+            $this->keys['duration'] = self::REQUIRED;
+        }
 
         parent::__construct($resource, $options);
 
@@ -131,6 +145,7 @@ class Body extends AbstractResourceType
 
     public function getService()
     {
+        // TODO Move this in ContentResource or RraitMedia.
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
             $helper = $this->urlHelper;
@@ -162,5 +177,26 @@ class Body extends AbstractResourceType
         }
 
         return null;
+    }
+
+    public function getHeight()
+    {
+        return method_exists($this->contentResource, 'getHeight')
+            ? $this->contentResource->getHeight()
+            : null;
+    }
+
+    public function getWidth()
+    {
+        return method_exists($this->contentResource, 'getWidth')
+        ? $this->contentResource->getWidth()
+        : null;
+    }
+
+    public function getDuration()
+    {
+        return method_exists($this->contentResource, 'getDuration')
+            ? $this->contentResource->getDuration()
+            : null;
     }
 }

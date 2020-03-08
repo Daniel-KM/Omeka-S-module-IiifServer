@@ -3,6 +3,11 @@
     "type": "library",
     "description": "Integrates the IIIF specifications and a simple IIP Image Server to allow to process and share instantly images of any size and medias (pdf, audio, video, 3D...) in the desired formats.",
     "license": "CECILL-2.1",
+    "minimum-stability": "beta",
+    "prefer-stable": true,
+    "require": {
+        "james-heinrich/getid3": "^2.0"
+    },
     "require-dev": {
         "biblibre/omeka-s-test-helper": "dev-master",
         "friendsofphp/php-cs-fixer": "^2.0"

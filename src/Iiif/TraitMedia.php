@@ -32,9 +32,9 @@ namespace IiifServer\Iiif;
 trait TraitMedia
 {
     /**
-     * @var \IiifServer\View\Helper\MediaInfo
+     * @var \IiifServer\View\Helper\MediaDimension
      */
-    protected $mediaInfoHelper;
+    protected $mediaDimensionHelper;
 
     /**
      * @var \IiifServer\View\Helper\IiifImageUrl
@@ -44,8 +44,7 @@ trait TraitMedia
     protected function initMedia()
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        // $this->mediaInfoHelper = $viewHelpers->get('mediaInfo');
-        $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+        $this->mediaDimensionHelper = $viewHelpers->get('mediaDimension');
     }
 
     public function isAudioVideo()
@@ -84,7 +83,9 @@ trait TraitMedia
     protected function mediaSize()
     {
         $data = $this->mediaDimension();
-        return isset($data['size']) ? $data['size'] : null;
+        return isset($data['width'])
+            ? ['height' => $data['height'], 'width' => $data['width']]
+            : null;
     }
 
     protected function mediaDimension()
@@ -96,8 +97,8 @@ trait TraitMedia
         }
 
         if ($info === false) {
-            $helper = $this->mediaInfoHelper;
-            // $info = $helper($this->resource->primaryMedia());
+            $helper = $this->mediaDimensionHelper;
+            $info = $helper($this->resource->primaryMedia());
         }
 
         return $info;

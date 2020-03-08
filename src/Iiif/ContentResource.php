@@ -166,6 +166,10 @@ class ContentResource extends AbstractResourceType
         return null;
     }
 
+    /**
+     * This method is required to overload TraitImage and TraitMedia.
+     * @return NULL
+     */
     public function getHeight()
     {
         if ($this->isImage()) {

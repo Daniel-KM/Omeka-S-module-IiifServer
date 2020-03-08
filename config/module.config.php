@@ -27,6 +27,7 @@ return [
             'iiifManifest21' => Service\ViewHelper\IiifManifest21Factory::class,
             'iiifManifest30' => Service\ViewHelper\IiifManifest30Factory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
+            'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
             // Currently in module Next and in a pull request for core.
             'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
             'publicResourceUrl' => Service\ViewHelper\PublicResourceUrlFactory::class,
@@ -49,6 +50,7 @@ return [
         ],
         'factories' => [
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
+            'mediaDimension' => Service\ControllerPlugin\MediaDimensionFactory::class,
         ],
     ],
     'router' => [
