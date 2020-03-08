@@ -168,6 +168,22 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
             ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_seealso_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to use for machine-readable "See also" links', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver-manifest-seealso-property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
             ->add([
                 'name' => 'iiifserver_manifest_logo_default',
                 'type' => Element\Url::class,
@@ -333,6 +349,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_homepage_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_seealso_property',
                 'required' => false,
             ])
             ->add([

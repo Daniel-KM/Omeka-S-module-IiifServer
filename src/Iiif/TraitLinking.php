@@ -200,16 +200,41 @@ trait TraitLinking
      */
     public function getSeeAlso()
     {
+        $output = new \ArrayObject;
+
+        $setting = $this->setting;
+        $property = $setting('iiifserver_manifest_seealso_property');
+
+        /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+        $values = $this->resource->value($property, ['all' => true, 'default' => []]);
+        if ($values) {
+            foreach ($values as $value) {
+                $id= $value->uri() ?: $value->value();
+                if (filter_var($id, FILTER_VALIDATE_URL)) {
+                    if ($value->type() === 'uri') {
+                        $format = $value->value() ?: 'Dataset';
+                    } else {
+                        $format = 'Dataset';
+                    }
+                    $output[] = (object) [
+                        'id' => $id,
+                        'type' => 'Dataset',
+                        'format' => $format,
+                    ];
+                    break;
+                }
+            }
+        }
+
         $helper = $this->urlHelper;
-        $output = [
+        $output[] = (object) [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
             'format' => 'application/ld+json',
             'profile' => $helper('api-context', [], ['force_canonical' => true]),
         ];
-        return [
-            (object) $output,
-        ];
+
+        return $output;
     }
 
     /**

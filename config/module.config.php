@@ -290,6 +290,7 @@ return [
             'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
             'iiifserver_manifest_homepage' => 'resource',
             'iiifserver_manifest_homepage_property' => '',
+            'iiifserver_manifest_seealso_property' => '',
             'iiifserver_manifest_logo_default' => '',
             'iiifserver_manifest_html_descriptive' => true,
             'iiifserver_manifest_properties_collection' => [],
