@@ -37,7 +37,6 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Canvas extends AbstractResourceType
 {
-    use TraitImage;
     use TraitDescriptive;
 
     protected $type = 'Canvas';
@@ -129,7 +128,6 @@ class Canvas extends AbstractResourceType
 
         parent::__construct($resource, $options);
 
-        $this->initImage();
         // TODO Add linking properties when not in manifest.
     }
 
@@ -172,11 +170,67 @@ class Canvas extends AbstractResourceType
     }
 
     /**
-     * As the process converts Omeka resource, there is only one file by canvas.
+     * As the process converts Omeka resource, there is only one file by canvas
+     * currently.
      */
     public function getItems()
     {
-        $item = new AnnotationPage($this->resource, $this->options);
-        return [$item];
+        static $items;
+
+        if (is_null($items)) {
+            $item = new AnnotationPage($this->resource, $this->options);
+            $items = [$item];
+        }
+
+        return $items;
+    }
+
+
+    public function getHeight()
+    {
+        return $this->canvasDimensions()['height'];
+    }
+
+    public function getWidth()
+    {
+        return $this->canvasDimensions()['width'];
+    }
+
+    public function getDuration()
+    {
+        return $this->canvasDimensions()['duration'];
+    }
+
+    protected function canvasDimensions()
+    {
+        static $dimension;
+
+        if (is_null($dimension)) {
+            $heights = [0];
+            $widths = [0];
+            $durations = [0];
+            foreach ($this->getItems() as $item) {
+                foreach ($item->getItems() as $itemItem) {
+                    if ($itemItem->getMotivation() !== 'painting') {
+                        continue;
+                    }
+                    $body = $itemItem->getBody();
+                    if (method_exists($body, 'getHeight')) {
+                        $heights[] = $body->getHeight();
+                    }
+                    if (method_exists($body, 'getWidth')) {
+                        $widths[] = $body->getWidth();
+                    }
+                    if (method_exists($body, 'getDuration')) {
+                        $durations[] = $body->getDuration();
+                    }
+                }
+            }
+            $dimension['height'] = max($heights) ?: null;
+            $dimension['width'] = max($widths) ?: null;
+            $dimension['duration'] = max($durations) ?: null;
+        }
+
+        return $dimension;
     }
 }

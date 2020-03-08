@@ -134,7 +134,8 @@ class Manifest extends AbstractResourceType
     }
 
     /**
-     * As the process converts Omeka resource, there is only one file by canvas.
+     * As the process converts Omeka resource, there is only one file by canvas
+     * currently.
      *
      * Canvas Painting are always Image, Video, or Audio. Other files are Canvas
      * Annotation or Manifest Rendering, for example associated pdf to download.
