@@ -132,6 +132,42 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_homepage',
+                'type' => Element\Select::class,
+                'options' => [
+                    'label' => 'Resource link', // @translate
+                    'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                    'value_options' => [
+                        'none' => 'No link', // @translate
+                        'site' => 'Homepage', // @translate
+                        'resource' => 'Resource page', // @translate
+                        'property' => 'Specified property below', // @translate
+                        'property_or_resource' => 'Property if any, else resource page', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver-manifest-homepage',
+                    'class' => 'chosen-select',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_homepage_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to use for resource link', // @translate
+                    'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver-manifest-homepage-property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+            ->add([
                 'name' => 'iiifserver_manifest_logo_default',
                 'type' => Element\Url::class,
                 'options' => [
@@ -279,11 +315,23 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
+                'name' => 'iiifserver_manifest_rights',
+                'required' => false,
+            ])
+            ->add([
                 'name' => 'iiifserver_manifest_rights_property',
                 'required' => false,
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_url',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_homepage',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_homepage_property',
                 'required' => false,
             ])
             ->add([

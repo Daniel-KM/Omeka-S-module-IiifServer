@@ -48,25 +48,81 @@ trait TraitLinking
      */
     public function getHomepage()
     {
-        $site = $this->defaultSite();
         $setting = $this->setting;
+        $site = $this->defaultSite();
         if ($site) {
-            $id = $site->siteUrl($site->slug(), true);
-            $label = $site->title();
             $siteSettings = $this->resource->getServiceLocator()->get('Omeka\Settings\Site');
             $siteSettings->setTargetId($site->id());
             $language = $siteSettings->get('locale') ?: ($setting('locale') ?: 'none');
         } else {
-            $helper = $this->urlHelper;
-            $id = $helper('top', [], ['force_canonical' => true]);
-            $label = $setting('installation_title');
             $language = $setting('locale') ?: 'none';
+        }
+
+        $homePage = $setting('iiifserver_manifest_homepage', 'resource');
+        switch ($homePage) {
+            case 'none':
+                return null;
+            case 'site':
+                if ($site) {
+                    $id = $site->siteUrl($site->slug(), true);
+                    $label = new ValueLanguage([$language => [$site->title()]]);
+                } else {
+                    $helper = $this->urlHelper;
+                    $id = $helper('top', [], ['force_canonical' => true]);
+                    $label = new ValueLanguage([$language => [$setting('installation_title')]]);
+                }
+                break;
+            case 'property':
+            case 'property_or_resource':
+                $property = $setting('iiifserver_manifest_homepage_property');
+                /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+                $values = $this->resource->value($property, ['all' => true, 'default' => []]);
+                if ($values) {
+                    foreach ($values as $value) {
+                        $val = $value->uri() ?: $value->value();
+                        if (filter_var($val, FILTER_VALIDATE_URL)) {
+                            $id = $val;
+                            break;
+                        }
+                    }
+                }
+                if (isset($id)) {
+                    if ($value->type() === 'uri') {
+                        $fallback = $value->value() ?: 'Source';
+                    } else {
+                        $fallback = 'Source';
+                    }
+                    $label = new ValueLanguage([], false, $fallback);
+                    break;
+                } elseif ($homePage === 'property') {
+                    return null;
+                }
+                // no break;
+            case 'resource':
+            default:
+                if ($site) {
+                    $id = $this->resource->siteUrl($site->slug(), true);
+                } else {
+                    $id = $this->resource->apiUrl();
+                }
+                // displayTitle() can't be used, because language is needed.
+                $template = $this->resource->resourceTemplate();
+                if ($template && $template->titleProperty()) {
+                    $values = $this->resource->value($template->titleProperty()->term(), ['all' => true, 'default' => []]);
+                    if (empty($values)) {
+                        $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+                    }
+                } else {
+                    $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+                }
+                $label = new ValueLanguage($values, false, 'Source');
+                break;
         }
 
         $output = [
             'id' => $id,
             'type' => 'Text',
-            'label' => new ValueLanguage([$language => [$label]]),
+            'label' => $label,
             'format' => 'text/html',
             'language' => [
                 $language,

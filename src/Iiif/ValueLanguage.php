@@ -64,6 +64,7 @@ class ValueLanguage implements JsonSerializable
      *   first value is not a ValueRepresentation, the values are returned directly.
      * @param bool $allowHtml Html is allowed only in summary, metadata value
      *   and requiredStatement.
+     * @param string $fallback
      * @param array|string $fallback
      */
     public function __construct($values, $allowHtml = false, $fallback = null)
