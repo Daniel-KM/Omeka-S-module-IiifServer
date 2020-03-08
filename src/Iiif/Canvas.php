@@ -72,6 +72,7 @@ class Canvas extends AbstractResourceType
         'format' => self::NOT_ALLOWED,
         'profile' => self::NOT_ALLOWED,
         // Height and width should be set together.
+        // Either size and/or duration are required.
         'height' => self::OPTIONAL,
         'width' => self::OPTIONAL,
         'duration' => self::OPTIONAL,
@@ -219,6 +220,18 @@ class Canvas extends AbstractResourceType
             $this->_storage['dimension']['height'] = max($heights) ?: null;
             $this->_storage['dimension']['width'] = max($widths) ?: null;
             $this->_storage['dimension']['duration'] = max($durations) ?: null;
+
+            // The canvas must have a size or a duration. It depends on the type
+            // of the view.
+            // Image / Video.
+            if (empty($this->_storage['dimension']['duration'])) {
+                $this->keys['width'] = self::REQUIRED;
+                $this->keys['height'] = self::REQUIRED;
+            }
+            // Audio / Video.
+            if (empty($this->_storage['dimension']['width'])) {
+                $this->keys['duration'] = self::REQUIRED;
+            }
         }
 
         return $this->_storage['dimension'];
