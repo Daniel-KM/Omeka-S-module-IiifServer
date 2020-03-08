@@ -35,7 +35,6 @@ use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
-use Omeka\Module\Manager as ModuleManager;
 
 class IiifManifest2 extends AbstractHelper
 {
@@ -159,33 +158,28 @@ class IiifManifest2 extends AbstractHelper
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
         $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifsearch');
-
         if ($iiifSearch) {
-            $searchServiceAvailable = true;
-
-            $moduleManager = $item->getServiceLocator()->get('Omeka\ModuleManager');
-            $extractOcrModule = $moduleManager->getModule("ExtractOcr");
-
-            // Checking if module ExtractOcr is installed
-            if ($extractOcrModule
-                && $extractOcrModule->getState() === ModuleManager::STATE_ACTIVE
-            ) {
-                // Checking if item has at least an XML file that will allow search
-                $searchServiceAvailable = false;
-                foreach ($item->media() as $media) {
-                    $mediaType = $media->mediaType();
-                    if (($mediaType == 'application/xml') || ($mediaType == 'text/xml')) {
-                        $searchServiceAvailable = true;
-                    }
+            // Checking if item has at least an XML file that will allow search
+            $searchServiceAvailable = false;
+            $searchMediaTypes = [
+                'application/xml',
+                'text/xml',
+                'application/vnd.pdf+xml',
+            ];
+            foreach ($item->media() as $media) {
+                $mediaType = $media->mediaType();
+                if (in_array($mediaType, $searchMediaTypes)) {
+                    $searchServiceAvailable = true;
+                    break;
                 }
             }
 
             if ($searchServiceAvailable) {
                 $manifest['service'] = [
-                    '@context' => 'http://iiif.io/api/search/0/context.json',
+                    '@context' => 'http://iiif.io/api/search/1/context.json',
                     '@id' => $iiifSearch . $item->id(),
-                    'profile' => 'http://iiif.io/api/search/0/search',
-                    'label' => 'Search within this manifest',
+                    'profile' => 'http://iiif.io/api/search/1/search',
+                    'label' => 'Search within this manifest', // @transalte
                 ];
             }
         }
