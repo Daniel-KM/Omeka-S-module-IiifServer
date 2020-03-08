@@ -88,7 +88,7 @@ abstract class AbstractType implements JsonSerializable
         // Always refresh the content.
         $this->content = new ArrayObject;
 
-        $allowedKeys = array_filter($this->keys, function($v) {
+        $allowedKeys = array_filter($this->keys, function ($v) {
             return $v !== self::NOT_ALLOWED;
         });
         foreach (array_keys($allowedKeys) as $key) {
@@ -120,7 +120,7 @@ abstract class AbstractType implements JsonSerializable
     {
         $output = $this->getCleanContent();
         // Check if all required data are present.
-        $requiredKeys = array_filter($this->keys, function($v) {
+        $requiredKeys = array_filter($this->keys, function ($v) {
             return $v === self::REQUIRED;
         });
         $intersect = array_intersect_key($requiredKeys, $output);
@@ -167,7 +167,7 @@ abstract class AbstractType implements JsonSerializable
      */
     protected function getCleanContent()
     {
-        return $this->content = array_filter($this->getContent()->getArrayCopy(), function($v) {
+        return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v) {
             if ($v instanceof ArrayObject) {
                 return (bool) $v->count();
             }

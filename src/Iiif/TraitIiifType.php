@@ -31,7 +31,7 @@ namespace IiifServer\Iiif;
 
 trait TraitIiifType
 {
-     /**
+    /**
      * The rendering types are defined by the resource class and media type.
      *
      * Note: the resource class of the item is not used.

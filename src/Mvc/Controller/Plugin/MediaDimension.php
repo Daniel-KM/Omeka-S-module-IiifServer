@@ -3,10 +3,10 @@ namespace IiifServer\Mvc\Controller\Plugin;
 
 use JamesHeinrich\GetID3\GetId3;
 use Omeka\File\TempFileFactory;
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Mvc\Exception\RuntimeException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-use Omeka\Api\Representation\MediaRepresentation;
 
 class MediaDimension extends AbstractPlugin
 {

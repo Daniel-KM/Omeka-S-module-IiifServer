@@ -197,7 +197,7 @@ class IiifCollectionList2 extends AbstractHelper
      */
     protected function buildIdentifierForList(array $resources)
     {
-        return array_map(function($v) {
+        return array_map(function ($v) {
             return $v->id();
         }, $resources);
     }

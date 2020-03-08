@@ -160,7 +160,7 @@ class IiifManifest2 extends AbstractHelper
 
         $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifsearch');
 
-        if ( $iiifSearch ) {
+        if ($iiifSearch) {
             $searchServiceAvailable = true;
 
             $moduleManager = $item->getServiceLocator()->get('Omeka\ModuleManager');
@@ -172,7 +172,7 @@ class IiifManifest2 extends AbstractHelper
             ) {
                 // Checking if item has at least an XML file that will allow search
                 $searchServiceAvailable = false;
-                foreach ( $item->media() as $media ) {
+                foreach ($item->media() as $media) {
                     $mediaType = $media->mediaType();
                     if (($mediaType == 'application/xml') || ($mediaType == 'text/xml')) {
                         $searchServiceAvailable = true;
@@ -184,8 +184,8 @@ class IiifManifest2 extends AbstractHelper
                 $manifest['service'] = [
                     '@context' => 'http://iiif.io/api/search/0/context.json',
                     '@id' => $iiifSearch . $item->id(),
-                    "profile" => "http://iiif.io/api/search/0/search",
-                    "label" => "Search within this manifest"
+                    'profile' => 'http://iiif.io/api/search/0/search',
+                    'label' => 'Search within this manifest',
                 ];
             }
         }

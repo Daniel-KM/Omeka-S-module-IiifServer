@@ -74,7 +74,7 @@ trait TraitLinking
         ];
 
         return [
-            (object) $output
+            (object) $output,
         ];
     }
 

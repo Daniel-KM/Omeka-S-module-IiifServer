@@ -38,7 +38,6 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 
 use Generic\AbstractModule;
 use IiifServer\Form\ConfigForm;
-use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\AbstractController;
 use Zend\Mvc\MvcEvent;
 use Zend\View\Renderer\PhpRenderer;

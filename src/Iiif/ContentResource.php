@@ -133,7 +133,6 @@ class ContentResource extends AbstractResourceType
         return $helper($url);
     }
 
-
     /**
      * The label is not a title, but an info about the type, since the main
      * label is already known.

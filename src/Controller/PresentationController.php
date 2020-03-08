@@ -141,7 +141,6 @@ class PresentationController extends AbstractActionController
             return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
         }
 
-
         return $this->iiifJsonLd($manifest, $version);
     }
 
