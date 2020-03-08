@@ -18,7 +18,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_version',
                 'type' => Element\Radio::class,
                 'options' => [
-                    'label' => 'Default api version (manifest)', // @translate
+                    'label' => 'Default IIIF api version (manifest)', // @translate
                     'info' => 'Set the version of the manifest to provide. Note that the version is automatically selected when a request specifies it.', // @translate
                     'value_options' => [
                         '2' => '2', // @translate
@@ -235,6 +235,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_service_iiifsearch',
+                'type' => Element\Url::class,
+                'options' => [
+                    'label' => 'IIIF Search base url', // @translate
+                    'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the viewer.',  // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_force_url_from',
                 'type' => Element\Text::class,
                 'options' => [
@@ -257,24 +266,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'id' => 'iiifserver-manifest-force-url-to',
                 ],
             ])
-
-            ->add([
-                'name' => 'iiifserver_manifest_service_media',
-                'type' => Element\Url::class,
-                'options' => [
-                    'label' => 'IIIF Media base url', // @translate
-                    'info' => 'This url will be used to manage media that are not image. The module ImageServer is automatically managed, but not external media servers.',  // @translate
-                ],
-            ])
-
-            ->add([
-                'name' => 'iiifserver_manifest_service_iiifsearch',
-                'type' => Element\Url::class,
-                'options' => [
-                    'label' => 'IIIF Search url', // @translate
-                    'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the viewer.',  // @translate
-                ],
-            ])
         ;
 
         $inputFilter = $this->getInputFilter();
@@ -289,6 +280,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_rights_url',
                 'required' => false,
             ])
             ->add([
