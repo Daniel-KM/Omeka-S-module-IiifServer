@@ -37,9 +37,9 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Manifest extends AbstractResourceType
 {
-    use TraitImage;
     use TraitDescriptive;
     use TraitLinking;
+    use TraitThumbnail;
 
     protected $type = 'Manifest';
 
@@ -117,8 +117,8 @@ class Manifest extends AbstractResourceType
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
-        $this->initImage();
         $this->initLinking();
+        $this->initThumbnail();
     }
 
     public function getId()

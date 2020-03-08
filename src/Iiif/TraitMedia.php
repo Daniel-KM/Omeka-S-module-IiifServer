@@ -37,6 +37,11 @@ trait TraitMedia
     protected $mediaDimensionHelper;
 
     /**
+     * @var \IiifServer\View\Helper\ImageSize
+     */
+    protected $imageSizeHelper;
+
+    /**
      * @var \IiifServer\View\Helper\IiifImageUrl
      */
     protected $iiifImageUrl;
@@ -45,6 +50,13 @@ trait TraitMedia
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->mediaDimensionHelper = $viewHelpers->get('mediaDimension');
+        // It's quicker to use image size helper for images.
+        $this->imageSizeHelper = $viewHelpers->get('imageSize');
+    }
+
+    public function isImage()
+    {
+        return $this->type === 'Image';
     }
 
     public function isAudioVideo()
@@ -64,28 +76,26 @@ trait TraitMedia
 
     public function getHeight()
     {
-        $size = $this->mediaSize();
-        return $size ? $size['height'] : null;
+        return $this->mediaSize()['height'];
     }
 
     public function getWidth()
     {
-        $size = $this->mediaSize();
-        return $size ? $size['width'] : null;
+        return $this->mediaSize()['width'];
     }
 
     public function getDuration()
     {
-        $data = $this->mediaDimension();
-        return isset($data['duration']) ? $data['duration'] : null;
+        return $this->mediaDimension()['duration'];
     }
 
     protected function mediaSize()
     {
         $data = $this->mediaDimension();
-        return isset($data['width'])
-            ? ['height' => $data['height'], 'width' => $data['width']]
-            : null;
+        return [
+            'width' => $data['width'],
+            'height' => $data['height'],
+        ];
     }
 
     protected function mediaDimension()
@@ -94,8 +104,16 @@ trait TraitMedia
             if ($this->isAudioVideo()) {
                 $helper = $this->mediaDimensionHelper;
                 $this->_storage['media_dimension'] = $helper($this->resource->primaryMedia());
+            } elseif ($this->isImage()) {
+                $helper = $this->imageSizeHelper;
+                $this->_storage['media_dimension'] = $helper($this->resource->primaryMedia());
+                if ($this->_storage['media_dimension']) {
+                    $this->_storage['media_dimension']['duration'] = null;
+                } else {
+                    $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
+                }
             } else {
-                $this->_storage['media_dimension'] = null;
+                $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
             }
         }
         return $this->_storage['media_dimension'];

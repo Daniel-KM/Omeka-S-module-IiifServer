@@ -29,7 +29,7 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitImage
+trait TraitThumbnail
 {
     /**
      * @var \IiifServer\View\Helper\ImageSize
@@ -41,34 +41,11 @@ trait TraitImage
      */
     protected $iiifImageUrl;
 
-    protected function initImage()
+    protected function initThumbnail()
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->imageSizeHelper = $viewHelpers->get('imageSize');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
-    }
-
-    public function isImage()
-    {
-        return $this->type === 'Image';
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getHeight()
-    {
-        $size = $this->imageSize();
-        return $size ? $size['height'] : null;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getWidth()
-    {
-        $size = $this->imageSize();
-        return $size ? $size['width'] : null;
     }
 
     public function getThumbnail()
@@ -120,23 +97,5 @@ trait TraitImage
         return [
             (object) $thumbnail,
         ];
-    }
-
-    protected function imageSize($type = 'original')
-    {
-        if (!$this->isImage()) {
-            return null;
-        }
-
-        if (!array_key_exists('image_sizes', $this->_storage)) {
-            $this->_storage['image_sizes'] = [];
-        }
-
-        if (!array_key_exists($type, $this->_storage['image_sizes'])) {
-            $helper = $this->imageSizeHelper;
-            $this->_storage['image_sizes'][$type] = $helper($this->resource->primaryMedia(), $type) ?: null;
-        }
-
-        return $this->_storage['image_sizes'][$type];
     }
 }

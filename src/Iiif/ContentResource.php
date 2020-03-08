@@ -39,8 +39,8 @@ use Omeka\Api\Representation\MediaRepresentation;
 class ContentResource extends AbstractResourceType
 {
     use TraitIiifType;
-    use TraitImage;
     use TraitMedia;
+    use TraitThumbnail;
 
     /**
      * This is not the real type and must be set more precisely.
@@ -103,9 +103,9 @@ class ContentResource extends AbstractResourceType
     {
         parent::__construct($resource, $options);
         $this->initIiifType();
-        $this->prepareMediaId();
-        $this->initImage();
         $this->initMedia();
+        $this->initThumbnail();
+        $this->prepareMediaId();
     }
 
     public function isValid()
@@ -164,34 +164,6 @@ class ContentResource extends AbstractResourceType
             return $mediaType;
         }
         return null;
-    }
-
-    /**
-     * This method is required to overload TraitImage and TraitMedia.
-     * @return NULL
-     */
-    public function getHeight()
-    {
-        if ($this->isImage()) {
-            $size = $this->imageSize();
-        } elseif ($this->isVideo()) {
-            $size = $this->mediaSize();
-        } else {
-            return null;
-        }
-        return $size ? $size['height'] : null;
-    }
-
-    public function getWidth()
-    {
-        if ($this->isImage()) {
-            $size = $this->imageSize();
-        } elseif ($this->isVideo()) {
-            $size = $this->mediaSize();
-        } else {
-            return null;
-        }
-        return $size ? $size['width'] : null;
     }
 
     protected function prepareMediaId()
