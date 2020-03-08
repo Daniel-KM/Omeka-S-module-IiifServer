@@ -141,24 +141,21 @@ trait TraitLinking
      */
     protected function defaultSite()
     {
-        static $site;
-
-        if (is_null($site)) {
+        if (!array_key_exists('site', $this->_storage)) {
             $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');
             $setting = $this->setting;
             $defaultSiteId = $setting('default_site');
             if ($defaultSiteId) {
                 try {
-                    $site = $api->read('sites', ['id' => $defaultSiteId])->getContent();
+                    $this->_storage['site'] = $api->read('sites', ['id' => $defaultSiteId])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                    $site = false;
+                    $this->_storage['site'] = null;
                 }
             } else {
                 $sites = $api->search('sites', ['limit' => 1, 'sort_by' => 'id'])->getContent();
-                $site = reset($sites);
+                $this->_storage['site'] = reset($sites);
             }
         }
-
-        return $site ?: null;
+        return $this->_storage['site'];
     }
 }

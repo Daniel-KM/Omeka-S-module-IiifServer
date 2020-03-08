@@ -90,17 +90,14 @@ trait TraitMedia
 
     protected function mediaDimension()
     {
-        static $info = false;
-
-        if (!$this->isAudioVideo()) {
-            return null;
+        if (!array_key_exists('media_dimension', $this->_storage)) {
+            if ($this->isAudioVideo()) {
+                $helper = $this->mediaDimensionHelper;
+                $this->_storage['media_dimension'] = $helper($this->resource->primaryMedia());
+            } else {
+                $this->_storage['media_dimension'] = null;
+            }
         }
-
-        if ($info === false) {
-            $helper = $this->mediaDimensionHelper;
-            $info = $helper($this->resource->primaryMedia());
-        }
-
-        return $info;
+        return $this->_storage['media_dimension'];
     }
 }

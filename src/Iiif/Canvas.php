@@ -170,14 +170,11 @@ class Canvas extends AbstractResourceType
      */
     public function getItems()
     {
-        static $items;
-
-        if (is_null($items)) {
+        if (!array_key_exists('items', $this->_storage)) {
             $item = new AnnotationPage($this->resource, $this->options);
-            $items = [$item];
+            $this->_storage['items'] = [$item];
         }
-
-        return $items;
+        return $this->_storage['items'];
     }
 
 
@@ -198,9 +195,7 @@ class Canvas extends AbstractResourceType
 
     protected function canvasDimensions()
     {
-        static $dimension;
-
-        if (is_null($dimension)) {
+        if (!array_key_exists('dimension', $this->_storage)) {
             $heights = [0];
             $widths = [0];
             $durations = [0];
@@ -221,11 +216,11 @@ class Canvas extends AbstractResourceType
                     }
                 }
             }
-            $dimension['height'] = max($heights) ?: null;
-            $dimension['width'] = max($widths) ?: null;
-            $dimension['duration'] = max($durations) ?: null;
+            $this->_storage['dimension']['height'] = max($heights) ?: null;
+            $this->_storage['dimension']['width'] = max($widths) ?: null;
+            $this->_storage['dimension']['duration'] = max($durations) ?: null;
         }
 
-        return $dimension;
+        return $this->_storage['dimension'];
     }
 }

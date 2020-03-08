@@ -139,24 +139,24 @@ class Rendering extends AbstractResourceType
 
     public function getId()
     {
-        static $id;
-
-        if (is_null($id)) {
+        if (!array_key_exists('id', $this->_storage)) {
             // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
             $url = $this->resource->originalUrl();
             if ($url) {
                 $id = $url;
             } else {
                 $siteSlug = @$this->options['siteSlug'];
-                if (!$siteSlug) {
-                    return null;
+                if ($siteSlug) {
+                    // TODO Return media page or item page? Add an option.
+                    $id = $this->resource->siteUrl($siteSlug, true);
+                } else {
+                    $id = null;
                 }
-                // TODO Return media page or item page? Add an option.
-                $id = $this->resource->siteUrl($siteSlug, true);
             }
+            $this->_storage['id'] = $id;
         }
 
-        return $id;
+        return $this->_storage['id'];
     }
 
     public function getType()

@@ -201,15 +201,13 @@ class Manifest extends AbstractResourceType
      */
     protected function mediaInfo(MediaRepresentation $media)
     {
-        static $mediaData;
-
-        if (is_null($mediaData)) {
-            $mediaData = $this->prepareMediaLists();
+        if (!array_key_exists('media_info', $this->_storage)) {
+            $this->_storage['media_info'] = $this->prepareMediaLists();
         }
 
         $mediaId = $media->id();
-        return isset($mediaData[$mediaId])
-            ? $mediaData[$mediaId]
+        return isset($this->_storage['media_info'][$mediaId])
+            ? $this->_storage['media_info'][$mediaId]
             : null;
     }
 

@@ -60,6 +60,14 @@ abstract class AbstractType implements JsonSerializable
     protected $keys = [];
 
     /**
+     * In some cases, it is useful to have an internal storage for temp values.
+     * This property is a uniform way to manage them.
+     *
+     * @var array
+     */
+    protected $_storage = [];
+
+    /**
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation
      */
     public function getResource()

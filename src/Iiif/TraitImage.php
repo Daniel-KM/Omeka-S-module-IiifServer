@@ -124,17 +124,19 @@ trait TraitImage
 
     protected function imageSize($type = 'original')
     {
-        static $sizes = [];
-
         if (!$this->isImage()) {
             return null;
         }
 
-        if (!array_key_exists($type, $sizes)) {
-            $helper = $this->imageSizeHelper;
-            $sizes[$type] = $helper($this->resource->primaryMedia(), $type) ?: null;
+        if (!array_key_exists('image_sizes', $this->_storage)) {
+            $this->_storage['image_sizes'] = [];
         }
 
-        return $sizes[$type];
+        if (!array_key_exists($type, $this->_storage['image_sizes'])) {
+            $helper = $this->imageSizeHelper;
+            $this->_storage['image_sizes'][$type] = $helper($this->resource->primaryMedia(), $type) ?: null;
+        }
+
+        return $this->_storage['image_sizes'][$type];
     }
 }
