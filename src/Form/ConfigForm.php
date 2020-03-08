@@ -145,6 +145,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                         'resource' => 'Resource page', // @translate
                         'property' => 'Specified property below', // @translate
                         'property_or_resource' => 'Property if any, else resource page', // @translate
+                        'property_and_resource' => 'Property if any, and resource page', // @translate
                     ],
                 ],
                 'attributes' => [

@@ -48,6 +48,8 @@ trait TraitLinking
      */
     public function getHomepage()
     {
+        $output = new \ArrayObject;
+
         $setting = $this->setting;
         $site = $this->defaultSite();
         if ($site) {
@@ -71,9 +73,19 @@ trait TraitLinking
                     $id = $helper('top', [], ['force_canonical' => true]);
                     $label = new ValueLanguage([$language => [$setting('installation_title')]]);
                 }
+                $output[] = (object) [
+                    'id' => $id,
+                    'type' => 'Text',
+                    'label' => $label,
+                    'format' => 'text/html',
+                    'language' => [
+                        $language,
+                    ],
+                ];
                 break;
             case 'property':
             case 'property_or_resource':
+            case 'property_and_resource':
                 $property = $setting('iiifserver_manifest_homepage_property');
                 /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
                 $values = $this->resource->value($property, ['all' => true, 'default' => []]);
@@ -93,7 +105,18 @@ trait TraitLinking
                         $fallback = 'Source';
                     }
                     $label = new ValueLanguage([], false, $fallback);
-                    break;
+                    $output[] = (object) [
+                        'id' => $id,
+                        'type' => 'Text',
+                        'label' => $label,
+                        'format' => 'text/html',
+                        'language' => [
+                            $language,
+                        ],
+                    ];
+                    if ($homePage !== 'property_and_resource') {
+                        break;
+                    }
                 } elseif ($homePage === 'property') {
                     return null;
                 }
@@ -116,22 +139,19 @@ trait TraitLinking
                     $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
                 }
                 $label = new ValueLanguage($values, false, 'Source');
+                $output[] = (object) [
+                    'id' => $id,
+                    'type' => 'Text',
+                    'label' => $label,
+                    'format' => 'text/html',
+                    'language' => [
+                        $language,
+                    ],
+                ];
                 break;
         }
 
-        $output = [
-            'id' => $id,
-            'type' => 'Text',
-            'label' => $label,
-            'format' => 'text/html',
-            'language' => [
-                $language,
-            ],
-        ];
-
-        return [
-            (object) $output,
-        ];
+        return $output;
     }
 
     /**
