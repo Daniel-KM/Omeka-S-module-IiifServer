@@ -100,6 +100,46 @@ trait TraitIiifType
         // @see \Next\File\TempFile::xmlMediaTypes
         'application/vnd.recordare.musicxml' => 'Text',
         'application/vnd.mei+xml' => 'Text',
+        'application/vnd.pdf+xml' => 'Text',
+    ];
+
+    /**
+     * Some labels for common formats.
+     *
+     * @var array
+     */
+    protected $mediaLabels = [
+        // @see \Omeka\Form\SettingForm::MEDIA_TYPE_WHITELIST
+        'application/msword' => 'Document Word',
+        'application/ogg' => 'Audio OGG',
+        'application/pdf' => 'Document PDF',
+        'application/rtf' => 'Document RTF',
+        'application/vnd.ms-access' => 'Database Access',
+        'application/vnd.ms-excel' => 'Spreadsheet Excel',
+        'application/vnd.ms-powerpoint' => 'Presentation Powerpoint',
+        'application/vnd.ms-project' => 'Microsoft Project',
+        'application/vnd.ms-write' => 'Document Write',
+        'application/vnd.oasis.opendocument.chart' => 'Chart OpenDocument',
+        'application/vnd.oasis.opendocument.database' => 'Database OpenDocument',
+        'application/vnd.oasis.opendocument.formula' => 'Formula OpenDocument',
+        'application/vnd.oasis.opendocument.graphics' => 'Graphics OpenDocument',
+        'application/vnd.oasis.opendocument.presentation' => 'Presentation OpenDocument',
+        'application/vnd.oasis.opendocument.spreadsheet' => 'Spreadsheet OpenDocument',
+        'application/vnd.oasis.opendocument.text' => 'Document OpenDocument',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Document Word',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Presentation Powerpoint',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Spreadsheet Excel',
+        'application/x-gzip' => 'Achive Zip',
+        'application/x-ms-wmp' => 'Video Windows',
+        'application/x-msdownload' => 'File Windows',
+        'application/x-shockwave-flash' => 'Flash',
+        'application/x-tar' => 'Archive Tar',
+        'application/zip' => 'Archive Zip',
+        'application/xml' => 'XML',
+        // @see \Next\File\TempFile::xmlMediaTypes
+        'application/vnd.recordare.musicxml' => 'MusicXML',
+        'application/vnd.mei+xml' => 'Music MEI',
+        'application/vnd.pdf+xml' => 'Document PDF',
     ];
 
     protected $rendererTypes = [

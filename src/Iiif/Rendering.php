@@ -97,9 +97,12 @@ class Rendering extends AbstractResourceType
         }
 
         $format = $this->getFormat();
+        if (isset($this->mediaLabels[$format])) {
+            $format = $this->mediaLabels[$format];
+        }
         $label = $format
             ? sprintf('%1$s [%2$s]', $this->type, $format)
-            : $format;
+            : $this->type;
         return new ValueLanguage(['none' => $label]);
     }
 

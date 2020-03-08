@@ -47,7 +47,7 @@ class ContentResource extends AbstractResourceType
      *
      * @var string
      */
-    protected $type = 'ContentResource';
+    protected $type = null;
 
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
@@ -110,7 +110,7 @@ class ContentResource extends AbstractResourceType
 
     public function hasIdAndType()
     {
-        return $this->id && $this->type && $this->type !== 'ContentResource';
+        return $this->id && $this->type;
     }
 
     public function getId()
@@ -142,10 +142,17 @@ class ContentResource extends AbstractResourceType
      */
     public function getLabel()
     {
+        if (!$this->type) {
+            return null;
+        }
+
         $format = $this->getFormat();
+        if (isset($this->mediaLabels[$format])) {
+            $format = $this->mediaLabels[$format];
+        }
         $label = $format
             ? sprintf('%1$s [%2$s]', $this->type, $format)
-            : $format;
+            : $this->type;
         return new ValueLanguage(['none' => $label]);
     }
 
