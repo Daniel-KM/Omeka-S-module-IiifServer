@@ -109,8 +109,7 @@ class Annotation extends AbstractResourceType
 
     public function getMotivation()
     {
-        // TODO Remove the default motivation or allow to rebuild it.
-        return isset($this->options['motivation']) ? $this->options['motivation'] : 'painting';
+        return isset($this->options['motivation']) ? $this->options['motivation'] : null;
     }
 
     public function getBody()
