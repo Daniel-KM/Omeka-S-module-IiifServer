@@ -192,12 +192,12 @@ class PresentationController extends AbstractActionController
 
         $iiifCanvas = $this->viewHelpers()->get('iiifCanvas');
         try {
-            $canvas = $iiifCanvas($resource, $index, $version);
+            $manifest = $iiifCanvas($resource, $index, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
             return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
         }
 
-        return $this->iiifJsonLd($canvas, $version);
+        return $this->iiifJsonLd($manifest, $version);
     }
 
     public function genericAction()

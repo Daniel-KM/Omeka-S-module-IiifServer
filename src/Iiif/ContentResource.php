@@ -108,7 +108,7 @@ class ContentResource extends AbstractResourceType
         $this->prepareMediaId();
     }
 
-    public function isValid()
+    public function hasIdAndType()
     {
         return $this->id && $this->type && $this->type !== 'ContentResource';
     }

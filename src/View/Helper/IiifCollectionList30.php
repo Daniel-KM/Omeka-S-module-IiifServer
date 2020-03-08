@@ -40,6 +40,7 @@ class IiifCollectionList30 extends AbstractHelper
      * Get the IIIF Collection manifest for the specified list of resources.
      *
      * @param array $resources Array of resources.
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke($resources)

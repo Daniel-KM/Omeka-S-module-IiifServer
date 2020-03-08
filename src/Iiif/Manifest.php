@@ -259,7 +259,7 @@ class Manifest extends AbstractResourceType
             $mediaId = $media->id();
             $result[$mediaId] = null;
             $contentResource = new ContentResource($media);
-            if ($contentResource->isValid()) {
+            if ($contentResource->hasIdAndType()) {
                 $type = $contentResource->getType();
                 if (in_array($type, ['Image', 'Video', 'Audio', 'Text'])) {
                     $types[$type][$mediaId] = [

@@ -40,6 +40,7 @@ class IiifCanvas extends AbstractHelper
      * @param MediaRepresentation $media
      * @param string $index
      * @param string $version
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke(MediaRepresentation $resource, $index, $version = null)

@@ -40,6 +40,7 @@ class IiifManifest extends AbstractHelper
      *
      * @param AbstractResourceEntityRepresentation $resource
      * @param string $version
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null)

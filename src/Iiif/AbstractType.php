@@ -75,6 +75,14 @@ abstract class AbstractType implements JsonSerializable
      */
     protected $_storage = [];
 
+    /**
+     * @return string
+     */
+    public function getType()
+    {
+        return (string) $this->type;
+    }
+
     public function getContent()
     {
         // Always refresh the content.
@@ -95,25 +103,58 @@ abstract class AbstractType implements JsonSerializable
 
     public function jsonSerialize()
     {
-        $output = $this->getCleanContent();
-
+        // The validity check updates the content.
+        $this->isValid(true);
         // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
+        return (object) $this->content;
+    }
 
+    /**
+     * Check validity for the object and related objects.
+     *
+     * @param bool $throwException
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
+     * @return bool
+     */
+    public function isValid($throwException = false)
+    {
+        $output = $this->getCleanContent();
         // Check if all required data are present.
         $requiredKeys = array_filter($this->keys, function($v) {
             return $v === self::REQUIRED;
         });
         $intersect = array_intersect_key($requiredKeys, $output);
-        if (count($requiredKeys) !== count($intersect)) {
+
+        $e = null;
+        if (count($requiredKeys) === count($intersect)) {
+            // Second check for the children.
+            // Instead of a recursive method, use jsonSerialize.
+            try {
+                json_encode($output);
+                return true;
+            } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            }
+        }
+
+        if ($throwException) {
             $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
-            $message = new Message(
-                'Missing required keys for resource type "%1$s": "%2$s".', // @translate
-                $this->getType(), implode('", "', $missingKeys)
-            );
+            if ($e) {
+                $message = $e->getMessage();
+            } elseif (isset($this->resource)) {
+                $message = new Message(
+                    'Missing required keys for resource type "%1$s": "%2$s" (resource #%3$d).', // @translate
+                    $this->getType(), implode('", "', $missingKeys), $this->resource->id()
+                );
+            } else {
+                $message = new Message(
+                    'Missing required keys for resource type "%1$s": "%2$s".', // @translate
+                    $this->getType(), implode('", "', $missingKeys)
+                );
+            }
             throw new \IiifServer\Iiif\Exception\RuntimeException($message);
         }
 
-        return (object) $output;
+        return false;
     }
 
     /**
@@ -126,7 +167,7 @@ abstract class AbstractType implements JsonSerializable
      */
     protected function getCleanContent()
     {
-        return array_filter($this->getContent()->getArrayCopy(), function($v) {
+        return $this->content = array_filter($this->getContent()->getArrayCopy(), function($v) {
             if ($v instanceof ArrayObject) {
                 return (bool) $v->count();
             }
@@ -135,13 +176,5 @@ abstract class AbstractType implements JsonSerializable
             }
             return !empty($v);
         });
-    }
-
-    /**
-     * @return string
-     */
-    public function getType()
-    {
-        return (string) $this->type;
     }
 }

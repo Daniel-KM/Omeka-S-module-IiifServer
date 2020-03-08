@@ -40,7 +40,8 @@ class IiifCanvas30 extends AbstractHelper
      *
      * @param MediaRepresentation $resource
      * @param int $index Used to set the standard name of the image.
-     * @return Object|null
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
+     * @return Canvas|null
      */
     public function __invoke(MediaRepresentation $media, $index)
     {
@@ -51,9 +52,10 @@ class IiifCanvas30 extends AbstractHelper
         $format = 'canvas';
         $type = 'media';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'format', 'canvas', 'resource', 'type');
+        $params = compact('format', 'canvas', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
-        return $canvas->jsonSerialize();
+        $canvas->isValid(true);
+        return $canvas;
     }
 }

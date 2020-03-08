@@ -43,6 +43,7 @@ class IiifCollection extends AbstractHelper
      *
      * @param ItemSetRepresentation $itemSet Item set
      * @param string $version
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke(ItemSetRepresentation $itemSet, $version = null)

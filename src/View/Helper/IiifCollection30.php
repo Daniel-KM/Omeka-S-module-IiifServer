@@ -42,7 +42,8 @@ class IiifCollection30 extends AbstractHelper
      * Get the IIIF Collection manifest for the specified item set (API Presentation 3.0).
      *
      * @param ItemSetRepresentation $itemSet Item set
-     * @return Object|null
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
+     * @return Collection|null
      */
     public function __invoke(ItemSetRepresentation $itemSet)
     {
@@ -53,9 +54,10 @@ class IiifCollection30 extends AbstractHelper
         $format = 'collection';
         $type = 'collection';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'format', 'collection', 'resource', 'type');
+        $params = compact('format', 'collection', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
-        return $collection->jsonSerialize();
+        $collection->isValid(true);
+        return $collection;
     }
 }

@@ -77,7 +77,7 @@ class IiifManifest30 extends AbstractHelper
      * Get the IIIF manifest for the specified item.
      *
      * @param ItemRepresentation $item
-     * @return Object|null. The object corresponding to the manifest.
+     * @return Manifest|null
      */
     protected function buildManifestItem(ItemRepresentation $item)
     {
@@ -88,9 +88,10 @@ class IiifManifest30 extends AbstractHelper
         $format = 'manifest';
         $type = 'item';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'format', 'manifest', 'resource', 'type');
+        $params = compact('format', 'manifest', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
-        return $manifest->jsonSerialize();
+        $manifest->isValid(true);
+        return $manifest;
     }
 }

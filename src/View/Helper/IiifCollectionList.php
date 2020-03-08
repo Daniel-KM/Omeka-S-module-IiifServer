@@ -41,6 +41,7 @@ class IiifCollectionList extends AbstractHelper
      *
      * @param array $resources Array of resources.
      * @param string $version
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke($resources, $version = null)
