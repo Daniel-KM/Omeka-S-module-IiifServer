@@ -48,17 +48,17 @@ trait TraitMedia
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
     }
 
-    protected function isAudioVideo()
+    public function isAudioVideo()
     {
         return $this->type === 'Video' || $this->type === 'Audio';
     }
 
-    protected function isAudio()
+    public function isAudio()
     {
         return $this->type === 'Audio';
     }
 
-    protected function isVideo()
+    public function isVideo()
     {
         return $this->type === 'Video';
     }

@@ -30,7 +30,6 @@
 namespace IiifServer\Iiif\Annotation;
 
 use IiifServer\Iiif\AbstractResourceType;
-use IiifServer\Iiif\TraitImage;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
@@ -38,15 +37,6 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class Body extends AbstractResourceType
 {
-    use TraitImage;
-
-    /**
-     * @todo Manage other types than image.
-     *
-     * @var string
-     */
-    protected $type = 'Image';
-
     protected $keys = [
         // Types for annotation body are not iiif.
 
@@ -55,20 +45,28 @@ class Body extends AbstractResourceType
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
         'format' => self::REQUIRED,
-        'service' => self::REQUIRED,
+        // These keys are required or not allowed according to the type (image,
+        // audio, or video).
+        'service' => self::RECOMMENDED,
         'height' => self::RECOMMENDED,
         'width' => self::RECOMMENDED,
+        'duration' => self::RECOMMENDED,
     ];
 
     /**
-     * @var \Omeka\Api\Representation\MediaRepresentation
+     * @var \IiifServer\View\Helper\IiifImageUrl
      */
-    protected $resource;
+    protected $iiifImageUrl;
 
     /**
      * @var string
      */
     protected $serviceLevel;
+
+    /**
+     * @var \IiifServer\Iiif\ContentResource
+     */
+    protected $contentResource;
 
     /**
      * @param AbstractResourceEntityRepresentation $resource
@@ -77,69 +75,92 @@ class Body extends AbstractResourceType
      */
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
+        $this->contentResource = $options['content'];
+        unset($options['content']);
+
         parent::__construct($resource, $options);
-        $this->initImage();
 
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        $setting = $viewHelpers->get('setting');
+        $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+
+        $setting = $this->setting;
         $this->serviceLevel = $setting('imageserver_manifest_version', '2.1');
     }
 
     public function getId()
     {
-        $size = $this->imageSize();
-        if (!$size) {
-            return null;
+        /** @var \IiifServer\Iiif\ContentResource $contentResource */
+        if ($this->contentResource->isImage()) {
+            $helper = $this->iiifImageUrl;
+            return $helper(
+                'imageserver/media',
+                [
+                    'id' => $this->resource->id(),
+                    'region' => 'full',
+                    'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
+                    'rotation' => 0,
+                    'quality' => 'default',
+                    'format' => 'jpg',
+                ]
+            );
         }
 
-        $helper = $this->iiifImageUrl;
-        return $helper(
-            'imageserver/media',
-            [
-                'id' => $this->resource->id(),
-                'region' => 'full',
-                'size' => $size['width'] . ',' . $size['height'],
-                'rotation' => 0,
-                'quality' => 'default',
-                'format' => 'jpg',
-            ]
-        );
+        if ($this->contentResource->isAudioVideo()) {
+            $helper = $this->iiifImageUrl;
+            return $helper(
+                'mediaserver/media',
+                [
+                    'id' => $this->resource->id(),
+                    'format' => $this->resource->extension(),
+                ]
+            );
+        }
+
+        return $this->contentResource->getId();
+    }
+
+    public function getType()
+    {
+        return $this->contentResource->getType();
     }
 
     public function getFormat()
     {
-        return $this->resource->mediaType();
+        return $this->contentResource->getFormat();
     }
 
     public function getService()
     {
-        // TODO Use the json from the image server.
+        if ($this->contentResource->isImage()) {
+            // TODO Use the json from the image server.
+            $helper = $this->urlHelper;
+            $url = $helper(
+                'imageserver/id',
+                [
+                    'id' => $this->resource->id(),
+                ],
+                ['force_canonical' => true]
+            );
+            $helper = $this->iiifForceBaseUrlIfRequired;
+            $id = $helper($url);
 
-        $helper = $this->urlHelper;
-        $url = $helper(
-            'imageserver/id',
-            [
-                'id' => $this->resource->id(),
-            ],
-            ['force_canonical' => true]
-        );
-        $helper = $this->iiifForceBaseUrlIfRequired;
-        $id = $helper($url);
-
-        switch ($this->serviceLevel) {
-            case '3.0':
-                return (object) [
-                    'id' => $id,
-                    'type' => 'ImageService3',
-                    'profile' => 'level2',
-                ];
-            case '2.1':
-            default:
-                return (object) [
-                    '@id' => $id,
-                    '@type' => 'ImageService2',
-                    'profile' => 'http://iiif.io/api/image/2/level2.json',
-                ];
+            switch ($this->serviceLevel) {
+                case '3.0':
+                    return (object) [
+                        'id' => $id,
+                        'type' => 'ImageService3',
+                        'profile' => 'level2',
+                    ];
+                case '2.1':
+                default:
+                    return (object) [
+                        '@id' => $id,
+                        '@type' => 'ImageService2',
+                        'profile' => 'http://iiif.io/api/image/2/level2.json',
+                    ];
+            }
         }
+
+        return null;
     }
 }

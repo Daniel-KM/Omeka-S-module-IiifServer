@@ -5,6 +5,9 @@ namespace IiifServer\View\Helper;
 use Zend\View\Helper\AbstractHelper;
 use Zend\View\Helper\Url;
 
+/**
+ * @todo FIXME Rename helper iiifImageUrl, because it is used for media too.
+ */
 class IiifImageUrl extends AbstractHelper
 {
     /**

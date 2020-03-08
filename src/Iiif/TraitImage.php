@@ -48,7 +48,7 @@ trait TraitImage
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
     }
 
-    protected function isImage()
+    public function isImage()
     {
         return $this->type === 'Image';
     }
