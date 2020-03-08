@@ -34,7 +34,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 /**
  *@link https://iiif.io/api/presentation/3.0/#57-content-resources
  *
- * They are "specific resources" too.
+ * There are "specific resources" too.
  */
 class ContentResource extends AbstractResourceType
 {
@@ -152,7 +152,11 @@ class ContentResource extends AbstractResourceType
     /**
      * Get the media type of the resource.
      *
+     * Note that the format of any image is always "image/jpeg", since the
+     * image server is used and the preferred output is set to jpeg.
+     *
      * @todo Manage the format of non-file resources (iiif, oembed, etc.).
+     * @todo Manage the preferred output for the format.
      *
      * @return string|null
      */
@@ -160,7 +164,7 @@ class ContentResource extends AbstractResourceType
     {
         $mediaType = $this->resource->mediaType();
         if ($mediaType) {
-            return $mediaType;
+            return $this->isImage() ? 'image/jpeg' : $mediaType;
         }
         return null;
     }
