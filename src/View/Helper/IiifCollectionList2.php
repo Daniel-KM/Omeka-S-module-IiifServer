@@ -48,7 +48,7 @@ class IiifCollectionList2 extends AbstractHelper
      * @param array $resources Array of resources.
      * @return Object|null
      */
-    public function __invoke($resources)
+    public function __invoke(array $resources)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.

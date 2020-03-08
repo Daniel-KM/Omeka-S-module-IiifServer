@@ -29,6 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\CollectionList;
 use Zend\View\Helper\AbstractHelper;
 
 /**
@@ -41,21 +42,25 @@ class IiifCollectionList3 extends AbstractHelper
      *
      * @param array $resources Array of resources.
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return Object|null
+     * @return CollectionList|null
      */
-    public function __invoke($resources)
+    public function __invoke(array $resources)
     {
-        // Prepare values needed for the manifest. Empty values will be removed.
-        // Some are required.
-        $manifest = [
-            '@context' => 'http://iiif.io/api/presentation/3/context.json',
-            'type' => 'CollectionList',
-            'id' => 'TODO',
-            'label' => [],
-            'summary' => [],
-            'requiredStatement' => [],
-            'items' => [],
-        ];
-        return (object) $manifest;
+        $collection = new CollectionList($resources);
+
+        // The services cannot be extracted from resources, so set them here.
+        $services = @$this->getView()->getHelperPluginManager()->getServiceLocator();
+        $collection->setServiceLocator($services);
+
+        // Give possibility to customize the manifest.
+        $resource = $resources;
+        $format = 'collection';
+        $type = 'collection';
+        $triggerHelper = $this->getView()->plugin('trigger');
+        $params = compact('format', 'collection', 'resource', 'type');
+        $params = $triggerHelper('iiifserver.manifest', $params, true);
+
+        $collection->isValid(true);
+        return $collection;
     }
 }

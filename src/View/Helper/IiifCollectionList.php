@@ -44,7 +44,7 @@ class IiifCollectionList extends AbstractHelper
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke($resources, $version = null)
+    public function __invoke(array $resources, $version = null)
     {
         $view = $this->getView();
 

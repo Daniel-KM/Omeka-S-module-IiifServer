@@ -173,6 +173,14 @@ abstract class AbstractResourceType extends AbstractType
     }
 
     /**
+     * @return string|null
+     */
+    public function getId()
+    {
+        return null;
+    }
+
+    /**
      * @return ValueLanguage
      */
     public function getLabel()
@@ -187,13 +195,5 @@ abstract class AbstractResourceType extends AbstractType
             $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
         }
         return new ValueLanguage($values);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getId()
-    {
-        return null;
     }
 }

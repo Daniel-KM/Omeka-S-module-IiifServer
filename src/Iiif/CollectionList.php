@@ -29,18 +29,15 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Omeka\Api\Representation\ItemSetRepresentation;
-
 /**
  * @link https://iiif.io/api/presentation/3.0/#51-collection
+ *
+ * Same as Collection, but without main resource (used for a search result or a
+ * list of manifests of any type). Properties related to the resources are not
+ * available
  */
-class Collection extends AbstractResourceType
+class CollectionList extends AbstractType
 {
-    use TraitDescriptive;
-    use TraitLinking;
-    use TraitThumbnail;
-
     protected $type = 'Collection';
 
     protected $keys = [
@@ -110,40 +107,92 @@ class Collection extends AbstractResourceType
     ];
 
     /**
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
+     */
+    protected $resources;
+
+    /**
+     * @var array
+     */
+    protected $options;
+
+    /**
      * @var \Omeka\View\Helper\Api
      */
     protected $api;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    /**
+     * @var \Zend\View\Helper\Url
+     */
+    protected $urlHelper;
+
+    /**
+     * @var \IiifServer\View\Helper\IiifForceBaseUrlIfRequired
+     */
+    protected $iiifForceBaseUrlIfRequired;
+
+    /**
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
+     * @var \IiifServer\View\Helper\PublicResourceUrl
+     */
+    protected $publicResourceUrl;
+
+    public function __construct(array $resources = null, array $options = null)
     {
-        parent::__construct($resource, $options);
-        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
+        $this->resources = $resources;
+        $this->options = $options;
+    }
+
+    public function setServiceLocator($services)
+    {
+        $this->serviceLocator = $services;
+        $viewHelpers = $services->get('ViewHelperManager');
         $this->api = $viewHelpers->get('api');
-        $this->initLinking();
-        $this->initThumbnail();
+        $this->urlHelper = $viewHelpers->get('url');
+        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
+        $this->setting = $viewHelpers->get('setting');
+        $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
+    }
+
+    public function getContext()
+    {
+        return 'http://iiif.io/api/presentation/3/context.json';
     }
 
     public function getId()
     {
-        // TODO Check if the id is the same for items (see manifest for 2.1)
+        $identifiers = $this->buildIdentifierForList();
+
         $helper = $this->urlHelper;
         $url = $helper(
-            'iiifserver/collection',
-            ['id' => $this->resource->id()],
-            ['force_canonical' => true]
+            'iiifserver/set',
+            [],
+            [
+                'query' => ['id' => $identifiers],
+                'force_canonical' => true,
+            ]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);
     }
 
+    /**
+     * @return ValueLanguage
+     */
+    public function getLabel()
+    {
+        $values = ['none' => ['Collection list']];
+        return new ValueLanguage($values);
+    }
+
     public function getItems()
     {
-        if (!($this->resource instanceof ItemSetRepresentation)) {
-            return [];
-        }
-
         $items = [];
-        foreach ($this->api->search('items', ['item_set_id' => $this->resource->id()])->getContent() as $item) {
+        foreach ($this->resources as $item) {
             $items[] = new ReferencedManifest($item);
         }
         return $items;
@@ -163,5 +212,17 @@ class Collection extends AbstractResourceType
             }
             return !empty($v);
         }, ARRAY_FILTER_USE_BOTH);
+    }
+
+    /**
+     * Helper to list all resource ids.
+     *
+     * @return string
+     */
+    protected function buildIdentifierForList()
+    {
+        return array_map(function ($v) {
+            return $v->id();
+        }, $this->resources);
     }
 }
