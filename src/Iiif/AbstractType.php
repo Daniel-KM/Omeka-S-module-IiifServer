@@ -60,6 +60,13 @@ abstract class AbstractType implements JsonSerializable
     protected $keys = [];
 
     /**
+     * Store the current object for output.
+     *
+     * @var ArrayObject
+     */
+    protected $content;
+
+    /**
      * In some cases, it is useful to have an internal storage for temp values.
      * This property is a uniform way to manage them.
      *
@@ -75,29 +82,57 @@ abstract class AbstractType implements JsonSerializable
         return $this->resource;
     }
 
-    public function getData()
+    public function getContent()
     {
-        $this->manifest = new ArrayObject;
+        // Always refresh the content.
+        $this->content = new ArrayObject;
 
-        $keys = array_filter($this->keys, function($v) {
+        $allowedKeys = array_filter($this->keys, function($v) {
             return $v !== self::NOT_ALLOWED;
         });
-
-        foreach (array_keys($keys) as $key) {
+        foreach (array_keys($allowedKeys) as $key) {
             $method = 'get' . Inflector::classify(str_replace('@', '', $key));
             if (method_exists($this, $method)) {
-                $this->manifest[$key] = $this->$method();
+                $this->content[$key] = $this->$method();
             }
         }
 
-        return $this->manifest;
+        return $this->content;
     }
 
     public function jsonSerialize()
     {
-        // Remove useless values (there is no "0", "null" or empty array at
-        // first level).
-        $output = array_filter($this->getData()->getArrayCopy(), function($v) {
+        $output = $this->getCleanContent();
+
+        // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
+
+        // Check if all required data are present.
+        $requiredKeys = array_filter($this->keys, function($v) {
+            return $v === self::REQUIRED;
+        });
+        $intersect = array_intersect_key($requiredKeys, $output);
+        if (count($requiredKeys) !== count($intersect)) {
+            $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
+            throw new \RuntimeException(sprintf(
+                'Missing required keys for resource type "%1$s": "%2$s".', // @translate
+                $this->getType(), implode('", "', $missingKeys)
+            ));
+        }
+
+        return (object) $output;
+    }
+
+    /**
+     * Remove useless key/values.
+     *
+     * There is no "0", "", "null" or empty array at first level, except for
+     * collection items, that may be empty after a search.
+     *
+     * @return array
+     */
+    protected function getCleanContent()
+    {
+        return array_filter($this->getContent()->getArrayCopy(), function($v) {
             if ($v instanceof ArrayObject) {
                 return (bool) $v->count();
             }
@@ -106,23 +141,6 @@ abstract class AbstractType implements JsonSerializable
             }
             return !empty($v);
         });
-
-        // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
-
-        // Check if all required data are present.
-        $keys = array_filter($this->keys, function($v) {
-            return $v === self::REQUIRED;
-        });
-
-        $intersect = array_intersect_key($keys, $output);
-        if (count($keys) !== count($intersect)) {
-            $missingKeys = array_keys(array_diff_key($keys, $intersect));
-            throw new \RuntimeException(
-                sprintf('Missing required keys for resource type "%1$s": "%2$s".', $this->getType(), implode('", "', $missingKeys))
-            );
-        }
-
-        return (object) $output;
     }
 
     /**
