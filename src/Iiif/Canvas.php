@@ -251,6 +251,7 @@ class Canvas extends AbstractResourceType
             $this->_storage['dimension']['width'] = max($widths) ?: null;
             $this->_storage['dimension']['duration'] = max($durations) ?: null;
 
+            /* // TODO Required dimensions of canvas. It should work with pdf and UV.
             // The canvas must have a size or a duration. It depends on the type
             // of the view.
             // Image / Video.
@@ -262,6 +263,7 @@ class Canvas extends AbstractResourceType
             if (empty($this->_storage['dimension']['width'])) {
                 $this->keys['duration'] = self::REQUIRED;
             }
+            */
         }
 
         return $this->_storage['dimension'];
