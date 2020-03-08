@@ -153,7 +153,7 @@ class Manifest extends AbstractResourceType
         $items = [];
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo['object'] === 'canvas') {
+            if ($mediaInfo['on'] === 'Canvas') {
                 $items[] = new Canvas($media, [
                     'index' => $media->id(),
                     'content' => $mediaInfo['content'],
@@ -177,11 +177,12 @@ class Manifest extends AbstractResourceType
         $siteSlug = $site ? $site->slug() : null;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo['object'] === 'manifest') {
+            if ($mediaInfo['on'] === 'Manifest') {
                 $rendering = new Rendering($media, [
                     'index' => $media->id(),
                     'siteSlug' => $siteSlug,
                     'content' => $mediaInfo['content'],
+                    'on' => 'Manifest',
                 ]);
                 if ($rendering->getId() && $rendering->getType()) {
                     $renderings[] = $rendering;
@@ -250,6 +251,8 @@ class Manifest extends AbstractResourceType
             'Audio' => [],
             // Supplementing or Rendering.
             'Text' => [],
+            'Dataset' => [],
+            'Model' => [],
             'other' => [],
             'invalid' => [],
         ];
@@ -280,47 +283,60 @@ class Manifest extends AbstractResourceType
 
         // TODO Manage distinction between supplementing and rendering, mainly for text (transcription and/or pdf? Via linked properties?
         // TODO Manage 3D that may uses multiple files.
+        // TODO Manage pdf, that are a Text, but not displayable as iiif.
 
         // Canvas manages only image, audio and video: it requires size and/or
         // duration.
         // Priorities are Image, then Video, Audio, and Text.
         if ($types['Image']) {
             $canvasPaintings = $types['Image'];
-            $manifestRenderings = $types['Video'] + $types['Audio'] + $types['Text'];
-         } elseif ($types['Video']) {
+            $types['Image'] = [];
+        } elseif ($types['Video']) {
             $canvasPaintings = $types['Video'];
-            $manifestRenderings = $types['Audio'] + $types['Text'];
+            $types['Video'] = [];
         } elseif ($types['Audio']) {
             $canvasPaintings = $types['Audio'];
-            $manifestRenderings = $types['Text'];
+            $types['Audio'] = [];
         } elseif ($types['Text']) {
-            // No painting.
-            $canvasRenderings = $types['Text'];
+            // For pdf and other texts, Iiif says no painting, but manifest
+            // rendering, but UV doesn't display it. Mirador doesn't manage them
+            // anyway.
+            // TODO The solution is to manage pdf as a list of images via the image server! And to make it type Image? And to add textual content.
+            $canvasPaintings = $types['Text'];
+            // $canvasRenderings = $types['Text'];
+            // $manifestRendering = $types['Text'];
+            $types['Text'] = [];
+        } elseif ($types['Model']) {
+            // TODO Same issue for Model than for Text?
+            // $canvasRenderings = $types['Model'];
+            $canvasPaintings = $types['Model'];
+            $types['Model'] = [];
         }
 
         // All other files are downloadable.
-        $manifestRenderings += $types['other'];
+        $manifestRenderings += array_replace($types['Image'], $types['Video'], $types['Audio'],
+            $types['Text'], $types['Dataset'], $types['Model'], $types['other']);
 
         // Second loop to store the category.
         foreach (array_keys($result) as $mediaId) {
             if (isset($canvasPaintings[$mediaId])) {
                 $result[$mediaId] = $canvasPaintings[$mediaId];
-                $result[$mediaId]['object'] = 'canvas';
+                $result[$mediaId]['on'] = 'Canvas';
                 $result[$mediaId]['key'] = 'annotation';
                 $result[$mediaId]['motivation'] = 'painting';
             } elseif (isset($canvasSupplementings[$mediaId])) {
                 $result[$mediaId] = $canvasSupplementings[$mediaId];
-                $result[$mediaId]['object'] = 'canvas';
+                $result[$mediaId]['on'] = 'Canvas';
                 $result[$mediaId]['key'] = 'annotation';
                 $result[$mediaId]['motivation'] = 'supplementing';
             } elseif (isset($canvasRenderings[$mediaId])) {
                 $result[$mediaId] = $canvasRenderings[$mediaId];
-                $result[$mediaId]['object'] = 'canvas';
+                $result[$mediaId]['on'] = 'Canvas';
                 $result[$mediaId]['key'] = 'rendering';
                 $result[$mediaId]['motivation'] = null;
             } elseif (isset($manifestRenderings[$mediaId])) {
                 $result[$mediaId] = $manifestRenderings[$mediaId];
-                $result[$mediaId]['object'] = 'manifest';
+                $result[$mediaId]['on'] = 'Manifest';
                 $result[$mediaId]['key'] = 'rendering';
                 $result[$mediaId]['motivation'] = null;
             }

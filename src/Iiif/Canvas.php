@@ -172,12 +172,42 @@ class Canvas extends AbstractResourceType
     public function getItems()
     {
         if (!array_key_exists('items', $this->_storage)) {
-            $item = new AnnotationPage($this->resource, $this->options);
-            $this->_storage['items'] = [$item];
+            $this->_storage['items'] = [];
+            if (isset($this->options['key']) && $this->options['key'] === 'annotation'
+                && isset($this->options['motivation']) && $this->options['motivation'] === 'painting'
+            ) {
+                $item = new AnnotationPage($this->resource, $this->options);
+                $this->_storage['items'][] = $item;
+            }
         }
         return $this->_storage['items'];
     }
 
+    public function getAnnotations()
+    {
+        if (!array_key_exists('annotations', $this->_storage)) {
+            $this->_storage['annotations'] = [];
+            if (isset($this->options['key']) && $this->options['key'] === 'annotation'
+                && isset($this->options['motivation']) && $this->options['motivation'] !== 'painting'
+            ) {
+                $rendering = new AnnotationPage($this->resource, $this->options);
+                $this->_storage['annotations'][] = $rendering;
+            }
+        }
+        return $this->_storage['annotations'];
+    }
+
+    public function getRendering()
+    {
+        if (!array_key_exists('rendering', $this->_storage)) {
+            $this->_storage['rendering'] = [];
+            if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
+                $rendering = new Rendering($this->resource, $this->options);
+                $this->_storage['rendering'][] = $rendering;
+            }
+        }
+        return $this->_storage['rendering'];
+    }
 
     public function getHeight()
     {
