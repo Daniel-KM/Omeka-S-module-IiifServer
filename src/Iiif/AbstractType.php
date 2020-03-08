@@ -32,6 +32,7 @@ namespace IiifServer\Iiif;
 use ArrayObject;
 use Doctrine\Common\Inflector\Inflector;
 use JsonSerializable;
+use Omeka\Stdlib\Message;
 
 /**
  * Manage the IIIF objects.
@@ -74,14 +75,6 @@ abstract class AbstractType implements JsonSerializable
      */
     protected $_storage = [];
 
-    /**
-     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation
-     */
-    public function getResource()
-    {
-        return $this->resource;
-    }
-
     public function getContent()
     {
         // Always refresh the content.
@@ -113,10 +106,11 @@ abstract class AbstractType implements JsonSerializable
         $intersect = array_intersect_key($requiredKeys, $output);
         if (count($requiredKeys) !== count($intersect)) {
             $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
-            throw new \RuntimeException(sprintf(
+            $message = new Message(
                 'Missing required keys for resource type "%1$s": "%2$s".', // @translate
                 $this->getType(), implode('", "', $missingKeys)
-            ));
+            );
+            throw new \IiifServer\Iiif\Exception\RuntimeException($message);
         }
 
         return (object) $output;

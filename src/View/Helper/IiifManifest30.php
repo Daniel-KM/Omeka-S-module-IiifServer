@@ -59,6 +59,7 @@ class IiifManifest30 extends AbstractHelper
      * Get the IIIF manifest for the specified resource (API Presentation 3.0).
      *
      * @param AbstractResourceEntityRepresentation $resource
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource)
@@ -67,7 +68,6 @@ class IiifManifest30 extends AbstractHelper
         if ($resourceName == 'items') {
             return $this->buildManifestItem($resource);
         }
-
         if ($resourceName == 'item_sets') {
             return $this->getView()->iiifCollection30($resource);
         }

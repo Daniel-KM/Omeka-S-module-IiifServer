@@ -32,6 +32,7 @@ namespace IiifServer\Controller;
 
 use Omeka\Mvc\Exception\NotFoundException;
 use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\JsonModel;
 
 class PresentationController extends AbstractActionController
 {
@@ -53,12 +54,20 @@ class PresentationController extends AbstractActionController
     {
         // Not found exception is automatically thrown.
         $id = $this->params('id');
-        $resource = $this->api()->read('item_sets', $id)->getContent();
+        try {
+            $resource = $this->api()->read('item_sets', $id)->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+        }
 
         $version = $this->requestedVersion();
 
         $iiifCollection = $this->viewHelpers()->get('iiifCollection');
-        $manifest = $iiifCollection($resource, $version);
+        try {
+            $manifest = $iiifCollection($resource, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+        }
 
         return $this->iiifJsonLd($manifest, $version);
     }
@@ -72,7 +81,7 @@ class PresentationController extends AbstractActionController
         if (empty($identifiers)) {
             $id = $params->fromRoute('id');
             if (empty($id)) {
-                throw new NotFoundException;
+                return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
             }
 
             // For compatibility with old urls from Omeka Classic.
@@ -110,19 +119,28 @@ class PresentationController extends AbstractActionController
         $api = $this->api();
         $identifiers = array_intersect($identifiers, array_keys($resourceIds));
         $resources = [];
-        foreach ($identifiers as $id) {
-            // Not found exception is automatically thrown.
-            $resources[] = $api->read($map[$resourceIds[$id]], $id)->getContent();
+        try {
+            foreach ($identifiers as $id) {
+                // Not found exception is automatically thrown.
+                $resources[] = $api->read($map[$resourceIds[$id]], $id)->getContent();
+            }
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            $resources = [];
         }
 
         if (empty($resources)) {
-            throw new NotFoundException;
+            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
 
         $iiifCollectionList = $this->viewHelpers()->get('iiifCollectionList');
-        $manifest = $iiifCollectionList($resources, $version);
+        try {
+            $manifest = $iiifCollectionList($resources, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+        }
+
 
         return $this->iiifJsonLd($manifest, $version);
     }
@@ -131,12 +149,20 @@ class PresentationController extends AbstractActionController
     {
         // Not found exception is automatically thrown.
         $id = $this->params('id');
-        $resource = $this->api()->read('items', $id)->getContent();
+        try {
+            $resource = $this->api()->read('items', $id)->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+        }
 
         $version = $this->requestedVersion();
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
-        $manifest = $iiifManifest($resource, $version);
+        try {
+            $manifest = $iiifManifest($resource, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+        }
 
         return $this->iiifJsonLd($manifest, $version);
     }
@@ -152,7 +178,11 @@ class PresentationController extends AbstractActionController
             $index = preg_replace('/[^0-9]/', '', $name);
             $resource = $this->api()->read('media', $name)->getContent();
         } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            $resource = $this->api()->read('media', $id)->getContent();
+            try {
+                $resource = $this->api()->read('media', $id)->getContent();
+            } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+            }
             $version = '2.1';
             $name = $this->params('name');
             $index = preg_replace('/[^0-9]/', '', $name);
@@ -161,7 +191,11 @@ class PresentationController extends AbstractActionController
         // $version = $this->requestedVersion();
 
         $iiifCanvas = $this->viewHelpers()->get('iiifCanvas');
-        $canvas = $iiifCanvas($resource, $index, $version);
+        try {
+            $canvas = $iiifCanvas($resource, $index, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+        }
 
         return $this->iiifJsonLd($canvas, $version);
     }
@@ -172,9 +206,10 @@ class PresentationController extends AbstractActionController
         if ($type === 'canvas' && $this->params('name')) {
             return $this->canvasAction();
         }
-        throw new NotFoundException(
-            sprintf('The type "%s" is currently only managed as uri, not url', $type)
-        );
+        return $this->jsonError(new NotFoundException(
+            sprintf('The type "%s" is currently only managed as uri, not url', $type), // @translate
+            \Zend\Http\Response::STATUS_CODE_501
+        ));
     }
 
     protected function requestedVersion()
@@ -187,5 +222,14 @@ class PresentationController extends AbstractActionController
             return '2.1';
         }
         return null;
+    }
+
+    protected function jsonError(\Exception $exception, $statusCode = 500)
+    {
+        $this->getResponse()->setStatusCode($statusCode);
+        return new JsonModel([
+            'status' => 'error',
+            'message' => $exception->getMessage(),
+        ]);
     }
 }

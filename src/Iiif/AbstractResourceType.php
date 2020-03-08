@@ -167,14 +167,6 @@ abstract class AbstractResourceType extends AbstractType
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 
-    /**
-     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation
-     */
-    public function getResource()
-    {
-        return $this->resource;
-    }
-
     public function getContext()
     {
         return 'http://iiif.io/api/presentation/3/context.json';
