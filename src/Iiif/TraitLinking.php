@@ -137,28 +137,6 @@ trait TraitLinking
     }
 
     /**
-     * @return \stdClass
-     */
-    public function getRendering()
-    {
-        $renderings = [];
-        $site = $this->defaultSite();
-        $siteSlug = $site ? $site->slug() : null;
-        foreach ($this->resource->media() as $media) {
-            if (strtok($media->mediaType(), '/') !== 'image') {
-                $rendering = new Rendering($media, [
-                    'index' => $media->id(),
-                    'siteSlug' => $siteSlug,
-                ]);
-                if ($rendering->getId() && $rendering->getType()) {
-                    $renderings[] = $rendering;
-                }
-            }
-        }
-        return $renderings;
-    }
-
-    /**
      * @return \Omeka\Api\Representation\SiteRepresentation|null
      */
     protected function defaultSite()

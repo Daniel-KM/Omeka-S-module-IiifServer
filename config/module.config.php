@@ -86,7 +86,9 @@ return [
                             'route' => '/:id/:type[/:name]',
                             'constraints' => [
                                 'id' => '\d+',
-                                'type' => 'annotation-page|annotation-collection|annotation|canvas|collection|content-resources|manifest|range',
+                                // Note: content resources should use the original media url, so it is just an alias.
+                                // TODO Make a redirection from content resource to original url. Or the inverse so all iiif urls will be standard?
+                                'type' => 'annotation-page|annotation-collection|annotation|canvas|collection|content-resource|manifest|range',
                             ],
                             'defaults' => [
                                 'action' => 'generic',

@@ -34,9 +34,14 @@ namespace IiifServer\Iiif;
  *
  * They are "specific resources" too.
  */
-class ContentResources extends AbstractResourceType
+class ContentResource extends AbstractResourceType
 {
-    protected $type = 'ContentResources';
+    /**
+     * This is not the real type and must be set more precisely.
+     *
+     * @var string
+     */
+    protected $type = 'ContentResource';
 
     protected $keys = [
         '@context' => self::NOT_ALLOWED,
@@ -95,7 +100,7 @@ class ContentResources extends AbstractResourceType
             'iiifserver/uri',
             [
                 'id' => $this->resource->item()->id(),
-                'type' => 'content-resources',
+                'type' => 'content-resource',
                 'name' => $this->resource->id(),
             ],
             ['force_canonical' => true]
