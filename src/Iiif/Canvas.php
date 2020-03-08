@@ -147,7 +147,13 @@ class Canvas extends AbstractResourceType
             $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
         }
 
-        return new ValueLanguage($values, false, '[' . $this->resource->id() . ']');
+        if ($values) {
+            $default = null;
+        } else {
+            $default = '[' . $this->resource->id() . ']';
+        }
+
+        return new ValueLanguage($values, false, $default);
     }
 
     public function getId()

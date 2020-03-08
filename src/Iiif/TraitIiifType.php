@@ -29,22 +29,9 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\MediaRepresentation;
-
-class HelperMedia
+trait TraitIiifType
 {
-    protected $type;
-
-    protected $mediaInfo = [
-        'id' => null,
-        'type' => null,
-        'label' => null,
-        'format' => null,
-    ];
-
-    protected $isValid = false;
-
-    /**
+     /**
      * The rendering types are defined by the resource class and media type.
      *
      * Note: the resource class of the item is not used.
@@ -121,59 +108,7 @@ class HelperMedia
         'tile' => 'Image',
     ];
 
-    /**
-     * @var MediaRepresentation
-     */
-    protected $resource;
-
-    /**
-     * @param MediaRepresentation $media
-     */
-    public function __construct(MediaRepresentation $media)
-    {
-        $this->resource = $media;
-        $this->prepareMedia();
-    }
-
-    /**
-     * @return bool
-     */
-    protected function prepareMedia()
-    {
-        $this->prepareMediaId();
-        $this->mediaInfo['type'] = $this->prepareMediaIiifType();
-        $this->mediaInfo['label'] = $this->getLabel();
-        $this->mediaInfo['format'] = $this->getFormat();
-        $this->isValid = !empty($this->mediaInfo['id']) && !empty($this->mediaInfo['type']);
-        return $this->isValid;
-    }
-
-    public function listMediaInfo()
-    {
-        return $this->isValid
-            ? $this->mediaInfo
-            : null;
-    }
-
-    public function isValid()
-    {
-        return $this->isValid;
-    }
-
-    protected function prepareMediaId()
-    {
-        // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
-        $this->mediaInfo['id'] = $this->resource->originalUrl();
-        if (!$this->mediaInfo['id']) {
-            $siteSlug = @$this->options['siteSlug'];
-            if ($siteSlug) {
-                // TODO Return media page or item page? Add an option.
-                $this->mediaInfo['id'] = $this->resource->siteUrl($siteSlug, true);
-            }
-        }
-    }
-
-    protected function prepareMediaIiifType()
+    protected function initIiifType()
     {
         $mediaType = $this->resource->mediaType();
         if ($mediaType) {
@@ -206,42 +141,6 @@ class HelperMedia
          }
          */
 
-        return null;
-    }
-
-    /**
-     * The label is not a title, but an info about the type, since the main
-     * label is already known.
-     *
-     * {@inheritDoc}
-     * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
-     */
-    public function getLabel()
-    {
-        if (!$this->type) {
-            return null;
-        }
-
-        $format = $this->getFormat();
-        $label = $format
-            ? sprintf('%1$s [%2$s]', $this->type, $format)
-            : $format;
-        return new ValueLanguage(['none' => $label]);
-    }
-
-    /**
-     * Get the media type of the resource.
-     *
-     * @todo Manage the format of non-file resources (iiif, oembed, etc.).
-     *
-     * @return string|null
-     */
-    public function getFormat()
-    {
-        $mediaType = $this->resource->mediaType();
-        if ($mediaType) {
-            return $mediaType;
-        }
         return null;
     }
 }

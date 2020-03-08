@@ -155,7 +155,7 @@ class Manifest extends AbstractResourceType
             if ($mediaInfo['object'] === 'canvas') {
                 $items[] = new Canvas($media, [
                     'index' => $media->id(),
-                    'info' => $mediaInfo['info'],
+                    'content' => $mediaInfo['content'],
                     'key' => $mediaInfo['key'],
                     'motivation' => $mediaInfo['motivation'],
                 ]);
@@ -180,7 +180,7 @@ class Manifest extends AbstractResourceType
                 $rendering = new Rendering($media, [
                     'index' => $media->id(),
                     'siteSlug' => $siteSlug,
-                    'info' => $mediaInfo['info'],
+                    'content' => $mediaInfo['content'],
                 ]);
                 if ($rendering->getId() && $rendering->getType()) {
                     $renderings[] = $rendering;
@@ -259,24 +259,21 @@ class Manifest extends AbstractResourceType
         foreach ($medias as $media) {
             $mediaId = $media->id();
             $result[$mediaId] = null;
-            $mediaInfo = new HelperMedia($media);
-            if ($mediaInfo->isValid()) {
-                $mediaInfo = $mediaInfo->listMediaInfo();
-                if (in_array($mediaInfo['type'], ['Image', 'Video', 'Audio', 'Text'])) {
-                    $types[$mediaInfo['type']][$mediaId] = [
-                        'media' => $media,
-                        'info' => $mediaInfo,
+            $contentResource = new ContentResource($media);
+            if ($contentResource->isValid()) {
+                $type = $contentResource->getType();
+                if (in_array($type, ['Image', 'Video', 'Audio', 'Text'])) {
+                    $types[$type][$mediaId] = [
+                        'content' => $contentResource,
                     ];
                 } else {
                     $types['other'][$mediaId] = [
-                        'media' => $media,
-                        'info' => $mediaInfo
+                        'content' => $contentResource,
                     ];
                 }
             } else {
                 $types['invalid'][$mediaId] = [
-                    'media' => $media,
-                    'info' => $mediaInfo,
+                    'content' => $contentResource,
                 ];
             }
         }

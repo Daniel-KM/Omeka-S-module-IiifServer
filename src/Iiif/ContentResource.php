@@ -29,6 +29,8 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\MediaRepresentation;
+
 /**
  *@link https://iiif.io/api/presentation/3.0/#57-content-resources
  *
@@ -36,6 +38,10 @@ namespace IiifServer\Iiif;
  */
 class ContentResource extends AbstractResourceType
 {
+    use TraitIiifType;
+    use TraitImage;
+    use TraitMedia;
+
     /**
      * This is not the real type and must be set more precisely.
      *
@@ -93,8 +99,26 @@ class ContentResource extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
+    public function __construct(MediaRepresentation $resource, array $options = null)
+    {
+        parent::__construct($resource, $options);
+        $this->initIiifType();
+        $this->prepareMediaId();
+        $this->initImage();
+        $this->initMedia();
+    }
+
+    public function isValid()
+    {
+        return $this->id && $this->type && $this->type !== 'ContentResource';
+    }
+
     public function getId()
     {
+        if ($this->id) {
+            return $this->id;
+        }
+
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/uri',
@@ -107,5 +131,75 @@ class ContentResource extends AbstractResourceType
         );
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);
+    }
+
+
+    /**
+     * The label is not a title, but an info about the type, since the main
+     * label is already known.
+     *
+     * {@inheritDoc}
+     * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
+     */
+    public function getLabel()
+    {
+        $format = $this->getFormat();
+        $label = $format
+            ? sprintf('%1$s [%2$s]', $this->type, $format)
+            : $format;
+        return new ValueLanguage(['none' => $label]);
+    }
+
+    /**
+     * Get the media type of the resource.
+     *
+     * @todo Manage the format of non-file resources (iiif, oembed, etc.).
+     *
+     * @return string|null
+     */
+    public function getFormat()
+    {
+        $mediaType = $this->resource->mediaType();
+        if ($mediaType) {
+            return $mediaType;
+        }
+        return null;
+    }
+
+    public function getHeight()
+    {
+        if ($this->isImage()) {
+            $size = $this->imageSize();
+        } elseif ($this->isVideo()) {
+            $size = $this->mediaSize();
+        } else {
+            return null;
+        }
+        return $size ? $size['height'] : null;
+    }
+
+    public function getWidth()
+    {
+        if ($this->isImage()) {
+            $size = $this->imageSize();
+        } elseif ($this->isVideo()) {
+            $size = $this->mediaSize();
+        } else {
+            return null;
+        }
+        return $size ? $size['width'] : null;
+    }
+
+    protected function prepareMediaId()
+    {
+        // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
+        $this->id = $this->resource->originalUrl();
+        if (!$this->id) {
+            $siteSlug = @$this->options['siteSlug'];
+            if ($siteSlug) {
+                // TODO Return media page or item page? Add an option or use content-resource url.
+                $this->id = $this->resource->siteUrl($siteSlug, true);
+            }
+        }
     }
 }
