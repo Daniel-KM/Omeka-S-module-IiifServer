@@ -37,6 +37,8 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Rendering extends AbstractResourceType
 {
+    use TraitIiifType;
+
     protected $type = null;
 
     protected $keys = [
@@ -44,83 +46,6 @@ class Rendering extends AbstractResourceType
         'type' => self::REQUIRED,
         'label' => self::OPTIONAL,
         'format' => self::OPTIONAL,
-    ];
-
-    /**
-     * The rendering types are efined by the resource class, by the media type.
-     *
-     * Note: the resource class of the item is not used.
-     *
-     * @todo Rendering type It's not clealy specified, except in the context. All dctype or not? Other than dctype? Default?
-     *
-     * @link https://iiif.io/api/image/3/context.json
-     */
-    protected $renderingTypes = [
-        'dctype:Dataset' => 'Dataset',
-        'dctype:StillImage' => 'Image',
-        'dctype:MovingImage' => 'Video',
-        'dctype:Sound' => 'Audio',
-        'dctype:Text' => 'Text',
-    ];
-
-    protected $mediaTypeTypes = [
-        // 'application',
-        'audio' => 'Audio',
-        // 'example',
-        // 'font',
-        'image' => 'Image',
-        // 'message',
-        // 'model',
-        // 'multipart',
-        'text' => 'Text',
-        'video' => 'Video',
-    ];
-
-    /**
-     * Some common media-types.
-     *
-     * @var array
-     */
-    protected $mediaTypes = [
-        // @see \Omeka\Form\SettingForm::MEDIA_TYPE_WHITELIST
-        'application/msword' => 'Text',
-        'application/ogg' => 'Video',
-        'application/pdf' => 'Text',
-        'application/rtf' => 'Text',
-        'application/vnd.ms-access' => 'Dataset',
-        'application/vnd.ms-excel' => 'Dataset',
-        'application/vnd.ms-powerpoint' => 'Text',
-        'application/vnd.ms-project' => 'Dataset',
-        'application/vnd.ms-write' => 'Text',
-        'application/vnd.oasis.opendocument.chart' => 'Image',
-        'application/vnd.oasis.opendocument.database' => 'Dataset',
-        'application/vnd.oasis.opendocument.formula' => 'Text',
-        'application/vnd.oasis.opendocument.graphics' => 'Image',
-        'application/vnd.oasis.opendocument.presentation' => 'Text',
-        'application/vnd.oasis.opendocument.spreadsheet' => 'Dataset',
-        'application/vnd.oasis.opendocument.text' => 'Text',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Text',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Text',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Dataset',
-        'application/x-gzip' => null,
-        'application/x-ms-wmp' => null,
-        'application/x-msdownload' => null,
-        'application/x-shockwave-flash' => null,
-        'application/x-tar' => null,
-        'application/zip' => null,
-        'application/xml' => 'Text',
-        // @see \Next\File\TempFile::xmlMediaTypes
-        'application/vnd.recordare.musicxml' => 'Text',
-        'application/vnd.mei+xml' => 'Text',
-    ];
-
-    protected $rendererTypes = [
-        'file' => null,
-        'oembed' => 'Text',
-        'youtube' => 'Video',
-        'html' => 'Text',
-        'iiif' => 'Image',
-        'tile' => 'Image',
     ];
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
@@ -133,8 +58,7 @@ class Rendering extends AbstractResourceType
 
         parent::__construct($resource, $options);
 
-        // Prepare type one time.
-        $this->getType();
+        $this->initIiifType();
     }
 
     public function getId()
@@ -157,42 +81,6 @@ class Rendering extends AbstractResourceType
         }
 
         return $this->_storage['id'];
-    }
-
-    public function getType()
-    {
-        $mediaType = $this->resource->mediaType();
-        if ($mediaType) {
-            $mediaTypeType = strtok($mediaType, '/');
-            if (isset($this->mediaTypeTypes[$mediaTypeType])) {
-                $this->type = $this->mediaTypeTypes[$mediaTypeType];
-                return $this->type;
-            }
-        }
-
-        // Managed some other common media types.
-        if (isset($this->mediaTypes[$mediaType])) {
-            $this->type = $this->mediaTypes[$mediaType];
-            return $this->type;
-        }
-
-        $renderer = $this->resource->renderer();
-        if (isset($this->rendererTypes[$renderer])) {
-            $this->type = $this->rendererTypes[$renderer];
-            return $this->type;
-        }
-
-        /* These cases are normally managed by the media type above.
-        // $extension = $this->resource->extension();
-        if ($renderer === 'file') {
-            // See \Omeka\Media\Renderer::render()
-            // $fileRenderers = $this->resource->getServiceLocator()->get('Config')['file_renderers'] + ['factories' => []];
-            /** @var \Omeka\Media\FileRenderer\Manager $fileRendererManager
-            // $fileRendererManager = $this->resource->getServiceLocator()->get('Omeka\Media\FileRenderer\Manager');
-        }
-        */
-
-        return null;
     }
 
     /**

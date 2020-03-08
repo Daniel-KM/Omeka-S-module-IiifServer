@@ -39,6 +39,7 @@ trait TraitIiifType
      * @todo Rendering type It's not clealy specified, except in the context. All dctype or not? Other than dctype? Default?
      *
      * @link https://iiif.io/api/image/3/context.json
+     * @link https://iiif.io/api/presentation/3.0/#type
      */
     protected $renderingTypes = [
         'dctype:Dataset' => 'Dataset',
@@ -46,6 +47,8 @@ trait TraitIiifType
         'dctype:MovingImage' => 'Video',
         'dctype:Sound' => 'Audio',
         'dctype:Text' => 'Text',
+        // TODO This is not specified in the context.
+        'dctype:PhysicalObject' => 'Model',
     ];
 
     protected $mediaTypeTypes = [
