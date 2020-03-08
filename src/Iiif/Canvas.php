@@ -113,11 +113,6 @@ class Canvas extends AbstractResourceType
         'unordered' => self::NOT_ALLOWED,
     ];
 
-    /**
-     * @var \Omeka\Api\Representation\MediaRepresentation
-     */
-    protected $resource;
-
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         if (!($resource instanceof MediaRepresentation)) {

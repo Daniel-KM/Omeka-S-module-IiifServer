@@ -91,11 +91,6 @@ class Annotation extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
-    /**
-     * @var \Omeka\Api\Representation\MediaRepresentation
-     */
-    protected $resource;
-
     public function getId()
     {
         $helper = $this->urlHelper;
