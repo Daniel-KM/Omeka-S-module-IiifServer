@@ -53,7 +53,7 @@ abstract class AbstractType implements JsonSerializable
     protected $type;
 
     /**
-     * List of ordered keys for the type.
+     * List of ordered keys for the type, associated with the requirement type.
      *
      * @var array
      */

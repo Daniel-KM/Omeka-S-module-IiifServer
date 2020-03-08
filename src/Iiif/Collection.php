@@ -29,11 +29,18 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\ItemSetRepresentation;
+
 /**
  * @link https://iiif.io/api/presentation/3.0/#51-collection
  */
 class Collection extends AbstractResourceType
 {
+    use TraitDescriptive;
+    use TraitLinking;
+    use TraitThumbnail;
+
     protected $type = 'Collection';
 
     protected $keys = [
@@ -102,16 +109,59 @@ class Collection extends AbstractResourceType
         'unordered' => self::OPTIONAL,
     ];
 
+    /**
+     * @var \Omeka\View\Helper\Api
+     */
+    protected $api;
+
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    {
+        parent::__construct($resource, $options);
+        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
+        $this->api = $viewHelpers->get('api');
+        $this->initLinking();
+        $this->initThumbnail();
+    }
+
     public function getId()
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
         $helper = $this->urlHelper;
-        $url = $this->view->url(
+        $url = $helper(
             'iiifserver/collection',
             ['id' => $this->resource->id()],
             ['force_canonical' => true]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);
+    }
+
+    public function getItems()
+    {
+        if (!($this->resource instanceof ItemSetRepresentation)) {
+            return [];
+        }
+
+        $items = [];
+        foreach ($this->api->search('items', ['item_set_id' => $this->resource->id()])->getContent() as $item) {
+            $items[] = new ReferencedManifest($item);
+        }
+        return $items;
+    }
+
+    protected function getCleanContent()
+    {
+        return array_filter($this->getContent()->getArrayCopy(), function($v, $k) {
+            if ($k === 'items') {
+                return true;
+            }
+            if ($v instanceof \ArrayObject) {
+                return (bool) $v->count();
+            }
+            if ($v instanceof \JsonSerializable) {
+                return (bool) $v->jsonSerialize();
+            }
+            return !empty($v);
+        }, ARRAY_FILTER_USE_BOTH);
     }
 }

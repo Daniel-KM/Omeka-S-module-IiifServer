@@ -27,35 +27,23 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\View\Helper;
-
-use IiifServer\Iiif\Collection;
-use Omeka\Api\Representation\ItemSetRepresentation;
-use Zend\View\Helper\AbstractHelper;
+namespace IiifServer\Iiif;
 
 /**
- * Helper to get a IIIF Collection manifest for an item set
+ * @link https://iiif.io/api/presentation/3.0/#51-collection
+ * @link https://iiif.io/api/presentation/3.0/#52-manifest
  */
-class IiifCollection30 extends AbstractHelper
+class ReferencedManifest extends Manifest
 {
     /**
-     * Get the IIIF Collection manifest for the specified item set (API Presentation 3.0).
+     * @link https://iiif.io/api/presentation/3.0/#51-collection
      *
-     * @param ItemSetRepresentation $itemSet Item set
-     * @return Object|null
+     * @var array
      */
-    public function __invoke(ItemSetRepresentation $itemSet)
-    {
-        $collection = new Collection($itemSet);
-
-        // Give possibility to customize the manifest.
-        $resource = $itemSet;
-        $format = 'collection';
-        $type = 'collection';
-        $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('', 'format', 'collection', 'resource', 'type');
-        $params = $triggerHelper('iiifserver.manifest', $params, true);
-
-        return $collection->jsonSerialize();
-    }
+    protected $keys = [
+        'id' => self::REQUIRED,
+        'type' => self::REQUIRED,
+        'label' => self::REQUIRED,
+        'thumbnail' => self::RECOMMENDED,
+    ];
 }
