@@ -1,7 +1,8 @@
 <?php
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -30,25 +31,26 @@
 namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\ItemSetRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * Helper to get a IIIF Collection manifest for a dynamic list.
+ * Helper to get a IIIF Collection manifest for an item set
  */
-class IiifCollectionList21 extends AbstractHelper
+class IiifCollection2 extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified list of resources.
+     * Get the IIIF Collection manifest for the specified item set.
      *
      * @todo Use a representation/context with a getResource(), a toString()
      * that removes empty values, a standard json() without ld and attach it to
      * event in order to modify it if needed.
      * @see IiifManifest
      *
-     * @param array $resources Array of resources.
+     * @param ItemSetRepresentation $itemSet Item set
      * @return Object|null
      */
-    public function __invoke($resources)
+    public function __invoke(ItemSetRepresentation $itemSet)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
@@ -74,71 +76,85 @@ class IiifCollectionList21 extends AbstractHelper
             'manifests' => [],
         ];
 
-        $translate = $this->getView()->plugin('translate');
+        $manifest = array_merge($manifest, $this->buildManifestBase($itemSet));
 
-        $identifiers = $this->buildIdentifierForList($resources);
-        $url = $this->view->url('iiifserver/set', [], [
-            'query' => ['id' => $identifiers],
-            'force_canonical' => true,
-        ]);
-        $url = $this->view->iiifForceBaseUrlIfRequired($url);
-        $manifest['@id'] = $url;
+        $metadata = $this->iiifMetadata($itemSet);
+        $manifest['metadata'] = $metadata;
 
-        $label = $translate('Dynamic list');
-        $manifest['label'] = $label;
+        $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
+        if ($descriptionProperty) {
+            $description = strip_tags($itemSet->value($descriptionProperty, ['type' => 'literal']));
+        }
+        $manifest['description'] = $description;
 
-        // TODO The dynamic list has no metadata. Use the query?
-
-        $license = $this->view->setting('iiifserver_manifest_license_default');
+        $licenseProperty = $this->view->setting('iiifserver_license_property');
+        if ($licenseProperty) {
+            $license = $itemSet->value($licenseProperty);
+        }
+        if (empty($license)) {
+            $license = $this->view->setting('iiifserver_manifest_license_default');
+        }
         $manifest['license'] = $license;
 
-        $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
+        $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
+        if ($attributionProperty) {
+            $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal']));
+        }
+        if (empty($attribution)) {
+            $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
+        }
         $manifest['attribution'] = $attribution;
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
 
+        // TODO Use resource thumbnail (> Omeka 1.3).
+        // $manifest['thumbnail'] = $thumbnail;
+        // $manifest['service'] = $service;
+
         /*
-        // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
-        $manifest['service'] = [
+         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
+         $manifest['service'] = [
              '@context' => $this->view->url('api-context', [], ['force_canonical' => true]),
-            '@id' => $this->view->url('api', $query, [], true),
+             '@id' => $itemSet->apiUrl(),
              'format' =>'application/ld+json',
              // TODO What is the profile of Omeka json-ld?
              // 'profile' => '',
          ];
-        */
+         $manifest['service'] = [
+             '@context' =>'http://example.org/ns/jsonld/context.json',
+             '@id' => 'http://example.org/service/example',
+             'profile' => 'http://example.org/docs/example-service.html',
+         ];
+         */
 
-        /*
-        // TODO Reuses  the original query to provide public and api url (search results).
         $manifest['related'] = [
-            '@id' => $this->view->url('resources', $query, [], true),
+            '@id' => $this->view->publicResourceUrl($itemSet, true),
             'format' => 'text/html',
         ];
 
         $manifest['seeAlso'] = [
-            '@id' => $this->view->url('api', $query, [], true),
+            '@id' => $itemSet->apiUrl(),
             'format' => 'application/ld+json',
+            // TODO What is the profile of Omeka json-ld?
+            // 'profile' => '',
         ];
-        */
 
-        // List of the manifest of each record. IIIF v2.0 separates collections
-        // and items, so the global order is not kept for them.
-        $collections = [];
+        // TODO Use within with collection tree.
+        // $manifest['within'] = $within;
+
+        // List of manifests inside the item set.
         $manifests = [];
-        foreach ($resources as $resource) {
-            if ($resource->resourceName() == 'item_sets') {
-                $collections[] = $this->buildManifestBase($resource);
-            } else {
-                $manifests[] = $this->buildManifestBase($resource);
-            }
+        $response = $this->view->api()->search('items', ['item_set_id' => $itemSet->id()]);
+        $items = $response->getContent();
+        foreach ($items as $item) {
+            $manifests[] = $this->buildManifestBase($item);
         }
-        $manifest['collections'] = $collections;
         $manifest['manifests'] = $manifests;
 
         // Give possibility to customize the manifest.
         // TODO Manifest should be a true object, with many sub-objects.
-        $resource = &$resources;
-        $type = 'collection_list';
+        $resource = $itemSet;
+        $type = 'collection';
         $triggerHelper = $this->view->plugin('trigger');
         $params = compact('manifest', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
@@ -162,9 +178,11 @@ class IiifCollectionList21 extends AbstractHelper
         $manifest = [];
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('iiifserver/collection', [
-                'id' => $resource->id(),
-            ]);
+            $url = $this->view->url(
+                'iiifserver/collection',
+                ['id' => $resource->id()],
+                ['force_canonical' => true]
+            );
 
             $type = 'sc:Collection';
         } else {
@@ -188,17 +206,33 @@ class IiifCollectionList21 extends AbstractHelper
     }
 
     /**
-     * Helper to list all resource ids.
+     * Prepare the metadata of a resource.
      *
-     * @todo Merge with IiifServer\View\Helper\UniversalViewer::buildIdentifierForList()
+     * @todo Factorize with IiifManifest.
      *
-     * @param array $resources
-     * @return string
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return array
      */
-    protected function buildIdentifierForList(array $resources)
+    protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
     {
-        return array_map(function($v) {
-            return $v->id();
-        }, $resources);
+        $properties = $this->view->setting('iiifserver_manifest_properties_collection');
+        if ($properties === ['none']) {
+            return [];
+        }
+
+        $metadata = [];
+        $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+        foreach ($values as $propertyData) {
+            $valueMetadata = [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) {
+                return strpos($v->type(), 'resource') === 0
+                    ? $this->view->iiifUrl($v->valueResource())
+                    : (string) $v;
+            }, $propertyData['values']), 'strlen');
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
+        }
+        return $metadata;
     }
 }

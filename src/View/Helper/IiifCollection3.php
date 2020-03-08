@@ -29,33 +29,35 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\Collection;
+use Omeka\Api\Representation\ItemSetRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * Helper to get a IIIF Collection manifest for a dynamic list.
+ * Helper to get a IIIF Collection manifest for an item set
  */
-class IiifCollectionList30 extends AbstractHelper
+class IiifCollection3 extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified list of resources.
+     * Get the IIIF Collection manifest for the specified item set (API Presentation 3.0).
      *
-     * @param array $resources Array of resources.
+     * @param ItemSetRepresentation $itemSet Item set
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return Object|null
+     * @return Collection|null
      */
-    public function __invoke($resources)
+    public function __invoke(ItemSetRepresentation $itemSet)
     {
-        // Prepare values needed for the manifest. Empty values will be removed.
-        // Some are required.
-        $manifest = [
-            '@context' => 'http://iiif.io/api/presentation/3/context.json',
-            'type' => 'CollectionList',
-            'id' => 'TODO',
-            'label' => [],
-            'summary' => [],
-            'requiredStatement' => [],
-            'items' => [],
-        ];
-        return (object) $manifest;
+        $collection = new Collection($itemSet);
+
+        // Give possibility to customize the manifest.
+        $resource = $itemSet;
+        $format = 'collection';
+        $type = 'collection';
+        $triggerHelper = $this->getView()->plugin('trigger');
+        $params = compact('format', 'collection', 'resource', 'type');
+        $params = $triggerHelper('iiifserver.manifest', $params, true);
+
+        $collection->isValid(true);
+        return $collection;
     }
 }

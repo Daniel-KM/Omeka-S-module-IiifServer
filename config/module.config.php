@@ -10,22 +10,22 @@ return [
     'view_helpers' => [
         'invokables' => [
             'iiifCollection' => View\Helper\IiifCollection::class,
-            'iiifCollection21' => View\Helper\IiifCollection21::class,
-            'iiifCollection30' => View\Helper\IiifCollection30::class,
+            'iiifCollection2' => View\Helper\IiifCollection2::class,
+            'iiifCollection3' => View\Helper\IiifCollection3::class,
             'iiifCollectionList' => View\Helper\IiifCollectionList::class,
-            'iiifCollectionList21' => View\Helper\IiifCollectionList21::class,
-            'iiifCollectionList30' => View\Helper\IiifCollectionList30::class,
+            'iiifCollectionList2' => View\Helper\IiifCollectionList2::class,
+            'iiifCollectionList3' => View\Helper\IiifCollectionList3::class,
             'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifCanvas' => View\Helper\IiifCanvas::class,
-            'iiifCanvas21' => View\Helper\IiifCanvas21::class,
-            'iiifCanvas30' => View\Helper\IiifCanvas30::class,
+            'iiifCanvas2' => View\Helper\IiifCanvas2::class,
+            'iiifCanvas3' => View\Helper\IiifCanvas3::class,
             'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [
             'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
-            'iiifManifest21' => Service\ViewHelper\IiifManifest21Factory::class,
-            'iiifManifest30' => Service\ViewHelper\IiifManifest30Factory::class,
+            'iiifManifest2' => Service\ViewHelper\IiifManifest2Factory::class,
+            'iiifManifest3' => Service\ViewHelper\IiifManifest3Factory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
             // Currently in module Next and in a pull request for core.
@@ -280,7 +280,7 @@ return [
     ],
     'iiifserver' => [
         'config' => [
-            'iiifserver_manifest_version' => '2.1',
+            'iiifserver_manifest_version' => '2',
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate

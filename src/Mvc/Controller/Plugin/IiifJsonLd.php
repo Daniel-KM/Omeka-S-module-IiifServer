@@ -42,7 +42,7 @@ class IiifJsonLd extends AbstractPlugin
 
         $headers = $response->getHeaders();
 
-        if ($version === '3.0') {
+        if ($version === '3') {
             $headers
                 ->addHeaderLine('Content-Type', 'application/ld+json;profile="http://iiif.io/api/presentation/3/context.json"', true);
         } else {

@@ -1,8 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
- * Copyright 2016-2017 BibLibre
+ * Copyright 2020 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -30,40 +29,33 @@
 
 namespace IiifServer\View\Helper;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
-class IiifManifest extends AbstractHelper
+/**
+ * Helper to get a IIIF Collection manifest for a dynamic list.
+ */
+class IiifCollectionList3 extends AbstractHelper
 {
     /**
-     * Get the IIIF manifest for the specified resource.
+     * Get the IIIF Collection manifest for the specified list of resources.
      *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param string $version
+     * @param array $resources Array of resources.
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null)
+    public function __invoke($resources)
     {
-        $view = $this->getView();
-
-        if (is_null($version)) {
-            $version = $view->setting('iiifserver_manifest_version', '2');
-        } else {
-            $version = $version === '2' ? '2' : '3';
-        }
-
-        $resourceName = $resource->resourceName();
-        if ($resourceName == 'items') {
-            return $version === '2'
-                ? $view->iiifManifest2($resource)
-                :  $view->iiifManifest3($resource);
-        }
-
-        if ($resourceName == 'item_sets') {
-            return $version === '2'
-                ? $view->iiifCollection2($resource)
-                : $view->iiifCollection3($resource);
-        }
+        // Prepare values needed for the manifest. Empty values will be removed.
+        // Some are required.
+        $manifest = [
+            '@context' => 'http://iiif.io/api/presentation/3/context.json',
+            'type' => 'CollectionList',
+            'id' => 'TODO',
+            'label' => [],
+            'summary' => [],
+            'requiredStatement' => [],
+            'items' => [],
+        ];
+        return (object) $manifest;
     }
 }

@@ -29,35 +29,33 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\Collection;
-use Omeka\Api\Representation\ItemSetRepresentation;
+use IiifServer\Iiif\Canvas;
+use Omeka\Api\Representation\MediaRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
-/**
- * Helper to get a IIIF Collection manifest for an item set
- */
-class IiifCollection30 extends AbstractHelper
+class IiifCanvas3 extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified item set (API Presentation 3.0).
+     * Get the IIIF canvas for the specified resource.
      *
-     * @param ItemSetRepresentation $itemSet Item set
+     * @param MediaRepresentation $resource
+     * @param int $index Used to set the standard name of the image.
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return Collection|null
+     * @return Canvas|null
      */
-    public function __invoke(ItemSetRepresentation $itemSet)
+    public function __invoke(MediaRepresentation $media, $index)
     {
-        $collection = new Collection($itemSet);
+        $canvas = new Canvas($media, ['index' => $index]);
 
         // Give possibility to customize the manifest.
-        $resource = $itemSet;
-        $format = 'collection';
-        $type = 'collection';
+        $resource = $media;
+        $format = 'canvas';
+        $type = 'media';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('format', 'collection', 'resource', 'type');
+        $params = compact('format', 'canvas', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
-        $collection->isValid(true);
-        return $collection;
+        $canvas->isValid(true);
+        return $canvas;
     }
 }

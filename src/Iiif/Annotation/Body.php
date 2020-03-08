@@ -98,7 +98,7 @@ class Body extends AbstractResourceType
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
 
         $setting = $this->setting;
-        $this->serviceLevel = $setting('imageserver_manifest_version', '2.1');
+        $this->serviceLevel = $setting('imageserver_manifest_version', '3');
     }
 
     public function getId()
@@ -160,18 +160,18 @@ class Body extends AbstractResourceType
             $id = $helper($url);
 
             switch ($this->serviceLevel) {
-                case '3.0':
-                    return (object) [
-                        'id' => $id,
-                        'type' => 'ImageService3',
-                        'profile' => 'level2',
-                    ];
-                case '2.1':
-                default:
+                case '2':
                     return (object) [
                         '@id' => $id,
                         '@type' => 'ImageService2',
                         'profile' => 'http://iiif.io/api/image/2/level2.json',
+                    ];
+                case '3':
+                default:
+                    return (object) [
+                        'id' => $id,
+                        'type' => 'ImageService3',
+                        'profile' => 'level2',
                     ];
             }
         }

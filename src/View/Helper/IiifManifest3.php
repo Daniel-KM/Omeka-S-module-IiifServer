@@ -29,33 +29,69 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\Canvas;
-use Omeka\Api\Representation\MediaRepresentation;
+use IiifServer\Iiif\Manifest;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\ItemRepresentation;
+use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
 
-class IiifCanvas30 extends AbstractHelper
+class IiifManifest3 extends AbstractHelper
 {
     /**
-     * Get the IIIF canvas for the specified resource.
-     *
-     * @param MediaRepresentation $resource
-     * @param int $index Used to set the standard name of the image.
-     * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return Canvas|null
+     * @var TempFileFactory
      */
-    public function __invoke(MediaRepresentation $media, $index)
+    protected $tempFileFactory;
+
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
-        $canvas = new Canvas($media, ['index' => $index]);
+        $this->tempFileFactory = $tempFileFactory;
+        $this->basePath = $basePath;
+    }
+
+    /**
+     * Get the IIIF manifest for the specified resource (API Presentation 3.0).
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @throws \IiifServer\Iiif\Exception\RuntimeException
+     * @return Object|null
+     */
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    {
+        $resourceName = $resource->resourceName();
+        if ($resourceName == 'items') {
+            return $this->buildManifestItem($resource);
+        }
+        if ($resourceName == 'item_sets') {
+            return $this->getView()->iiifCollection3($resource);
+        }
+    }
+
+    /**
+     * Get the IIIF manifest for the specified item.
+     *
+     * @param ItemRepresentation $item
+     * @return Manifest|null
+     */
+    protected function buildManifestItem(ItemRepresentation $item)
+    {
+        $manifest = new Manifest($item);
 
         // Give possibility to customize the manifest.
-        $resource = $media;
-        $format = 'canvas';
-        $type = 'media';
+        $resource = $item;
+        $format = 'manifest';
+        $type = 'item';
         $triggerHelper = $this->getView()->plugin('trigger');
-        $params = compact('format', 'canvas', 'resource', 'type');
+        $params = compact('format', 'manifest', 'resource', 'type');
         $params = $triggerHelper('iiifserver.manifest', $params, true);
 
-        $canvas->isValid(true);
-        return $canvas;
+        $manifest->isValid(true);
+        return $manifest;
     }
 }

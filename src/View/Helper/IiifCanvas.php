@@ -48,13 +48,13 @@ class IiifCanvas extends AbstractHelper
         $view = $this->getView();
 
         if (is_null($version)) {
-            $version = $view->setting('iiifserver_manifest_version', '2.1');
+            $version = $view->setting('iiifserver_manifest_version', '2');
         } else {
-            $version = $version === '3.0' ? '3.0' : '2.1';
+            $version = $version === '2' ? '2' : '3';
         }
 
-        return $version === '3.0'
-            ? $view->iiifCanvas30($resource, $index)
-            : $view->iiifCanvas21($resource, $index);
+        return $version === '2'
+            ? $view->iiifCanvas2($resource, $index)
+            : $view->iiifCanvas3($resource, $index);
     }
 }

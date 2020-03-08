@@ -34,7 +34,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
-class IiifCanvas21 extends AbstractHelper
+class IiifCanvas2 extends AbstractHelper
 {
     /**
      * @var string
@@ -44,7 +44,7 @@ class IiifCanvas21 extends AbstractHelper
     /**
      * Get the IIIF canvas for the specified resource.
      *
-     * @todo Factorize with IiifManifest21.
+     * @todo Factorize with IiifManifest2.
      *
      * @param MediaRepresentation $resource
      * @param int $index Used to set the standard name of the image.

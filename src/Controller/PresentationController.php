@@ -173,7 +173,7 @@ class PresentationController extends AbstractActionController
         $id = $this->params('id');
         try {
             $resource = $this->api()->read('items', $id)->getContent();
-            $version = '3.0';
+            $version = '3';
             $name = $this->params('name');
             $index = preg_replace('/[^0-9]/', '', $name);
             $resource = $this->api()->read('media', $name)->getContent();
@@ -183,7 +183,7 @@ class PresentationController extends AbstractActionController
             } catch (\Omeka\Api\Exception\NotFoundException $e) {
                 return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
             }
-            $version = '2.1';
+            $version = '2';
             $name = $this->params('name');
             $index = preg_replace('/[^0-9]/', '', $name);
         }
@@ -216,10 +216,10 @@ class PresentationController extends AbstractActionController
     {
         $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
         if (strpos($accept, 'iiif.io/api/presentation/3/context.json')) {
-            return '3.0';
+            return '3';
         }
         if (strpos($accept, 'iiif.io/api/presentation/2/context.json')) {
-            return '2.1';
+            return '2';
         }
         return null;
     }

@@ -37,7 +37,7 @@ use Omeka\File\TempFileFactory;
 use Zend\View\Helper\AbstractHelper;
 use Omeka\Module\Manager as ModuleManager;
 
-class IiifManifest21 extends AbstractHelper
+class IiifManifest2 extends AbstractHelper
 {
     /**
      * @var TempFileFactory
@@ -71,7 +71,7 @@ class IiifManifest21 extends AbstractHelper
         }
 
         if ($resourceName == 'item_sets') {
-            return $this->view->iiifCollection21($resource);
+            return $this->view->iiifCollection2($resource);
         }
     }
 

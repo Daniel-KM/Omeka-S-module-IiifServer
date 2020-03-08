@@ -49,13 +49,13 @@ class IiifCollectionList extends AbstractHelper
         $view = $this->getView();
 
         if (is_null($version)) {
-            $version = $view->setting('iiifserver_manifest_version', '2.1');
+            $version = $view->setting('iiifserver_manifest_version', '2');
         } else {
-            $version = $version === '3.0' ? '3.0' : '2.1';
+            $version = $version === '2' ? '2' : '3';
         }
 
-        return $version === '3.0'
-            ? $view->iiifCollectionList30($resources)
-            : $view->iiifCollectionList21($resources);
+        return $version === '2'
+            ? $view->iiifCollectionList2($resources)
+            : $view->iiifCollectionList3($resources);
     }
 }
