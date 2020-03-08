@@ -63,10 +63,12 @@ trait TraitThumbnail
             $size = $helper($thumbnailAsset);
             // FIXME The image server doesn't know the resource id when it's an item. Neither the extension.
             $id = $primaryMedia ? $primaryMedia->id() : $this->resource->id();
+            $format = $image->mediaType();
         } else {
             $image = $primaryMedia;
             $size = $helper($primaryMedia, 'medium');
             $id = $primaryMedia->id();
+            $format = 'image/jpeg';
         }
 
         if (empty($size)) {
@@ -89,7 +91,7 @@ trait TraitThumbnail
         $thumbnail = [
             'id' => $imageUrl,
             'type' => 'Image',
-            'format' => $image->mediaType(),
+            'format' => $format,
             'width' => $size['width'],
             'height' => $size['height'],
         ];
