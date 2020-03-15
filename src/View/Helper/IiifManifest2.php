@@ -723,12 +723,11 @@ class IiifManifest2 extends AbstractHelper
     {
         $canvas = [];
 
-        $titleFile = $media->displayTitle();
         $canvasUrl = $this->_baseUrl . '/canvas/p' . $index;
 
         $canvas['@id'] = $canvasUrl;
         $canvas['@type'] = 'sc:Canvas';
-        $canvas['label'] = $titleFile ?: '[' . $index .']';
+        $canvas['label'] = $this->_iiifCanvasImageLabel($media, $index);
 
         // Thumbnail of the current file.
         $canvas['thumbnail'] = $this->_iiifThumbnail($media);
@@ -751,9 +750,53 @@ class IiifManifest2 extends AbstractHelper
             $canvas['metadata'] = $metadata;
         }
 
-        $canvas = (object) $canvas;
+        return (object) $canvas;
+    }
 
-        return $canvas;
+    /**
+     * Get the label of an image for canvas.
+     *
+     * @param MediaRepresentation $media
+     * @param int $index
+     * @return string
+     */
+    protected function _iiifCanvasImageLabel(MediaRepresentation $media, $index)
+    {
+        $labelOption = $this->view->setting('iiifserver_manifest_canvas_label');
+        $fallback = (string) $index;
+        switch ($labelOption) {
+            case 'property':
+                $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
+                return $media->value($labelProperty, ['default' => $fallback]);
+
+            case 'property_or_source':
+                $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
+                $label = $media->value($labelProperty, ['default' => '']);
+                if (strlen($label)) {
+                    return $label;
+                }
+                // no break;
+            case 'source':
+                return $media->displayTitle($fallback);
+
+            case 'template_or_source':
+                $fallback = $media->displayTitle($fallback);
+                // no break;
+            case 'template':
+                $template = $media->resourceTemplate();
+                $label = false;
+                if ($template && $template->titleProperty()) {
+                    $label = $media->value($labelProperty, ['default' => false]);
+                }
+                if (!$label) {
+                    $label = $media->value('dcterms:title', ['default' => $fallback]);
+                }
+                return $label;
+
+            case 'position':
+            default:
+                return $fallback;
+        }
     }
 
     /**

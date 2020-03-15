@@ -151,11 +151,12 @@ class Manifest extends AbstractResourceType
     public function getItems()
     {
         $items = [];
+        $index = 0;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo['on'] === 'Canvas') {
                 $items[] = new Canvas($media, [
-                    'index' => $media->id(),
+                    'index' => ++$index,
                     'content' => $mediaInfo['content'],
                     'key' => isset($mediaInfo['key']) ? $mediaInfo['key'] : null,
                     'motivation' => isset($mediaInfo['motivation']) ? $mediaInfo['motivation'] : null,

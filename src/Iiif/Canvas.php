@@ -114,40 +114,57 @@ class Canvas extends AbstractResourceType
         'unordered' => self::NOT_ALLOWED,
     ];
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function __construct(MediaRepresentation $resource, array $options = null)
     {
-        if (!($resource instanceof MediaRepresentation)) {
-            throw new \RuntimeException(
-                'A media is required to build a canvas.'
-            );
-        }
-
+        // This construct is required, because the resource must be a media.
         parent::__construct($resource, $options);
-
         // TODO Add linking properties when not in manifest.
     }
 
     public function getLabel()
     {
-        // TODO Store the use of the fallback to avoid to copy the parent.
+        $setting = $this->setting;
+        $labelOption = $setting('iiifserver_manifest_canvas_label');
+        $values = [];
+        $fallback = (string) $this->options['index'];
+        switch ($labelOption) {
+            case 'property':
+                $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
+                $values = $this->resource->value($labelProperty, ['all' => true, 'default' => $fallback]);
+                break;
 
-        $template = $this->resource->resourceTemplate();
-        if ($template && $template->titleProperty()) {
-            $values = $this->resource->value($template->titleProperty()->term(), ['all' => true, 'default' => []]);
-            if (empty($values)) {
-                $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
-            }
-        } else {
-            $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+            case 'property_or_source':
+                $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
+                $values = $this->resource->value($labelProperty, ['all' => true, 'default' => []]);
+                if (count($values)) {
+                    break;
+                }
+                // no break;
+            case 'source':
+                $values = $this->resource->displayTitle($fallback);
+                break;
+
+            case 'template_or_source':
+                $fallback = $this->resource->displayTitle($fallback);
+                // no break;
+            case 'template':
+                $template = $this->resource->resourceTemplate();
+                if ($template && $template->titleProperty()) {
+                    $labelProperty = $template->titleProperty()->term();
+                    $values = $this->resource->value($labelProperty, ['all' => true, 'default' => []]);
+                }
+                if (!$values) {
+                    $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => $fallback]);
+                }
+                break;
+
+            case 'position':
+            default:
+                // Use fallback.
+                break;
         }
 
-        if ($values) {
-            $default = null;
-        } else {
-            $default = '[' . $this->resource->id() . ']';
-        }
-
-        return new ValueLanguage($values, false, $default);
+        return new ValueLanguage($values, false, $fallback);
     }
 
     public function getId()

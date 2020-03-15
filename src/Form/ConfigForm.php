@@ -138,7 +138,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'label' => 'Resource link', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
                     'empty_option' => '',
-                    'term_as_value' => true,
                     'value_options' => [
                         'none' => 'No link', // @translate
                         'site' => 'Homepage', // @translate
@@ -179,6 +178,44 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
                 'attributes' => [
                     'id' => 'iiifserver-manifest-seealso-property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_canvas_label',
+                'type' => Element\Select::class,
+                'options' => [
+                    'label' => 'Label for each file', // @translate
+                    'info' => 'This value can be used to indicate the page number in multi-paged documents. The position is used when there is no value.', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                    'value_options' => [
+                        'position' => 'Position in sequence', // @translate
+                        'template' => 'Template title', // @translate
+                        'property' => 'Specified property below', // @translate
+                        'source' => 'File name', // @translate
+                        'template_or_source' => 'Template title, else file name', // @translate
+                        'property_or_source' => 'Property if any, else file name', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver-manifest-canvas-label',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select an option…', // @translate
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_canvas_label_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to use for files', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver-manifest-canvas-label-property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -353,6 +390,14 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_canvas_label',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_canvas_label_property',
                 'required' => false,
             ])
             ->add([
