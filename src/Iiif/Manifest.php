@@ -114,6 +114,11 @@ class Manifest extends AbstractResourceType
         'unordered' => self::OPTIONAL,
     ];
 
+    /**
+     * @var array
+     */
+    protected $service;
+
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
@@ -195,7 +200,9 @@ class Manifest extends AbstractResourceType
 
     public function getService()
     {
-        $services = [];
+        if (!is_null($this->service)) {
+            return $this->service;
+        }
 
         $setting = $this->setting;
         $iiifSearch = $setting('iiifserver_manifest_service_iiifsearch');
@@ -217,7 +224,7 @@ class Manifest extends AbstractResourceType
             }
 
             if ($searchServiceAvailable) {
-                $services[] = (object) [
+                $this->service[] = [
                     '@context' => 'http://iiif.io/api/search/1/context.json',
                     '@id' => $iiifSearch . $this->resource->id(),
                     'profile' => 'http://iiif.io/api/search/1/search',
@@ -226,7 +233,13 @@ class Manifest extends AbstractResourceType
             }
         }
 
-        return $services;
+        return $this->service;
+    }
+
+    public function appendService(array $service)
+    {
+        $this->service[] = $service;
+        return $this;
     }
 
     /**
