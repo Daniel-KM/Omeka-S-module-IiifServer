@@ -85,12 +85,12 @@ return [
                     'uri' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/:id/:type[/:name]',
+                            'route' => '/:id/:type[/:name][/:subname]',
                             'constraints' => [
                                 'id' => '\d+',
                                 // Note: content resources should use the original media url, so it is just an alias.
                                 // TODO Make a redirection from content resource to original url. Or the inverse so all iiif urls will be standard?
-                                'type' => 'annotation-page|annotation-collection|annotation|canvas|collection|content-resource|manifest|range',
+                                'type' => 'annotation-page|annotation-collection|annotation-list|annotation|canvas|collection|content-resource|manifest|range',
                             ],
                             'defaults' => [
                                 'action' => 'generic',
