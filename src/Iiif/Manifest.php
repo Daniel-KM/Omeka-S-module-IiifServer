@@ -224,19 +224,19 @@ class Manifest extends AbstractResourceType
             }
 
             if ($searchServiceAvailable) {
-                $this->service[] = [
+                $this->service[] = new Service([
                     '@context' => 'http://iiif.io/api/search/1/context.json',
                     '@id' => $iiifSearch . $this->resource->id(),
                     'profile' => 'http://iiif.io/api/search/1/search',
                     'label' => 'Search within this manifest', // @translate
-                ];
+                ]);
             }
         }
 
         return $this->service;
     }
 
-    public function appendService(array $service)
+    public function appendService(Service $service)
     {
         $this->service[] = $service;
         return $this;
