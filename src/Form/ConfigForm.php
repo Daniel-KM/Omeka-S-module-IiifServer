@@ -2,6 +2,8 @@
 namespace IiifServer\Form;
 
 use Omeka\Form\Element\PropertySelect;
+use Zend\EventManager\Event;
+use Zend\EventManager\EventManagerAwareTrait;
 use Zend\Form\Element;
 use Zend\Form\Form;
 use Zend\I18n\Translator\TranslatorAwareInterface;
@@ -9,6 +11,7 @@ use Zend\I18n\Translator\TranslatorAwareTrait;
 
 class ConfigForm extends Form implements TranslatorAwareInterface
 {
+    use EventManagerAwareTrait;
     use TranslatorAwareTrait;
 
     public function init()
@@ -358,6 +361,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
         ;
 
+        $addEvent = new Event('form.add_elements', $this);
+        $this->getEventManager()->triggerEvent($addEvent);
+
         $inputFilter = $this->getInputFilter();
         $inputFilter
             ->add([
@@ -429,6 +435,9 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
         ;
+
+        $filterEvent = new Event('form.add_input_filters', $this, ['inputFilter' => $inputFilter]);
+        $this->getEventManager()->triggerEvent($filterEvent);
     }
 
     protected function translate($args)
