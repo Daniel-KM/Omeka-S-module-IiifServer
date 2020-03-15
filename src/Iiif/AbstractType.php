@@ -119,6 +119,7 @@ abstract class AbstractType implements JsonSerializable
     public function isValid($throwException = false)
     {
         $output = $this->getCleanContent();
+
         // Check if all required data are present.
         $requiredKeys = array_filter($this->keys, function ($v) {
             return $v === self::REQUIRED;
@@ -160,8 +161,7 @@ abstract class AbstractType implements JsonSerializable
     /**
      * Remove useless key/values.
      *
-     * There is no "0", "", "null" or empty array at first level, except for
-     * collection items, that may be empty after a search.
+     * There is no "0", "", "null" or empty array, except some exceptions.
      *
      * @return array
      */

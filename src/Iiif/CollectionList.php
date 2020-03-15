@@ -29,6 +29,9 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\ItemRepresentation;
+use Omeka\Api\Representation\ItemSetRepresentation;
+
 /**
  * @link https://iiif.io/api/presentation/3.0/#51-collection
  *
@@ -192,8 +195,12 @@ class CollectionList extends AbstractType
     public function getItems()
     {
         $items = [];
-        foreach ($this->resources as $item) {
-            $items[] = new ReferencedManifest($item);
+        foreach ($this->resources as $resource) {
+            if ($resource instanceof ItemRepresentation) {
+                $items[] = new ReferencedManifest($resource);
+            } elseif ($resource instanceof ItemSetRepresentation) {
+                $items[] = new ReferencedCollection($resource);
+            }
         }
         return $items;
     }

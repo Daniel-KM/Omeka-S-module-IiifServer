@@ -149,6 +149,12 @@ class Collection extends AbstractResourceType
         return $items;
     }
 
+    /**
+     * For collection items, that may be empty after a search.
+     *
+     * {@inheritDoc}
+     * @see \IiifServer\Iiif\AbstractType::getCleanContent()
+     */
     protected function getCleanContent()
     {
         return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v, $k) {
