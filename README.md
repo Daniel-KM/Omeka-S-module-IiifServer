@@ -26,6 +26,8 @@ The IIIF manifests can be displayed with many viewers, the integrated [OpenSeadr
 the [Universal Viewer], the advanced [Mirador], or the ligher and themable [Diva],
 or any other IIIF compatible viewer.
 
+The search is provided by the module [Iiif Search] for common xml formats.
+
 
 Installation
 ------------
@@ -163,8 +165,9 @@ seconds that the browser loads all files and prepares them to be displayed.
 TODO / Bugs
 -----------
 
+- Implements ArrayObject to all classes to simplify events.
 - When a item set contains non image items, the left panel with the index is
-  displayed only when the first item contains an image.
+  displayed only when the first item contains an image (UV).
 
 See module [Image Server].
 
@@ -233,6 +236,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mirador]: https://github.com/Daniel-KM/Omeka-S-module-Mirador
 [Diva]: https://github.com/Daniel-KM/Omeka-S-module-Diva
 [Omeka Classic]: https://omeka.org
+[Iiif Search]: https://github.com/bubdxm/Omeka-S-module-IiifSearch
 [`GD`]: https://secure.php.net/manual/en/book.image.php
 [`Imagick`]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
