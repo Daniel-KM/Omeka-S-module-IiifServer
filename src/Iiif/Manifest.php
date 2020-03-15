@@ -200,39 +200,6 @@ class Manifest extends AbstractResourceType
 
     public function getService()
     {
-        if (!is_null($this->service)) {
-            return $this->service;
-        }
-
-        $setting = $this->setting;
-        $iiifSearch = $setting('iiifserver_manifest_service_iiifsearch');
-        if ($iiifSearch) {
-            // Checking if item has at least an XML file that will allow search.
-            $searchServiceAvailable = false;
-            $searchMediaTypes = [
-                'application/xml',
-                'text/xml',
-                'application/vnd.pdf+xml',
-            ];
-            // TODO Use mediaInfo.
-            foreach ($this->resource->media() as $media) {
-                $mediaType = $media->mediaType();
-                if (in_array($mediaType, $searchMediaTypes)) {
-                    $searchServiceAvailable = true;
-                    break;
-                }
-            }
-
-            if ($searchServiceAvailable) {
-                $this->service[] = new Service([
-                    '@context' => 'http://iiif.io/api/search/1/context.json',
-                    '@id' => $iiifSearch . $this->resource->id(),
-                    'profile' => 'http://iiif.io/api/search/1/search',
-                    'label' => 'Search within this manifest', // @translate
-                ]);
-            }
-        }
-
         return $this->service;
     }
 

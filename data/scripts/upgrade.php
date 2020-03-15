@@ -114,4 +114,6 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
         $settings->set('iiifserver_manifest_rights', 'none');
         $settings->set('iiifserver_manifest_rights_url', '');
     }
+
+    $settings->delete('iiifserver_manifest_service_iiifsearch');
 }

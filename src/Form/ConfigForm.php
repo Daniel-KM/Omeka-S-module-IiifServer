@@ -328,15 +328,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_service_iiifsearch',
-                'type' => Element\Url::class,
-                'options' => [
-                    'label' => 'IIIF Search base url', // @translate
-                    'info' => 'If any, this url to IIIF Search API will be used in search service and display search bar in the bottom panel of the viewer.',  // @translate
-                ],
-            ])
-
-            ->add([
                 'name' => 'iiifserver_manifest_force_url_from',
                 'type' => Element\Text::class,
                 'options' => [

@@ -101,7 +101,7 @@ class IiifManifest2 extends AbstractHelper
             'attribution' => '',
             // A logo to add at the end of the information panel.
             'logo' => '',
-            'service' => '',
+            'service' => [],
             // For example the web page of the item.
             'related' => '',
             // Other formats of the same data.
@@ -156,33 +156,6 @@ class IiifManifest2 extends AbstractHelper
         $manifest['attribution'] = $attribution;
 
         $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
-
-        $iiifSearch = $this->view->setting('iiifserver_manifest_service_iiifsearch');
-        if ($iiifSearch) {
-            // Checking if item has at least an XML file that will allow search
-            $searchServiceAvailable = false;
-            $searchMediaTypes = [
-                'application/xml',
-                'text/xml',
-                'application/vnd.pdf+xml',
-            ];
-            foreach ($item->media() as $media) {
-                $mediaType = $media->mediaType();
-                if (in_array($mediaType, $searchMediaTypes)) {
-                    $searchServiceAvailable = true;
-                    break;
-                }
-            }
-
-            if ($searchServiceAvailable) {
-                $manifest['service'] = [
-                    '@context' => 'http://iiif.io/api/search/1/context.json',
-                    '@id' => $iiifSearch . $item->id(),
-                    'profile' => 'http://iiif.io/api/search/1/search',
-                    'label' => 'Search within this manifest', // @transalte
-                ];
-            }
-        }
 
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
