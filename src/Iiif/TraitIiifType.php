@@ -100,7 +100,7 @@ trait TraitIiifType
         // @see \Next\File\TempFile::xmlMediaTypes
         'application/vnd.recordare.musicxml' => 'Text',
         'application/vnd.mei+xml' => 'Text',
-        'application/vnd.pdf+xml' => 'Text',
+        'application/vnd.pdf2xml+xml' => 'Text',
     ];
 
     /**
@@ -139,7 +139,7 @@ trait TraitIiifType
         // @see \Next\File\TempFile::xmlMediaTypes
         'application/vnd.recordare.musicxml' => 'MusicXML',
         'application/vnd.mei+xml' => 'Music MEI',
-        'application/vnd.pdf+xml' => 'Document PDF',
+        'application/vnd.pdf2xml+xml' => 'Document PDF',
     ];
 
     protected $rendererTypes = [
