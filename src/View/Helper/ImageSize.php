@@ -1,7 +1,8 @@
 <?php
 namespace IiifServer\View\Helper;
 
-use IiifServer\Mvc\Controller\Plugin\ImageSize as ImageSizePlugin;
+// Plugin ImageSize may be overridden by module ImageServer or another one.
+// use IiifServer\Mvc\Controller\Plugin\ImageSize as ImageSizePlugin;
 use Omeka\Mvc\Exception\RuntimeException;
 use Zend\View\Exception;
 use Zend\View\Helper\AbstractHelper;
@@ -9,14 +10,14 @@ use Zend\View\Helper\AbstractHelper;
 class ImageSize extends AbstractHelper
 {
     /**
-     * @var ImageSizePlugin
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize|\ImageServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSizePlugin;
 
     /**
-     * @param ImageSizePlugin $imageSizePlugin
+     * @param \IiifServer\Mvc\Controller\Plugin\ImageSize|\ImageServer\Mvc\Controller\Plugin\ImageSize $imageSizePlugin
      */
-    public function __construct(ImageSizePlugin $imageSizePlugin)
+    public function __construct($imageSizePlugin)
     {
         $this->imageSizePlugin = $imageSizePlugin;
     }
