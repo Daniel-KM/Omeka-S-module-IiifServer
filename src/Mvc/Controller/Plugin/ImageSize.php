@@ -1,12 +1,12 @@
 <?php
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use Omeka\Api\Representation\AssetRepresentation;
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 use Omeka\Mvc\Exception\RuntimeException;
 use Omeka\Stdlib\Message;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
-use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Api\Representation\AssetRepresentation;
 
 class ImageSize extends AbstractPlugin
 {
