@@ -62,7 +62,9 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $this->preInstall();
         $this->checkDependency();
         $this->checkDependencies();
+        $this->checkAllResourcesToInstall();
         $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
+        $this->installAllResources();
         $this->manageConfig('install');
         $this->manageMainSettings('install');
         $this->manageSiteSettings('install');
@@ -90,6 +92,48 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $this->setServiceLocator($serviceLocator);
             require_once $filepath;
         }
+    }
+
+    /**
+     * @throws \Omeka\Module\Exception\ModuleCannotInstallException
+     */
+    public function checkAllResourcesToInstall()
+    {
+        if (!class_exists(\Generic\InstallResources::class)) {
+            if (file_exists(dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php')) {
+                require_once dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php';
+            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
+                require_once __DIR__ . '/InstallResources.php';
+            } else {
+                // Nothing to install.
+                return true;
+            }
+        }
+
+        $services = $this->getServiceLocator();
+        $installResources = new \Generic\InstallResources($services);
+        $installResources->checkAllResources(static::NAMESPACE);
+    }
+
+    /**
+     * @throws \Omeka\Module\Exception\ModuleCannotInstallException
+     */
+    public function installAllResources()
+    {
+        if (!class_exists(\Generic\InstallResources::class)) {
+            if (file_exists(dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php')) {
+                require_once dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php';
+            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
+                require_once __DIR__ . '/InstallResources.php';
+            } else {
+                // Nothing to install.
+                return true;
+            }
+        }
+
+        $services = $this->getServiceLocator();
+        $installResources = new \Generic\InstallResources($services);
+        $installResources->createAllResources(static::NAMESPACE);
     }
 
     public function getConfigForm(PhpRenderer $renderer)
