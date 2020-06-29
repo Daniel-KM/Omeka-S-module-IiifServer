@@ -171,6 +171,7 @@ class CollectionList extends AbstractType
         $identifiers = $this->buildIdentifierForList();
 
         $helper = $this->urlHelper;
+        /*
         $url = $helper(
             'iiifserver/set',
             ['version' => '3'],
@@ -178,6 +179,12 @@ class CollectionList extends AbstractType
                 'query' => ['id' => $identifiers],
                 'force_canonical' => true,
             ]
+        );
+        */
+        $url = $helper(
+            'iiifserver/set',
+            ['version' => '3', 'id' => implode(',', $identifiers)],
+            ['force_canonical' => true]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;
         return $helper($url);

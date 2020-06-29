@@ -77,10 +77,17 @@ class IiifCollectionList2 extends AbstractHelper
         $translate = $this->getView()->plugin('translate');
 
         $identifiers = $this->buildIdentifierForList($resources);
+        /*
         $url = $this->view->url('iiifserver/set', ['version' => '2'], [
             'query' => ['id' => $identifiers],
             'force_canonical' => true,
         ]);
+        */
+        $url = $this->view->url(
+            'iiifserver/set',
+            ['version' => '2', 'id' => implode(',', $identifiers)],
+            ['force_canonical' => true]
+        );
         $url = $this->view->iiifForceBaseUrlIfRequired($url);
         $manifest['@id'] = $url;
 
