@@ -72,8 +72,8 @@ class PresentationController extends AbstractActionController
     public function listAction()
     {
         $resources = $this->fetchResources();
-        if ($resources instanceof \Exception) {
-            return $this->jsonError($resources, \Zend\Http\Response::STATUS_CODE_404);
+        if (!count($resources)) {
+            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -160,6 +160,14 @@ class PresentationController extends AbstractActionController
     protected function fetchResource($resourceType)
     {
         $id = $this->params('id');
+
+        $useCleanIdentifier = $this->useCleanIdentifier();
+        if ($useCleanIdentifier) {
+            $getResourceFromIdentifier = $this->viewHelpers()->get('getResourceFromIdentifier');
+            return $getResourceFromIdentifier($id, false, $resourceType)
+                ?: new NotFoundException;
+        }
+
         try {
             return $this->api()->read($resourceType, $id)->getContent();
         } catch (\Omeka\Api\Exception\NotFoundException $e) {
@@ -169,7 +177,7 @@ class PresentationController extends AbstractActionController
 
     /**
      * @param string $resourceType
-     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]|\Omeka\Api\Exception\NotFoundException
+     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
      */
     protected function fetchResources($resourceType = null)
     {
@@ -180,30 +188,43 @@ class PresentationController extends AbstractActionController
         if (empty($identifiers)) {
             $id = $params->fromRoute('id');
             if (empty($id)) {
-                return new NotFoundException;
+                return [];
             }
-
-            // For compatibility with old urls from Omeka Classic.
-            $id = preg_replace('/[^0-9,]/', '', $id);
-
             $identifiers = array_filter(explode(',', $id));
         } elseif (is_string($identifiers)) {
-            $identifiers = preg_replace('/[^0-9,]/', '', $identifiers);
             $identifiers = array_filter(explode(',', $identifiers));
         }
 
-        $identifiers = array_filter(array_map('intval', $identifiers));
+        $identifiers = array_filter(array_map('trim', $identifiers));
         if (empty($identifiers)) {
-            return new NotFoundException;
+            return [];
         }
 
         // Extract the resources from the identifier.
+        $useCleanIdentifier = $this->useCleanIdentifier();
+        if ($useCleanIdentifier) {
+            $getResourcesFromIdentifiers = $this->viewHelpers()->get('getResourcesFromIdentifiers');
+            $resources = $getResourcesFromIdentifiers($identifiers, false, $resourceType);
+            // A loop is done with identifiers to keep original order and
+            // possible duplicates.
+            $result = [];
+            foreach ($identifiers as $identifier) {
+                if (isset($resources[$identifier])) {
+                    $result[] = $resources[$identifier];
+                }
+            }
+            return $result;
+        }
+
+        $ids = array_filter(array_map('intval', $identifiers));
+        if (!$ids) {
+            return [];
+        }
 
         // Currently, Omeka S doesn't allow to read mixed resources.
         $services = $this->getEvent()->getApplication()->getServiceManager();
         $entityManager = $services->get('Omeka\EntityManager');
-        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $identifiers]);
-
+        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $ids]);
         // A loop is done with identifiers to keep original order and possible
         // duplicates.
         $adapter = $services->get('Omeka\ApiAdapterManager')->get('resources');
@@ -215,11 +236,13 @@ class PresentationController extends AbstractActionController
         foreach (array_intersect($identifiers, array_keys($result)) as $id) {
             $resources[] = $result[$id];
         }
-        if (!count($resources)) {
-            return new NotFoundException;
-        }
-
         return $resources;
+    }
+
+    protected function useCleanIdentifier()
+    {
+        return $this->viewHelpers()->has('getResourcesFromIdentifiers')
+            && $this->settings()->get('iiifserver_manifest_clean_identifier');
     }
 
     protected function requestedVersion()

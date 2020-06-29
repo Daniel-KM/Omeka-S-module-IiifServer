@@ -54,6 +54,8 @@ return [
         ],
     ],
     'router' => [
+        // In order to use clean urls, the identifier "id" can be any string without "/", not only Omeka id.
+        // A specific config file is used is used to manage identifiers with "/", like arks.
         'routes' => [
             // @todo It is recommended to use a true identifier (ark, urn…], not an internal id.
 
@@ -92,7 +94,8 @@ return [
                             'route' => '[/v:version]/:id/:type[/:name][/:subname]',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                // 'id' => '\d+',
+                                'id' => '[^\/]+',
                                 // Note: content resources should use the original media url, so it is just an alias.
                                 // TODO Make a redirection from content resource to original url. Or the inverse so all iiif urls will be standard?
                                 'type' => 'annotation-page|annotation-collection|annotation-list|annotation|canvas|collection|content-resource|manifest|range',
@@ -119,7 +122,8 @@ return [
                             'route' => '[/v:version]/collection/:id',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '(?:[cimf]?\-?\d+\,?)+',
+                                // 'id' => '(?:[cimf]?\-?\d+\,?)+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'list',
@@ -138,7 +142,7 @@ return [
                             'route' => '[/v:version]/collection/:id',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'collection',
@@ -151,7 +155,7 @@ return [
                             'route' => '[/v:version]/collection/:id/manifest',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'collection',
@@ -165,7 +169,7 @@ return [
                             'route' => '[/v:version]/:id',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'manifest',
@@ -178,7 +182,7 @@ return [
                             'route' => '[/v:version]/:id/manifest',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'manifest',
@@ -193,7 +197,7 @@ return [
                             'route' => '[/v:version]/:id/canvas/:name',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '\d+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'action' => 'canvas',
@@ -211,7 +215,8 @@ return [
                             // or in route: "/set/1,2".
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '(?:\d+\,?)*',
+                                // 'id' => '(?:\d+\,?)*',
+                                'id' => '[^/]*',
                             ],
                             'defaults' => [
                                 'action' => 'list',
@@ -221,7 +226,7 @@ return [
                 ],
             ],
 
-            /** @deprecated */
+            /** @deprecated Will be removed in Omeka version 3.0. */
             // Keep some deprecated routes for compatibility with old modules UniversalViewer, Mirador and Diva.
             'iiifserver_presentation_collection_list' => [
                 'type' => \Zend\Router\Http\Segment::class,
@@ -298,6 +303,7 @@ return [
     'iiifserver' => [
         'config' => [
             'iiifserver_manifest_version' => '2',
+            'iiifserver_manifest_clean_identifier' => true,
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate

@@ -14,6 +14,11 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     use EventManagerAwareTrait;
     use TranslatorAwareTrait;
 
+    /**
+     * @var bool
+     */
+    protected $hasCleanUrl;
+
     public function init()
     {
         $this
@@ -30,6 +35,19 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_version',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_clean_identifier',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => $this->hasCleanUrl
+                        ? 'Use the identifier from Clean Url' // @translate
+                        : 'Use the identifier from Clean Url (unavailable)', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_clean_identifier',
                 ],
             ])
 
@@ -435,5 +453,11 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     {
         $translator = $this->getTranslator();
         return $translator->translate($args);
+    }
+
+    public function setHasCleanUrl($hasCleanUrl)
+    {
+        $this->hasCleanUrl = $hasCleanUrl;
+        return $this;
     }
 }
