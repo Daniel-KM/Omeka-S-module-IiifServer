@@ -57,6 +57,10 @@ return [
         'routes' => [
             // @todo It is recommended to use a true identifier (ark, urn…], not an internal id.
 
+            // The Api version 2 and 3 are supported via the optional "/version".
+            // When version is not indicated in url, the default version is the one set in headers, else
+            // via the setting "iiifserver_manifest_version".
+
             // @link https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
             // Collection     {scheme}://{host}/{prefix}/collection/{name}
             // Manifest       {scheme}://{host}/{prefix}/{identifier}/manifest
@@ -85,8 +89,9 @@ return [
                     'uri' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/:id/:type[/:name][/:subname]',
+                            'route' => '[/v:version]/:id/:type[/:name][/:subname]',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                                 // Note: content resources should use the original media url, so it is just an alias.
                                 // TODO Make a redirection from content resource to original url. Or the inverse so all iiif urls will be standard?
@@ -111,8 +116,9 @@ return [
                     'collection-list' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/collection/:id',
+                            'route' => '[/v:version]/collection/:id',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '(?:[cimf]?\-?\d+\,?)+',
                             ],
                             'defaults' => [
@@ -128,8 +134,9 @@ return [
                     'collection' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/collection/:id',
+                            'route' => '[/v:version]/collection/:id',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                             ],
                             'defaults' => [
@@ -140,8 +147,9 @@ return [
                     'collection-manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/collection/:id/manifest',
+                            'route' => '[/v:version]/collection/:id/manifest',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                             ],
                             'defaults' => [
@@ -153,8 +161,9 @@ return [
                     'manifest-id' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/:id',
+                            'route' => '[/v:version]/:id',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                             ],
                             'defaults' => [
@@ -165,8 +174,9 @@ return [
                     'manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/:id/manifest',
+                            'route' => '[/v:version]/:id/manifest',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                             ],
                             'defaults' => [
@@ -179,8 +189,9 @@ return [
                     'canvas' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/:id/canvas/:name',
+                            'route' => '[/v:version]/:id/canvas/:name',
                             'constraints' => [
+                                'version' => '2|3',
                                 'id' => '\d+',
                             ],
                             'defaults' => [
@@ -194,8 +205,11 @@ return [
                     'set' => [
                         'type' => \Zend\Router\Http\Literal::class,
                         'options' => [
-                            'route' => '/set',
+                            'route' => '[/v:version]/set',
                             // The ids are in the query: "id[]=1&id[]=2".
+                            'constraints' => [
+                                'version' => '2|3',
+                            ],
                             'defaults' => [
                                 'action' => 'list',
                             ],

@@ -213,6 +213,12 @@ class PresentationController extends AbstractActionController
 
     protected function requestedVersion()
     {
+        // Check the version from the url first.
+        $version = $this->params('version');
+        if ($version === '2' || $version === '3') {
+            return $version;
+        }
+
         $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
         if (strpos($accept, 'iiif.io/api/presentation/3/context.json')) {
             return '3';
