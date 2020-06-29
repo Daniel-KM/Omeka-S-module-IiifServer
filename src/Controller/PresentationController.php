@@ -77,7 +77,7 @@ class PresentationController extends AbstractActionController
         $params = $this->params();
         $identifiers = $params->fromQuery('id');
 
-        // Compatibility with old comma-separated list.
+        // Compatibility with old comma-separated list (/collection/1,3 or /collection/i1,m2).
         if (empty($identifiers)) {
             $id = $params->fromRoute('id');
             if (empty($id)) {
@@ -88,47 +88,35 @@ class PresentationController extends AbstractActionController
             $id = preg_replace('/[^0-9,]/', '', $id);
 
             $identifiers = array_filter(explode(',', $id));
+        } elseif (is_string($identifiers)) {
+            $identifiers = preg_replace('/[^0-9,]/', '', $identifiers);
+            $identifiers = array_filter(explode(',', $identifiers));
+        }
+
+        $identifiers = array_filter(array_map('intval', $identifiers));
+        if (empty($identifiers)) {
+            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         // Extract the resources from the identifier.
 
         // Currently, Omeka S doesn't allow to read mixed resources.
-        $conn = $this
-            ->getEvent()
-            ->getApplication()
-            ->getServiceManager()
-            ->get('Omeka\Connection');
+        $services = $this->getEvent()->getApplication()->getServiceManager();
+        $entityManager = $services->get('Omeka\EntityManager');
+        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $identifiers]);
 
-        $map = [
-            'Omeka\Entity\Item' => 'items',
-            'Omeka\Entity\ItemSet' => 'item_sets',
-            'Omeka\Entity\Media' => 'media',
-        ];
-
-        // TODO Use the adapter / get representation directly instead re-query result (but keep possible duplicate).
-        $qb = $conn->createQueryBuilder()
-            ->select('id, resource_type')
-            ->from('resource', 'resource')
-            ->where('resource.id IN (' . implode(',', $identifiers) . ')')
-            ->andWhere("resource.resource_type IN ('Omeka\\\Entity\\\Item', 'Omeka\\\Entity\\\ItemSet', 'Omeka\\\Entity\\\Media')");
-        $stmt = $conn->executeQuery($qb, $qb->getParameters());
-        $resourceIds = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
-
-        // The loop is done with identifiers to keep original order and possible
+        // A loop is done with identifiers to keep original order and possible
         // duplicates.
-        $api = $this->api();
-        $identifiers = array_intersect($identifiers, array_keys($resourceIds));
-        $resources = [];
-        try {
-            foreach ($identifiers as $id) {
-                // Not found exception is automatically thrown.
-                $resources[] = $api->read($map[$resourceIds[$id]], $id)->getContent();
-            }
-        } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            $resources = [];
+        $adapter = $services->get('Omeka\ApiAdapterManager')->get('resources');
+        $result = [];
+        foreach ($resources as $resource) {
+            $result[$resource->getId()] = $adapter->getRepresentation($resource);
         }
-
-        if (empty($resources)) {
+        $resources = [];
+        foreach (array_intersect($identifiers, array_keys($result)) as $id) {
+            $resources[] = $result[$id];
+        }
+        if (!count($resources)) {
             return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 

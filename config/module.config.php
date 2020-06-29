@@ -123,6 +123,7 @@ return [
                             ],
                             'defaults' => [
                                 'action' => 'list',
+                                'is_deprecated' => 'use /set',
                             ],
                         ],
                     ],
@@ -203,12 +204,14 @@ return [
                     // Special route for the dynamic collections, search or browse pages.
                     // This route is not standard.
                     'set' => [
-                        'type' => \Zend\Router\Http\Literal::class,
+                        'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/set',
-                            // The ids are in the query: "id[]=1&id[]=2".
+                            'route' => '[/v:version]/set[/:id]',
+                            // Ids are in the query: "?id[]=1&id[]=2", but may be "?id=1,2"
+                            // or in route: "/set/1,2".
                             'constraints' => [
                                 'version' => '2|3',
+                                'id' => '(?:\d+\,?)*',
                             ],
                             'defaults' => [
                                 'action' => 'list',
