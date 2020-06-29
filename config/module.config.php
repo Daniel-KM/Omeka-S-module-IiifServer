@@ -1,6 +1,16 @@
 <?php
 namespace IiifServer;
 
+// Write the default verseion ("2" or "3") here (and in image server if needed).
+if (!isset($defaultVersion)) {
+    $defaultVersion = '';
+}
+if (!isset($versionAppend)) {
+    $versionAppend = false;
+}
+// If the version is set here, the route will skip it.
+$version = $versionAppend ? '' : $defaultVersion;
+
 return [
     'view_manager' => [
         'strategies' => [
@@ -102,6 +112,7 @@ return [
                                 'type' => 'annotation-page|annotation-collection|annotation-list|annotation|canvas|collection|content-resource|manifest|range',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'generic',
                             ],
                         ],
@@ -127,6 +138,7 @@ return [
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'list',
                                 'is_deprecated' => 'use /set',
                             ],
@@ -147,6 +159,7 @@ return [
                                 'id' => '[^,/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'collection',
                             ],
                         ],
@@ -160,6 +173,7 @@ return [
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'collection',
                             ],
                         ],
@@ -174,6 +188,7 @@ return [
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'manifest',
                             ],
                         ],
@@ -187,6 +202,7 @@ return [
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'manifest',
                             ],
                         ],
@@ -202,6 +218,7 @@ return [
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'canvas',
                             ],
                         ],
@@ -221,6 +238,7 @@ return [
                                 'id' => '[^/]*',
                             ],
                             'defaults' => [
+                                'version' => $version,
                                 'action' => 'list',
                             ],
                         ],
@@ -305,6 +323,7 @@ return [
     'iiifserver' => [
         'config' => [
             'iiifserver_manifest_version' => '2',
+            'iiifserver_manifest_version_append' => false,
             'iiifserver_manifest_clean_identifier' => true,
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',

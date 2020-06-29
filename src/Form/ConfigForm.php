@@ -39,6 +39,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_version_append',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Append the version to the url (to be set inside module.config.php currently)', // @translate
+                    'info' => 'If set, the version will be appended to the url of the server: "iiif/v3".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_version_append',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_clean_identifier',
                 'type' => Element\Checkbox::class,
                 'options' => [
