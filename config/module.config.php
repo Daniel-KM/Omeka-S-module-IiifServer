@@ -23,6 +23,7 @@ return [
             'iiifUrl' => View\Helper\IiifUrl::class,
         ],
         'factories' => [
+            'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,
             'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
             'iiifManifest2' => Service\ViewHelper\IiifManifest2Factory::class,
             'iiifManifest3' => Service\ViewHelper\IiifManifest3Factory::class,

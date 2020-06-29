@@ -164,8 +164,7 @@ class PresentationController extends AbstractActionController
         $useCleanIdentifier = $this->useCleanIdentifier();
         if ($useCleanIdentifier) {
             $getResourceFromIdentifier = $this->viewHelpers()->get('getResourceFromIdentifier');
-            return $getResourceFromIdentifier($id, false, $resourceType)
-                ?: new NotFoundException;
+            return $getResourceFromIdentifier($id, false, $resourceType);
         }
 
         try {
