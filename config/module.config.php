@@ -143,7 +143,8 @@ return [
                             'route' => '[/v:version]/collection/:id',
                             'constraints' => [
                                 'version' => '2|3',
-                                'id' => '[^/]+',
+                                // "," is not allowed in order to allow deprecated collection list.
+                                'id' => '[^,/]+',
                             ],
                             'defaults' => [
                                 'action' => 'collection',
