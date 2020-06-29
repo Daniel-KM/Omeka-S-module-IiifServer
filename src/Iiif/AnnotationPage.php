@@ -92,6 +92,7 @@ class AnnotationPage extends AbstractResourceType
         $url = $helper(
             'iiifserver/uri',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'type' => 'annotation-page',
                 'name' => $this->resource->id(),

@@ -109,6 +109,7 @@ class Body extends AbstractResourceType
             return $helper(
                 'imageserver/media',
                 [
+                    'version' => $this->serviceLevel,
                     'id' => $this->resource->id(),
                     'region' => 'full',
                     'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
@@ -124,6 +125,7 @@ class Body extends AbstractResourceType
             return $helper(
                 'mediaserver/media',
                 [
+                    'version' => $this->serviceLevel,
                     'id' => $this->resource->id(),
                     'format' => $this->resource->extension(),
                 ]
@@ -145,13 +147,14 @@ class Body extends AbstractResourceType
 
     public function getService()
     {
-        // TODO Move this in ContentResource or RraitMedia.
+        // TODO Move this in ContentResource or TraitMedia.
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
             $helper = $this->urlHelper;
             $url = $helper(
                 'imageserver/id',
                 [
+                    'version' => $this->serviceLevel,
                     'id' => $this->resource->id(),
                 ],
                 ['force_canonical' => true]

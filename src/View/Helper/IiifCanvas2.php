@@ -58,7 +58,7 @@ class IiifCanvas2 extends AbstractHelper
         // TODO Store the base url consistently.
         $url = $view->url(
             'iiifserver/manifest',
-            ['id' => $resource->id()],
+            ['version' => '2', 'id' => $resource->id()],
             ['force_canonical' => true]
         );
         $url = $view->iiifForceBaseUrlIfRequired($url);

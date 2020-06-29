@@ -92,6 +92,7 @@ class AnnotationCollection extends AbstractResourceType
         $url = $helper(
             'iiifserver/uri',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'type' => 'annotation-collection',
                 'name' => $this->resource->id(),

@@ -131,7 +131,7 @@ class Manifest extends AbstractResourceType
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/manifest',
-            ['id' => $this->resource->id()],
+            ['version' => '3', 'id' => $this->resource->id()],
             ['force_canonical' => true]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;

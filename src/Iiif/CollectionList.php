@@ -173,7 +173,7 @@ class CollectionList extends AbstractType
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/set',
-            [],
+            ['version' => '3'],
             [
                 'query' => ['id' => $identifiers],
                 'force_canonical' => true,

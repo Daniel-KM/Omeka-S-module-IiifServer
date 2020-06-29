@@ -173,6 +173,7 @@ class Canvas extends AbstractResourceType
         $url = $helper(
             'iiifserver/canvas',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'name' => $this->resource->id(),
             ],

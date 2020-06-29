@@ -41,13 +41,20 @@ class IiifUrl extends AbstractHelper
      * the admin or the site path. In that case, the canonical iiif url is used.
      *
      * @param AbstractResourceEntityRepresentation $resource
+     * @param string $version
      * @return string
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = '')
     {
         $resourceName = $resource->resourceName();
         if ($resourceName === 'media') {
             return $this->view->iiifImageUrl('imageserver/info', ['id' => $resource->id()]);
+        }
+
+        if (is_null($version)) {
+            $version = $this->view->setting('iiifserver_manifest_version', '2');
+        } else {
+            $version = $version === '2' ? '2' : '3';
         }
 
         $mapRouteNames = [
@@ -56,7 +63,7 @@ class IiifUrl extends AbstractHelper
         ];
         $url = $this->view->url(
             $mapRouteNames[$resource->resourceName()],
-            ['id' => $resource->id()],
+            ['version' => $version, 'id' => $resource->id()],
             ['force_canonical' => true]
         );
         return $this->view->iiifForceBaseUrlIfRequired($url);

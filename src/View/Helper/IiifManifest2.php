@@ -114,7 +114,7 @@ class IiifManifest2 extends AbstractHelper
 
         $url = $this->view->url(
             'iiifserver/manifest',
-            ['id' => $item->id()],
+            ['version' => '2', 'id' => $item->id()],
             ['force_canonical' => true]
         );
         $url = $this->view->iiifForceBaseUrlIfRequired($url);
@@ -126,7 +126,7 @@ class IiifManifest2 extends AbstractHelper
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
-        $label = $item->displayTitle('') ?: $this->view->iiifUrl($item);
+        $label = $item->displayTitle('') ?: $this->view->iiifUrl($item, '2');
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -189,7 +189,7 @@ class IiifManifest2 extends AbstractHelper
         foreach ($item->itemSets() as $itemSet) {
             $within = $this->view->url(
                 'iiifserver/collection',
-                ['id' => $itemSet->id()],
+                ['version' => '2', 'id' => $itemSet->id()],
                 ['force_canonical' => true]
             );
             $within = $this->view->iiifForceBaseUrlIfRequired($within);

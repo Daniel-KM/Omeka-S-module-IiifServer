@@ -77,7 +77,7 @@ class IiifCollectionList2 extends AbstractHelper
         $translate = $this->getView()->plugin('translate');
 
         $identifiers = $this->buildIdentifierForList($resources);
-        $url = $this->view->url('iiifserver/set', [], [
+        $url = $this->view->url('iiifserver/set', ['version' => '2'], [
             'query' => ['id' => $identifiers],
             'force_canonical' => true,
         ]);
@@ -162,18 +162,18 @@ class IiifCollectionList2 extends AbstractHelper
         $manifest = [];
 
         if ($resourceName == 'item_sets') {
-            $url = $this->view->url('iiifserver/collection', [
-                'id' => $resource->id(),
-            ]);
-
+            $url = $this->view->url(
+                'iiifserver/collection',
+                ['version' => '2', 'id' => $resource->id()],
+                ['force_canonical' => true]
+            );
             $type = 'sc:Collection';
         } else {
             $url = $this->view->url(
                 'iiifserver/manifest',
-                ['id' => $resource->id()],
+                ['version' => '2', 'id' => $resource->id()],
                 ['force_canonical' => true]
             );
-
             $type = 'sc:Manifest';
         }
 

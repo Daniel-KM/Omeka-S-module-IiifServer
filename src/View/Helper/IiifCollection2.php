@@ -180,7 +180,7 @@ class IiifCollection2 extends AbstractHelper
         if ($resourceName == 'item_sets') {
             $url = $this->view->url(
                 'iiifserver/collection',
-                ['id' => $resource->id()],
+                ['version' => '2', 'id' => $resource->id()],
                 ['force_canonical' => true]
             );
 
@@ -188,7 +188,7 @@ class IiifCollection2 extends AbstractHelper
         } else {
             $url = $this->view->url(
                 'iiifserver/manifest',
-                ['id' => $resource->id()],
+                ['version' => '2', 'id' => $resource->id()],
                 ['force_canonical' => true]
             );
 
@@ -227,7 +227,7 @@ class IiifCollection2 extends AbstractHelper
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {
                 return strpos($v->type(), 'resource') === 0
-                    ? $this->view->iiifUrl($v->valueResource())
+                    ? $this->view->iiifUrl($v->valueResource(), '2')
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;

@@ -129,7 +129,7 @@ class Collection extends AbstractResourceType
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/collection',
-            ['id' => $this->resource->id()],
+            ['version' => '3', 'id' => $this->resource->id()],
             ['force_canonical' => true]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;

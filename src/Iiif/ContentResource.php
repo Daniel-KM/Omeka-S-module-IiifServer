@@ -123,6 +123,7 @@ class ContentResource extends AbstractResourceType
         $url = $helper(
             'iiifserver/uri',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'type' => 'content-resource',
                 'name' => $this->resource->id(),

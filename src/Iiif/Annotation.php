@@ -97,6 +97,7 @@ class Annotation extends AbstractResourceType
         $url = $helper(
             'iiifserver/uri',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'type' => 'annotation',
                 'name' => $this->resource->id(),
@@ -123,6 +124,7 @@ class Annotation extends AbstractResourceType
         $url = $helper(
             'iiifserver/uri',
             [
+                'version' => '3',
                 'id' => $this->resource->item()->id(),
                 'type' => 'canvas',
                 'name' => $this->resource->id(),
