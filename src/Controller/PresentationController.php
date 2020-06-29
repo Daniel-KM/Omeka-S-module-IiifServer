@@ -154,6 +154,8 @@ class PresentationController extends AbstractActionController
     }
 
     /**
+     * @todo Factorize with ImageServer.
+     *
      * @param string $resourceType
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
      */

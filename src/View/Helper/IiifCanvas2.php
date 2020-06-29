@@ -58,7 +58,7 @@ class IiifCanvas2 extends AbstractHelper
         // TODO Store the base url consistently.
         $url = $view->url(
             'iiifserver/manifest',
-            ['version' => '2', 'id' => $resource->id()],
+            ['version' => '2', 'id' => $view->iiifCleanIdentifiers($resource->id())],
             ['force_canonical' => true]
         );
         $url = $view->iiifForceBaseUrlIfRequired($url);
@@ -219,7 +219,7 @@ class IiifCanvas2 extends AbstractHelper
         $thumbnailService['@context'] = 'http://iiif.io/api/image/2/context.json';
         $thumbnailServiceUrl = $view->iiifImageUrl(
             'imageserver/id',
-            ['id' => $media->id()]
+            ['id' => $view->iiifCleanIdentifiers($media->id())]
         );
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
@@ -268,7 +268,7 @@ class IiifCanvas2 extends AbstractHelper
         $imageUrl = $view->iiifImageUrl(
             'imageserver/media',
             [
-                'id' => $media->id(),
+                'id' => $view->iiifCleanIdentifiers($media->id()),
                 'region' => 'full',
                 'size' => $widthLarge . ',' . $heightLarge,
                 'rotation' => 0,
@@ -285,7 +285,7 @@ class IiifCanvas2 extends AbstractHelper
 
         $imageUrlService = $view->iiifImageUrl(
             'imageserver/id',
-            ['id' => $media->id()]
+            ['id' => $view->iiifCleanIdentifiers($media->id())]
         );
         $imageResourceService = [];
         $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';

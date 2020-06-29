@@ -88,12 +88,13 @@ class AnnotationCollection extends AbstractResourceType
 
     public function getId()
     {
+        $cleanIdentifiers = $this->iiifCleanIdentifiers;
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/uri',
             [
                 'version' => '3',
-                'id' => $this->resource->item()->id(),
+                'id' => $cleanIdentifiers($this->resource->item()->id()),
                 'type' => 'annotation-collection',
                 'name' => $this->resource->id(),
             ],

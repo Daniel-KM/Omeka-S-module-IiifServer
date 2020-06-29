@@ -132,19 +132,24 @@ abstract class AbstractResourceType extends AbstractType
     protected $manifest;
 
     /**
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
      * @var \Zend\View\Helper\Url
      */
     protected $urlHelper;
 
     /**
+     * @var \IiifServer\View\Helper\IiifCleanIdentifiers
+     */
+    protected $iiifCleanIdentifiers;
+
+    /**
      * @var \IiifServer\View\Helper\IiifForceBaseUrlIfRequired
      */
     protected $iiifForceBaseUrlIfRequired;
-
-    /**
-     * @var \Omeka\View\Helper\Setting
-     */
-    protected $setting;
 
     /**
      * @var \IiifServer\View\Helper\PublicResourceUrl
@@ -161,9 +166,10 @@ abstract class AbstractResourceType extends AbstractType
         $this->resource = $resource;
         $this->options = $options;
         $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
-        $this->urlHelper = $viewHelpers->get('url');
-        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->setting = $viewHelpers->get('setting');
+        $this->urlHelper = $viewHelpers->get('url');
+        $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
+        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 

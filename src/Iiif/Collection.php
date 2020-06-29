@@ -126,10 +126,11 @@ class Collection extends AbstractResourceType
     public function getId()
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
+        $cleanIdentifiers = $this->iiifCleanIdentifiers;
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/collection',
-            ['version' => '3', 'id' => $this->resource->id()],
+            ['version' => '3', 'id' => $cleanIdentifiers($this->resource->id())],
             ['force_canonical' => true]
         );
         $helper = $this->iiifForceBaseUrlIfRequired;

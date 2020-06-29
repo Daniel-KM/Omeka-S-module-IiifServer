@@ -105,12 +105,13 @@ class Body extends AbstractResourceType
     {
         /** @var \IiifServer\Iiif\ContentResource $contentResource */
         if ($this->contentResource->isImage()) {
-            $helper = $this->iiifImageUrl;
-            return $helper(
+            $imageUrl = $this->iiifImageUrl;
+            $cleanIdentifiers = $this->iiifCleanIdentifiers;
+            return $imageUrl(
                 'imageserver/media',
                 [
                     'version' => $this->serviceLevel,
-                    'id' => $this->resource->id(),
+                    'id' => $cleanIdentifiers($this->resource->id()),
                     'region' => 'full',
                     'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
                     'rotation' => 0,
@@ -121,12 +122,13 @@ class Body extends AbstractResourceType
         }
 
         if ($this->contentResource->isAudioVideo()) {
-            $helper = $this->iiifImageUrl;
-            return $helper(
+            $imageUrl = $this->iiifImageUrl;
+            $cleanIdentifiers = $this->iiifCleanIdentifiers;
+            return $imageUrl(
                 'mediaserver/media',
                 [
                     'version' => $this->serviceLevel,
-                    'id' => $this->resource->id(),
+                    'id' => $cleanIdentifiers($this->resource->id()),
                     'format' => $this->resource->extension(),
                 ]
             );
@@ -151,11 +153,12 @@ class Body extends AbstractResourceType
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
             $helper = $this->urlHelper;
+            $cleanIdentifiers = $this->iiifCleanIdentifiers;
             $url = $helper(
                 'imageserver/id',
                 [
                     'version' => $this->serviceLevel,
-                    'id' => $this->resource->id(),
+                    'id' => $cleanIdentifiers($this->resource->id()),
                 ],
                 ['force_canonical' => true]
             );

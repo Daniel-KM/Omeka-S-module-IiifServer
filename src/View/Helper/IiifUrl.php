@@ -63,7 +63,7 @@ class IiifUrl extends AbstractHelper
         ];
         $url = $this->view->url(
             $mapRouteNames[$resource->resourceName()],
-            ['version' => $version, 'id' => $resource->id()],
+            ['version' => $version, 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
             ['force_canonical' => true]
         );
         return $this->view->iiifForceBaseUrlIfRequired($url);

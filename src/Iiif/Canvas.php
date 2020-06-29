@@ -169,12 +169,13 @@ class Canvas extends AbstractResourceType
 
     public function getId()
     {
+        $cleanIdentifiers = $this->iiifCleanIdentifiers;
         $helper = $this->urlHelper;
         $url = $helper(
             'iiifserver/canvas',
             [
                 'version' => '3',
-                'id' => $this->resource->item()->id(),
+                'id' => $cleanIdentifiers($this->resource->item()->id()),
                 'name' => $this->resource->id(),
             ],
             ['force_canonical' => true]

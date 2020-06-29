@@ -74,9 +74,9 @@ class IiifCollectionList2 extends AbstractHelper
             'manifests' => [],
         ];
 
-        $translate = $this->getView()->plugin('translate');
+        $translate = $this->view->plugin('translate');
 
-        $identifiers = $this->buildIdentifierForList($resources);
+        $identifiers = $this->view->iiifCleanIdentifiers($resources);
         /*
         $url = $this->view->url('iiifserver/set', ['version' => '2'], [
             'query' => ['id' => $identifiers],
@@ -171,14 +171,14 @@ class IiifCollectionList2 extends AbstractHelper
         if ($resourceName == 'item_sets') {
             $url = $this->view->url(
                 'iiifserver/collection',
-                ['version' => '2', 'id' => $resource->id()],
+                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
                 ['force_canonical' => true]
             );
             $type = 'sc:Collection';
         } else {
             $url = $this->view->url(
                 'iiifserver/manifest',
-                ['version' => '2', 'id' => $resource->id()],
+                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
                 ['force_canonical' => true]
             );
             $type = 'sc:Manifest';
@@ -192,20 +192,5 @@ class IiifCollectionList2 extends AbstractHelper
         $manifest['label'] = $resource->displayTitle();
 
         return $manifest;
-    }
-
-    /**
-     * Helper to list all resource ids.
-     *
-     * @todo Merge with IiifServer\View\Helper\UniversalViewer::buildIdentifierForList()
-     *
-     * @param array $resources
-     * @return string
-     */
-    protected function buildIdentifierForList(array $resources)
-    {
-        return array_map(function ($v) {
-            return $v->id();
-        }, $resources);
     }
 }

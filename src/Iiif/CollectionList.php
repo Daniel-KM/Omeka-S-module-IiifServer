@@ -125,19 +125,24 @@ class CollectionList extends AbstractType
     protected $api;
 
     /**
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
      * @var \Zend\View\Helper\Url
      */
     protected $urlHelper;
 
     /**
+     * @var \IiifServer\View\Helper\IiifCleanIdentifiers
+     */
+    protected $IiifCleanIdentifiers;
+
+    /**
      * @var \IiifServer\View\Helper\IiifForceBaseUrlIfRequired
      */
     protected $iiifForceBaseUrlIfRequired;
-
-    /**
-     * @var \Omeka\View\Helper\Setting
-     */
-    protected $setting;
 
     /**
      * @var \IiifServer\View\Helper\PublicResourceUrl
@@ -155,9 +160,10 @@ class CollectionList extends AbstractType
         $this->serviceLocator = $services;
         $viewHelpers = $services->get('ViewHelperManager');
         $this->api = $viewHelpers->get('api');
-        $this->urlHelper = $viewHelpers->get('url');
-        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->setting = $viewHelpers->get('setting');
+        $this->urlHelper = $viewHelpers->get('url');
+        $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
+        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 
@@ -168,7 +174,8 @@ class CollectionList extends AbstractType
 
     public function getId()
     {
-        $identifiers = $this->buildIdentifierForList();
+        $helper = $this->iiifCleanIdentifiers;
+        $identifiers = $helper($this->resources);
 
         $helper = $this->urlHelper;
         /*
@@ -226,17 +233,5 @@ class CollectionList extends AbstractType
             }
             return !empty($v);
         }, ARRAY_FILTER_USE_BOTH);
-    }
-
-    /**
-     * Helper to list all resource ids.
-     *
-     * @return string
-     */
-    protected function buildIdentifierForList()
-    {
-        return array_map(function ($v) {
-            return $v->id();
-        }, $this->resources);
     }
 }

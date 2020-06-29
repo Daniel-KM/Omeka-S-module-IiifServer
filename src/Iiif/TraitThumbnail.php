@@ -75,11 +75,13 @@ trait TraitThumbnail
             return null;
         }
 
+        $cleanIdentifiers = $this->iiifCleanIdentifiers;
+        $identifier = $cleanIdentifiers ? $cleanIdentifiers($id) : $id;
         $helper = $this->iiifImageUrl;
         $imageUrl = $helper(
             'imageserver/media',
             [
-                'id' => $id,
+                'id' => $identifier,
                 'region' => 'full',
                 'size' => $size['width'] . ',' . $size['height'],
                 'rotation' => 0,
