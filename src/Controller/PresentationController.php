@@ -52,12 +52,9 @@ class PresentationController extends AbstractActionController
 
     public function collectionAction()
     {
-        // Not found exception is automatically thrown.
-        $id = $this->params('id');
-        try {
-            $resource = $this->api()->read('item_sets', $id)->getContent();
-        } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+        $resource = $this->fetchResource('item_sets');
+        if (!$resource) {
+            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -74,50 +71,9 @@ class PresentationController extends AbstractActionController
 
     public function listAction()
     {
-        $params = $this->params();
-        $identifiers = $params->fromQuery('id');
-
-        // Compatibility with old comma-separated list (/collection/1,3 or /collection/i1,m2).
-        if (empty($identifiers)) {
-            $id = $params->fromRoute('id');
-            if (empty($id)) {
-                return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
-            }
-
-            // For compatibility with old urls from Omeka Classic.
-            $id = preg_replace('/[^0-9,]/', '', $id);
-
-            $identifiers = array_filter(explode(',', $id));
-        } elseif (is_string($identifiers)) {
-            $identifiers = preg_replace('/[^0-9,]/', '', $identifiers);
-            $identifiers = array_filter(explode(',', $identifiers));
-        }
-
-        $identifiers = array_filter(array_map('intval', $identifiers));
-        if (empty($identifiers)) {
-            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
-        }
-
-        // Extract the resources from the identifier.
-
-        // Currently, Omeka S doesn't allow to read mixed resources.
-        $services = $this->getEvent()->getApplication()->getServiceManager();
-        $entityManager = $services->get('Omeka\EntityManager');
-        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $identifiers]);
-
-        // A loop is done with identifiers to keep original order and possible
-        // duplicates.
-        $adapter = $services->get('Omeka\ApiAdapterManager')->get('resources');
-        $result = [];
-        foreach ($resources as $resource) {
-            $result[$resource->getId()] = $adapter->getRepresentation($resource);
-        }
-        $resources = [];
-        foreach (array_intersect($identifiers, array_keys($result)) as $id) {
-            $resources[] = $result[$id];
-        }
-        if (!count($resources)) {
-            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
+        $resources = $this->fetchResources();
+        if ($resources instanceof \Exception) {
+            return $this->jsonError($resources, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -134,12 +90,9 @@ class PresentationController extends AbstractActionController
 
     public function manifestAction()
     {
-        // Not found exception is automatically thrown.
-        $id = $this->params('id');
-        try {
-            $resource = $this->api()->read('items', $id)->getContent();
-        } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+        $resource = $this->fetchResource('items');
+        if (!$resource) {
+            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -156,6 +109,7 @@ class PresentationController extends AbstractActionController
 
     public function canvasAction()
     {
+        // TODO Check for clean url.
         // Not found exception is automatically thrown.
         $id = $this->params('id');
         try {
@@ -197,6 +151,75 @@ class PresentationController extends AbstractActionController
             sprintf('The type "%s" is currently only managed as uri, not url', $type), // @translate
             \Zend\Http\Response::STATUS_CODE_501
         ));
+    }
+
+    /**
+     * @param string $resourceType
+     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
+     */
+    protected function fetchResource($resourceType)
+    {
+        $id = $this->params('id');
+        try {
+            return $this->api()->read($resourceType, $id)->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $resourceType
+     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]|\Omeka\Api\Exception\NotFoundException
+     */
+    protected function fetchResources($resourceType = null)
+    {
+        $params = $this->params();
+        $identifiers = $params->fromQuery('id');
+
+        // Compatibility with comma-separated list (/collection/i1,m2 or /set/1,2).
+        if (empty($identifiers)) {
+            $id = $params->fromRoute('id');
+            if (empty($id)) {
+                return new NotFoundException;
+            }
+
+            // For compatibility with old urls from Omeka Classic.
+            $id = preg_replace('/[^0-9,]/', '', $id);
+
+            $identifiers = array_filter(explode(',', $id));
+        } elseif (is_string($identifiers)) {
+            $identifiers = preg_replace('/[^0-9,]/', '', $identifiers);
+            $identifiers = array_filter(explode(',', $identifiers));
+        }
+
+        $identifiers = array_filter(array_map('intval', $identifiers));
+        if (empty($identifiers)) {
+            return new NotFoundException;
+        }
+
+        // Extract the resources from the identifier.
+
+        // Currently, Omeka S doesn't allow to read mixed resources.
+        $services = $this->getEvent()->getApplication()->getServiceManager();
+        $entityManager = $services->get('Omeka\EntityManager');
+        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $identifiers]);
+
+        // A loop is done with identifiers to keep original order and possible
+        // duplicates.
+        $adapter = $services->get('Omeka\ApiAdapterManager')->get('resources');
+        $result = [];
+        foreach ($resources as $resource) {
+            $result[$resource->getId()] = $adapter->getRepresentation($resource);
+        }
+        $resources = [];
+        foreach (array_intersect($identifiers, array_keys($result)) as $id) {
+            $resources[] = $result[$id];
+        }
+        if (!count($resources)) {
+            return new NotFoundException;
+        }
+
+        return $resources;
     }
 
     protected function requestedVersion()
