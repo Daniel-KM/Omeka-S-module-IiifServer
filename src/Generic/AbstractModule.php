@@ -403,6 +403,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      *
      * @param Event $event
      * @param string $settingsType
+     * @return \Zend\Form\Form|null
      */
     protected function handleAnySettings(Event $event, $settingsType)
     {
@@ -417,7 +418,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             'user_settings' => 'Omeka\Settings\User',
         ];
         if (!isset($settingsTypes[$settingsType])) {
-            return;
+            return null;
         }
 
         // TODO Check fieldsets in the config of the module.
@@ -428,7 +429,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             'user_settings' => static::NAMESPACE . '\Form\UserSettingsFieldset',
         ];
         if (!isset($settingFieldsets[$settingsType])) {
-            return;
+            return null;
         }
 
         $settings = $services->get($settingsTypes[$settingsType]);
@@ -462,7 +463,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $this->initDataToPopulate($settings, $settingsType, $id);
             $data = $this->prepareDataToPopulate($settings, $settingsType);
             if (is_null($data)) {
-                return;
+                return null;
             }
         }
 
@@ -485,6 +486,8 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $form->add($fieldset);
             $form->get($space)->populateValues($data);
         }
+
+        return $form;
     }
 
     /**
