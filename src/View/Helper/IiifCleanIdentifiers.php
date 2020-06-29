@@ -5,7 +5,10 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
 /**
- * View helper to get the identifier from id.
+ * View helper to get the identifier from id and to url encode it.
+ *
+ * @link https://iiif.io/api/image/2.1/#uri-encoding-and-decoding
+ * @link https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
  */
 class IiifCleanIdentifiers extends AbstractHelper
 {
@@ -61,15 +64,20 @@ class IiifCleanIdentifiers extends AbstractHelper
                 : array_map($returnId, $in);
         }
 
+        // According to the specifications, the ":" should not be url encoded.
+        $urlEncode = function ($v) {
+            return str_replace('%3A', ':', rawurldecode($v));
+        };
+
         $helper = $this->getIdentifiersFromResources;
         $result = $helper($in);
         if ($isSingle) {
-            return $result ? reset($result) : reset($in);
+            return $result ? $urlEncode(reset($result)) : reset($in);
         }
 
         $identifiers = [];
         foreach ($in as $id) {
-            $identifiers[] = isset($result[$id]) ? $result[$id] : $id;
+            $identifiers[] = isset($result[$id]) ? $urlEncode($result[$id]) : $id;
         }
         return $identifiers;
     }
