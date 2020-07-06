@@ -11,17 +11,10 @@ class IiifImageUrlFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $urlHelper = $services->get('ViewHelperManager')->get('url');
-        $baseUrlImage = $urlHelper('imageserver', [], ['force_canonical' => true]);
-        $baseUrlMedia = $urlHelper('mediaserver', [], ['force_canonical' => true]);
-
         $settings = $services->get('Omeka\Settings');
         return new IiifImageUrl(
-            $settings->get('iiifserver_url_service_image'),
-            $settings->get('iiifserver_url_service_media'),
             $settings->get('iiifserver_url_force_from'),
             $settings->get('iiifserver_url_force_to'),
-            $baseUrlImage,
-            $baseUrlMedia,
             $urlHelper
         );
     }

@@ -346,8 +346,6 @@ return [
             // Urls.
             'iiifserver_url_version_add' => false,
             'iiifserver_identifier_clean' => true,
-            'iiifserver_url_service_image' => '',
-            'iiifserver_url_service_media' => '',
             // These options allows to bypass a proxy issue.
             'iiifserver_url_force_from' => '',
             'iiifserver_url_force_to' => '',

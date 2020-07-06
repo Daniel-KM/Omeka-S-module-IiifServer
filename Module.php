@@ -79,15 +79,6 @@ class Module extends AbstractModule
         $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $params = $controller->getRequest()->getPost();
 
-        if (empty($params['iiifserver_url_service_image'])) {
-            $moduleManager = $services->get('Omeka\ModuleManager');
-            $module = $moduleManager->getModule('ImageServer');
-            if (!$module) {
-                $controller->messenger()->addErrors('The module requires an external iiif compliant image server or the module Image Server.'); // @translate
-                return false;
-            }
-        }
-
         if (!parent::handleConfigForm($controller)) {
             return false;
         }

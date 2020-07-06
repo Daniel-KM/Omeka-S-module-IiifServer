@@ -129,7 +129,8 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->delete('iiifserver_manifest_force_url_from');
     $settings->set('iiifserver_url_force_to', $settings->get('iiifserver_manifest_force_url_to', ''));
     $settings->delete('iiifserver_manifest_force_url_to');
-
+    $settings->delete('iiifserver_manifest_service_image');
+    $settings->delete('iiifserver_manifest_service_media');
     $settings->delete('iiifserver_manifest_service_iiifsearch');
     $settings->delete('iiifserver_image_server_base_url');
     $settings->delete('iiifserver_image_server_api_version');
