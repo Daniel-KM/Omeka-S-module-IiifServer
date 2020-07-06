@@ -149,29 +149,21 @@ class ContentResource extends AbstractResourceType
         return new ValueLanguage(['none' => $label]);
     }
 
-    /**
-     * Get the media type of the resource.
-     *
-     * Note that the format of any image is always "image/jpeg", since the
-     * image server is used and the preferred output is set to jpeg.
-     *
-     * @todo Manage the format of non-file resources (iiif, oembed, etc.).
-     * @todo Manage the preferred output for the format.
-     *
-     * @return string|null
-     */
-    public function getFormat()
-    {
-        $mediaType = $this->resource->mediaType();
-        if ($mediaType) {
-            return $this->isImage() ? 'image/jpeg' : $mediaType;
-        }
-        return null;
-    }
-
     protected function prepareMediaId()
     {
         // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
+        $ingester = $this->resource->ingester();
+        if ($ingester === 'iiif') {
+            $mediaData = $this->resource->mediaData();
+            if (isset($mediaData['id'])) {
+                $this->id = $mediaData['id'];
+                return;
+            } elseif (isset($mediaData['@id'])) {
+                $this->id = $mediaData['@id'];
+                return;
+            }
+        }
+
         $this->id = $this->resource->originalUrl();
         if (!$this->id) {
             $siteSlug = @$this->options['siteSlug'];

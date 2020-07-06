@@ -123,30 +123,38 @@ class Body extends AbstractResourceType
 
     public function getId()
     {
+        if ($this->isMediaIiif()) {
+            $mediaData = $this->resource->mediaData();
+            return isset($mediaData['id']) ? $mediaData['id'] : $mediaData['@id'];
+        }
+
         if ($this->contentResource->isImage()) {
             // According to https://iiif.io/api/presentation/3.0/#57-content-resources,
             // "the URL may be the complete URL to a particular size of the image
             // content", so the large one here, and it's always a jpeg.
             // It's not needed to use the full original size.
             $helper = $this->imageSize;
-            $imageSize = $helper($this->resource, 'large');
-            list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
+            $size = $helper($this->resource, 'large');
+            list($widthLarge, $heightLarge) = $size ? array_values($size) : [null, null];
             $imageUrl = $this->iiifImageUrl;
             return $imageUrl($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
-                'size' => $widthLarge . ',' . $heightLarge,
+                'size' => $size ? $widthLarge . ',' . $heightLarge : 'max',
                 'rotation' => 0,
                 'quality' => 'default',
                 'format' => 'jpg',
             ]);
-        } elseif ($this->contentResource->isAudioVideo()) {
+        }
+
+        if ($this->contentResource->isAudioVideo()) {
+            // TODO Manage iiif 3 audio video.
             $imageUrl = $this->iiifImageUrl;
             return $imageUrl($this->resource, 'mediaserver/media', $this->imageApiVersion, [
                 'format' => $this->resource->extension(),
             ]);
-        } else {
-            return $this->contentResource->getId();
         }
+
+        return $this->contentResource->getId();
     }
 
     public function getType()
@@ -162,6 +170,12 @@ class Body extends AbstractResourceType
     public function getService()
     {
         // TODO Move this in ContentResource or TraitMedia.
+
+        if ($this->isMediaIiif()) {
+            $mediaData = $this->resource->mediaData();
+            return isset($mediaData['service']) ? $mediaData['service'] : null;
+        }
+
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
             $helper = $this->iiifImageUrl;

@@ -153,7 +153,25 @@ trait TraitIiifType
 
     protected function initIiifType()
     {
-        $mediaType = $this->resource->mediaType();
+        if ($this->resource->ingester() == 'iiif') {
+            $mediaData = $this->resource->mediaData();
+            if (isset($mediaData['type'])) {
+                $this->type = $mediaData['type'];
+                return $this->type;
+            }
+            if (isset($mediaData['@type'])) {
+                $this->type = $mediaData['@type'];
+                return $this->type;
+            }
+            if (isset($mediaData['format'])) {
+                $mediaType = $mediaData['format'];
+            }
+        }
+
+        if (empty($mediaType)) {
+            $mediaType = $this->resource->mediaType();
+        }
+
         if ($mediaType) {
             $mediaTypeType = strtok($mediaType, '/');
             if (isset($this->mediaTypeTypes[$mediaTypeType])) {
