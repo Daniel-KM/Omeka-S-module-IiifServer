@@ -66,7 +66,7 @@ class IiifCleanIdentifiers extends AbstractHelper
 
         // According to the specifications, the ":" should not be url encoded.
         $urlEncode = function ($v) {
-            return str_replace('%3A', ':', rawurldecode($v));
+            return str_replace('%3A', ':', rawurlencode($v));
         };
 
         $helper = $this->getIdentifiersFromResources;

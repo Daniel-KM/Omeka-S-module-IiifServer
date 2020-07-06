@@ -68,13 +68,15 @@ return [
         // In order to use clean urls, the identifier "id" can be any string without "/", not only Omeka id.
         // A specific config file is used is used to manage identifiers with "/", like arks.
         'routes' => [
-            // @todo It is recommended to use a true identifier (ark, urn…], not an internal id.
-
             // The Api version 2 and 3 are supported via the optional "/version".
             // When version is not indicated in url, the default version is the one set in headers, else
             // via the setting "iiifserver_manifest_version".
 
+            // Unlike the Api Image, there is no requirement on the identifier: it may contains
+            // "/" and doesn't need to be url encoded.
+
             // @link https://iiif.io/api/presentation/2.1/#a-summary-of-recommended-uri-patterns
+            // There is no recommended uri patterns in presentation 3.0, only a generic pattern.
             // Collection     {scheme}://{host}/{prefix}/collection/{name}
             // Manifest       {scheme}://{host}/{prefix}/{identifier}/manifest
             // Sequence       {scheme}://{host}/{prefix}/{identifier}/sequence/{name}
