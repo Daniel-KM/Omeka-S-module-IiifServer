@@ -11,6 +11,26 @@ use Zend\View\Helper\Url;
 class IiifImageUrl extends AbstractHelper
 {
     /**
+     * @var \Zend\View\Helper\Url
+     */
+    protected $url;
+
+    /**
+     * @var IiifCleanIdentifiers
+     */
+    protected $iiifCleanIdentifiers;
+
+    /**
+     * @var string
+     */
+    protected $defaultVersion;
+
+    /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
      * @var string
      */
     protected $forceFrom;
@@ -21,40 +41,59 @@ class IiifImageUrl extends AbstractHelper
     protected $forceTo;
 
     /**
-     * @var \Zend\View\Helper\Url
-     */
-    protected $urlHelper;
-
-    /**
+     * @param Url $url
+     * @param IiifCleanIdentifiers $iiifCleanIdentifiers
+     * @param string $defaultVersion
+     * @param string $prefix
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
-     * @param Url $urlHelper
      */
     public function __construct(
+        Url $url,
+        IiifCleanIdentifiers $iiifCleanIdentifiers,
+        $defaultVersion,
+        $prefix,
         $forceUrlFrom,
-        $forceUrlTo,
-        Url $urlHelper
+        $forceUrlTo
     ) {
+        $this->url = $url;
+        $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
+        $this->defaultVersion = $defaultVersion;
+        $this->prefix = $prefix;
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
-        $this->urlHelper = $urlHelper;
     }
 
     /**
      * Return an iiif image url.
      *
      * It takes care of external server and of the option to force base url.
+     * @see \IiifServer\View\Helper\IiifUrl
      *
+     * @param \Omeka\Api\Representation\MediaRepresentation|int $resource
      * @param string $route
+     * @param string $version
      * @param array $params
      * @return string
      */
-    public function __invoke($route, array $params = [])
+    public function __invoke($resource, $route = '', $version = null, array $params = [])
     {
-        $helper = $this->urlHelper;
-        $url = $helper($route, $params, ['force_canonical' => true]);
-        return $this->forceFrom && (strpos($url, $this->forceFrom) === 0)
-            ? substr_replace($url, $this->forceTo, 0, strlen($this->forceFrom))
-            : $url;
+        $urlHelper = $this->url;
+        $iiifCleanIdentifiersHelper = $this->iiifCleanIdentifiers;
+
+        $route = $route ?: 'imageserver/info';
+        $apiVersion = $version ?: $this->defaultVersion;
+        $id = is_numeric($resource) ? $resource : $resource->id();
+
+        $params += [
+            'version' => $apiVersion,
+            'prefix' => $this->prefix,
+            'id' => $iiifCleanIdentifiersHelper($id),
+        ];
+
+        $urlInfo = $urlHelper($route, $params, ['force_canonical' => true]);
+        return $this->forceFrom && (strpos($urlInfo, $this->forceFrom) === 0)
+            ? substr_replace($urlInfo, $this->forceTo, 0, strlen($this->forceFrom))
+            : $urlInfo;
     }
 }

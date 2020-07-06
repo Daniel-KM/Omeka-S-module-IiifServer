@@ -45,8 +45,13 @@ class PresentationController extends AbstractActionController
      */
     public function indexAction()
     {
+        $settings = $this->settings();
         $params = $this->params()->fromRoute();
         $params['action'] = 'manifest';
+        $params += [
+            'version' => $settings->get('imageserver_info_default_version', '2'),
+            'prefix' => $settings->get('cleanurl_identifier_prefix'),
+        ];
         return $this->forward()->dispatch(__CLASS__, $params);
     }
 

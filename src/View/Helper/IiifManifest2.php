@@ -595,25 +595,18 @@ class IiifManifest2 extends AbstractHelper
         }
         list($width, $height) = array_values($imageSize);
 
-        $imageUrl = $this->view->iiifImageUrl(
-            'imageserver/media',
-            [
-                'id' => $this->view->iiifCleanIdentifiers($media->id()),
-                'region' => 'full',
-                'size' => $width . ',' . $height,
-                'rotation' => 0,
-                'quality' => 'default',
-                'format' => 'jpg',
-            ]
-        );
+        $imageUrl = $this->view->iiifImageUrl($media, 'imageserver/media', '2', [
+            'region' => 'full',
+            'size' => $width . ',' . $height,
+            'rotation' => 0,
+            'quality' => 'default',
+            'format' => 'jpg',
+        ]);
         $thumbnail['@id'] = $imageUrl;
 
         $thumbnailService = [];
         $thumbnailService['@context'] = 'http://iiif.io/api/image/2/context.json';
-        $thumbnailServiceUrl = $this->view->iiifImageUrl(
-            'imageserver/id',
-            ['id' => $this->view->iiifCleanIdentifiers($media->id())]
-        );
+        $thumbnailServiceUrl = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
         $thumbnailService = (object) $thumbnailService;
@@ -677,19 +670,16 @@ class IiifManifest2 extends AbstractHelper
         // According to https://iiif.io/api/presentation/2.1/#image-resources,
         // "the URL may be the complete URL to a particular size of the image
         // content", so the large one here, and it's always a jpeg.
+        // It's not needed to use the full original size.
         $imageSize = $view->imageSize($media, 'large');
         list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
-        $imageUrl = $this->view->iiifImageUrl(
-            'imageserver/media',
-            [
-                'id' => $this->view->iiifCleanIdentifiers($media->id()),
-                'region' => 'full',
-                'size' => $widthLarge . ',' . $heightLarge,
-                'rotation' => 0,
-                'quality' => 'default',
-                'format' => 'jpg',
-            ]
-        );
+        $imageUrl = $this->view->iiifImageUrl($media, 'imageserver/media', '2', [
+            'region' => 'full',
+            'size' => $widthLarge . ',' . $heightLarge,
+            'rotation' => 0,
+            'quality' => 'default',
+            'format' => 'jpg',
+        ]);
 
         $imageResource['@id'] = $imageUrl;
         $imageResource['@type'] = 'dctypes:Image';
@@ -697,10 +687,7 @@ class IiifManifest2 extends AbstractHelper
         $imageResource['width'] = $width;
         $imageResource['height'] = $height;
 
-        $imageUrlService = $this->view->iiifImageUrl(
-            'imageserver/id',
-            ['id' => $this->view->iiifCleanIdentifiers($media->id())]
-        );
+        $imageUrlService = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
         $imageResourceService = [];
         $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
         $imageResourceService['@id'] = $imageUrlService;
@@ -891,10 +878,7 @@ class IiifManifest2 extends AbstractHelper
             }
         }
         $mediaSequencesService = [];
-        $mseUrl = $this->view->iiifImageUrl(
-            'mediaserver/id',
-            ['id' => $this->view->iiifCleanIdentifiers($media->id())]
-        );
+        $mseUrl = $this->view->iiifImageUrl($media, 'mediaserver/id', '2');
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
@@ -950,10 +934,7 @@ class IiifManifest2 extends AbstractHelper
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
         $mediaSequencesService = [];
-        $mseUrl = $this->view->iiifImageUrl(
-            'mediaserver/id',
-            ['id' => $this->view->iiifCleanIdentifiers($media->id())]
-        );
+        $mseUrl = $this->view->iiifImageUrl($media, 'mediaserver/id', '2');
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
@@ -1009,10 +990,7 @@ class IiifManifest2 extends AbstractHelper
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
         $mediaSequencesService = [];
-        $mseUrl = $this->view->iiifImageUrl(
-            'mediaserver/id',
-            ['id' => $this->view->iiifCleanIdentifiers($media->id())]
-        );
+        $mseUrl = $this->view->iiifImageUrl($media, 'mediaserver/id', '2');
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';

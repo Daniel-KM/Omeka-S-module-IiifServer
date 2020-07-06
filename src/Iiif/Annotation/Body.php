@@ -61,7 +61,7 @@ class Body extends AbstractResourceType
     /**
      * @var string
      */
-    protected $serviceLevel;
+    protected $imageApiVersion;
 
     /**
      * @var \IiifServer\Iiif\ContentResource
@@ -98,43 +98,28 @@ class Body extends AbstractResourceType
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
 
         $setting = $this->setting;
-        $this->serviceLevel = $setting('imageserver_manifest_version', '3');
+        $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
     }
 
     public function getId()
     {
-        /** @var \IiifServer\Iiif\ContentResource $contentResource */
         if ($this->contentResource->isImage()) {
             $imageUrl = $this->iiifImageUrl;
-            $cleanIdentifiers = $this->iiifCleanIdentifiers;
-            return $imageUrl(
-                'imageserver/media',
-                [
-                    'version' => $this->serviceLevel,
-                    'id' => $cleanIdentifiers($this->resource->id()),
-                    'region' => 'full',
-                    'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
-                    'rotation' => 0,
-                    'quality' => 'default',
-                    'format' => 'jpg',
-                ]
-            );
-        }
-
-        if ($this->contentResource->isAudioVideo()) {
+            return $imageUrl($this->resource, 'imageserver/media', $this->imageApiVersion, [
+                'region' => 'full',
+                'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
+                'rotation' => 0,
+                'quality' => 'default',
+                'format' => 'jpg',
+            ]);
+        } elseif ($this->contentResource->isAudioVideo()) {
             $imageUrl = $this->iiifImageUrl;
-            $cleanIdentifiers = $this->iiifCleanIdentifiers;
-            return $imageUrl(
-                'mediaserver/media',
-                [
-                    'version' => $this->serviceLevel,
-                    'id' => $cleanIdentifiers($this->resource->id()),
-                    'format' => $this->resource->extension(),
-                ]
-            );
+            return $imageUrl($this->resource, 'mediaserver/media', $this->imageApiVersion, [
+                'format' => $this->resource->extension(),
+            ]);
+        } else {
+            return $this->contentResource->getId();
         }
-
-        return $this->contentResource->getId();
     }
 
     public function getType()
@@ -152,20 +137,10 @@ class Body extends AbstractResourceType
         // TODO Move this in ContentResource or TraitMedia.
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
-            $helper = $this->urlHelper;
-            $cleanIdentifiers = $this->iiifCleanIdentifiers;
-            $url = $helper(
-                'imageserver/id',
-                [
-                    'version' => $this->serviceLevel,
-                    'id' => $cleanIdentifiers($this->resource->id()),
-                ],
-                ['force_canonical' => true]
-            );
-            $helper = $this->iiifForceBaseUrlIfRequired;
-            $id = $helper($url);
+            $helper = $this->iiifImageUrl;
+            $id = $helper($this->resource, 'imageserver/id', $this->imageApiVersion);
 
-            switch ($this->serviceLevel) {
+            switch ($this->imageApiVersion) {
                 case '2':
                     return (object) [
                         '@id' => $id,

@@ -107,22 +107,36 @@ class IiifUrl extends AbstractHelper
         $iiifCleanIdentifiersHelper = $this->iiifCleanIdentifiers;
         $iiifForceBaseUrlIfRequiredHelper = $this->iiifForceBaseUrlIfRequired;
 
-        $version = $version ?: $this->defaultVersion;
+        $apiVersion = $version ?: $this->defaultVersion;
 
         if (is_array($resource)) {
             $identifiers = $iiifCleanIdentifiersHelper($resource);
             $urlManifest = $urlHelper(
                 'iiifserver/set',
-                ['version' => $version, 'id' => implode(',', $identifiers)],
+                ['version' => $apiVersion, 'id' => implode(',', $identifiers)],
                 ['force_canonical' => true]
             );
             return $iiifForceBaseUrlIfRequiredHelper($urlManifest);
         }
 
-        $resourceName = $resource->resourceName();
+        if (is_numeric($resource)) {
+            $id = $resource;
+            if (isset($params['resource_name'])) {
+                $resourceName = $params['resource_name'];
+            } else {
+                // Generally, the resource is already loaded by doctrine.
+                $resourceName = $this->view->api()->read('resources', ['id' => $id])
+                    ->getContent()
+                    ->resourceName();
+            }
+        } else {
+            $id = $resource->id();
+            $resourceName = $resource->resourceName();
+        }
+
         if ($resourceName === 'media') {
             $helper = $this->iiifImageUrl;
-            return $helper('imageserver/info', ['id' => $resource->id(), 'prefix' => $this->prefix]);
+            return $helper($resource, 'imageserver/info', $version, $params);
         }
 
         $mapRouteNames = [
@@ -131,9 +145,9 @@ class IiifUrl extends AbstractHelper
         ];
 
         $params += [
-            'version' => $version,
+            'version' => $apiVersion,
             'prefix' => $this->prefix,
-            'id' => $iiifCleanIdentifiersHelper($resource->id()),
+            'id' => $iiifCleanIdentifiersHelper($id),
         ];
 
         $urlIiif = $urlHelper(
