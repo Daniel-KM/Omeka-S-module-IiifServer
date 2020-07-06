@@ -166,7 +166,7 @@ class PresentationController extends AbstractActionController
         $useCleanIdentifier = $this->useCleanIdentifier();
         if ($useCleanIdentifier) {
             $getResourceFromIdentifier = $this->viewHelpers()->get('getResourceFromIdentifier');
-            return $getResourceFromIdentifier($id, false, $resourceType);
+            return $getResourceFromIdentifier($id, $resourceType);
         }
 
         try {
@@ -205,7 +205,7 @@ class PresentationController extends AbstractActionController
         $useCleanIdentifier = $this->useCleanIdentifier();
         if ($useCleanIdentifier) {
             $getResourcesFromIdentifiers = $this->viewHelpers()->get('getResourcesFromIdentifiers');
-            $resources = $getResourcesFromIdentifiers($identifiers, false, $resourceType);
+            $resources = $getResourcesFromIdentifiers($identifiers, $resourceType);
             // A loop is done with identifiers to keep original order and
             // possible duplicates.
             $result = [];

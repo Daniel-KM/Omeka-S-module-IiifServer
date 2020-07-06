@@ -15,13 +15,13 @@ class IiifCleanIdentifiersFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         // Check use of clean identifiers one time.
-        $useCleanIdentifier = (bool) $services->get('Omeka\Settings')->get('iiifserver_url_clean', true);
-        $getIdentifiersFromResources = null;
-        if ($useCleanIdentifier) {
+        if ($services->get('Omeka\Settings')->get('iiifserver_url_clean', true)) {
             $plugins = $services->get('ViewHelperManager');
-            if ($plugins->has('getIdentifiersFromResources')) {
-                $getIdentifiersFromResources = $plugins->get('getIdentifiersFromResources');
-            }
+            $getIdentifiersFromResources = $plugins->has('getIdentifiersFromResources')
+                ? $plugins->get('getIdentifiersFromResources')
+                : null;
+        } else {
+            $getIdentifiersFromResources = null;
         }
         return new IiifCleanIdentifiers(
             $getIdentifiersFromResources

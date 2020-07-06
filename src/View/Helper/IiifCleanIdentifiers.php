@@ -1,6 +1,7 @@
 <?php
 namespace IiifServer\View\Helper;
 
+use CleanUrl\View\Helper\GetIdentifiersFromResources;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
@@ -20,9 +21,9 @@ class IiifCleanIdentifiers extends AbstractHelper
     /**
      * Construct the helper.
      *
-     * @param string|null $defaultSiteSlug
+     * @param GetIdentifiersFromResources $getIdentifiersFromResources
      */
-    public function __construct($getIdentifiersFromResources = null)
+    public function __construct(GetIdentifiersFromResources $getIdentifiersFromResources = null)
     {
         $this->getIdentifiersFromResources = $getIdentifiersFromResources;
     }
