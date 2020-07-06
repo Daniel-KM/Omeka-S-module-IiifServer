@@ -43,7 +43,10 @@ class AnnotationPage extends AbstractResourceType
         'type' => self::REQUIRED,
 
         // Descriptive and rights properties.
-        'label' => self::OPTIONAL,
+        // To fix an issue with Open Annotation, the label is forbidden.
+        // @link https://iiif.io/api/presentation/3.0/#55-annotation-page
+        // 'label' => self::OPTIONAL,
+        'label' => self::NOT_ALLOWED,
         'metadata' => self::OPTIONAL,
         'summary' => self::OPTIONAL,
         'requiredStatement' => self::OPTIONAL,
