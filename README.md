@@ -38,6 +38,9 @@ of the php extensions [`GD`] or [`Imagick`] are recommended. They are installed
 by default in most servers. If not, the image server will use the command line
 [ImageMagick] tool `convert`.
 
+An image server is required to display the images. It can be the module [Image Server],
+or any other IIIF compliant image server.
+
 Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
 before enabling of IiifServer. Else, simply set them in the config form.
 
@@ -80,20 +83,20 @@ viewer.
 
 You might also want to use a dedicated third-party image server (for instance
 one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers)
-of the IIIF community), instead of the [internal image server] that comes with
-this module. If so, you need to fill in some settings in the "Third-party IIIF Image Server"
+of the IIIF community), instead of the Omeka module [Image Server], available
+separately. If so, you need to fill in some settings in the "Third-party IIIF Image Server"
 section of the module configuration:
 
 - _Base URL of your IIIF image server_: this is the base url endpoint where the
   image server is able to handle image requests. As soon as you indicate a URL
   in this field, it will take precedence over the image server provided by the
-  IiifServer module and will be used in the IIIF Manifests (i.e. every `service`
-  field that refers to an Image API endpoint will now point to your image
-  server).
-- _Compliance level of your image server_ with respect to the IIIF Image API
-  (level 0, 1 or 2).
+  [Image Server] module and will be used in the IIIF Manifests (i.e. every
+  `service` field that refers to an Image API endpoint will now point to your
+  image server).
 - _Version of the Image API supported by your server_ (you must choose between
   version 2 or 3).
+- _Compliance level of your image server_ with respect to the IIIF Image API
+  (level 0, 1 or 2).
 
 **Important notes:**
 - you first need to configure your image server separately and make sure it
@@ -199,6 +202,10 @@ TODO / Bugs
 - Implements ArrayObject to all classes to simplify events.
 - When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image (UV).
+- Fetch image data from the third party image server and use them to build the
+  manifest in real time (if not too many attached media), or save it as a iiif
+  media.
+- Use the option "no storage" for url of a media for external server.
 
 See module [Image Server].
 
