@@ -174,27 +174,8 @@ class CollectionList extends AbstractType
 
     public function getId()
     {
-        $helper = $this->iiifCleanIdentifiers;
-        $identifiers = $helper($this->resources);
-
-        $helper = $this->urlHelper;
-        /*
-        $url = $helper(
-            'iiifserver/set',
-            ['version' => '3'],
-            [
-                'query' => ['id' => $identifiers],
-                'force_canonical' => true,
-            ]
-        );
-        */
-        $url = $helper(
-            'iiifserver/set',
-            ['version' => '3', 'id' => implode(',', $identifiers)],
-            ['force_canonical' => true]
-        );
-        $helper = $this->iiifForceBaseUrlIfRequired;
-        return $helper($url);
+        $helper = $this->iiifUrl;
+        return $helper($this->resources, 'iiifserver/set', '3');
     }
 
     /**

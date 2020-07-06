@@ -172,36 +172,29 @@ class IiifCollection2 extends AbstractHelper
         return $manifest;
     }
 
+    /**
+     * Prepare the base manifest of a resource.
+     *
+     * @todo Factorize with IiifManifest.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return array
+     */
     protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
+        $mapRoutes = [
+            'item_sets' => 'iiifserver/collection',
+            'items' => 'iiifserver/manifest',
+        ];
+        $mapTypes = [
+            'item_sets' => 'sc:Collection',
+            'items' => 'sc:Manifest',
+        ];
         $manifest = [];
-
-        if ($resourceName == 'item_sets') {
-            $url = $this->view->url(
-                'iiifserver/collection',
-                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
-                ['force_canonical' => true]
-            );
-
-            $type = 'sc:Collection';
-        } else {
-            $url = $this->view->url(
-                'iiifserver/manifest',
-                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
-                ['force_canonical' => true]
-            );
-
-            $type = 'sc:Manifest';
-        }
-
-        $url = $this->view->iiifForceBaseUrlIfRequired($url);
-        $manifest['@id'] = $url;
-
-        $manifest['@type'] = $type;
-
+        $manifest['@id'] = $this->view->iiifUrl($resource, $mapRoutes[$resourceName], '2');
+        $manifest['@type'] = $mapTypes[$resourceName];
         $manifest['label'] = $resource->displayTitle();
-
         return $manifest;
     }
 
@@ -227,7 +220,7 @@ class IiifCollection2 extends AbstractHelper
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) {
                 return strpos($v->type(), 'resource') === 0
-                    ? $this->view->iiifUrl($v->valueResource(), '2')
+                    ? $this->view->iiifUrl($v->valueResource(), null, '2')
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;

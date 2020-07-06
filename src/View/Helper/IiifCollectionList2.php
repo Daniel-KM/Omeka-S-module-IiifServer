@@ -76,20 +76,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         $translate = $this->view->plugin('translate');
 
-        $identifiers = $this->view->iiifCleanIdentifiers($resources);
-        /*
-        $url = $this->view->url('iiifserver/set', ['version' => '2'], [
-            'query' => ['id' => $identifiers],
-            'force_canonical' => true,
-        ]);
-        */
-        $url = $this->view->url(
-            'iiifserver/set',
-            ['version' => '2', 'id' => implode(',', $identifiers)],
-            ['force_canonical' => true]
-        );
-        $url = $this->view->iiifForceBaseUrlIfRequired($url);
-        $manifest['@id'] = $url;
+        $manifest['@id'] = $this->view->iiifUrl($resources, 'iiifserver/set', '2');
 
         $label = $translate('Dynamic list');
         $manifest['label'] = $label;
@@ -163,34 +150,29 @@ class IiifCollectionList2 extends AbstractHelper
         return $manifest;
     }
 
+    /**
+     * Prepare the base manifest of a resource.
+     *
+     * @todo Factorize with IiifCollection.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
+     * @return array
+     */
     protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
     {
         $resourceName = $resource->resourceName();
+        $mapRoutes = [
+            'item_sets' => 'iiifserver/collection',
+            'items' => 'iiifserver/manifest',
+        ];
+        $mapTypes = [
+            'item_sets' => 'sc:Collection',
+            'items' => 'sc:Manifest',
+        ];
         $manifest = [];
-
-        if ($resourceName == 'item_sets') {
-            $url = $this->view->url(
-                'iiifserver/collection',
-                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
-                ['force_canonical' => true]
-            );
-            $type = 'sc:Collection';
-        } else {
-            $url = $this->view->url(
-                'iiifserver/manifest',
-                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
-                ['force_canonical' => true]
-            );
-            $type = 'sc:Manifest';
-        }
-
-        $url = $this->view->iiifForceBaseUrlIfRequired($url);
-        $manifest['@id'] = $url;
-
-        $manifest['@type'] = $type;
-
+        $manifest['@id'] = $this->view->iiifUrl($resource, $mapRoutes[$resourceName], '2');
+        $manifest['@type'] = $mapTypes[$resourceName];
         $manifest['label'] = $resource->displayTitle();
-
         return $manifest;
     }
 }

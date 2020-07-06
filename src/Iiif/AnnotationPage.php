@@ -88,20 +88,11 @@ class AnnotationPage extends AbstractResourceType
 
     public function getId()
     {
-        $cleanIdentifiers = $this->iiifCleanIdentifiers;
-        $helper = $this->urlHelper;
-        $url = $helper(
-            'iiifserver/uri',
-            [
-                'version' => '3',
-                'id' => $cleanIdentifiers($this->resource->item()->id()),
-                'type' => 'annotation-page',
-                'name' => $this->resource->id(),
-            ],
-            ['force_canonical' => true]
-        );
-        $helper = $this->iiifForceBaseUrlIfRequired;
-        return $helper($url);
+        $helper = $this->iiifUrl;
+        return $helper($this->resource->item(), 'iiifserver/uri', '3', [
+            'type' => 'annotation-page',
+            'name' => $this->resource->id(),
+        ]);
     }
 
     /**

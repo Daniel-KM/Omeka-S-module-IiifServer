@@ -112,21 +112,19 @@ class IiifManifest2 extends AbstractHelper
             'sequences' => [],
         ];
 
-        $url = $this->view->url(
-            'iiifserver/manifest',
-            ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($item->id())],
-            ['force_canonical' => true]
-        );
-        $url = $this->view->iiifForceBaseUrlIfRequired($url);
-        $manifest['@id'] = $url;
+        $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
 
-        // The base url for some other ids.
-        $this->_baseUrl = dirname($url);
+        // The base url for some other ids to quick process.
+        $this->_baseUrl = $this->view->iiifUrl($item, 'iiifserver/uri', '2', [
+            'type' => 'annotation-page',
+            'name' => '',
+        ]);
+        $this->_baseUrl = mb_substr($this->_baseUrl, 0, mb_strpos($this->_baseUrl, '/annotation-page'));
 
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
-        $label = $item->displayTitle('') ?: $this->view->iiifUrl($item, '2');
+        $label = $item->displayTitle('') ?: $manifest['@id'];
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -187,19 +185,12 @@ class IiifManifest2 extends AbstractHelper
 
         $withins = [];
         foreach ($item->itemSets() as $itemSet) {
-            $within = $this->view->url(
-                'iiifserver/collection',
-                ['version' => '2', 'id' => $this->view->iiifCleanIdentifiers($itemSet->id())],
-                ['force_canonical' => true]
-            );
-            $within = $this->view->iiifForceBaseUrlIfRequired($within);
-            $withins[] = $within;
+            $withins[] = $this->view->iiifUrl($itemSet, 'iiifserver/collection', '2');
         }
-        if (!empty($withins)) {
-            $within = count($withins) > 1
-                ? $withins
-                : reset($withins);
-            $metadata['within'] = $within;
+        if (count($withins) === 1) {
+            $metadata['within'] = reset($withins);
+        } elseif (count($withins)) {
+            $metadata['within'] = $withins;
         }
 
         $canvases = [];

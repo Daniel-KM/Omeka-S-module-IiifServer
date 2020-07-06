@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017  Daniel Berthereau
+ * Copyright 2015-2020  Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/or
@@ -31,41 +31,117 @@ namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
+use Zend\View\Helper\Url;
 
 class IiifUrl extends AbstractHelper
 {
     /**
-     * Return the iiif url of the resource.
+     * @var Url
+     */
+    protected $url;
+
+    /**
+     * @var IiifCleanIdentifiers
+     */
+    protected $iiifCleanIdentifiers;
+
+    /**
+     * @var IiifForceBaseUrlIfRequired
+     */
+    protected $iiifForceBaseUrlIfRequired;
+
+    /**
+     * @var IiifImageUrl
+     */
+    protected $iiifImageUrl;
+
+    /**
+     * @var string
+     */
+    protected $defaultVersion;
+
+    /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
+     * @param Url $url
+     * @param IiifCleanIdentifiers $iiifCleanIdentifiers
+     * @param IiifForceBaseUrlIfRequired $iiifForceBaseUrlIfRequired
+     * @param IiifImageUrl $iifImageUrl
+     * @param string $defaultVersion
+     * @param string $prefix
+     */
+    public function __construct(
+        Url $url,
+        IiifCleanIdentifiers $iiifCleanIdentifiers,
+        IiifForceBaseUrlIfRequired $iiifForceBaseUrlIfRequired,
+        IiifImageUrl $iifImageUrl,
+        $defaultVersion,
+        $prefix
+    ) {
+        $this->url = $url;
+        $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
+        $this->iiifForceBaseUrlIfRequired = $iiifForceBaseUrlIfRequired;
+        $this->iiifImageUrl = $iifImageUrl;
+        $this->defaultVersion = $defaultVersion;
+        $this->prefix = $prefix;
+    }
+
+    /**
+     * Return the iiif url of one or multiple resource.
      *
      * When a value is a resource, the url cannot be built, because it requires
      * the admin or the site path. In that case, the canonical iiif url is used.
      *
-     * @param AbstractResourceEntityRepresentation $resource
+     * @param AbstractResourceEntityRepresentation|AbstractResourceEntityRepresentation[] $resource
+     * @param string $route
      * @param string $version
+     * @param array $params
      * @return string
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = '')
+    public function __invoke($resource, $route = '', $version = null, array $params = [])
     {
-        $resourceName = $resource->resourceName();
-        if ($resourceName === 'media') {
-            return $this->view->iiifImageUrl('imageserver/info', ['id' => $resource->id()]);
+        $urlHelper = $this->url;
+        $iiifCleanIdentifiersHelper = $this->iiifCleanIdentifiers;
+        $iiifForceBaseUrlIfRequiredHelper = $this->iiifForceBaseUrlIfRequired;
+
+        $version = $version ?: $this->defaultVersion;
+
+        if (is_array($resource)) {
+            $identifiers = $iiifCleanIdentifiersHelper($resource);
+            $urlManifest = $urlHelper(
+                'iiifserver/set',
+                ['version' => $version, 'id' => implode(',', $identifiers)],
+                ['force_canonical' => true]
+            );
+            return $iiifForceBaseUrlIfRequiredHelper($urlManifest);
         }
 
-        if (is_null($version)) {
-            $version = $this->view->setting('iiifserver_manifest_default_version', '2');
-        } else {
-            $version = $version === '2' ? '2' : '3';
+        $resourceName = $resource->resourceName();
+        if ($resourceName === 'media') {
+            $helper = $this->iiifImageUrl;
+            return $helper('imageserver/info', ['id' => $resource->id(), 'prefix' => $this->prefix]);
         }
 
         $mapRouteNames = [
             'item_sets' => 'iiifserver/collection',
             'items' => 'iiifserver/manifest',
         ];
-        $url = $this->view->url(
-            $mapRouteNames[$resource->resourceName()],
-            ['version' => $version, 'id' => $this->view->iiifCleanIdentifiers($resource->id())],
+
+        $params += [
+            'version' => $version,
+            'prefix' => $this->prefix,
+            'id' => $iiifCleanIdentifiersHelper($resource->id()),
+        ];
+
+        $urlIiif = $urlHelper(
+            $route ?: $mapRouteNames[$resourceName],
+            $params,
             ['force_canonical' => true]
         );
-        return $this->view->iiifForceBaseUrlIfRequired($url);
+
+        return $iiifForceBaseUrlIfRequiredHelper($urlIiif);
     }
 }

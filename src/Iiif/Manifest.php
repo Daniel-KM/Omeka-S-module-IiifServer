@@ -128,15 +128,8 @@ class Manifest extends AbstractResourceType
 
     public function getId()
     {
-        $cleanIdentifiers = $this->iiifCleanIdentifiers;
-        $helper = $this->urlHelper;
-        $url = $helper(
-            'iiifserver/manifest',
-            ['version' => '3', 'id' => $cleanIdentifiers($this->resource->id())],
-            ['force_canonical' => true]
-        );
-        $helper = $this->iiifForceBaseUrlIfRequired;
-        return $helper($url);
+        $helper = $this->iiifUrl;
+        return $helper($this->resource, 'iiifserver/manifest', '3');
     }
 
     /**

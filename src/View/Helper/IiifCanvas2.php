@@ -54,16 +54,12 @@ class IiifCanvas2 extends AbstractHelper
     {
         $view = $this->getView();
 
-        // Hack to get the base url.
-        // TODO Store the base url consistently.
-        $url = $view->url(
-            'iiifserver/manifest',
-            ['version' => '2', 'id' => $view->iiifCleanIdentifiers($resource->id())],
-            ['force_canonical' => true]
-        );
-        $url = $view->iiifForceBaseUrlIfRequired($url);
-        // The base url for some other ids.
-        $this->_baseUrl = dirname($url);
+        // The base url for some other ids to quick process.
+        $this->_baseUrl = $view->iiifUrl($resource, 'iiifserver/uri', '2', [
+            'type' => 'annotation-page',
+            'name' => '',
+        ]);
+        $this->_baseUrl = mb_substr($this->_baseUrl, 0, mb_strpos($this->_baseUrl, '/annotation-page'));
 
         $canvas = [];
 
