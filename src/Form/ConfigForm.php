@@ -23,10 +23,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
     {
         $this
             ->add([
-                'name' => 'iiifserver_manifest_version',
+                'name' => 'iiifserver_manifest_default_version',
                 'type' => Element\Radio::class,
                 'options' => [
-                    'label' => 'Default IIIF api version (manifest)', // @translate
+                    'label' => 'Default IIIF api version of the manifest', // @translate
                     'info' => 'Set the version of the manifest to provide. Note that the version is automatically selected when a request specifies it in headers, or via the specific url (iiif/v2/ or iiif/v3/).', // @translate
                     'value_options' => [
                         '2' => '2', // @translate
@@ -34,32 +34,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_version',
+                    'id' => 'iiifserver_manifest_default_version',
                 ],
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_version_append',
-                'type' => Element\Checkbox::class,
+                'name' => 'fieldset_content',
+                'type' => \Zend\Form\Fieldset::class,
                 'options' => [
-                    'label' => 'Append the version to the url (to be set inside module.config.php currently)', // @translate
-                    'info' => 'If set, the version will be appended to the url of the server: "iiif/v3".', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_manifest_version_append',
-                ],
-            ])
-
-            ->add([
-                'name' => 'iiifserver_manifest_clean_identifier',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => $this->hasCleanUrl
-                        ? 'Use the identifier from Clean Url' // @translate
-                        : 'Use the identifier from Clean Url (unavailable)', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_manifest_clean_identifier',
+                    'label' => 'Content of the manifest', // @translate
                 ],
             ])
 
@@ -74,7 +57,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-description-property',
+                    'id' => 'iiifserver_manifest_description_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -90,7 +73,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-attribution-property',
+                    'id' => 'iiifserver_manifest_attribution_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -105,7 +88,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                         . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-attribution-default',
+                    'id' => 'iiifserver_manifest_attribution_default',
                 ],
             ])
 
@@ -181,7 +164,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-homepage',
+                    'id' => 'iiifserver_manifest_homepage',
                     'class' => 'chosen-select',
                 ],
             ])
@@ -195,7 +178,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-homepage-property',
+                    'id' => 'iiifserver_manifest_homepage_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -210,7 +193,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-seealso-property',
+                    'id' => 'iiifserver_manifest_seealso_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -234,7 +217,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-canvas-label',
+                    'id' => 'iiifserver_manifest_canvas_label',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select an option…', // @translate
                 ],
@@ -248,7 +231,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-canvas-label-property',
+                    'id' => 'iiifserver_manifest_canvas_label_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -258,11 +241,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_logo_default',
                 'type' => Element\Url::class,
                 'options' => [
-                    'label' => 'Logo', // @translate
-                    'info' => 'If any, this url to an image will be used as logo and displayed in the right panel of the Universal Viewer.',  // @translate
+                    'label' => 'Logo of the institution', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-logo-default',
+                    'id' => 'iiifserver_manifest_logo_default',
                 ],
             ])
 
@@ -272,7 +254,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'options' => [
                     'label' => 'Link for descriptive metadata', // @translate
                     'info' => 'Some viewers display urls (for resources and uris) as plain text. This option presents them as a html link.',  // @translate
-                    'documentation' => 'https://iiif.io/api/presentation/2.1/#descriptive-properties',
+                    'documentation' => 'https://iiif.io/api/presentation/3.0/#31-descriptive-properties',
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_html_descriptive',
@@ -340,25 +322,62 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_service_image',
+                'name' => 'fieldset_urls',
+                'type' => \Zend\Form\Fieldset::class,
+                'options' => [
+                    'label' => 'Advanced options for urls', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_url_version_add',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Append version to url (to be set inside module.config.php currently)', // @translate
+                    'info' => 'If set, the version will be appended to the url of the server: "iiif/v3".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_url_version_add',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_identifier_clean',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => $this->hasCleanUrl
+                    ? 'Use the identifiers from Clean Url' // @translate
+                    : 'Use the identifiers from Clean Url (unavailable)', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_identifier_clean',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_url_service_image',
                 'type' => Element\Url::class,
                 'options' => [
                     'label' => 'IIIF Image base url', // @translate
                     'info' => 'This url will be used to create the image parts of the manifests. The module ImageServer is automatically managed, but not external image servers.',  // @translate
                 ],
+                'attributes' => [
+                    'id' => 'iiifserver_url_service_image',
+                ],
             ])
-
             ->add([
-                'name' => 'iiifserver_manifest_service_media',
+                'name' => 'iiifserver_url_service_media',
                 'type' => Element\Url::class,
                 'options' => [
                     'label' => 'IIIF Media base url', // @translate
                     'info' => 'This url will be used to manage media that are not image. The module ImageServer is automatically managed, but not external media servers.',  // @translate
                 ],
+                'attributes' => [
+                    'id' => 'iiifserver_url_service_media',
+                ],
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_force_url_from',
+                'name' => 'iiifserver_url_force_from',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Force base of url (from)', // @translate
@@ -366,18 +385,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                         . ' ' . $this->translate('For example, when the server is secured, the "http:" urls may be replaced by "https:".'), // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-force-url-from',
+                    'id' => 'iiifserver_url_force_from',
                 ],
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_force_url_to',
+                'name' => 'iiifserver_url_force_to',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Force base of url (to)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-force-url-to',
+                    'id' => 'iiifserver_url_force_to',
                 ],
             ])
         ;
@@ -444,15 +463,11 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_service_image',
+                'name' => 'iiifserver_url_service_image',
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_service_media',
-                'required' => false,
-            ])
-            ->add([
-                'name' => 'iiifserver_manifest_service_iiifsearch',
+                'name' => 'iiifserver_url_service_media',
                 'required' => false,
             ])
         ;

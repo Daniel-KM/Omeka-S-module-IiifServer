@@ -322,9 +322,8 @@ return [
     ],
     'iiifserver' => [
         'config' => [
-            'iiifserver_manifest_version' => '2',
-            'iiifserver_manifest_version_append' => false,
-            'iiifserver_manifest_clean_identifier' => true,
+            'iiifserver_manifest_default_version' => '2',
+            // Content of the manifest.
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
@@ -342,12 +341,14 @@ return [
             'iiifserver_manifest_properties_collection' => [],
             'iiifserver_manifest_properties_item' => [],
             'iiifserver_manifest_properties_media' => [],
-            'iiifserver_manifest_service_image' => '',
-            'iiifserver_manifest_service_media' => '',
-            'iiifserver_manifest_service_iiifsearch' => '',
-            // TODO Remove url_from and url_to with external image server? But it fixes proxy issues too.
-            'iiifserver_manifest_force_url_from' => '',
-            'iiifserver_manifest_force_url_to' => '',
+            // Urls.
+            'iiifserver_url_version_add' => false,
+            'iiifserver_identifier_clean' => true,
+            'iiifserver_url_service_image' => '',
+            'iiifserver_url_service_media' => '',
+            // These options allows to bypass a proxy issue.
+            'iiifserver_url_force_from' => '',
+            'iiifserver_url_force_to' => '',
         ],
     ],
 ];

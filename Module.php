@@ -79,7 +79,7 @@ class Module extends AbstractModule
         $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $params = $controller->getRequest()->getPost();
 
-        if (empty($params['iiifserver_manifest_service_image'])) {
+        if (empty($params['iiifserver_url_service_image'])) {
             $moduleManager = $services->get('Omeka\ModuleManager');
             $module = $moduleManager->getModule('ImageServer');
             if (!$module) {

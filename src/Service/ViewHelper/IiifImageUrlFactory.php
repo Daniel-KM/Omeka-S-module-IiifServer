@@ -16,10 +16,10 @@ class IiifImageUrlFactory implements FactoryInterface
 
         $settings = $services->get('Omeka\Settings');
         return new IiifImageUrl(
-            $settings->get('iiifserver_manifest_service_image'),
-            $settings->get('iiifserver_manifest_service_media'),
-            $settings->get('iiifserver_manifest_force_url_from'),
-            $settings->get('iiifserver_manifest_force_url_to'),
+            $settings->get('iiifserver_url_service_image'),
+            $settings->get('iiifserver_url_service_media'),
+            $settings->get('iiifserver_url_force_from'),
+            $settings->get('iiifserver_url_force_to'),
             $baseUrlImage,
             $baseUrlMedia,
             $urlHelper

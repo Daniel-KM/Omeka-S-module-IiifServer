@@ -52,7 +52,7 @@ class IiifUrl extends AbstractHelper
         }
 
         if (is_null($version)) {
-            $version = $this->view->setting('iiifserver_manifest_version', '2');
+            $version = $this->view->setting('iiifserver_manifest_default_version', '2');
         } else {
             $version = $version === '2' ? '2' : '3';
         }

@@ -49,7 +49,7 @@ class IiifCollectionList extends AbstractHelper
         $view = $this->getView();
 
         if (is_null($version)) {
-            $version = $view->setting('iiifserver_manifest_version', '2');
+            $version = $view->setting('iiifserver_manifest_default_version', '2');
         } else {
             $version = $version === '2' ? '2' : '3';
         }

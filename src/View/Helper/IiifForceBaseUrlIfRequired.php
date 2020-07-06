@@ -56,8 +56,8 @@ class IiifForceBaseUrlIfRequired extends AbstractHelper
     public function __invoke($absoluteUrl)
     {
         if (is_null($this->forceFrom)) {
-            $this->forceFrom = (string) $this->view->setting('iiifserver_manifest_force_url_from');
-            $this->forceTo = (string) $this->view->setting('iiifserver_manifest_force_url_to');
+            $this->forceFrom = (string) $this->view->setting('iiifserver_url_force_from');
+            $this->forceTo = (string) $this->view->setting('iiifserver_url_force_to');
         }
 
         return $this->forceFrom && (strpos($absoluteUrl, $this->forceFrom) === 0)

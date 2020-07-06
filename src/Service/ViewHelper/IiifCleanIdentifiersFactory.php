@@ -15,7 +15,7 @@ class IiifCleanIdentifiersFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         // Check use of clean identifiers one time.
-        $useCleanIdentifier = (bool) $services->get('Omeka\Settings')->get('iiifserver_manifest_clean_identifier', true);
+        $useCleanIdentifier = (bool) $services->get('Omeka\Settings')->get('iiifserver_url_clean', true);
         $getIdentifiersFromResources = null;
         if ($useCleanIdentifier) {
             $plugins = $services->get('ViewHelperManager');

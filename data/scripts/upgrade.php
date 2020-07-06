@@ -37,8 +37,8 @@ if (version_compare($oldVersion, '3.5.1', '<')) {
 if (version_compare($oldVersion, '3.5.8', '<')) {
     $forceHttps = $settings->get('iiifserver_manifest_force_https');
     if ($forceHttps) {
-        $settings->set('iiifserver_manifest_force_url_from', 'http:');
-        $settings->set('iiifserver_manifest_force_url_to', 'https:');
+        $settings->set('iiifserver_url_force_from', 'http:');
+        $settings->set('iiifserver_url_force_to', 'https:');
     }
     $settings->delete('iiifserver_manifest_force_https');
 }
@@ -114,6 +114,21 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
         $settings->set('iiifserver_manifest_rights', 'none');
         $settings->set('iiifserver_manifest_rights_url', '');
     }
+
+    $settings->set('iiifserver_manifest_default_version', $settings->get('iiifserver_manifest_version', '2'));
+    $settings->delete('iiifserver_manifest_default_version');
+    $settings->set('iiifserver_url_version_add', $settings->get('iiifserver_manifest_version_append', false));
+    $settings->delete('iiifserver_manifest_version_append');
+    $settings->set('iiifserver_identifier_clean', $settings->get('iiifserver_manifest_clean_identifier', true));
+    $settings->delete('iiifserver_manifest_clean_identifier');
+    $settings->set('iiifserver_url_service_image', $settings->get('iiifserver_manifest_service_image', ''));
+    $settings->delete('iiifserver_manifest_service_image');
+    $settings->set('iiifserver_url_service_media', $settings->get('iiifserver_manifest_service_media', ''));
+    $settings->delete('iiifserver_manifest_service_media');
+    $settings->set('iiifserver_url_force_from', $settings->get('iiifserver_manifest_force_url_from', ''));
+    $settings->delete('iiifserver_manifest_force_url_from');
+    $settings->set('iiifserver_url_force_to', $settings->get('iiifserver_manifest_force_url_to', ''));
+    $settings->delete('iiifserver_manifest_force_url_to');
 
     $settings->delete('iiifserver_manifest_service_iiifsearch');
     $settings->delete('iiifserver_image_server_base_url');

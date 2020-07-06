@@ -20,7 +20,7 @@ class TileInfoFactory implements FactoryInterface
         $plugins = $services->get('ControllerPluginManager');
         $settings = $services->get('Omeka\Settings');
         return new TileInfo(
-            $settings->get('iiifserver_manifest_service_image'),
+            $settings->get('iiifserver_url_service_image'),
             $plugins->has('tileInfo') ? $plugins->get('tileInfo') : null
         );
     }
