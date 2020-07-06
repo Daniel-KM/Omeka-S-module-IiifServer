@@ -32,17 +32,9 @@ The search is provided by the module [Iiif Search] for common xml formats.
 Installation
 ------------
 
-PHP should be installed with the extension `exif` in order to get the size of
-images. This is the case for all major distributions and providers. At least one
-of the php extensions [`GD`] or [`Imagick`] are recommended. They are installed
-by default in most servers. If not, the image server will use the command line
-[ImageMagick] tool `convert`.
+### Module
 
-An image server is required to display the images. It can be the module [Image Server],
-or any other IIIF compliant image server.
-
-Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
-before enabling of IiifServer. Else, simply set them in the config form.
+Installation can be done:
 
 * From the zip
 
@@ -53,20 +45,63 @@ directory, and rename the module folder `IiifServer`.
 * From the source and for development:
 
 If the module was installed from the source, check if the name of the folder of
-the module is `IiifServer`, go to the root of the module, and run either:
+the module is `IiifServer`, go to the root of the module, and run:
 
-```
-    composer install
+```sh
+composer install --no-dev
 ```
 
 Then install it like any other Omeka module.
+
+Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
+before enabling of IiifServer. Else, simply set them in the config form.
+
+### Image server
+
+An image server is required to display the images. It can be the module [Image Server],
+or any other IIIF compliant image server. The image server is used to display
+audio and video files too.
+
+### PHP
+
+PHP should be installed with the extension `exif` in order to get the size of
+images. This is the case for all major distributions and providers. At least one
+of the php extensions [`GD`] or [`Imagick`] are recommended. They are installed
+by default in most servers. If not, the image server will use the command line
+[ImageMagick] tool `convert` automatically.
+
+### Web server and identifiers containing `/`
+
+This point is related to Apache. If you are using nginx, you can skip it.
+
+If you are using Ark as identifier for items and IIIF manifests (through the
+modules [Clean Url] and optionally [Ark]), or any other identifier that contains
+a forward slash `/`, you must modify the Apache system configuration, because by
+default, [it doesn't allow the url encoded `/`] (`%2F`) inside urls for an old
+security issue.
+
+Indeed, an Ark identifier contains at least two forward slashes `/` (`ark:/12345/bNw3sx`)
+and the IIIF specification requires to use [url encoded slashes], except for the
+colon `:` (`ark:%2F12345%2FbNw3sx`). More precisely, this iiif requirement is
+specified in the Image Api, not in the presentation Api, but the identifiers are
+used in the same way.
+
+```Apache
+AllowEncodedSlashes NoDecode
+```
+
+If you cannot access to config of the server, two settings can fix it in the
+config of the module :
+- disable the advanced option "Use the identifiers from Clean Url";
+- set the "Prefix to use for identifier".
 
 
 Notes
 -----
 
-The module allows to manage collections (item set level/item list), manifests
-(item level), and info.json (media level).
+The module allows to manage collections (item set level/item list), and
+manifests (item level). The info.json (media level) are managed by the image
+server.
 
 ### Using externally supplied IIIF manifest
 
@@ -107,8 +142,8 @@ All the combinations are possible: external manifest for items, iiif image for
 external medias, a local standard media file with module Image Server.
 
 
-IIIF Server
------------
+Routes and urls
+---------------
 
 All routes of the IIIF server are defined in `config/module.config.php`.
 They follow the recommandations of the [IIIF specifications].
@@ -135,6 +170,7 @@ and a record can have multiple single identifiers. There are many possibilities:
 named number like in a library or a museum, isbn for books, or random id like
 with ark, noid, doi, etc. They can be displayed in the public url with the
 modules [Ark] and/or [Clean Url].
+
 
 3D models
 ---------
@@ -191,9 +227,6 @@ TODO / Bugs
 - Implements ArrayObject to all classes to simplify events.
 - When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image (UV).
-- Fetch image data from the third party image server and use them to build the
-  manifest in real time (if not too many attached media), or save it as a iiif
-  media.
 - Use the option "no storage" for url of a media for external server.
 - Job to update data of [IIIF Image].
 
@@ -270,6 +303,8 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [`Imagick`]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
 [`IiifServer.zip`]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases
+[it doesn't allow the url encoded `/`]: https://stackoverflow.com/questions/13834007/url-with-encoded-slashes-goes-to-404/13839424#13839424
+[url encoded slashes]: https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
