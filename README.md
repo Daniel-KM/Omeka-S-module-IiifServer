@@ -62,7 +62,7 @@ Then install it like any other Omeka module.
 Notes
 -----
 
-* Using externally supplied IIIF manifest and images
+### Using externally supplied IIIF manifest and images
 
 If you are harvesting data (via OAI-PMH, for instance) from another system where
 images are hosted and exposed via IIIF, you can use a configurable metadata
@@ -76,7 +76,35 @@ in the specified element of a record. The viewer included on that record’s
 display page will use that manifest URL to retrieve images and metadata for the
 viewer.
 
-* Customize data of manifests
+### Using a third-party IIIF Image server
+
+You might also want to use a dedicated third-party image server (for instance
+one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers)
+of the IIIF community), instead of the [internal image server] that comes with
+this module. If so, you need to fill in some settings in the "Third-party IIIF Image Server"
+section of the module configuration:
+
+- _Base URL of your IIIF image server_: this is the base url endpoint where the
+  image server is able to handle image requests. As soon as you indicate a URL
+  in this field, it will take precedence over the image server provided by the
+  IiifServer module and will be used in the IIIF Manifests (i.e. every `service`
+  field that refers to an Image API endpoint will now point to your image
+  server).
+- _Compliance level of your image server_ with respect to the IIIF Image API
+  (level 0, 1 or 2).
+- _Version of the Image API supported by your server_ (you must choose between
+  version 2 or 3).
+
+**Important notes:**
+- you first need to configure your image server separately and make sure it
+  supports the source formats of the images you want to serve (see their
+  respective documentation).
+- you must configure it in such a way that it is able to serve images from the
+  Omeka S `files/original` folder.
+- the images must have been imported into Omeka S beforehand and properly
+  associated with their items.
+
+### Customize data of manifests
 
 The module creates manifests with all the metadata of each record. The event
 `iiifserver.manifest` can be used to modify the exposed data of a manifest for
@@ -219,6 +247,7 @@ Copyright
 
 * Copyright Daniel Berthereau, 2015-2020 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
+* Copyright Régis Robineau, 2019 (see [regisrob])
 
 First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mines ParisTech].
@@ -244,6 +273,8 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [`Imagick`]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
 [`IiifServer.zip`]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases
+[official list]: https://github.com/IIIF/awesome-iiif/#image-servers
+[internal image server]: #image-server
 [Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Ark]: https://github.com/BibLibre/omeka-s-module-Ark
 [Clean Url]: https://github.com/BibLibre/omeka-s-module-CleanUrl
@@ -265,4 +296,5 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [OSI]: http://opensource.org
 [Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [Mines ParisTech]: http://mines-paristech.fr
+[regisrob]: https://github.com/regisrob
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
