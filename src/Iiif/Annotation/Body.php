@@ -179,24 +179,19 @@ class Body extends AbstractResourceType
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
             $helper = $this->iiifImageUrl;
-            $id = $helper($this->resource, 'imageserver/id', $this->imageApiVersion);
 
-            $imageResourceService = [];
-            switch ($this->imageApiVersion) {
-                case '2':
-                    $imageResourceService = [
-                        '@id' => $id,
-                        '@type' => 'ImageService2',
-                        'profile' => 'http://iiif.io/api/image/2/level2.json',
-                    ];
-                case '3':
-                default:
-                    $imageResourceService = [
-                        'id' => $id,
-                        'type' => 'ImageService3',
-                        'profile' => 'level2',
-                    ];
-            }
+            // The image server supports the two services.
+            $imageResourceServices = [];
+            $imageResourceServices[] = [
+                '@id' => $helper($this->resource, 'imageserver/id', '2'),
+                '@type' => 'ImageService2',
+                'profile' => 'http://iiif.io/api/image/2/level2.json',
+            ];
+            $imageResourceServices[] = [
+                'id' => $helper($this->resource, 'imageserver/id', '3'),
+                'type' => 'ImageService3',
+                'profile' => 'level2',
+            ];
 
             if ($this->tileInfo) {
                 $helper = $this->tileInfo;
@@ -205,13 +200,15 @@ class Body extends AbstractResourceType
                 if ($iiifTileInfo) {
                     $tiles = [];
                     $tiles[] = $iiifTileInfo;
-                    $imageResourceService['tiles'] = $tiles;
-                    $imageResourceService['height'] = $this->getHeight();
-                    $imageResourceService['width'] = $this->getWidth();
+                    foreach ($imageResourceServices as &$imageResourceService) {
+                        $imageResourceService['tiles'] = $tiles;
+                        $imageResourceService['height'] = $this->getHeight();
+                        $imageResourceService['width'] = $this->getWidth();
+                    }
                 }
             }
 
-            return (object) $imageResourceService;
+            return $imageResourceServices;
         }
 
         return null;
