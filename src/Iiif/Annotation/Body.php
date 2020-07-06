@@ -173,7 +173,20 @@ class Body extends AbstractResourceType
 
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
-            return isset($mediaData['service']) ? $mediaData['service'] : null;
+            $imageResourceServices = [];
+            $context = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
+            $id = isset($mediaData['id']) ? $mediaData['id'] : $mediaData['@id'];
+            $type = $this->_iiifType($context);
+            $profile = $this->_iiifComplianceLevel($mediaData['profile']);
+            if (!$id || !$type || !$profile) {
+                return null;
+            }
+            $imageResourceServices[] = [
+                'id' => $id,
+                'type' => $type,
+                'profile' => $profile,
+            ];
+            return $imageResourceServices;
         }
 
         if ($this->contentResource->isImage()) {
@@ -183,9 +196,9 @@ class Body extends AbstractResourceType
             // The image server supports the two services.
             $imageResourceServices = [];
             $imageResourceServices[] = [
-                '@id' => $helper($this->resource, 'imageserver/id', '2'),
-                '@type' => 'ImageService2',
-                'profile' => 'http://iiif.io/api/image/2/level2.json',
+                'id' => $helper($this->resource, 'imageserver/id', '2'),
+                'type' => 'ImageService2',
+                'profile' => 'level2',
             ];
             $imageResourceServices[] = [
                 'id' => $helper($this->resource, 'imageserver/id', '3'),
@@ -261,5 +274,64 @@ class Body extends AbstractResourceType
         $tile['width'] = $tileSize;
         $tile['scaleFactors'] = $squaleFactors;
         return $tile;
+    }
+
+    /**
+     * Get the iiif type from the context.
+     *
+     * @param string $context
+     * @return string
+     */
+    protected function _iiifType($context)
+    {
+        $contexts = [
+            'http://library.stanford.edu/iiif/image-api/context.json' => 'ImageService1',
+            'http://library.stanford.edu/iiif/image-api/1.1/context.json' => 'ImageService1',
+            'http://iiif.io/api/image/2/context.json' => 'ImageService2',
+            'http://iiif.io/api/image/3/context.json' => 'ImageService3',
+        ];
+        return isset($contexts[$context])
+           ? $contexts[$context]
+            : null;
+    }
+
+    /**
+     * Helper to set the compliance level to the IIIF Image API, based on the
+     * compliance level URI
+     *
+     * @param array|string $profile Contents of the `profile` property from the
+     * info.json
+     * @return string Image API compliance level (returned value: level0 | level1 | level2)
+     */
+    protected function _iiifComplianceLevel($profile)
+    {
+        // In Image API 2.1, the profile property is a list, and the first entry
+        // is the compliance level URI.
+        // In Image API 1.1 and 3.0, the profile property is a string.
+        if (is_array($profile)) {
+            $profile = $profile[0];
+        }
+
+        $profileToLlevels = [
+            // Image API 1.0 profile.
+            'http://library.stanford.edu/iiif/image-api/compliance.html' => 'level0',
+            // Image API 1.1 profiles.
+            'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0' => 'level0',
+            'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level1' => 'level1',
+            'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level2' => 'level2',
+            // Api 2.0.
+            'http://iiif.io/api/image/2/level0.json' => 'level0',
+            'http://iiif.io/api/image/2/level1.json' => 'level1',
+            'http://iiif.io/api/image/2/level2.json' => 'level2',
+            // in Image API 3.0, the profile property is a string with one of
+            // these values: level0, level1, or level2 so just return the value…
+            'level0' => 'level0',
+            'level1' => 'level1',
+            'level2' => 'level2',
+        ];
+
+        return isset($profileToLlevels[$profile])
+            ? $profileToLlevels[$profile]
+            : 'level0';
     }
 }
