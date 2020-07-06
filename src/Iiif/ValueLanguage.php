@@ -60,7 +60,7 @@ class ValueLanguage implements JsonSerializable
      *
      * @link https://iiif.io/api/presentation/3.0/#44-language-of-property-values
      *
-     * @param ValueRepresentation|ValueRepresentation[]|array $values When the
+     * @param ValueRepresentation[]|array|ValueRepresentation|string $values When the
      *   first value is not a ValueRepresentation, the values are returned directly.
      * @param bool $allowHtml Html is allowed only in summary, metadata value
      *   and requiredStatement.
@@ -69,7 +69,9 @@ class ValueLanguage implements JsonSerializable
      */
     public function __construct($values, $allowHtml = false, $fallback = null)
     {
-        if (!is_array($values)) {
+        if (is_string($values)) {
+            $values = ['none' => [$values]];
+        } elseif (!is_array($values)) {
             $values = [$values];
         }
 

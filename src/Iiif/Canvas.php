@@ -131,7 +131,6 @@ class Canvas extends AbstractResourceType
                 $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
                 $values = $this->resource->value($labelProperty, ['all' => true, 'default' => $fallback]);
                 break;
-
             case 'property_or_source':
                 $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
                 $values = $this->resource->value($labelProperty, ['all' => true, 'default' => []]);
@@ -142,7 +141,6 @@ class Canvas extends AbstractResourceType
             case 'source':
                 $values = $this->resource->displayTitle($fallback);
                 break;
-
             case 'template_or_source':
                 $fallback = $this->resource->displayTitle($fallback);
                 // no break;
@@ -156,13 +154,11 @@ class Canvas extends AbstractResourceType
                     $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => $fallback]);
                 }
                 break;
-
             case 'position':
             default:
                 // Use fallback.
                 break;
         }
-
         return new ValueLanguage($values, false, $fallback);
     }
 
