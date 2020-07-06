@@ -157,7 +157,10 @@ class IiifManifest2 extends AbstractHelper
         }
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
+        $logo = $this->view->setting('iiifserver_manifest_logo_default');
+        if ($logo) {
+            $manifest['logo'] = (object) ['@id' => $logo];
+        }
 
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.

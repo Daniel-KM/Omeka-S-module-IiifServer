@@ -40,6 +40,7 @@ trait TraitDescriptive
      * @todo Remove publicResourceUrl for v3.0?
      * @todo Remove some settings for v3.0.
      * @todo Use displayValues() or the event?
+     * @todo Remove special properties used in other keys.
      *
      * @return array
      */
@@ -64,6 +65,8 @@ trait TraitDescriptive
         $values = $properties
             ? array_intersect_key($this->resource->values(), array_flip($properties))
             : $this->resource->values();
+
+        // TODO Remove only special properties that are used (check complex conditions…).
 
         $metadata = [];
         foreach ($values as $propertyData) {

@@ -151,7 +151,7 @@ trait TraitLinking
                 break;
         }
 
-        return $output;
+        return $output->getArrayCopy();
     }
 
     /**
@@ -180,7 +180,11 @@ trait TraitLinking
         try {
             $size = $helper($url);
         } catch (\Exception $e) {
-            $size = ['height' => null, 'width' => null];
+            return null;
+        }
+
+        if (empty($size['width']) || empty($size['height'])) {
+            return null;
         }
 
         $output = [
@@ -207,34 +211,38 @@ trait TraitLinking
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
         $values = $this->resource->value($property, ['all' => true, 'default' => []]);
-        if ($values) {
-            foreach ($values as $value) {
-                $id = $value->uri() ?: $value->value();
-                if (filter_var($id, FILTER_VALIDATE_URL)) {
-                    if ($value->type() === 'uri') {
-                        $format = $value->value() ?: 'Dataset';
-                    } else {
-                        $format = 'Dataset';
+        foreach ($values as $value) {
+            $id = $value->uri() ?: $value->value();
+            if (filter_var($id, FILTER_VALIDATE_URL)) {
+                $seeAlso = [
+                    'id' => $id,
+                    'type' => 'Dataset',
+                ];
+                if ($value->type() === 'uri') {
+                    $vvalue = $value->value();
+                    if ($vvalue) {
+                        // TODO Use ValueLanguage.
+                        $seeAlso['label'] = ['none' => $value->value()];
                     }
-                    $output[] = (object) [
-                        'id' => $id,
-                        'type' => 'Dataset',
-                        'format' => $format,
-                    ];
-                    break;
+                    // TODO Add format and profile of the seealso (require a fetch?).
+                    // $seeAlso['format'] = $value->value();
+                    // $seeAlso['profile'] = $value->value();
                 }
+                $output[] = (object) $seeAlso;
             }
         }
 
+        // Added the link to the json-ld representation.
         $helper = $this->urlHelper;
         $output[] = (object) [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
+            'label' => ['none' => 'application/ld+json'],
             'format' => 'application/ld+json',
             'profile' => $helper('api-context', [], ['force_canonical' => true]),
         ];
 
-        return $output;
+        return $output->getArrayCopy();
     }
 
     /**

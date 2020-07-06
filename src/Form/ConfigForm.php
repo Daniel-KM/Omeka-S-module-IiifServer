@@ -96,7 +96,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_rights',
                 'type' => Element\Select::class,
                 'options' => [
-                    'label' => 'Rights', // @translate
+                    'label' => 'Rights (license)', // @translate
                     'value_options' => [
                         'none' => 'No mention', // @translate
                         'text' => 'Specified text below (only for iiif 2.0)', // @translate
@@ -115,7 +115,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_rights_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for rights (license)', // @translate
+                    'label' => 'Property to use for rights', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
