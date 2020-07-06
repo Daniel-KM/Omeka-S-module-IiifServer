@@ -348,9 +348,9 @@ return [
             // TODO Remove url_from and url_to with external image server? But it fixes proxy issues too.
             'iiifserver_manifest_force_url_from' => '',
             'iiifserver_manifest_force_url_to' => '',
-            'iiifserver_external_image_server_base_url' => '',
-            'iiifserver_external_image_server_compliance_level' => '',
-            'iiifserver_external_image_server_api_version' => '2',
+            'iiifserver_image_server_base_url' => '',
+            'iiifserver_image_server_api_version' => '2',
+            'iiifserver_image_server_compliance_level' => 'level0',
         ],
     ],
 ];

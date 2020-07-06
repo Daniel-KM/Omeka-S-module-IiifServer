@@ -189,7 +189,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_homepage_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for resource link', // @translate
+                    'label' => 'Property for resource link', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -205,7 +205,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_seealso_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for machine-readable "See also" links', // @translate
+                    'label' => 'Property for machine-readable "See also" links', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
@@ -243,7 +243,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_canvas_label_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for files', // @translate
+                    'label' => 'Property for files label', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
@@ -390,7 +390,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_base_url',
+                'name' => 'iiifserver_image_server_base_url',
                 'type' => Element\Url::class,
                 'options' => [
                     'label' => 'Base URL of the IIIF Image Server', // @translate
@@ -401,8 +401,8 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_api_version',
-                'type' => Element\Select::class,
+                'name' => 'iiifserver_image_server_api_version',
+                'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'IIIF Image API version', // @translate
                     'info' => 'Indicate the version of the Image API supported by the server that you want to use',  // @translate
@@ -413,11 +413,12 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_compliance_level',
-                'type' => Element\Select::class,
+                'name' => 'iiifserver_image_server_compliance_level',
+                'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Compliance level of the server with the IIIF Image API', // @translate
-                    'info' => 'Specify which level of the Image API the server supports. See: https://iiif.io/api/image/2.1/#compliance-levels',  // @translate
+                    'info' => 'Specify which level of the Image API the server supports.',  // @translate
+                    'documentation' => 'https://iiif.io/api/image/3.0/#6-compliance-level-and-profile-document',
                     'empty_option' => 'Select IIIF Image API compliance level…', // @translate
                     'value_options' => [
                         'level0' => 'Level 0', // @translate
@@ -502,15 +503,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_base_url',
+                'name' => 'iiifserver_image_server_base_url',
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_compliance_level',
+                'name' => 'iiifserver_image_server_compliance_level',
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_external_image_server_api_version',
+                'name' => 'iiifserver_image_server_api_version',
                 'required' => false,
             ])
         ;
