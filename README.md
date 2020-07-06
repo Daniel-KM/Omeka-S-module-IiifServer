@@ -65,7 +65,10 @@ Then install it like any other Omeka module.
 Notes
 -----
 
-### Using externally supplied IIIF manifest and images
+The module allows to manage collections (item set level/item list), manifests
+(item level), and info.json (media level).
+
+### Using externally supplied IIIF manifest
 
 If you are harvesting data (via OAI-PMH, for instance) from another system where
 images are hosted and exposed via IIIF, you can use a configurable metadata
@@ -79,33 +82,16 @@ in the specified element of a record. The viewer included on that record’s
 display page will use that manifest URL to retrieve images and metadata for the
 viewer.
 
-### Using a third-party IIIF Image server
+### Using a third-party IIIF Image server via the Omeka media type "IIIF Image"
 
-You might also want to use a dedicated third-party image server (for instance
-one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers)
-of the IIIF community), instead of the Omeka module [Image Server], available
-separately. If so, you need to fill in some settings in the "Third-party IIIF Image Server"
-section of the module configuration:
+If your images are already managed by one or multiple dedicated third-party
+image server (for instance one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers)
+of the IIIF community), you can use them directly in your items: create or
+import them as media "[IIIF Image]". With this media type, the full json is
+saved in metadata of the media itself.
 
-- _Base URL of your IIIF image server_: this is the base url endpoint where the
-  image server is able to handle image requests. As soon as you indicate a URL
-  in this field, it will take precedence over the image server provided by the
-  [Image Server] module and will be used in the IIIF Manifests (i.e. every
-  `service` field that refers to an Image API endpoint will now point to your
-  image server).
-- _Version of the Image API supported by your server_ (you must choose between
-  version 2 or 3).
-- _Compliance level of your image server_ with respect to the IIIF Image API
-  (level 0, 1 or 2).
-
-**Important notes:**
-- you first need to configure your image server separately and make sure it
-  supports the source formats of the images you want to serve (see their
-  respective documentation).
-- you must configure it in such a way that it is able to serve images from the
-  Omeka S `files/original` folder.
-- the images must have been imported into Omeka S beforehand and properly
-  associated with their items.
+If you don’t want to manage a dedicated image server, you can simply install the
+module [Image Server].
 
 ### Customize data of manifests
 
@@ -116,6 +102,9 @@ So, it is possible, for example, to modify the citation, to remove or to add
 some metadata or to change the thumbnail.
 
 Note: with a collection list, the parameter `resource` is an array of resources.
+
+All the combinations are possible: external manifest for items, iiif image for
+external medias, a local standard media file with module Image Server.
 
 
 IIIF Server
@@ -206,6 +195,7 @@ TODO / Bugs
   manifest in real time (if not too many attached media), or save it as a iiif
   media.
 - Use the option "no storage" for url of a media for external server.
+- Job to update data of [IIIF Image].
 
 See module [Image Server].
 
@@ -296,6 +286,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Zoomify library]: https://github.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
 [#6]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/6
+[IIIF Image]: https://omeka.org/s/docs/user-manual/content/items/#media
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
