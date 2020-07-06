@@ -30,6 +30,7 @@
 namespace IiifServer\Iiif\Annotation;
 
 use IiifServer\Iiif\AbstractResourceType;
+use IiifServer\Iiif\TraitMedia;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
@@ -37,6 +38,8 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class Body extends AbstractResourceType
 {
+    use TraitMedia;
+
     protected $keys = [
         // Types for annotation body are not iiif.
 
@@ -57,6 +60,16 @@ class Body extends AbstractResourceType
      * @var \IiifServer\View\Helper\IiifImageUrl
      */
     protected $iiifImageUrl;
+
+    /**
+     * @var \IiifServer\View\Helper\ImageSize
+     */
+    protected $imageSize;
+
+    /**
+     * @var \ImageServer\Mvc\Controller\Plugin\TileInfo|null
+     */
+    protected $tileInfo;
 
     /**
      * @var string
@@ -94,8 +107,15 @@ class Body extends AbstractResourceType
 
         parent::__construct($resource, $options);
 
+        $this->initMedia();
+
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+        $this->imageSize = $viewHelpers->get('imageSize');
+
+        // Module Image Server is required to get specific data about the image
+        $plugins = $this->resource->getServiceLocator()->get('ControllerPluginManager');
+        $this->tileInfo = $plugins->has('tileInfo') ? $plugins->get('tileInfo') : null;
 
         $setting = $this->setting;
         $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
@@ -104,10 +124,17 @@ class Body extends AbstractResourceType
     public function getId()
     {
         if ($this->contentResource->isImage()) {
+            // According to https://iiif.io/api/presentation/3.0/#57-content-resources,
+            // "the URL may be the complete URL to a particular size of the image
+            // content", so the large one here, and it's always a jpeg.
+            // It's not needed to use the full original size.
+            $helper = $this->imageSize;
+            $imageSize = $helper($this->resource, 'large');
+            list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
             $imageUrl = $this->iiifImageUrl;
             return $imageUrl($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
-                'size' => $this->contentResource->getWidth() . ',' . $this->contentResource->getHeight(),
+                'size' => $widthLarge . ',' . $heightLarge,
                 'rotation' => 0,
                 'quality' => 'default',
                 'format' => 'jpg',
@@ -140,21 +167,37 @@ class Body extends AbstractResourceType
             $helper = $this->iiifImageUrl;
             $id = $helper($this->resource, 'imageserver/id', $this->imageApiVersion);
 
+            $imageResourceService = [];
             switch ($this->imageApiVersion) {
                 case '2':
-                    return (object) [
+                    $imageResourceService = [
                         '@id' => $id,
                         '@type' => 'ImageService2',
                         'profile' => 'http://iiif.io/api/image/2/level2.json',
                     ];
                 case '3':
                 default:
-                    return (object) [
+                    $imageResourceService = [
                         'id' => $id,
                         'type' => 'ImageService3',
                         'profile' => 'level2',
                     ];
             }
+
+            if ($this->tileInfo) {
+                $helper = $this->tileInfo;
+                $tilingData = $helper($this->resource);
+                $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
+                if ($iiifTileInfo) {
+                    $tiles = [];
+                    $tiles[] = $iiifTileInfo;
+                    $imageResourceService['tiles'] = $tiles;
+                    $imageResourceService['height'] = $this->getHeight();
+                    $imageResourceService['width'] = $this->getWidth();
+                }
+            }
+
+            return (object) $imageResourceService;
         }
 
         return null;
@@ -179,5 +222,33 @@ class Body extends AbstractResourceType
         return method_exists($this->contentResource, 'getDuration')
             ? $this->contentResource->getDuration()
             : null;
+    }
+
+    /**
+     * Create the data for a IIIF tile object.
+     *
+     * @param array $tileInfo
+     * @return array|null
+     */
+    protected function iiifTileInfo($tileInfo)
+    {
+        $tile = [];
+
+        $squaleFactors = [];
+        $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
+        $tileSize = $tileInfo['size'];
+        $total = (int) ceil($maxSize / $tileSize);
+        $factor = 1;
+        while ($factor / 2 <= $total) {
+            $squaleFactors[] = $factor;
+            $factor = $factor * 2;
+        }
+        if (count($squaleFactors) <= 1) {
+            return null;
+        }
+
+        $tile['width'] = $tileSize;
+        $tile['scaleFactors'] = $squaleFactors;
+        return $tile;
     }
 }

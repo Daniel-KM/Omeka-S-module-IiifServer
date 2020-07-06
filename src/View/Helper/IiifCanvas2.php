@@ -274,14 +274,18 @@ class IiifCanvas2 extends AbstractHelper
         $imageResourceService['@id'] = $imageUrlService;
         $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
 
-        $tilingData = $view->tileInfo($media);
-        $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
-        if ($iiifTileInfo) {
-            $tiles = [];
-            $tiles[] = $iiifTileInfo;
-            $imageResourceService['tiles'] = $tiles;
-            $imageResourceService['width'] = $width;
-            $imageResourceService['height'] = $height;
+        // TODO Use the trait TileInfo of module ImageServer.
+        $viewHelpers = $view->getHelperPluginManager();
+        if ($viewHelpers->has('tileInfo')) {
+            $tilingData = $view->tileInfo($media);
+            $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
+            if ($iiifTileInfo) {
+                $tiles = [];
+                $tiles[] = $iiifTileInfo;
+                $imageResourceService['tiles'] = $tiles;
+                $imageResourceService['width'] = $width;
+                $imageResourceService['height'] = $height;
+            }
         }
 
         $imageResourceService = (object) $imageResourceService;
