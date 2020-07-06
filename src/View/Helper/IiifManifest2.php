@@ -546,8 +546,8 @@ class IiifManifest2 extends AbstractHelper
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
-                return strpos($v->type(), 'resource') === 0
-                    ? $publicResourceUrl($v->valueResource(), true)
+                return strpos($v->type(), 'resource') === 0 && $vr = $v->valueResource()
+                    ? $publicResourceUrl($vr, true)
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
@@ -570,10 +570,9 @@ class IiifManifest2 extends AbstractHelper
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
-                if (strpos($v->type(), 'resource') === 0) {
-                    $r = $v->valueResource();
-                    return '<a class="resource-link" href="' . $publicResourceUrl($r, true) . '">'
-                        . '<span class="resource-name">' . $r->displayTitle() . '</span>'
+                if (strpos($v->type(), 'resource') === 0 && $vr = $v->valueResource()) {
+                    return '<a class="resource-link" href="' . $publicResourceUrl($vr, true) . '">'
+                        . '<span class="resource-name">' . $vr->displayTitle() . '</span>'
                         . '</a>';
                 }
                 return $v->asHtml();
