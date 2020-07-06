@@ -121,6 +121,8 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->delete('iiifserver_manifest_version_append');
     $settings->set('iiifserver_identifier_clean', $settings->get('iiifserver_manifest_clean_identifier', true));
     $settings->delete('iiifserver_manifest_clean_identifier');
+    $settings->set('iiifserver_identifier_prefix', '');
+    $settings->set('iiifserver_identifier_raw', '');
     $settings->set('iiifserver_url_service_image', $settings->get('iiifserver_manifest_service_image', ''));
     $settings->delete('iiifserver_manifest_service_image');
     $settings->set('iiifserver_url_service_media', $settings->get('iiifserver_manifest_service_media', ''));

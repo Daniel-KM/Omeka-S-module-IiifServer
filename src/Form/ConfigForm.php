@@ -340,7 +340,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'id' => 'iiifserver_url_version_add',
                 ],
             ])
-
             ->add([
                 'name' => 'iiifserver_identifier_clean',
                 'type' => Element\Checkbox::class,
@@ -351,6 +350,28 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_identifier_clean',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_identifier_prefix',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Prefix to use for identifier (to be set inside module.config.php currently)', // @translate
+                    'info' => 'Allows to check identifiers that contains "/" from "ark:/12345/xxx" and "ark:%2F12345%2Fxxx" (example: "ark:/12345/").', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_identifier_prefix',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_identifier_raw',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Allow raw identifier', // @translate
+                    'info' => 'So an ark identifier will be available as "ark:/12345/betz" and "ark:%2F12345%2Fbetz".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_identifier_raw',
                 ],
             ])
 
@@ -366,7 +387,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'id' => 'iiifserver_url_force_from',
                 ],
             ])
-
             ->add([
                 'name' => 'iiifserver_url_force_to',
                 'type' => Element\Text::class,

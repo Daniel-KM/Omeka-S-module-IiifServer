@@ -19,13 +19,30 @@ class IiifCleanIdentifiers extends AbstractHelper
     protected $getIdentifiersFromResources;
 
     /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
+     * @var bool
+     */
+    protected $rawIdentifier;
+
+    /**
      * Construct the helper.
      *
      * @param GetIdentifiersFromResources $getIdentifiersFromResources
+     * @param bool $prefix
+     * @param bool $rawIdentifier
      */
-    public function __construct(GetIdentifiersFromResources $getIdentifiersFromResources = null)
-    {
+    public function __construct(
+        GetIdentifiersFromResources $getIdentifiersFromResources = null,
+        $prefix,
+        $rawIdentifier
+    ) {
         $this->getIdentifiersFromResources = $getIdentifiersFromResources;
+        $this->prefix = $prefix;
+        $this->rawIdentifier = $rawIdentifier;
     }
 
     /**
@@ -65,20 +82,42 @@ class IiifCleanIdentifiers extends AbstractHelper
                 : array_map($returnId, $in);
         }
 
-        // According to the specifications, the ":" should not be url encoded.
-        $urlEncode = function ($v) {
-            return str_replace('%3A', ':', rawurlencode($v));
-        };
+        if ($this->prefix) {
+            if ($this->rawIdentifier) {
+                $output = function ($v) {
+                    return strpos($v, $this->prefix) === 0
+                        ? mb_substr($v, mb_strlen($this->prefix))
+                        : $v;
+                };
+            } else {
+                $output = function ($v) {
+                    return str_replace('%3A', ':', rawurlencode(strpos($v, $this->prefix) === 0
+                        ?mb_substr($v, mb_strlen($this->prefix))
+                        : $v));
+                };
+            }
+        } elseif ($this->rawIdentifier) {
+            $output = function ($v) {
+                return $v;
+            };
+        }
+        // Default options.
+        else {
+            // According to the specifications, the ":" should not be url encoded.
+            $output = function ($v) {
+                return str_replace('%3A', ':', rawurlencode($v));
+            };
+        }
 
         $helper = $this->getIdentifiersFromResources;
         $result = $helper($in);
         if ($isSingle) {
-            return $result ? $urlEncode(reset($result)) : reset($in);
+            return $result ? $output(reset($result)) : reset($in);
         }
 
         $identifiers = [];
         foreach ($in as $id) {
-            $identifiers[] = isset($result[$id]) ? $urlEncode($result[$id]) : $id;
+            $identifiers[] = isset($result[$id]) ? $output($result[$id]) : $id;
         }
         return $identifiers;
     }

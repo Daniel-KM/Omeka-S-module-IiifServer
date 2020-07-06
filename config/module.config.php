@@ -1,7 +1,12 @@
 <?php
+/**
+ * @var string $defaultVersion
+ * @var bool $versionAppend
+ * @var string $prefix
+ */
 namespace IiifServer;
 
-// Write the default verseion ("2" or "3") here (and in image server if needed).
+// Write the default version ("2" or "3") here (and in image server if needed).
 if (!isset($defaultVersion)) {
     $defaultVersion = '';
 }
@@ -10,6 +15,22 @@ if (!isset($versionAppend)) {
 }
 // If the version is set here, the route will skip it.
 $version = $versionAppend ? '' : $defaultVersion;
+
+// Write the prefix between the top of the iiif server and the identifier.
+// This option allows to manage arks identifiers not url-encoded.
+// The url encoding is required for image api, but not for presentation api.
+// So prefix can be "ark:/12345/".
+if (!isset($prefix)) {
+    $prefix = '';
+}
+if ($prefix) {
+    $urlEncodedPrefix = rawurlencode($prefix);
+    $constraintPrefix = $prefix . '|' . $urlEncodedPrefix . '|' . str_replace('%3A', ':', $urlEncodedPrefix);
+    $prefix = '[:prefix]';
+} else {
+    $constraintPrefix = '';
+    $prefix = '';
+}
 
 return [
     'view_manager' => [
@@ -104,9 +125,10 @@ return [
                     'uri' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/:id/:type[/:name][/:subname]',
+                            'route' => "[/v:version]/$prefix:id/:type[/:name][/:subname]",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 // 'id' => '\d+',
                                 'id' => '[^\/]+',
                                 // Note: content resources should use the original media url, so it is just an alias.
@@ -133,9 +155,10 @@ return [
                     'collection-list' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/collection/:id',
+                            'route' => "[/v:version]/collection/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 // 'id' => '(?:[cimf]?\-?\d+\,?)+',
                                 'id' => '[^/]+',
                             ],
@@ -154,9 +177,10 @@ return [
                     'collection' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/collection/:id',
+                            'route' => "[/v:version]/collection/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 // "," is not allowed in order to allow deprecated collection list.
                                 'id' => '[^,/]+',
                             ],
@@ -169,9 +193,10 @@ return [
                     'collection-manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/collection/:id/manifest',
+                            'route' => "[/v:version]/collection/$prefix:id/manifest",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
@@ -184,9 +209,10 @@ return [
                     'manifest-id' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/:id',
+                            'route' => "[/v:version]/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
@@ -198,9 +224,10 @@ return [
                     'manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/:id/manifest',
+                            'route' => "[/v:version]/$prefix:id/manifest",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
@@ -209,14 +236,15 @@ return [
                             ],
                         ],
                     ],
-                    // In 2.1, canvas id is meida id and name is p + index.
+                    // In 2.1, canvas id is media id and name is p + index.
                     // In 3.0, canvas id is item id and name is media id.
                     'canvas' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/:id/canvas/:name',
+                            'route' => "[/v:version]/$prefix:id/canvas/:name",
                             'constraints' => [
                                 'version' => '2|3',
+                                'prefix' => $constraintPrefix,
                                 'id' => '[^/]+',
                             ],
                             'defaults' => [
@@ -248,7 +276,7 @@ return [
                 ],
             ],
 
-            /** @deprecated Will be removed in Omeka version 3.0. */
+            /* @deprecated Will be removed in Omeka version 3.0. */
             // Keep some deprecated routes for compatibility with old modules UniversalViewer, Mirador and Diva.
             'iiifserver_presentation_collection_list' => [
                 'type' => \Zend\Router\Http\Segment::class,
@@ -346,6 +374,8 @@ return [
             // Urls.
             'iiifserver_url_version_add' => false,
             'iiifserver_identifier_clean' => true,
+            'iiifserver_identifier_prefix' => '',
+            'iiifserver_identifier_raw' => false,
             // These options allows to bypass a proxy issue.
             'iiifserver_url_force_from' => '',
             'iiifserver_url_force_to' => '',

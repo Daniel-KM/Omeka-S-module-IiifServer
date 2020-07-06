@@ -243,7 +243,7 @@ class PresentationController extends AbstractActionController
     protected function useCleanIdentifier()
     {
         return $this->viewHelpers()->has('getResourcesFromIdentifiers')
-            && $this->settings()->get('iiifserver_url_clean');
+            && $this->settings()->get('iiifserver_identifier_clean');
     }
 
     protected function requestedVersion()
