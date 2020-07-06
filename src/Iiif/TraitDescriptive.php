@@ -48,25 +48,43 @@ trait TraitDescriptive
     {
         $jsonLdType = $this->resource->getResourceJsonLdType();
         $map = [
-            'o:ItemSet' => 'iiifserver_manifest_properties_collection',
-            'o:Item' => 'iiifserver_manifest_properties_item',
-            'o:Media' => 'iiifserver_manifest_properties_media',
+            'o:ItemSet' => [
+                'whitelist' => 'iiifserver_manifest_properties_collection_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_collection_blacklist',
+            ],
+            'o:Item' => [
+                'whitelist' => 'iiifserver_manifest_properties_item_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_item_blacklist',
+            ],
+            'o:Media' => [
+                'whitelist' => 'iiifserver_manifest_properties_media_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_media_blacklist',
+            ],
         ];
         if (!isset($map[$jsonLdType])) {
             return [];
         }
 
         $settingHelper = $this->setting;
-        $properties = $settingHelper($map[$jsonLdType]);
-        if ($properties === ['none']) {
+
+        $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
+        if ($whitelist === ['none']) {
             return [];
         }
 
-        $values = $properties
-            ? array_intersect_key($this->resource->values(), array_flip($properties))
+        $values = $whitelist
+            ? array_intersect_key($this->resource->values(), array_flip($whitelist))
             : $this->resource->values();
 
-        // TODO Remove only special properties that are used (check complex conditions…).
+        $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+        if ($blacklist) {
+            $values = array_diff_key($values, array_flip($blacklist));
+        }
+        if (empty($values)) {
+            return [];
+        }
+
+        // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
 
         $metadata = [];
         foreach ($values as $propertyData) {

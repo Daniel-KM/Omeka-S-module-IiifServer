@@ -133,6 +133,17 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->delete('iiifserver_manifest_clean_identifier');
     $settings->set('iiifserver_identifier_prefix', '');
     $settings->set('iiifserver_identifier_raw', '');
+
+    $settings->set('iiifserver_manifest_properties_collection_whitelist', $settings->get('iiifserver_manifest_properties_collection', []));
+    $settings->delete('iiifserver_manifest_properties_collection');
+    $settings->set('iiifserver_manifest_properties_item_whitelist', $settings->get('iiifserver_manifest_properties_item', []));
+    $settings->delete('iiifserver_manifest_properties_item');
+    $settings->set('iiifserver_manifest_properties_media_whitelist', $settings->get('iiifserver_manifest_properties_media', []));
+    $settings->delete('iiifserver_manifest_properties_media');
+    $settings->set('iiifserver_manifest_properties_collection_blacklist', []);
+    $settings->set('iiifserver_manifest_properties_item_blacklist', []);
+    $settings->set('iiifserver_manifest_properties_media_blacklist', []);
+
     $settings->set('iiifserver_url_service_image', $settings->get('iiifserver_manifest_service_image', ''));
     $settings->delete('iiifserver_manifest_service_image');
     $settings->set('iiifserver_url_service_media', $settings->get('iiifserver_manifest_service_media', ''));

@@ -262,7 +262,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_properties_collection',
+                'name' => 'iiifserver_manifest_properties_collection_whitelist',
                 'type' => PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for collection in manifest', // @translate
@@ -274,15 +274,14 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_properties_collection',
+                    'id' => 'iiifserver_manifest_properties_collection_whitelist',
                     'class' => 'chosen-select',
                     'multiple' => true,
                     'data-placeholder' => 'Select one or more properties…', // @translate
                 ],
             ])
-
             ->add([
-                'name' => 'iiifserver_manifest_properties_item',
+                'name' => 'iiifserver_manifest_properties_item_whitelist',
                 'type' => PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for item in manifest', // @translate
@@ -294,15 +293,14 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_properties_item',
+                    'id' => 'iiifserver_manifest_properties_item_whitelist',
                     'class' => 'chosen-select',
                     'multiple' => true,
                     'data-placeholder' => 'Select one or more properties…', // @translate
                 ],
             ])
-
             ->add([
-                'name' => 'iiifserver_manifest_properties_media',
+                'name' => 'iiifserver_manifest_properties_media_whitelist',
                 'type' => PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for media in manifest', // @translate
@@ -314,7 +312,53 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_properties_media',
+                    'id' => 'iiifserver_manifest_properties_media_whitelist',
+                    'class' => 'chosen-select',
+                    'multiple' => true,
+                    'data-placeholder' => 'Select one or more properties…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_properties_collection_blacklist',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Skip properties for collection in manifest', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_properties_collection_blacklist',
+                    'class' => 'chosen-select',
+                    'multiple' => true,
+                    'data-placeholder' => 'Select one or more properties…', // @translate
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_properties_item_blacklist',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Skip properties for item in manifest', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_properties_item_blacklist',
+                    'class' => 'chosen-select',
+                    'multiple' => true,
+                    'data-placeholder' => 'Select one or more properties…', // @translate
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_properties_media_blacklist',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Skp properties for media in manifest', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_properties_media_blacklist',
                     'class' => 'chosen-select',
                     'multiple' => true,
                     'data-placeholder' => 'Select one or more properties…', // @translate
@@ -449,15 +493,27 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_properties_collection',
+                'name' => 'iiifserver_manifest_properties_collection_whitelist',
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_properties_item',
+                'name' => 'iiifserver_manifest_properties_item_whitelist',
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_properties_media',
+                'name' => 'iiifserver_manifest_properties_media_whitelist',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_properties_collection_blacklist',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_properties_item_blacklist',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_properties_media_blacklist',
                 'required' => false,
             ])
         ;

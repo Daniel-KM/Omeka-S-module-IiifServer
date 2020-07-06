@@ -201,27 +201,103 @@ class IiifCollection2 extends AbstractHelper
     /**
      * Prepare the metadata of a resource.
      *
-     * @todo Factorize with IiifManifest.
+     * @todo Factorize IiifCanvas2, IiifCollection2, TraitDescriptive and IiifManifest2.
      *
      * @param AbstractResourceEntityRepresentation $resource
      * @return array
      */
     protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
     {
-        $properties = $this->view->setting('iiifserver_manifest_properties_collection');
-        if ($properties === ['none']) {
+        $jsonLdType = $resource->getResourceJsonLdType();
+        $map = [
+            'o:ItemSet' => [
+                'whitelist' => 'iiifserver_manifest_properties_collection_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_collection_blacklist',
+            ],
+            'o:Item' => [
+                'whitelist' => 'iiifserver_manifest_properties_item_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_item_blacklist',
+            ],
+            'o:Media' => [
+                'whitelist' => 'iiifserver_manifest_properties_media_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_media_blacklist',
+            ],
+        ];
+        if (!isset($map[$jsonLdType])) {
             return [];
         }
 
+        $settingHelper = $this->view->getHelperPluginManager()->get('setting');
+
+        $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
+        if ($whitelist === ['none']) {
+            return [];
+        }
+
+        $values = $whitelist
+            ? array_intersect_key($resource->values(), array_flip($whitelist))
+            : $resource->values();
+
+        $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+        if ($blacklist) {
+            $values = array_diff_key($values, array_flip($blacklist));
+        }
+        if (empty($values)) {
+            return [];
+        }
+
+        // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
+
+        return $this->view->setting('iiifserver_manifest_html_descriptive')
+            ? $this->valuesAsHtml($values)
+            : $this->valuesAsPlainText($values);
+    }
+
+    /**
+     * List values as plain text descriptive metadata.
+     *
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+     * @return array
+     */
+    protected function valuesAsPlainText(array $values)
+    {
         $metadata = [];
-        $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+        $publicResourceUrl = $this->view->plugin('publicResourceUrl');
         foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
-            $valueValues = array_filter(array_map(function ($v) {
+            $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
                 return strpos($v->type(), 'resource') === 0
-                    ? $this->view->iiifUrl($v->valueResource(), null, '2')
+                    ? $publicResourceUrl($v->valueResource(), true)
                     : (string) $v;
+            }, $propertyData['values']), 'strlen');
+            $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
+            $metadata[] = (object) $valueMetadata;
+        }
+        return $metadata;
+    }
+
+    /**
+     * List values as descriptive metadata, with links for resources and uris.
+     *
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+     * @return array
+     */
+    protected function valuesAsHtml(array $values)
+    {
+        $metadata = [];
+        $publicResourceUrl = $this->view->plugin('publicResourceUrl');
+        foreach ($values as $propertyData) {
+            $valueMetadata = [];
+            $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
+            $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
+                if (strpos($v->type(), 'resource') === 0) {
+                    $r = $v->valueResource();
+                    return '<a class="resource-link" href="' . $publicResourceUrl($r, true) . '">'
+                        . '<span class="resource-name">' . $r->displayTitle() . '</span>'
+                        . '</a>';
+                }
+                return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
             $metadata[] = (object) $valueMetadata;

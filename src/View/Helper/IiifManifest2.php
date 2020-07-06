@@ -480,7 +480,7 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Prepare the metadata of a resource.
      *
-     * @todo Factorize with IiifCollection.
+     * @todo Factorize IiifCanvas2, IiifCollection2, TraitDescriptive and IiifManifest2.
      *
      * @param AbstractResourceEntityRepresentation $resource
      * @return array
@@ -489,20 +489,43 @@ class IiifManifest2 extends AbstractHelper
     {
         $jsonLdType = $resource->getResourceJsonLdType();
         $map = [
-            'o:ItemSet' => 'iiifserver_manifest_properties_collection',
-            'o:Item' => 'iiifserver_manifest_properties_item',
-            'o:Media' => 'iiifserver_manifest_properties_media',
+            'o:ItemSet' => [
+                'whitelist' => 'iiifserver_manifest_properties_collection_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_collection_blacklist',
+            ],
+            'o:Item' => [
+                'whitelist' => 'iiifserver_manifest_properties_item_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_item_blacklist',
+            ],
+            'o:Media' => [
+                'whitelist' => 'iiifserver_manifest_properties_media_whitelist',
+                'blacklist' => 'iiifserver_manifest_properties_media_blacklist',
+            ],
         ];
         if (!isset($map[$jsonLdType])) {
             return [];
         }
 
-        $properties = $this->view->setting($map[$jsonLdType]);
-        if ($properties === ['none']) {
+        $settingHelper = $this->view->getHelperPluginManager()->get('setting');
+
+        $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
+        if ($whitelist === ['none']) {
             return [];
         }
 
-        $values = $properties ? array_intersect_key($resource->values(), array_flip($properties)) : $resource->values();
+        $values = $whitelist
+            ? array_intersect_key($resource->values(), array_flip($whitelist))
+            : $resource->values();
+
+        $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+        if ($blacklist) {
+            $values = array_diff_key($values, array_flip($blacklist));
+        }
+        if (empty($values)) {
+            return [];
+        }
+
+        // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
 
         return $this->view->setting('iiifserver_manifest_html_descriptive')
             ? $this->valuesAsHtml($values)
