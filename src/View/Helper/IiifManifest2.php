@@ -704,7 +704,7 @@ class IiifManifest2 extends AbstractHelper
         // We use the internal image server provided by this module.
 
         // If it is an external IIIF image.
-        if ( $media->ingester() == 'iiif' ) {
+        if ($media->ingester() == 'iiif') {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
             // @todo In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
@@ -802,7 +802,7 @@ class IiifManifest2 extends AbstractHelper
         $canvas['thumbnail'] = $this->_iiifThumbnail($media);
 
         // If it is an external IIIF image.
-        if ( $media->ingester() == 'iiif' ) {
+        if ($media->ingester() == 'iiif') {
             $mediaData = $media->mediaData();
             $width = $canvas['width'] = $mediaData['width'];
             $height = $canvas['height'] = $mediaData['height'];
@@ -1290,28 +1290,33 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Helper to set the IIIF full size url of an image, depending on the version of the IIIF Image API supported by the server
+     * Helper to set the IIIF full size url of an image, depending on the
+     * version of the IIIF Image API supported by the server
      *
-     * @param string $baseUrl IIIF base url of the image (including the identifier slot)
-     * @param string $apiVersion Version of the API Image supported by the server, as set in the config form
+     * @param string $baseUrl IIIF base url of the image (including the
+     * identifier slot)
+     * @param string $apiVersion Version of the API Image supported by the
+     * server, as set in the config form
      * @return string IIIF full size url of the image
      */
     protected function _setImageFullUrl($baseUrl, $apiVersion)
     {
         if ($apiVersion == '2') {
-            return $baseUrl.'/full/full/0/default.jpg';
-        }
-        elseif ($apiVersion == '3') {
-            return $baseUrl.'/full/max/0/default.jpg';
+            return $baseUrl . '/full/full/0/default.jpg';
+        } elseif ($apiVersion == '3') {
+            return $baseUrl . '/full/max/0/default.jpg';
         }
     }
 
     /**
      * Helper to create the IIIF Image API service block
      *
-     * @param string $baseUrl IIIF base url of the image (including the identifier slot)
-     * @param string $apiVersion Version of the API Image supported by the server, as set in the config form
-     * @param string $level Compliance level of the server, as set in the config form
+     * @param string $baseUrl IIIF base url of the image (including the
+     * identifier slot)
+     * @param string $apiVersion Version of the API Image supported by the
+     * server, as set in the config form
+     * @param string $level Compliance level of the server, as set in the config
+     * form
      * @return object $service IIIF Image API service block
      */
     protected function _iiifImageService($baseUrl, $apiVersion = '2', $level = 'level0')
@@ -1320,74 +1325,69 @@ class IiifManifest2 extends AbstractHelper
         $service['@context'] = $this->_setIiifImageApiVersion($apiVersion);
         $service['@id'] = $baseUrl;
         $service['profile'] = $this->_setServerComplianceLevel($apiVersion, $level);
-        $service = (object) $service;
-        return $service;
+        return (object) $service;
     }
 
     /**
-     * Helper to set the URI of the IIIF Image API version (JSON-LD @context document)
+     * Helper to set the URI of the IIIF Image API version (JSON-LD @context
+     * document)
      *
-     * @param string $apiVersion Version of the API Image supported by the server, as set in the config form
+     * @param string $apiVersion Version of the API Image supported by the
+     * server, as set in the config form
      * @return string URI of the @context document
      */
     protected function _setIiifImageApiVersion($apiVersion = '2')
     {
         if ($apiVersion == '2') {
             return 'http://iiif.io/api/image/2/context.json';
-        }
-        elseif ($apiVersion == '3') {
+        } elseif ($apiVersion == '3') {
             return 'http://iiif.io/api/image/3/context.json';
         }
     }
 
     /**
-     * Helper to set the compliance URI (used for the `profile` property) based on the compliance level of the image server, and depending on the version of the IIIF Image API
+     * Helper to set the compliance URI (used for the `profile` property) based
+     * on the compliance level of the image server, and depending on the version
+     * of the IIIF Image API
      *
-     * @param string $apiVersion Version of the API Image supported by the server, as set in the config form
+     * @param string $apiVersion Version of the API Image supported by the
+     * server, as set in the config form
      * @param string $level Compliance level of the server, as set in the config form
      * @return string URI of the compliance level
      */
     protected function _setServerComplianceLevel($apiVersion, $level)
     {
-        $complianceLevelUri = '';
         if ($apiVersion == '2') {
             switch ($level) {
                 case 'level0':
                     return 'http://iiif.io/api/image/2/level0.json';
-                    break;
                 case 'level1':
                     return 'http://iiif.io/api/image/2/level1.json';
-                    break;
                 case 'level2':
                     return 'http://iiif.io/api/image/2/level2.json';
-                    break;
                 default:
                     return 'http://iiif.io/api/image/2/level2.json';
-                    break;
             }
-        }
-        elseif ($apiVersion == '3') {
+        } elseif ($apiVersion == '3') {
             switch ($level) {
                 case 'level0':
                     return 'http://iiif.io/api/image/3/level0.json';
-                    break;
                 case 'level1':
                     return 'http://iiif.io/api/image/3/level1.json';
-                    break;
                 case 'level2':
                     return 'http://iiif.io/api/image/3/level2.json';
-                    break;
                 default:
                     return 'http://iiif.io/api/image/3/level2.json';
-                    break;
             }
         }
     }
 
     /**
-     * Helper to set the IIIF base url of the image on the server, used as the @id in the service blocks
+     * Helper to set the IIIF base url of the image on the server, used as the
+     * @id in the service blocks
      *
-     * @param string $serverBaseUrl Base url of the IIIF image server, as set in the config form
+     * @param string $serverBaseUrl Base url of the IIIF image server, as set in
+     * the config form
      * @param string $filename Image file name in the Omeka files/ directory
      * @return string IIIF base url of the image
      */
@@ -1395,8 +1395,7 @@ class IiifManifest2 extends AbstractHelper
     {
         if (substr(rtrim($serverBaseUrl), -1) != '/') {
             return rtrim($serverBaseUrl) . '/' . $filename;
-        }
-        else {
+        } else {
             return rtrim($serverBaseUrl) . $filename;
         }
     }
@@ -1404,92 +1403,93 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Helper to create a IIIF url for the thumbnail
      *
-     * @param string $baseUrl IIIF base url of the image (url up to the identifier, w/o trailing slash)
-     * @param string $apiVersion Version of the API Image supported by the server, as set in the config form
+     * @param string $baseUrl IIIF base url of the image (url up to the
+     * identifier, w/o trailing slash)
+     * @param string $apiVersion Version of the API Image supported by the
+     * server, as set in the config form
      * @return string Full IIIF thumbnail url
      */
     protected function _setIiifThumbnail($baseUrl, $apiVersion = '2', $level = 'level0')
     {
-        // @TODO:
-        // - handle square thumbnails, depending on server capabilities ('regionSquare' feature, see https://iiif.io/api/image/2.1/#profile-description): ability to indicate the set of image features supported by the server in the config form of this module
-        //return $baseUrl.'/square/200,200/0/default.jpg';
+        // TODO handle square thumbnails, depending on server capabilities ('regionSquare' feature, see https://iiif.io/api/image/2.1/#profile-description): ability to indicate the set of image features supported by the server in the config form of this module
+        // return $baseUrl . '/square/200,200/0/default.jpg';
 
         if ($level != 'level0') {
-            return $baseUrl.'/full/,200/0/default.jpg';
+            return $baseUrl . '/full/,200/0/default.jpg';
         }
     }
 
     /**
-     * Helper to set the IIIF full size url of an image, depending on the version of the IIIF Image API supported by the server
+     * Helper to set the IIIF full size url of an image, depending on the
+     * version of the IIIF Image API supported by the server
      *
-     * @param string $baseUri IIIF base URI of the image (including the identifier slot)
-     * @param string $contextUri Version of the API Image supported by the server, as stated by the JSON-LD context URI
+     * @param string $baseUri IIIF base URI of the image (including the
+     * identifier slot)
+     * @param string $contextUri Version of the API Image supported by the
+     * server, as stated by the JSON-LD context URI
      * @return string IIIF full size URL of the image
      */
     protected function _setIiifImageFullUrl($baseUri, $contextUri)
     {
         switch ($contextUri) {
             case 'http://iiif.io/api/image/2/context.json':
-                return $baseUri.'/full/full/0/default.jpg';
-                break;
+                return $baseUri . '/full/full/0/default.jpg';
             case 'http://iiif.io/api/image/3/context.json':
-                return $baseUri.'/full/max/0/default.jpg';
-                break;
+                return $baseUri . '/full/max/0/default.jpg';
             case 'http://library.stanford.edu/iiif/image-api/1.1/context.json':
-                return $baseUri.'/full/full/0/native.jpg';
-                break;
+                return $baseUri . '/full/full/0/native.jpg';
         }
     }
 
     /**
      * Helper to create a IIIF URL for the thumbnail
      *
-     * @param string $baseUri IIIF base URI of the image (URI up to the identifier, w/o trailing slash)
-     * @param string $contextUri Version of the API Image supported by the server, as stated by the JSON-LD context URI
-     * @param string $complianceLevel Compliance level to the API Image supported by the server
+     * @param string $baseUri IIIF base URI of the image (URI up to the
+     * identifier, w/o trailing slash)
+     * @param string $contextUri Version of the API Image supported by the
+     * server, as stated by the JSON-LD context URI
+     * @param string $complianceLevel Compliance level to the API Image
+     * supported by the server
      * @return string IIIF thumbnail URL
      */
     protected function _setIiifThumbnailUrl($baseUri, $contextUri, $complianceLevel)
     {
         // NOTE: this function does not support level0 implementations (need to use `sizes` from the info.json)
-        // TODO: handle square thumbnails, depending on server capabilities (see 'regionSquare' feature https://iiif.io/api/image/2.1/#profile-description): e.g. $baseUri.'/square/200,200/0/default.jpg';
+        // TODO handle square thumbnails, depending on server capabilities (see 'regionSquare' feature https://iiif.io/api/image/2.1/#profile-description): e.g. $baseUri . '/square/200,200/0/default.jpg';
 
         if ($complianceLevel != 'level0') {
             switch ($contextUri) {
                 case 'http://library.stanford.edu/iiif/image-api/1.1/context.json':
-                    return $baseUri.'/full/,200/0/native.jpg';
-                    break;
+                    return $baseUri . '/full/,200/0/native.jpg';
                 case 'http://iiif.io/api/image/2/context.json':
                 case 'http://iiif.io/api/image/3/context.json':
-                    return $baseUri.'/full/,200/0/default.jpg';
-                    break;
+                    return $baseUri . '/full/,200/0/default.jpg';
             }
         }
     }
 
     /**
-     * Helper to set the compliance level to the IIIF Image API, based on the compliance level URI
+     * Helper to set the compliance level to the IIIF Image API, based on the
+     * compliance level URI
      *
-     * @param array|string $profile Contents of the `profile` property from the info.json
+     * @param array|string $profile Contents of the `profile` property from the
+     * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
     protected function _setIiifComplianceLevel($profile)
     {
-        // in Image API 2.1, the profile property is a list, and the first entry is the compliance level URI
+        // in Image API 2.1, the profile property is a list, and the first entry
+        // is the compliance level URI
         if (is_array($profile)) {
             switch ($profile[0]) {
                 case 'http://iiif.io/api/image/2/level0.json':
                     return 'level0';
-                    break;
                 case 'http://iiif.io/api/image/2/level1.json':
                     return 'level1';
-                    break;
                 case 'http://iiif.io/api/image/2/level2.json':
                     return 'level2';
-                    break;
                 default:
                     return 'level2';
-                    break;
             }
         }
         // in Image API 1.1 and 3.0, the profile property is a string
@@ -1498,18 +1498,15 @@ class IiifManifest2 extends AbstractHelper
                 // check for Image API 1.1 profiles
                 case 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0':
                     return 'level0';
-                    break;
                 case 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level1':
                     return 'level1';
-                    break;
                 case 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level2':
                     return 'level2';
-                    break;
-                // in Image API 3.0, the profile property is a string with one of these values: level0, level1, or level2
-                // so just return the value...
+                // in Image API 3.0, the profile property is a string with one
+                // of these values: level0, level1, or level2 so just return the
+                // value…
                 default:
                     return $profile;
-                    break;
             }
         }
     }
@@ -1517,10 +1514,14 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Helper to create the IIIF Image API service block
      *
-     * @param string $baseUri IIIF base URI of the image (including the identifier slot)
-     * @param string $contextUri Version of the API Image supported by the server, as stated by the JSON-LD context URI
-     * @param string $complianceLevel Compliance level to the API Image supported by the server
-     * @return object $service IIIF Image API service block to be appended to the Manifest
+     * @param string $baseUri IIIF base URI of the image (including the
+     * identifier slot)
+     * @param string $contextUri Version of the API Image supported by the
+     * server, as stated by the JSON-LD context URI
+     * @param string $complianceLevel Compliance level to the API Image
+     * supported by the server
+     * @return object $service IIIF Image API service block to be appended to
+     * the Manifest
      */
     protected function _setIiifImageService($baseUri, $contextUri, $complianceLevelUri)
     {

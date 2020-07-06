@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**

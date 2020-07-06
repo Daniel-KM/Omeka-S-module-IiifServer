@@ -209,7 +209,7 @@ trait TraitLinking
         $values = $this->resource->value($property, ['all' => true, 'default' => []]);
         if ($values) {
             foreach ($values as $value) {
-                $id= $value->uri() ?: $value->value();
+                $id = $value->uri() ?: $value->value();
                 if (filter_var($id, FILTER_VALIDATE_URL)) {
                     if ($value->type() === 'uri') {
                         $format = $value->value() ?: 'Dataset';
