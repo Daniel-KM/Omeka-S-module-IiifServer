@@ -380,53 +380,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'id' => 'iiifserver-manifest-force-url-to',
                 ],
             ])
-
-            ->add([
-                'name' => 'iiifserver_external_image_server',
-                'type' => \Zend\Form\Fieldset::class,
-                'options' => [
-                    'label' => 'Third-party IIIF Image Server', // @translate
-                    'info' => 'Serve images using a third-party IIIF image server, instead of the internal one that comes with this module.', // @translate
-                ],
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_base_url',
-                'type' => Element\Url::class,
-                'options' => [
-                    'label' => 'Base URL of the IIIF Image Server', // @translate
-                    'info' => 'Indicate the root url of your image server (e.g. https://my-domain.org/iiif)',  // @translate
-                ],
-                'attributes' => [
-                    'placeholder' => 'e.g. https://example.org/iiif', // @translate
-                ],
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_api_version',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'IIIF Image API version', // @translate
-                    'info' => 'Indicate the version of the Image API supported by the server that you want to use',  // @translate
-                    'value_options' => [
-                        '2' => 'Version 2', // @translate
-                        '3' => 'Version 3', // @translate
-                    ],
-                ],
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_compliance_level',
-                'type' => Element\Radio::class,
-                'options' => [
-                    'label' => 'Compliance level of the server with the IIIF Image API', // @translate
-                    'info' => 'Specify which level of the Image API the server supports.',  // @translate
-                    'documentation' => 'https://iiif.io/api/image/3.0/#6-compliance-level-and-profile-document',
-                    'empty_option' => 'Select IIIF Image API compliance level…', // @translate
-                    'value_options' => [
-                        'level0' => 'Level 0', // @translate
-                        'level1' => 'Level 1', // @translate
-                        'level2' => 'Level 2', // @translate
-                    ],
-                ],
-            ])
         ;
 
         $addEvent = new Event('form.add_elements', $this);
@@ -500,18 +453,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_service_iiifsearch',
-                'required' => false,
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_base_url',
-                'required' => false,
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_compliance_level',
-                'required' => false,
-            ])
-            ->add([
-                'name' => 'iiifserver_image_server_api_version',
                 'required' => false,
             ])
         ;

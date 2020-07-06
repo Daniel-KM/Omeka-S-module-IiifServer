@@ -573,27 +573,6 @@ class IiifManifest2 extends AbstractHelper
     {
         $thumbnail = [];
 
-        // We use the third-party IIIF Image endpoint defined in the config.
-        if ($this->view->setting('iiifserver_image_server_base_url')) {
-            $extImageServerBaseUrl = $this->view->setting('iiifserver_image_server_base_url');
-            $imageBaseUrl = $this->_iiifImageBaseUrl($extImageServerBaseUrl, $media->filename());
-
-            // Use the Omeka `medium` size derivative as the thumbnail.
-            if ($media->hasThumbnails()) {
-                $thumbnail['@id'] = $media->thumbnailUrl('medium');
-            // Else use a IIIF url (/full/,200/0/default.jpg).
-            } else {
-                $thumbnail['@id'] = $this->_iiifThumbnailUrl($imageBaseUrl, $this->view->setting('iiifserver_image_server_api_version'), $this->view->setting('iiifserver_image_server_compliance_level'));
-            }
-
-            $thumbnailService = $this->_iiifImageResourceService($imageBaseUrl, $this->view->setting('iiifserver_image_server_api_version'), $this->view->setting('iiifserver_image_server_compliance_level'));
-
-            $thumbnail['service'] = $thumbnailService;
-            return (object) $thumbnail;
-        }
-
-        // We use the internal image server provided by this module.
-
         // Manage external IIIF image.
         if ($media->ingester() === 'iiif') {
             // The method "mediaData" contains data from the info.json file.
@@ -677,28 +656,6 @@ class IiifManifest2 extends AbstractHelper
 
         // There is only one image (parallel is not managed currently).
         $imageResource = [];
-
-        // We use the third-party IIIF Image endpoint defined in the config.
-        if ($this->view->setting('iiifserver_image_server_base_url')) {
-            $extImageServerBaseUrl = $this->view->setting('iiifserver_image_server_base_url');
-            $imageBaseUrl = $this->_iiifImageBaseUrl($extImageServerBaseUrl, $media->filename());
-
-            $imageResource['@id'] = $this->_iiifImageFullUrl($imageBaseUrl, $this->view->setting('iiifserver_image_server_api_version'));
-            $imageResource['@type'] = 'dctypes:Image';
-            $imageResource['format'] = $media->mediaType();
-            $imageResource['width'] = $width;
-            $imageResource['height'] = $height;
-
-            $imageResourceService = $this->_iiifImageResourceService($imageBaseUrl, $this->view->setting('iiifserver_image_server_api_version'), $this->view->setting('iiifserver_image_server_compliance_level'));
-            $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
-
-            $image['resource'] = $imageResource;
-            $image['on'] = $canvasUrl;
-            return (object) $image;
-        }
-
-        // We use the internal image server provided by this module.
 
         // If it is an external IIIF image.
         // Convert info.json saved in media into a presentation sequence part.
@@ -1286,20 +1243,6 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Helper to set the IIIF base url of the image on the server, used as the
-     * @id in the service blocks
-     *
-     * @param string $serverBaseUrl Base url of the IIIF image server, as set in
-     * the config form
-     * @param string $filename Image file name in the Omeka files/ directory
-     * @return string IIIF base url of the image
-     */
-    protected function _iiifImageBaseUrl($serverBaseUrl, $filename)
-    {
-        return rtrim(trim($serverBaseUrl), ' /') . $filename;
-    }
-
-    /**
      * Helper to create a IIIF URL for the thumbnail
      *
      * @param string $baseUri IIIF base URI of the image (URI up to the
@@ -1358,63 +1301,6 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Helper to set the URI of the IIIF Image API version (JSON-LD @context
-     * document)
-     *
-     * @param string $apiVersion Version of the API Image supported by the
-     * server, as set in the config form
-     * @return string URI of the @context document
-     */
-    protected function _apiContextUri($apiVersion)
-    {
-        $apiVersions = [
-            '1.1' => 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
-            '2' => 'http://iiif.io/api/image/2/context.json',
-            '3' => 'http://iiif.io/api/image/3/context.json',
-        ];
-        return isset($apiVersions[$apiVersion])
-            ? $apiVersions[$apiVersion]
-            : null;
-    }
-
-    /**
-     * Helper to set the compliance URI (used for the `profile` property) based
-     * on the compliance level of the image server, and depending on the version
-     * of the IIIF Image API
-     *
-     * @param string $apiVersion Version of the API Image supported by the
-     * server, as set in the config form
-     * @param string $level Compliance level of the server, as set in the config form
-     * @return string URI of the compliance level
-     */
-    protected function _complianceLevelUri($apiVersion, $level)
-    {
-        $levelsToCompliances = [
-            '1.0' => [
-                'level0' => 'http://library.stanford.edu/iiif/image-api/compliance.html',
-            ],
-            '1.1' => [
-                'level0' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
-                'level1' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level1',
-                'level2' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level2',
-            ],
-            '2' => [
-                'level0' => 'http://iiif.io/api/image/2/level0.json',
-                'level1' => 'http://iiif.io/api/image/2/level1.json',
-                'level2' => 'http://iiif.io/api/image/2/level2.json',
-            ],
-            '3' => [
-                'level0' => 'http://iiif.io/api/image/3/level0.json',
-                'level1' => 'http://iiif.io/api/image/3/level1.json',
-                'level2' => 'http://iiif.io/api/image/3/level2.json',
-            ],
-        ];
-        return isset($levelsToCompliances[$apiVersion][$level])
-            ? $levelsToCompliances[$apiVersion][$level]
-            : "http://iiif.io/api/image/$apiVersion/$level.json";
-    }
-
-    /**
      * Helper to set the compliance level to the IIIF Image API, based on the
      * compliance level URI
      *
@@ -1452,22 +1338,6 @@ class IiifManifest2 extends AbstractHelper
         return isset($profileToLlevels[$profile])
             ? $profileToLlevels[$profile]
             : 'level0';
-    }
-
-    /**
-     * Helper to create the IIIF Image API service block
-     *
-     * @param string $baseUrl IIIF base url of the image (including the
-     * identifier slot)
-     * @param string $apiVersion Version of the API Image supported by the
-     * server, as set in the config form
-     * @param string $level Compliance level of the server, as set in the config
-     * form
-     * @return object $service IIIF Image API service block
-     */
-    protected function _iiifImageResourceService($baseUrl, $apiVersion = '2', $level = 'level0')
-    {
-        return $this->_iiifImageService($baseUrl, $this->_apiContextUri($apiVersion), $this->_complianceLevelUri($apiVersion, $level));
     }
 
     /**

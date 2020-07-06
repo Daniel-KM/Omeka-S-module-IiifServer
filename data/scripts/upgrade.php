@@ -116,4 +116,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     }
 
     $settings->delete('iiifserver_manifest_service_iiifsearch');
+    $settings->delete('iiifserver_image_server_base_url');
+    $settings->delete('iiifserver_image_server_api_version');
+    $settings->delete('iiifserver_image_server_compliance_level');
 }
