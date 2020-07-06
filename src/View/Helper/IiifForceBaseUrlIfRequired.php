@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright 2015-2017  Daniel Berthereau
+ * Copyright 2015-2020 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/or
@@ -31,6 +31,9 @@ namespace IiifServer\View\Helper;
 
 use Zend\View\Helper\AbstractHelper;
 
+/**
+ * @deprecated Since version 3.6.0.
+ */
 class IiifForceBaseUrlIfRequired extends AbstractHelper
 {
     /**
@@ -50,6 +53,7 @@ class IiifForceBaseUrlIfRequired extends AbstractHelper
     /**
      * Force the base of absolute urls.
      *
+     * @deprecated Since version 3.6.0.
      * @param string $absoluteUrl
      * @return string
      */

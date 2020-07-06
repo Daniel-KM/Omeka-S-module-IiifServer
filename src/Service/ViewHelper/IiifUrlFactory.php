@@ -15,10 +15,11 @@ class IiifUrlFactory implements FactoryInterface
         return new IiifUrl(
             $helpers->get('url'),
             $helpers->get('iiifCleanIdentifiers'),
-            $helpers->get('iiifForceBaseUrlIfRequired'),
             $helpers->get('iiifImageUrl'),
             $settings->get('iiifserver_manifest_default_version', '2'),
-            $settings->get('cleanurl_identifier_prefix')
+            $settings->get('cleanurl_identifier_prefix'),
+            $settings->get('iiifserver_url_force_from'),
+            $settings->get('iiifserver_url_force_to')
         );
     }
 }

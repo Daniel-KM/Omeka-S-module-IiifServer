@@ -140,11 +140,6 @@ class CollectionList extends AbstractType
     protected $IiifCleanIdentifiers;
 
     /**
-     * @var \IiifServer\View\Helper\IiifForceBaseUrlIfRequired
-     */
-    protected $iiifForceBaseUrlIfRequired;
-
-    /**
      * @var \IiifServer\View\Helper\PublicResourceUrl
      */
     protected $publicResourceUrl;
@@ -163,7 +158,6 @@ class CollectionList extends AbstractType
         $this->setting = $viewHelpers->get('setting');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
-        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 

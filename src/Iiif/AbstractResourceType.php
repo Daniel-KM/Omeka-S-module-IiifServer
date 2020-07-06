@@ -147,11 +147,6 @@ abstract class AbstractResourceType extends AbstractType
     protected $iiifCleanIdentifiers;
 
     /**
-     * @var \IiifServer\View\Helper\IiifForceBaseUrlIfRequired
-     */
-    protected $iiifForceBaseUrlIfRequired;
-
-    /**
      * @var \IiifServer\View\Helper\IiifUrl
      */
     protected $iiifUrl;
@@ -174,7 +169,6 @@ abstract class AbstractResourceType extends AbstractType
         $this->setting = $viewHelpers->get('setting');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
-        $this->iiifForceBaseUrlIfRequired = $viewHelpers->get('iiifForceBaseUrlIfRequired');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }

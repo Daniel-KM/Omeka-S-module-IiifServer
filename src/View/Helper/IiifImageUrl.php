@@ -90,10 +90,10 @@ class IiifImageUrl extends AbstractHelper
             'prefix' => $this->prefix,
             'id' => $iiifCleanIdentifiersHelper($id),
         ];
+        $urlIiif = $urlHelper($route, $params, ['force_canonical' => true]);
 
-        $urlInfo = $urlHelper($route, $params, ['force_canonical' => true]);
-        return $this->forceFrom && (strpos($urlInfo, $this->forceFrom) === 0)
-            ? substr_replace($urlInfo, $this->forceTo, 0, strlen($this->forceFrom))
-            : $urlInfo;
+        return $this->forceFrom && (strpos($urlIiif, $this->forceFrom) === 0)
+            ? substr_replace($urlIiif, $this->forceTo, 0, strlen($this->forceFrom))
+            : $urlIiif;
     }
 }

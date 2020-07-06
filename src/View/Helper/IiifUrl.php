@@ -46,11 +46,6 @@ class IiifUrl extends AbstractHelper
     protected $iiifCleanIdentifiers;
 
     /**
-     * @var IiifForceBaseUrlIfRequired
-     */
-    protected $iiifForceBaseUrlIfRequired;
-
-    /**
      * @var IiifImageUrl
      */
     protected $iiifImageUrl;
@@ -66,27 +61,40 @@ class IiifUrl extends AbstractHelper
     protected $prefix;
 
     /**
+     * @var string
+     */
+    protected $forceFrom;
+
+    /**
+     * @var string
+     */
+    protected $forceTo;
+
+    /**
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
-     * @param IiifForceBaseUrlIfRequired $iiifForceBaseUrlIfRequired
      * @param IiifImageUrl $iifImageUrl
      * @param string $defaultVersion
      * @param string $prefix
+     * @param string $forceUrlFrom
+     * @param string $forceUrlTo
      */
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
-        IiifForceBaseUrlIfRequired $iiifForceBaseUrlIfRequired,
         IiifImageUrl $iifImageUrl,
         $defaultVersion,
-        $prefix
+        $prefix,
+        $forceUrlFrom,
+        $forceUrlTo
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
-        $this->iiifForceBaseUrlIfRequired = $iiifForceBaseUrlIfRequired;
         $this->iiifImageUrl = $iifImageUrl;
         $this->defaultVersion = $defaultVersion;
         $this->prefix = $prefix;
+        $this->forceUrlFrom = $forceUrlFrom;
+        $this->forceUrlTo = $forceUrlTo;
     }
 
     /**
@@ -105,18 +113,17 @@ class IiifUrl extends AbstractHelper
     {
         $urlHelper = $this->url;
         $iiifCleanIdentifiersHelper = $this->iiifCleanIdentifiers;
-        $iiifForceBaseUrlIfRequiredHelper = $this->iiifForceBaseUrlIfRequired;
 
         $apiVersion = $version ?: $this->defaultVersion;
 
         if (is_array($resource)) {
             $identifiers = $iiifCleanIdentifiersHelper($resource);
-            $urlManifest = $urlHelper(
+            $urlIiif = $urlHelper(
                 'iiifserver/set',
                 ['version' => $apiVersion, 'id' => implode(',', $identifiers)],
                 ['force_canonical' => true]
             );
-            return $iiifForceBaseUrlIfRequiredHelper($urlManifest);
+            return $this->forceToIfRequired($urlIiif);
         }
 
         if (is_numeric($resource)) {
@@ -156,6 +163,13 @@ class IiifUrl extends AbstractHelper
             ['force_canonical' => true]
         );
 
-        return $iiifForceBaseUrlIfRequiredHelper($urlIiif);
+        return $this->forceToIfRequired($urlIiif);
+    }
+
+    protected function forceToIfRequired($absoluteUrl)
+    {
+        return $this->forceFrom && (strpos($absoluteUrl, $this->forceFrom) === 0)
+            ? substr_replace($absoluteUrl, $this->forceTo, 0, strlen($this->forceFrom))
+            : $absoluteUrl;
     }
 }
