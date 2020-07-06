@@ -120,7 +120,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-rights-property',
+                    'id' => 'iiifserver_manifest_rights_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -137,13 +137,13 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
             ])
             ->add([
-                'name' => 'iiifserver_manifest_license_default',
+                'name' => 'iiifserver_manifest_rights_text',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Default license text (only for iiif 2.0)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver-manifest-license-default',
+                    'id' => 'iiifserver_manifest_rights_text',
                 ],
             ])
 

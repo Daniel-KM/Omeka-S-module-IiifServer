@@ -37,6 +37,8 @@ use Zend\View\Helper\AbstractHelper;
  */
 class IiifCollectionList2 extends AbstractHelper
 {
+    use \IiifServer\Iiif\TraitRights;
+
     /**
      * Get the IIIF Collection manifest for the specified list of resources.
      *
@@ -83,8 +85,11 @@ class IiifCollectionList2 extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        $license = $this->view->setting('iiifserver_manifest_license_default');
-        $manifest['license'] = $license;
+        $this->setting = $this->getView()->getHelperPluginManager()->get('setting');
+        $license = $this->rightsResource();
+        if ($license) {
+            $manifest['license'] = $license;
+        }
 
         $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
         $manifest['attribution'] = $attribution;
@@ -174,5 +179,13 @@ class IiifCollectionList2 extends AbstractHelper
         $manifest['@type'] = $mapTypes[$resourceName];
         $manifest['label'] = $resource->displayTitle();
         return $manifest;
+    }
+
+    /**
+     * Added in order to use trait TraitRights.
+     */
+    protected function getContext()
+    {
+        return 'http://iiif.io/api/presentation/2/context.json';
     }
 }

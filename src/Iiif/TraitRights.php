@@ -34,19 +34,29 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 trait TraitRights
 {
     /**
-     * List of allowed urls for rights.
+     * List of allowed urls for rights for api 3.
+     *
+     * Creative commons machine readable statements are http, but the https are
+     * provided too for compatibility with real data and human display.
+     * @link https://iiif.io/api/presentation/3.0/#31-descriptive-properties
      *
      * @var array
      */
     protected $rightUrls = [
+        'http://creativecommons.org/',
         'https://creativecommons.org/',
-        // For cross domain issues, allows https for right statements, but the
-        // right statement is http.
         'http://rightsstatements.org/',
         'https://rightsstatements.org/',
+        // Other uris are allowed only by iiif extensions.
     ];
 
     /**
+     * Get the license of the resource.
+     *
+     * Warning: the option for Iiif Server (manifest) and Image Server (info.json)
+     * are different, so they can be used independantly.
+     *
+     * @param AbstractResourceEntityRepresentation $resource
      * @return string|null
      */
     public function getRights()
@@ -55,36 +65,67 @@ trait TraitRights
         return $this->rightsResource($this->resource);
     }
 
-    protected function rightsResource(AbstractResourceEntityRepresentation $resource)
+    /**
+     * This method can be used without resource, in case of a list.
+     *
+     * @todo Add a way to manage image server settings.
+     * Note: in api 2, the value can be a list.
+     *
+     * @param AbstractResourceEntityRepresentation|null $resource
+     * @return string|null
+     */
+    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null)
     {
         $helper = $this->setting;
         $url = null;
         $orUrl = false;
+        $orText = false;
 
         $param = $helper('iiifserver_manifest_rights');
         switch ($param) {
-            case 'url':
             case 'text':
-                $url = $helper('iiifserver_info_rights_url');
+                if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
+                    return null;
+                }
+                $url = $helper('iiifserver_manifest_rights_text');
                 break;
-            case 'property_or_url':
+            case 'url':
+                $url = $helper('iiifserver_manifest_rights_url');
+                break;
             case 'property_or_text':
-                $orUrl = true;
+                $orText = !empty($helper('iiifserver_manifest_rights_text'));
+                // no break.
+            case 'property_or_url':
+                if ($param === 'property_or_url') {
+                    $orUrl = true;
+                }
                 // no break.
             case 'property':
-                $property = $helper('iiifserver_info_rights_property');
-                $url = (string) $resource->value($property);
+                if ($resource) {
+                    $property = $helper('iiifserver_manifest_rights_property');
+                    $url = (string) $resource->value($property);
+                }
                 break;
             case 'none':
             default:
                 return null;
         }
 
-        if (!$url && $orUrl) {
-            $url = $helper('iiifserver_info_rights_url');
+        // Text is not allowed for presentation 3.
+        $isPresentation3 = $this->getContext() === 'http://iiif.io/api/presentation/3/context.json';
+        $orText = $orText && !$isPresentation3;
+
+        if (!$url) {
+            if ($orUrl) {
+                $url = $helper('iiifserver_manifest_rights_url');
+            } elseif ($orText) {
+                $url = $helper('iiifserver_manifest_rights_text');
+            } else {
+                return null;
+            }
         }
 
-        if ($url) {
+        if ($isPresentation3 && $url) {
             foreach ($this->rightUrls as $rightUrl) {
                 if (strpos($url, $rightUrl) === 0) {
                     return $url;

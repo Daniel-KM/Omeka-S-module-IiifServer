@@ -39,6 +39,8 @@ use Zend\View\Helper\AbstractHelper;
  */
 class IiifCollection2 extends AbstractHelper
 {
+    use \IiifServer\Iiif\TraitRights;
+
     /**
      * Get the IIIF Collection manifest for the specified item set.
      *
@@ -57,6 +59,7 @@ class IiifCollection2 extends AbstractHelper
         $manifest = [
             '@context' => 'http://iiif.io/api/presentation/2/context.json',
             '@id' => '',
+
             '@type' => 'sc:Collection',
             'label' => '',
             'description' => '',
@@ -87,14 +90,11 @@ class IiifCollection2 extends AbstractHelper
         }
         $manifest['description'] = $description;
 
-        $licenseProperty = $this->view->setting('iiifserver_license_property');
-        if ($licenseProperty) {
-            $license = $itemSet->value($licenseProperty);
+        $this->setting = $this->view->getHelperPluginManager()->get('setting');
+        $license = $this->rightsResource($itemSet);
+        if ($license) {
+            $manifest['license'] = $license;
         }
-        if (empty($license)) {
-            $license = $this->view->setting('iiifserver_manifest_license_default');
-        }
-        $manifest['license'] = $license;
 
         $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
@@ -227,5 +227,13 @@ class IiifCollection2 extends AbstractHelper
             $metadata[] = (object) $valueMetadata;
         }
         return $metadata;
+    }
+
+    /**
+     * Added in order to use trait TraitRights.
+     */
+    protected function getContext()
+    {
+        return 'http://iiif.io/api/presentation/2/context.json';
     }
 }

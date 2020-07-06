@@ -359,7 +359,7 @@ return [
             'iiifserver_manifest_rights' => 'property_or_url',
             'iiifserver_manifest_rights_property' => 'dcterms:license',
             'iiifserver_manifest_rights_url' => 'http://rightsstatements.org/vocab/CNE/1.0/',
-            'iiifserver_manifest_license_default' => 'http://www.example.org/license.html',
+            'iiifserver_manifest_rights_text' => '',
             'iiifserver_manifest_homepage' => 'resource',
             'iiifserver_manifest_homepage_property' => '',
             'iiifserver_manifest_seealso_property' => '',

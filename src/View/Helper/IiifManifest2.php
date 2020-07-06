@@ -38,6 +38,8 @@ use Zend\View\Helper\AbstractHelper;
 
 class IiifManifest2 extends AbstractHelper
 {
+    use \IiifServer\Iiif\TraitRights;
+
     /**
      * @var int
      */
@@ -140,14 +142,11 @@ class IiifManifest2 extends AbstractHelper
         }
         $manifest['description'] = $description;
 
-        $licenseProperty = $this->view->setting('iiifserver_license_property');
-        if ($licenseProperty) {
-            $license = $item->value($licenseProperty);
+        $this->setting = $this->getView()->getHelperPluginManager()->get('setting');
+        $license = $this->rightsResource($item);
+        if ($license) {
+            $manifest['license'] = $license;
         }
-        if (empty($license)) {
-            $license = $this->view->setting('iiifserver_manifest_license_default');
-        }
-        $manifest['license'] = $license;
 
         $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
@@ -1342,5 +1341,13 @@ class IiifManifest2 extends AbstractHelper
         $service['@id'] = $baseUri;
         $service['profile'] = $complianceLevelUri;
         return (object) $service;
+    }
+
+    /**
+     * Added in order to use trait TraitRights.
+     */
+    protected function getContext()
+    {
+        return 'http://iiif.io/api/presentation/2/context.json';
     }
 }

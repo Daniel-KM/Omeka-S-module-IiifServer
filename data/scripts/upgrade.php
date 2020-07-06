@@ -91,7 +91,12 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
 
     $default = $settings->get('iiifserver_manifest_license_default');
     if ($default
-        && (strpos($default, 'https://creativecommons.org/') === 0 || strpos($default, 'https://rightsstatements.org/') === 0)
+        && (
+            strpos($default, 'https://creativecommons.org/') === 0
+            || strpos($default, 'https://rightsstatements.org/') === 0
+            || strpos($default, 'http://creativecommons.org/') === 0
+            || strpos($default, 'http://rightsstatements.org/') === 0
+        )
     ) {
         if ($property) {
             $settings->set('iiifserver_manifest_rights', 'property_or_url');
@@ -99,7 +104,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
             $settings->set('iiifserver_manifest_rights', 'url');
         }
         $settings->set('iiifserver_manifest_rights_url', $default);
-        $settings->set('iiifserver_manifest_license_default', '');
+        $settings->set('iiifserver_manifest_rights_text', '');
     } elseif ($default) {
         if ($property) {
             $settings->set('iiifserver_manifest_rights', 'property_or_text');
@@ -114,6 +119,11 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
         $settings->set('iiifserver_manifest_rights', 'none');
         $settings->set('iiifserver_manifest_rights_url', '');
     }
+
+    if (!$settings->set('iiifserver_manifest_rights_text')) {
+        $settings->set('iiifserver_manifest_rights_text', $settings->get('iiifserver_manifest_license_default', true));
+    }
+    $settings->delete('iiifserver_manifest_license_default');
 
     $settings->set('iiifserver_manifest_default_version', $settings->get('iiifserver_manifest_version', '2'));
     $settings->delete('iiifserver_manifest_default_version');
