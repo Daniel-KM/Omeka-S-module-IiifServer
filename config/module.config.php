@@ -124,7 +124,7 @@ return [
                     'uri' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/$prefix:id/:type[/:name][/:subname]",
+                            'route' => "[/:version]/$prefix:id/:type[/:name][/:subname]",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -154,7 +154,7 @@ return [
                     'collection-list' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/collection/$prefix:id",
+                            'route' => "[/:version]/collection/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -176,7 +176,7 @@ return [
                     'collection' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/collection/$prefix:id",
+                            'route' => "[/:version]/collection/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -192,7 +192,7 @@ return [
                     'collection-manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/collection/$prefix:id/manifest",
+                            'route' => "[/:version]/collection/$prefix:id/manifest",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -208,7 +208,7 @@ return [
                     'manifest-id' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/$prefix:id",
+                            'route' => "[/:version]/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -223,7 +223,7 @@ return [
                     'manifest' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/$prefix:id/manifest",
+                            'route' => "[/:version]/$prefix:id/manifest",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -240,7 +240,7 @@ return [
                     'canvas' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/v:version]/$prefix:id/canvas/:name",
+                            'route' => "[/:version]/$prefix:id/canvas/:name",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
@@ -258,7 +258,7 @@ return [
                     'set' => [
                         'type' => \Zend\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '[/v:version]/set[/:id]',
+                            'route' => '[/:version]/set[/:id]',
                             // Ids are in the query: "?id[]=1&id[]=2", but may be "?id=1,2"
                             // or in route: "/set/1,2".
                             'constraints' => [

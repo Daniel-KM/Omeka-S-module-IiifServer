@@ -27,7 +27,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Default IIIF api version of the manifest', // @translate
-                    'info' => 'Set the version of the manifest to provide. Note that the version is automatically selected when a request specifies it in headers, or via the specific url (iiif/v2/ or iiif/v3/).', // @translate
+                    'info' => 'Set the version of the manifest to provide. Note that the version is automatically selected when a request specifies it in headers, or via the specific url (iiif/2/ or iiif/3/).', // @translate
                     'value_options' => [
                         '2' => '2', // @translate
                         '3' => '3', // @translate
@@ -334,7 +334,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'label' => 'Append version to url (to be set inside module.config.php currently)', // @translate
-                    'info' => 'If set, the version will be appended to the url of the server: "iiif/v3".', // @translate
+                    'info' => 'If set, the version will be appended to the url of the server: "iiif/3".', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_url_version_add',
