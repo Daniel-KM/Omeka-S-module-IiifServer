@@ -120,7 +120,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
         $settings->set('iiifserver_manifest_rights_url', '');
     }
 
-    if (!$settings->set('iiifserver_manifest_rights_text')) {
+    if (!$settings->get('iiifserver_manifest_rights_text')) {
         $settings->set('iiifserver_manifest_rights_text', $settings->get('iiifserver_manifest_license_default', true));
     }
     $settings->delete('iiifserver_manifest_license_default');
