@@ -125,12 +125,15 @@ class ValueLanguage implements JsonSerializable
             $first = reset($this->values);
             if (gettype($first) === 'object' && $first instanceof ValueRepresentation) {
                 if ($this->allowHtml) {
-                    $publicResourceUrl = $first->getServiceLocator()->get('ViewHelperManager')->get('publicResourceUrl');
+                    $helpers = $first->getServiceLocator()->get('ViewHelperManager');
+                    $publicResourceUrl = $helpers->get('publicResourceUrl');
+                    $escape = $helpers->get('escapeHtml');
+                    $escapeAttr = $helpers->get('escapeHtmlAttr');
                     foreach ($this->values as $value) {
                         $lang = $value->lang() ?: 'none';
                         if (strpos($value->type(), 'resource') === 0 && $vr = $value->valueResource()) {
-                            $html = '<a class="resource-link" href="' . $publicResourceUrl($vr, true) . '">'
-                                . '<span class="resource-name">' . $vr->displayTitle() . '</span>'
+                            $html = '<a class="resource-link" href="' . $escapeAttr($publicResourceUrl($vr, true)) . '">'
+                                . '<span class="resource-name">' . $escape($vr->displayTitle()) . '</span>'
                                 . '</a>';
                         } else {
                             $html = $value->asHtml();

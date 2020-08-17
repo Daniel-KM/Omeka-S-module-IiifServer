@@ -131,7 +131,8 @@ class IiifManifest2 extends AbstractHelper
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
-        $label = $item->displayTitle('') ?: $manifest['@id'];
+        $plugins = $this->getView()->getHelperPluginManager();
+        $label = $plugins->get('escapeHtml')->__invoke($item->displayTitle('') ?: $manifest['@id']);
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -142,7 +143,7 @@ class IiifManifest2 extends AbstractHelper
         }
         $manifest['description'] = $description;
 
-        $this->setting = $this->getView()->getHelperPluginManager()->get('setting');
+        $this->setting = $plugins->get('setting');
         $license = $this->rightsResource($item);
         if ($license) {
             $manifest['license'] = $license;
