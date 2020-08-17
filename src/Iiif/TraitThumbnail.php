@@ -39,7 +39,7 @@ trait TraitThumbnail
     /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
-    protected $imageSizeHelper;
+    protected $imageSize;
 
     /**
      * @var \IiifServer\View\Helper\IiifImageUrl
@@ -50,19 +50,18 @@ trait TraitThumbnail
     {
         $services = $this->resource->getServiceLocator();
         $this->iiifImageUrl = $services->get('ViewHelperManager')->get('iiifImageUrl');
-        $this->imageSizeHelper = $services->get('ControllerPluginManager')->get('imageSize');
+        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
     }
 
     public function getThumbnail()
     {
         // TODO Factorize as a standard image.
-        $imageSize = $this->imageSizeHelper;
 
         /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
         $thumbnailAsset = $this->resource->thumbnail();
         if ($thumbnailAsset) {
             $imageUrl = $thumbnailAsset->assetUrl();
-            $size = $imageSize($thumbnailAsset);
+            $size = $this->imageSize->__invoke($thumbnailAsset);
             if ($size) {
                 $thumbnail = [
                     'id' => $imageUrl,
@@ -82,7 +81,7 @@ trait TraitThumbnail
 
         if ($primaryMedia->hasThumbnails()) {
             $imageUrl = $primaryMedia->thumbnailUrl('medium');
-            $size = $imageSize($primaryMedia, 'medium');
+            $size = $this->imageSize->__invoke($primaryMedia, 'medium');
             if ($size) {
                 $thumbnail = [
                     'id' => $imageUrl,

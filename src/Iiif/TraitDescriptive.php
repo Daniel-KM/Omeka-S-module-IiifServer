@@ -65,9 +65,7 @@ trait TraitDescriptive
             return [];
         }
 
-        $settingHelper = $this->setting;
-
-        $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
+        $whitelist = $this->setting->__invoke($map[$jsonLdType]['whitelist'], []);
         if ($whitelist === ['none']) {
             return [];
         }
@@ -76,7 +74,7 @@ trait TraitDescriptive
             ? array_intersect_key($this->resource->values(), array_flip($whitelist))
             : $this->resource->values();
 
-        $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+        $blacklist = $this->setting->__invoke($map[$jsonLdType]['blacklist'], []);
         if ($blacklist) {
             $values = array_diff_key($values, array_flip($blacklist));
         }
@@ -113,8 +111,7 @@ trait TraitDescriptive
      */
     public function getSummary()
     {
-        $helper = $this->setting;
-        $summaryProperty = $helper('iiifserver_manifest_description_property');
+        $summaryProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         $values = [];
         if ($summaryProperty) {
             $values = $this->resource->value($summaryProperty, ['all' => true, 'default' => []]);
@@ -127,16 +124,14 @@ trait TraitDescriptive
      */
     public function getRequiredStatement()
     {
-        $helper = $this->setting;
-
         $license = [];
-        $licenseProperty = $helper('iiifserver_manifest_attribution_property');
+        $licenseProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
         if ($licenseProperty) {
             $license = $this->resource->value($licenseProperty, ['all' => true, 'default' => []]);
         }
 
         if (empty($license)) {
-            $default = $helper('iiifserver_manifest_attribution_default');
+            $default = $this->setting->__invoke('iiifserver_manifest_attribution_default');
             if ($default) {
                 $license = ['none' => [$default]];
             } else {

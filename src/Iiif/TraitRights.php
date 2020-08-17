@@ -76,24 +76,23 @@ trait TraitRights
      */
     protected function rightsResource(AbstractResourceEntityRepresentation $resource = null)
     {
-        $helper = $this->setting;
         $url = null;
         $orUrl = false;
         $orText = false;
 
-        $param = $helper('iiifserver_manifest_rights');
+        $param = $this->setting->__invoke('iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
                 if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
                     return null;
                 }
-                $url = $helper('iiifserver_manifest_rights_text');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_text');
                 break;
             case 'url':
-                $url = $helper('iiifserver_manifest_rights_url');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_url');
                 break;
             case 'property_or_text':
-                $orText = !empty($helper('iiifserver_manifest_rights_text'));
+                $orText = !empty($this->setting->__invoke('iiifserver_manifest_rights_text'));
                 // no break.
             case 'property_or_url':
                 if ($param === 'property_or_url') {
@@ -102,7 +101,7 @@ trait TraitRights
                 // no break.
             case 'property':
                 if ($resource) {
-                    $property = $helper('iiifserver_manifest_rights_property');
+                    $property = $this->setting->__invoke('iiifserver_manifest_rights_property');
                     $url = (string) $resource->value($property);
                 }
                 break;
@@ -117,9 +116,9 @@ trait TraitRights
 
         if (!$url) {
             if ($orUrl) {
-                $url = $helper('iiifserver_manifest_rights_url');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_url');
             } elseif ($orText) {
-                $url = $helper('iiifserver_manifest_rights_text');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_text');
             } else {
                 return null;
             }

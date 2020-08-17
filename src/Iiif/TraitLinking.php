@@ -34,12 +34,12 @@ trait TraitLinking
     /**
      * @var \IiifServer\View\Helper\ImageSize
      */
-    protected $imageSizeHelper;
+    protected $imageSize;
 
     public function initLinking()
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        $this->imageSizeHelper = $viewHelpers->get('imageSize');
+        $this->imageSize = $viewHelpers->get('imageSize');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
     }
 
@@ -69,8 +69,7 @@ trait TraitLinking
                     $id = $site->siteUrl($site->slug(), true);
                     $label = new ValueLanguage([$language => [$site->title()]]);
                 } else {
-                    $helper = $this->urlHelper;
-                    $id = $helper('top', [], ['force_canonical' => true]);
+                    $id = $this->urlHelper->__invoke('top', [], ['force_canonical' => true]);
                     $label = new ValueLanguage([$language => [$setting('installation_title')]]);
                 }
                 $output[] = (object) [
@@ -176,9 +175,8 @@ trait TraitLinking
             'svg' => 'image/svg+xml',
         ];
 
-        $helper = $this->imageSizeHelper;
         try {
-            $size = $helper($url);
+            $size = $this->imageSize->__invoke($url);
         } catch (\Exception $e) {
             return null;
         }
@@ -233,13 +231,12 @@ trait TraitLinking
         }
 
         // Added the link to the json-ld representation.
-        $helper = $this->urlHelper;
         $output[] = (object) [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
             'label' => ['none' => 'application/ld+json'],
             'format' => 'application/ld+json',
-            'profile' => $helper('api-context', [], ['force_canonical' => true]),
+            'profile' => $this->urlHelper->__invoke('api-context', [], ['force_canonical' => true]),
         ];
 
         return $output->getArrayCopy();
@@ -252,8 +249,7 @@ trait TraitLinking
     {
         if (!array_key_exists('site', $this->_storage)) {
             $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');
-            $setting = $this->setting;
-            $defaultSiteId = $setting('default_site');
+            $defaultSiteId = $this->setting->__invoke('default_site');
             if ($defaultSiteId) {
                 try {
                     $this->_storage['site'] = $api->read('sites', ['id' => $defaultSiteId])->getContent();

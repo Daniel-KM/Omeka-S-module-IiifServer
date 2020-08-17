@@ -465,16 +465,14 @@ class IiifManifest2 extends AbstractHelper
         // TODO Manifest should be a true object, with many sub-objects.
         $resource = $item;
         $type = 'item';
-        $triggerHelper = $this->view->plugin('trigger');
         $params = compact('manifest', 'resource', 'type');
-        $params = $triggerHelper('iiifserver.manifest', $params, true);
+        $params = $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $manifest = $params['manifest'];
 
         // Remove all empty values (there is no "0" or "null" at first level).
         $manifest = array_filter($manifest);
 
-        $manifest = (object) $manifest;
-        return $manifest;
+        return (object) $manifest;
     }
 
     /**

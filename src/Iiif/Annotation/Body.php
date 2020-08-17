@@ -133,13 +133,10 @@ class Body extends AbstractResourceType
             // "the URL may be the complete URL to a particular size of the image
             // content", so the large one here, and it's always a jpeg.
             // It's not needed to use the full original size.
-            $helper = $this->imageSize;
-            $size = $helper($this->resource, 'large');
-            list($widthLarge, $heightLarge) = $size ? array_values($size) : [null, null];
-            $imageUrl = $this->iiifImageUrl;
-            return $imageUrl($this->resource, 'imageserver/media', $this->imageApiVersion, [
+            $sizeLarge = $this->imageSize->__invoke($this->resource, 'large');
+            return $this->iiifImageUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
-                'size' => $size ? $widthLarge . ',' . $heightLarge : 'max',
+                'size' => !empty($sizeLarge) ? $sizeLarge['width'] . ',' . $sizeLarge['height'] : 'max',
                 'rotation' => 0,
                 'quality' => 'default',
                 'format' => 'jpg',
@@ -191,24 +188,22 @@ class Body extends AbstractResourceType
 
         if ($this->contentResource->isImage()) {
             // TODO Use the json from the image server.
-            $helper = $this->iiifImageUrl;
 
             // The image server supports the two services.
             $imageResourceServices = [];
             $imageResourceServices[] = [
-                'id' => $helper($this->resource, 'imageserver/id', '2'),
+                'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', '2'),
                 'type' => 'ImageService2',
                 'profile' => 'level2',
             ];
             $imageResourceServices[] = [
-                'id' => $helper($this->resource, 'imageserver/id', '3'),
+                'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', '3'),
                 'type' => 'ImageService3',
                 'profile' => 'level2',
             ];
 
             if ($this->tileInfo) {
-                $helper = $this->tileInfo;
-                $tilingData = $helper($this->resource);
+                $tilingData = $this->tileInfo->__invoke($this->resource);
                 $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
                 if ($iiifTileInfo) {
                     $tiles = [];

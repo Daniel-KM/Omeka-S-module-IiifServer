@@ -87,10 +87,8 @@ class IiifManifest3 extends AbstractHelper
         $resource = $item;
         $format = 'manifest';
         $type = 'item';
-        $triggerHelper = $this->getView()->plugin('trigger');
         $params = compact('format', 'manifest', 'resource', 'type');
-        $params = $triggerHelper('iiifserver.manifest', $params, true);
-
+        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $manifest->isValid(true);
         return $manifest;
     }

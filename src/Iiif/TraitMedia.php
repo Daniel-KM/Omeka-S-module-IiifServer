@@ -34,12 +34,12 @@ trait TraitMedia
     /**
      * @var \IiifServer\View\Helper\MediaDimension
      */
-    protected $mediaDimensionHelper;
+    protected $mediaDimension;
 
     /**
      * @var \IiifServer\View\Helper\ImageSize
      */
-    protected $imageSizeHelper;
+    protected $imageSize;
 
     /**
      * @var \IiifServer\View\Helper\IiifImageUrl
@@ -99,9 +99,9 @@ trait TraitMedia
     protected function initMedia()
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        $this->mediaDimensionHelper = $viewHelpers->get('mediaDimension');
+        $this->mediaDimension = $viewHelpers->get('mediaDimension');
         // It's quicker to use image size helper for images.
-        $this->imageSizeHelper = $viewHelpers->get('imageSize');
+        $this->imageSize = $viewHelpers->get('imageSize');
     }
 
     public function isImage()
@@ -234,11 +234,9 @@ trait TraitMedia
             }
             // Manual check.
             if ($this->isAudioVideo()) {
-                $helper = $this->mediaDimensionHelper;
-                $this->_storage['media_dimension'] = $helper($media);
+                $this->_storage['media_dimension'] = $this->mediaDimension->__invoke($media);
             } elseif ($this->isImage()) {
-                $helper = $this->imageSizeHelper;
-                $this->_storage['media_dimension'] = $helper($media);
+                $this->_storage['media_dimension'] = $this->imageSize->__invoke($media);
                 if ($this->_storage['media_dimension']) {
                     $this->_storage['media_dimension']['duration'] = null;
                 }

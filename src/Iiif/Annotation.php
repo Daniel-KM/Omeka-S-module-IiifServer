@@ -93,8 +93,7 @@ class Annotation extends AbstractResourceType
 
     public function getId()
     {
-        $helper = $this->iiifUrl;
-        return $helper($this->resource->item(), 'iiifserver/uri', '3', [
+        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation',
             'name' => $this->resource->id(),
         ]);
@@ -112,8 +111,7 @@ class Annotation extends AbstractResourceType
 
     public function getTarget()
     {
-        $helper = $this->iiifUrl;
-        return $helper($this->resource->item(), 'iiifserver/uri', '3', [
+        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',
             'name' => $this->resource->id(),
         ]);

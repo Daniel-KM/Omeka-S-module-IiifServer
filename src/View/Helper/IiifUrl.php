@@ -111,14 +111,11 @@ class IiifUrl extends AbstractHelper
      */
     public function __invoke($resource, $route = '', $version = null, array $params = [])
     {
-        $urlHelper = $this->url;
-        $iiifCleanIdentifiersHelper = $this->iiifCleanIdentifiers;
-
         $apiVersion = $version ?: $this->defaultVersion;
 
         if (is_array($resource)) {
-            $identifiers = $iiifCleanIdentifiersHelper($resource);
-            $urlIiif = $urlHelper(
+            $identifiers = $this->iiifCleanIdentifiers->__invoke($resource);
+            $urlIiif = $this->url->__invoke(
                 'iiifserver/set',
                 ['version' => $apiVersion, 'id' => implode(',', $identifiers)],
                 ['force_canonical' => true]
@@ -142,8 +139,7 @@ class IiifUrl extends AbstractHelper
         }
 
         if ($resourceName === 'media') {
-            $helper = $this->iiifImageUrl;
-            return $helper($resource, 'imageserver/info', $version, $params);
+            return $this->iiifImageUrl->__invoke($resource, 'imageserver/info', $version, $params);
         }
 
         $mapRouteNames = [
@@ -154,10 +150,10 @@ class IiifUrl extends AbstractHelper
         $params += [
             'version' => $apiVersion,
             'prefix' => $this->prefix,
-            'id' => $iiifCleanIdentifiersHelper($id),
+            'id' => $this->iiifCleanIdentifiers->__invoke($id),
         ];
 
-        $urlIiif = $urlHelper(
+        $urlIiif = $this->url->__invoke(
             $route ?: $mapRouteNames[$resourceName],
             $params,
             ['force_canonical' => true]

@@ -168,8 +168,7 @@ class CollectionList extends AbstractType
 
     public function getId()
     {
-        $helper = $this->iiifUrl;
-        return $helper($this->resources, 'iiifserver/set', '3');
+        return $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
     }
 
     /**

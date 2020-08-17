@@ -109,8 +109,7 @@ class IiifCleanIdentifiers extends AbstractHelper
             };
         }
 
-        $helper = $this->getIdentifiersFromResources;
-        $result = $helper($in);
+        $result = $this->getIdentifiersFromResources->__invoke($in);
         if ($isSingle) {
             return $result ? $output(reset($result)) : reset($in);
         }

@@ -88,8 +88,7 @@ class AnnotationCollection extends AbstractResourceType
 
     public function getId()
     {
-        $helper = $this->iiifUrl;
-        return $helper($this->resource->item(), 'iiifserver/uri', '3', [
+        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-collection',
             'name' => $this->resource->id(),
         ]);
