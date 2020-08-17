@@ -129,7 +129,7 @@ class IiifManifest extends AbstractHelper
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
-        $label = $item->displayTitle('') ?: $this->view->iiifUrl($item);
+        $label = $this->view->escapeHtml($item->displayTitle('') ?: $this->view->iiifUrl($item));
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
