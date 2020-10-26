@@ -1,6 +1,9 @@
 IIIF Server (module for Omeka S)
 ================================
 
+> __New versions of this module and support for Omeka S version 3.0 and above
+> are available on [GitLab], which seems to respect users and privacy better.__
+
 [![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer)
 
 **IMPORTANT**: This readme is for the development version of IIIF Server. See
@@ -330,4 +333,5 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [Mines ParisTech]: http://mines-paristech.fr
 [regisrob]: https://github.com/regisrob
+[GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
