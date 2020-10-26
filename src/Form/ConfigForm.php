@@ -277,7 +277,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_behavior_default',
                 'type' => Element\MultiCheckbox::class,
                 'options' => [
-                    'label' => 'Default viewing hint', // @translate
+                    'label' => 'Default behavior (viewing hint)', // @translate
                     'info' => $this->translate('If any, and if there is no metadata for the property above, these values will be added in all manifests and canvases.') // @translate
                         . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
                     'value_options' => [
