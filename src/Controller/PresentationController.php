@@ -100,6 +100,14 @@ class PresentationController extends AbstractActionController
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
+        $internal = (bool) $this->params()->fromQuery('internal');
+        if (!$internal) {
+            $externalManifest = $this->viewHelpers()->get('iiifManifestExternal')->__invoke($resource);
+            if ($externalManifest) {
+                return $this->redirect()->toUrl($externalManifest);
+            }
+        }
+
         $version = $this->requestedVersion();
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
@@ -164,7 +172,7 @@ class PresentationController extends AbstractActionController
      * @param string $resourceType
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
      */
-    protected function fetchResource($resourceType)
+    protected function fetchResource($resourceType): ?\Omeka\Api\Representation\AbstractResourceEntityRepresentation
     {
         $id = $this->params('id');
 

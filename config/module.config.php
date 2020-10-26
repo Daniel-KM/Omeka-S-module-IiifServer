@@ -46,11 +46,12 @@ return [
             'iiifCollectionList' => View\Helper\IiifCollectionList::class,
             'iiifCollectionList2' => View\Helper\IiifCollectionList2::class,
             'iiifCollectionList3' => View\Helper\IiifCollectionList3::class,
-            'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifCanvas' => View\Helper\IiifCanvas::class,
             'iiifCanvas2' => View\Helper\IiifCanvas2::class,
             'iiifCanvas3' => View\Helper\IiifCanvas3::class,
             'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
+            'iiifManifest' => View\Helper\IiifManifest::class,
+            'iiifManifestExternal' => View\Helper\IiifManifestExternal::class,
         ],
         'factories' => [
             'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,
@@ -352,6 +353,7 @@ return [
     'iiifserver' => [
         'config' => [
             'iiifserver_manifest_default_version' => '2',
+            'iiifserver_manifest_external_property' => 'dcterms:hasFormat',
             // Content of the manifest.
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',

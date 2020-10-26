@@ -39,6 +39,23 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_external_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property supplying an external manifest', // @translate
+                    'info' => 'External or static manifests can be more customized and may be quicker to be loaded. Usually, the property is "dcterms:hasFormat" or "dcterms:isFormatOf".', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                    'use_hidden_element' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_external_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'fieldset_content',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
@@ -448,6 +465,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $inputFilter = $this->getInputFilter();
         $inputFilter
+            ->add([
+                'name' => 'iiifserver_manifest_external_property',
+                'required' => false,
+            ])
             ->add([
                 'name' => 'iiifserver_manifest_description_property',
                 'required' => false,
