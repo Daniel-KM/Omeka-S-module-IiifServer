@@ -31,8 +31,8 @@
 namespace IiifServer\Controller;
 
 use Omeka\Mvc\Exception\NotFoundException;
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\JsonModel;
+use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\View\Model\JsonModel;
 
 class PresentationController extends AbstractActionController
 {
@@ -59,7 +59,7 @@ class PresentationController extends AbstractActionController
     {
         $resource = $this->fetchResource('item_sets');
         if (!$resource) {
-            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -68,7 +68,7 @@ class PresentationController extends AbstractActionController
         try {
             $manifest = $iiifCollection($resource, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
 
         return $this->iiifJsonLd($manifest, $version);
@@ -78,7 +78,7 @@ class PresentationController extends AbstractActionController
     {
         $resources = $this->fetchResources();
         if (!count($resources)) {
-            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -87,7 +87,7 @@ class PresentationController extends AbstractActionController
         try {
             $manifest = $iiifCollectionList($resources, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
 
         return $this->iiifJsonLd($manifest, $version);
@@ -97,7 +97,7 @@ class PresentationController extends AbstractActionController
     {
         $resource = $this->fetchResource('items');
         if (!$resource) {
-            return $this->jsonError(new NotFoundException, \Zend\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -106,7 +106,7 @@ class PresentationController extends AbstractActionController
         try {
             $manifest = $iiifManifest($resource, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
 
         return $this->iiifJsonLd($manifest, $version);
@@ -127,7 +127,7 @@ class PresentationController extends AbstractActionController
             try {
                 $resource = $this->api()->read('media', $id)->getContent();
             } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_404);
+                return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
             }
             $version = '2';
             $name = $this->params('name');
@@ -140,7 +140,7 @@ class PresentationController extends AbstractActionController
         try {
             $manifest = $iiifCanvas($resource, $index, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
-            return $this->jsonError($e, \Zend\Http\Response::STATUS_CODE_400);
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
 
         return $this->iiifJsonLd($manifest, $version);
@@ -154,7 +154,7 @@ class PresentationController extends AbstractActionController
         }
         return $this->jsonError(new NotFoundException(
             sprintf('The type "%s" is currently only managed as uri, not url', $type), // @translate
-            \Zend\Http\Response::STATUS_CODE_501
+            \Laminas\Http\Response::STATUS_CODE_501
         ));
     }
 

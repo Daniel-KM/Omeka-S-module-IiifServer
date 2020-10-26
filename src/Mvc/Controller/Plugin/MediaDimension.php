@@ -8,7 +8,7 @@ use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
 use Omeka\Mvc\Exception\RuntimeException;
 use Omeka\Stdlib\Message;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class MediaDimension extends AbstractPlugin
 {

@@ -130,7 +130,7 @@ class CollectionList extends AbstractType
     protected $setting;
 
     /**
-     * @var \Zend\View\Helper\Url
+     * @var \Laminas\View\Helper\Url
      */
     protected $urlHelper;
 

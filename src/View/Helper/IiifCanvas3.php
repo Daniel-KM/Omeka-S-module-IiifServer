@@ -31,7 +31,7 @@ namespace IiifServer\View\Helper;
 
 use IiifServer\Iiif\Canvas;
 use Omeka\Api\Representation\MediaRepresentation;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class IiifCanvas3 extends AbstractHelper
 {

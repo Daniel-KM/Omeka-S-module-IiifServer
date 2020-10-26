@@ -3,7 +3,7 @@ namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\MediaDimension;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class MediaDimensionFactory implements FactoryInterface
 {

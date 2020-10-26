@@ -33,7 +33,7 @@ use IiifServer\Iiif\Manifest;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\File\TempFileFactory;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class IiifManifest3 extends AbstractHelper
 {

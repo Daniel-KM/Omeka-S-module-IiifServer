@@ -29,7 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * Helper to get a IIIF Collection manifest for a dynamic list.

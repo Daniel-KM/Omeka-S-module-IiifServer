@@ -29,7 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * @deprecated Since version 3.6.0.

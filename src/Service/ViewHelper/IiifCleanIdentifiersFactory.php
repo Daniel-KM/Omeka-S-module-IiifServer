@@ -3,7 +3,7 @@ namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifCleanIdentifiers;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class IiifCleanIdentifiersFactory implements FactoryInterface
 {

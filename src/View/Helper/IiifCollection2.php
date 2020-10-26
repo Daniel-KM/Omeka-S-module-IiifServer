@@ -32,7 +32,7 @@ namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemSetRepresentation;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * Helper to get a IIIF Collection manifest for an item set

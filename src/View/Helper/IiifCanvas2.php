@@ -32,7 +32,7 @@ namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class IiifCanvas2 extends AbstractHelper
 {

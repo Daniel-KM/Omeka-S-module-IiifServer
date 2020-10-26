@@ -30,8 +30,8 @@
 namespace IiifServer\View\Helper;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\View\Helper\AbstractHelper;
-use Zend\View\Helper\Url;
+use Laminas\View\Helper\AbstractHelper;
+use Laminas\View\Helper\Url;
 
 class IiifUrl extends AbstractHelper
 {

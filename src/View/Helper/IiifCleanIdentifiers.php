@@ -3,7 +3,7 @@ namespace IiifServer\View\Helper;
 
 use CleanUrl\View\Helper\GetIdentifiersFromResources;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * View helper to get the identifier from id and to url encode it.

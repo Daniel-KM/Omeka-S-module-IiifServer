@@ -108,7 +108,7 @@ return [
             // Content        {scheme}://{host}/{prefix}/{identifier}/res/{name}.{format}
 
             'iiifserver' => [
-                'type' => \Zend\Router\Http\Literal::class,
+                'type' => \Laminas\Router\Http\Literal::class,
                 'options' => [
                     'route' => '/iiif',
                     'defaults' => [
@@ -122,7 +122,7 @@ return [
                 'child_routes' => [
                     // A generic way to build url for all uri, even if they are not managed urls.
                     'uri' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/$prefix:id/:type[/:name][/:subname]",
                             'constraints' => [
@@ -152,7 +152,7 @@ return [
                     // most common case).
                     // This route should be set before the "iiifserver/collection".
                     'collection-list' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/collection/$prefix:id",
                             'constraints' => [
@@ -174,7 +174,7 @@ return [
                     // "{id}.json", etc. Here, an empty name is used, and a second route is added.
                     // Invert the names of the route to use the generic name for the manifest itself.
                     'collection' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/collection/$prefix:id",
                             'constraints' => [
@@ -190,7 +190,7 @@ return [
                         ],
                     ],
                     'collection-manifest' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/collection/$prefix:id/manifest",
                             'constraints' => [
@@ -206,7 +206,7 @@ return [
                     ],
                     // The redirection is not required for presentation, but a forward is possible.
                     'manifest-id' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/$prefix:id",
                             'constraints' => [
@@ -221,7 +221,7 @@ return [
                         ],
                     ],
                     'manifest' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/$prefix:id/manifest",
                             'constraints' => [
@@ -238,7 +238,7 @@ return [
                     // In 2.1, canvas id is media id and name is p + index.
                     // In 3.0, canvas id is item id and name is media id.
                     'canvas' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/$prefix:id/canvas/:name",
                             'constraints' => [
@@ -256,7 +256,7 @@ return [
                     // Special route for the dynamic collections, search or browse pages.
                     // This route is not standard.
                     'set' => [
-                        'type' => \Zend\Router\Http\Segment::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => '[/:version]/set[/:id]',
                             // Ids are in the query: "?id[]=1&id[]=2", but may be "?id=1,2"
@@ -278,7 +278,7 @@ return [
             /* @deprecated Will be removed in Omeka version 3.0. */
             // Keep some deprecated routes for compatibility with old modules UniversalViewer, Mirador and Diva.
             'iiifserver_presentation_collection_list' => [
-                'type' => \Zend\Router\Http\Segment::class,
+                'type' => \Laminas\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/collection/:id',
                     'constraints' => [
@@ -293,7 +293,7 @@ return [
                 ],
             ],
             'iiifserver_presentation_collection' => [
-                'type' => \Zend\Router\Http\Segment::class,
+                'type' => \Laminas\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/collection/:id',
                     'constraints' => [
@@ -308,7 +308,7 @@ return [
                 ],
             ],
             'iiifserver_presentation_item' => [
-                'type' => \Zend\Router\Http\Segment::class,
+                'type' => \Laminas\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/:id/manifest',
                     'constraints' => [
@@ -323,7 +323,7 @@ return [
                 ],
             ],
             'iiifserver_presentation_item_redirect' => [
-                'type' => \Zend\Router\Http\Segment::class,
+                'type' => \Laminas\Router\Http\Segment::class,
                 'options' => [
                     'route' => '/iiif/:id',
                     'constraints' => [

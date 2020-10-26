@@ -4,7 +4,7 @@ namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifManifest2;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class IiifManifest2Factory implements FactoryInterface
 {

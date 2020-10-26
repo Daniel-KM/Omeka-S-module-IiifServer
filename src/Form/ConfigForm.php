@@ -2,12 +2,12 @@
 namespace IiifServer\Form;
 
 use Omeka\Form\Element\PropertySelect;
-use Zend\EventManager\Event;
-use Zend\EventManager\EventManagerAwareTrait;
-use Zend\Form\Element;
-use Zend\Form\Form;
-use Zend\I18n\Translator\TranslatorAwareInterface;
-use Zend\I18n\Translator\TranslatorAwareTrait;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\EventManagerAwareTrait;
+use Laminas\Form\Element;
+use Laminas\Form\Form;
+use Laminas\I18n\Translator\TranslatorAwareInterface;
+use Laminas\I18n\Translator\TranslatorAwareTrait;
 
 class ConfigForm extends Form implements TranslatorAwareInterface
 {
@@ -40,7 +40,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
             ->add([
                 'name' => 'fieldset_content',
-                'type' => \Zend\Form\Fieldset::class,
+                'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
                     'label' => 'Content of the manifest', // @translate
                 ],
@@ -367,7 +367,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
             ->add([
                 'name' => 'fieldset_urls',
-                'type' => \Zend\Form\Fieldset::class,
+                'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
                     'label' => 'Advanced options for urls', // @translate
                 ],

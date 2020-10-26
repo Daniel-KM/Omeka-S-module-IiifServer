@@ -7,7 +7,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Entity\Asset;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class ImageSize extends AbstractPlugin
 {

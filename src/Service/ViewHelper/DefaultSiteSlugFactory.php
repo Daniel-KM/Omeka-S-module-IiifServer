@@ -3,7 +3,7 @@ namespace IiifServer\Service\ViewHelper;
 
 use Interop\Container\ContainerInterface;
 use IiifServer\View\Helper\DefaultSiteSlug;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Service factory to get the default site slug, or the first site slug.

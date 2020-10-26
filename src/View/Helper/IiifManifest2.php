@@ -34,7 +34,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class IiifManifest2 extends AbstractHelper
 {

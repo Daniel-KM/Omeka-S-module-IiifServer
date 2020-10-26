@@ -3,7 +3,7 @@ namespace IiifServer\Service\ViewHelper;
 
 use Interop\Container\ContainerInterface;
 use IiifServer\View\Helper\PublicResourceUrl;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**
  * Service factory for the PublicResourceUrlFactory view helper.

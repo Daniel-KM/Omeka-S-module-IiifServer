@@ -3,8 +3,8 @@ namespace IiifServer\View\Helper;
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension as MediaDimensionPlugin;
 use Omeka\Mvc\Exception\RuntimeException;
-use Zend\View\Exception;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Exception;
+use Laminas\View\Helper\AbstractHelper;
 
 class MediaDimension extends AbstractHelper
 {

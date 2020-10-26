@@ -8,7 +8,7 @@ if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class MediaDimensionFactory implements FactoryInterface
 {
