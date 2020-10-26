@@ -145,7 +145,7 @@ class ValueLanguage implements JsonSerializable
                         $lang = $value->lang() ?: 'none';
                         $this->output[$lang][] = $value->type() === 'uri'
                             ? $value->uri()
-                            : strip_tags($value);
+                            : strip_tags((string) $value);
                     }
                 }
             } else {

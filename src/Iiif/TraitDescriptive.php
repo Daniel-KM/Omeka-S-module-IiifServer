@@ -114,7 +114,7 @@ trait TraitDescriptive
         $summaryProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         $values = [];
         if ($summaryProperty) {
-            $values = $this->resource->value($summaryProperty, ['all' => true, 'default' => []]);
+            $values = $this->resource->value($summaryProperty, ['all' => true]);
         }
         return new ValueLanguage($values, true);
     }
@@ -127,7 +127,7 @@ trait TraitDescriptive
         $license = [];
         $licenseProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
         if ($licenseProperty) {
-            $license = $this->resource->value($licenseProperty, ['all' => true, 'default' => []]);
+            $license = $this->resource->value($licenseProperty, ['all' => true]);
         }
 
         if (empty($license)) {

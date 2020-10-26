@@ -193,12 +193,12 @@ abstract class AbstractResourceType extends AbstractType
     {
         $template = $this->resource->resourceTemplate();
         if ($template && $template->titleProperty()) {
-            $values = $this->resource->value($template->titleProperty()->term(), ['all' => true, 'default' => []]);
+            $values = $this->resource->value($template->titleProperty()->term(), ['all' => true]);
             if (empty($values)) {
-                $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+                $values = $this->resource->value('dcterms:title', ['all' => true]);
             }
         } else {
-            $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+            $values = $this->resource->value('dcterms:title', ['all' => true]);
         }
         return new ValueLanguage($values, false, '[Untitled]');
     }

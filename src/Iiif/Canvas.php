@@ -133,7 +133,7 @@ class Canvas extends AbstractResourceType
                 break;
             case 'property_or_source':
                 $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
-                $values = $this->resource->value($labelProperty, ['all' => true, 'default' => []]);
+                $values = $this->resource->value($labelProperty, ['all' => true]);
                 if (count($values)) {
                     break;
                 }
@@ -148,7 +148,7 @@ class Canvas extends AbstractResourceType
                 $template = $this->resource->resourceTemplate();
                 if ($template && $template->titleProperty()) {
                     $labelProperty = $template->titleProperty()->term();
-                    $values = $this->resource->value($labelProperty, ['all' => true, 'default' => []]);
+                    $values = $this->resource->value($labelProperty, ['all' => true]);
                 }
                 if (!$values) {
                     $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => $fallback]);

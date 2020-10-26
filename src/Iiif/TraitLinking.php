@@ -87,7 +87,7 @@ trait TraitLinking
             case 'property_and_resource':
                 $property = $setting('iiifserver_manifest_homepage_property');
                 /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
-                $values = $this->resource->value($property, ['all' => true, 'default' => []]);
+                $values = $this->resource->value($property, ['all' => true]);
                 if ($values) {
                     foreach ($values as $value) {
                         $val = $value->uri() ?: $value->value();
@@ -130,12 +130,12 @@ trait TraitLinking
                 // displayTitle() can't be used, because language is needed.
                 $template = $this->resource->resourceTemplate();
                 if ($template && $template->titleProperty()) {
-                    $values = $this->resource->value($template->titleProperty()->term(), ['all' => true, 'default' => []]);
+                    $values = $this->resource->value($template->titleProperty()->term(), ['all' => true]);
                     if (empty($values)) {
-                        $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+                        $values = $this->resource->value('dcterms:title', ['all' => true]);
                     }
                 } else {
-                    $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => []]);
+                    $values = $this->resource->value('dcterms:title', ['all' => true]);
                 }
                 $label = new ValueLanguage($values, false, 'Source');
                 $output[] = (object) [
@@ -208,7 +208,7 @@ trait TraitLinking
         $property = $setting('iiifserver_manifest_seealso_property');
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
-        $values = $this->resource->value($property, ['all' => true, 'default' => []]);
+        $values = $this->resource->value($property, ['all' => true]);
         foreach ($values as $value) {
             $id = $value->uri() ?: $value->value();
             if (filter_var($id, FILTER_VALIDATE_URL)) {

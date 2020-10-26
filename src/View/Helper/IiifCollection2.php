@@ -86,7 +86,7 @@ class IiifCollection2 extends AbstractHelper
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags($itemSet->value($descriptionProperty, ['type' => 'literal']));
+            $description = strip_tags($itemSet->value($descriptionProperty, ['type' => 'literal', 'default' => '']));
         }
         $manifest['description'] = $description;
 
@@ -98,7 +98,7 @@ class IiifCollection2 extends AbstractHelper
 
         $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal']));
+            $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal', 'default' => '']));
         }
         if (empty($attribution)) {
             $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
