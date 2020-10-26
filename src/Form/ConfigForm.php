@@ -217,6 +217,64 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_viewing_direction_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to use for Viewing Direction (only for iiif 2.0)', // @translate
+                    'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the viewingDirection.', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_viewing_direction_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+            
+            ->add([
+                'name' => 'iiifserver_manifest_viewing_direction_default',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Default viewingDirection (only for iiif 2.0)', // @translate
+                    'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
+                        . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_viewing_direction_default',
+                ],
+            ])
+            
+            ->add([
+                'name' => 'iiifserver_manifest_viewing_hint_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to use for Viewing Hint (only for iiif 2.0)', // @translate
+                    'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the viewingHint.', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_viewing_hint_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+            
+            ->add([
+                'name' => 'iiifserver_manifest_viewing_hint_default',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Default viewingHint (only for iiif 2.0)', // @translate
+                    'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
+                        . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_viewing_hint_default',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_canvas_label',
                 'type' => Element\Select::class,
                 'options' => [
@@ -499,6 +557,14 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_viewing_direction_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_viewing_hint_property',
                 'required' => false,
             ])
             ->add([

@@ -389,8 +389,26 @@ class IiifManifest2 extends AbstractHelper
             $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
             $sequence['@type'] = 'sc:Sequence';
             $sequence['label'] = 'Current Page Order';
-            $sequence['viewingDirection'] = 'left-to-right';
-            $sequence['viewingHint'] = $totalImages > 1 ? 'paged' : 'non-paged';
+
+            $viewingDirectionProperty = $this->view->setting('iiifserver_manifest_viewing_direction_property');
+            if ($viewingDirectionProperty) {
+                $viewingDirection = strip_tags($item->value($viewingDirectionProperty, ['type' => 'literal']));
+            }
+            if (empty($viewingDirection)) {
+                $viewingDirection = $this->view->setting('iiifserver_manifest_viewing_direction_default');
+            }
+
+            $sequence['viewingDirection'] = $viewingDirection;
+
+            $viewingHintProperty = $this->view->setting('iiifserver_manifest_viewing_hint_property');
+            if ($viewingHintProperty) {
+                $viewingHint = strip_tags($item->value($viewingHintProperty, ['type' => 'literal']));
+            }
+            if (empty($viewingHint)) {
+                $viewingHint = $this->view->setting('iiifserver_manifest_viewing_hint_default');
+            }
+
+            $sequence['viewingHint'] = $totalImages > 1 ? $viewingHint : 'non-paged';
             if ($rendering) {
                 $sequence['rendering'] = $rendering;
             }
