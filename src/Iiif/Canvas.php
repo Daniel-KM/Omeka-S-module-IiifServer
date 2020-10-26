@@ -36,6 +36,7 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Canvas extends AbstractResourceType
 {
+    use TraitBehavior;
     use TraitDescriptive;
 
     protected $type = 'Canvas';

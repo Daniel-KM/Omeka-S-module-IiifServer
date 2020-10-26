@@ -392,23 +392,27 @@ class IiifManifest2 extends AbstractHelper
 
             $viewingDirectionProperty = $this->view->setting('iiifserver_manifest_viewing_direction_property');
             if ($viewingDirectionProperty) {
-                $viewingDirection = strip_tags($item->value($viewingDirectionProperty, ['type' => 'literal']));
+                $viewingDirection = strip_tags((string) $item->value($viewingDirectionProperty));
             }
             if (empty($viewingDirection)) {
                 $viewingDirection = $this->view->setting('iiifserver_manifest_viewing_direction_default');
             }
+            if (in_array($viewingDirection, ['left-to-right', 'right-to-left', 'top-to-bottom', 'bottom-to-top'])) {
+                $sequence['viewingDirection'] = $viewingDirection;
+            }
 
-            $sequence['viewingDirection'] = $viewingDirection;
-
-            $viewingHintProperty = $this->view->setting('iiifserver_manifest_viewing_hint_property');
+            $viewingHintProperty = $this->view->setting('iiifserver_manifest_behavior_property');
             if ($viewingHintProperty) {
-                $viewingHint = strip_tags($item->value($viewingHintProperty, ['type' => 'literal']));
+                $viewingHint = strip_tags((string) $item->value($viewingHintProperty));
             }
             if (empty($viewingHint)) {
-                $viewingHint = $this->view->setting('iiifserver_manifest_viewing_hint_default');
+                $viewingHint = $this->view->setting('iiifserver_manifest_behavior_default', []);
+                $viewingHint = in_array('none', $viewingHint) ? 'none' : reset($viewingHint);
+            }
+            if ($viewingHint !== 'none') {
+                $sequence['viewingHint'] = $totalImages > 1 ? $viewingHint : 'non-paged';
             }
 
-            $sequence['viewingHint'] = $totalImages > 1 ? $viewingHint : 'non-paged';
             if ($rendering) {
                 $sequence['rendering'] = $rendering;
             }

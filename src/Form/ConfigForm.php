@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\Form;
 
 use Laminas\EventManager\Event;
@@ -72,6 +73,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                         . ' ' . $this->translate('It’s recommended to use "Dublin Core:Bibliographic Citation".'), // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
+                    'use_hidden_element' => true,
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_description_property',
@@ -88,6 +90,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
+                    'use_hidden_element' => true,
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_attribution_property',
@@ -122,6 +125,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                         'property_or_text' => 'Property if any, else specified license text (only for iiif 2.0)', // @translate
                         'property_or_url' => 'Property if any, else specified license', // @translate
                     ],
+                    'use_hidden_element' => true,
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_rights',
@@ -141,6 +145,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
+                'use_hidden_element' => true,
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_url',
@@ -220,8 +225,8 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'name' => 'iiifserver_manifest_viewing_direction_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for Viewing Direction (only for iiif 2.0)', // @translate
-                    'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the viewingDirection.', // @translate
+                    'label' => 'Property to use for viewing direction', // @translate
+                    'info' => 'If any, the first value will be added to indicate the viewing direction of the manifest.', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
@@ -231,46 +236,74 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
             ])
-            
+
             ->add([
                 'name' => 'iiifserver_manifest_viewing_direction_default',
-                'type' => Element\Text::class,
+                'type' => Element\Radio::class,
                 'options' => [
-                    'label' => 'Default viewingDirection (only for iiif 2.0)', // @translate
-                    'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
+                    'label' => 'Default viewing direction', // @translate
+                    'info' => $this->translate('If any, and if there is no metadata for the property above, this value will be added in all manifests.') // @translate
                         . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                    'value_options' => [
+                        'none' => 'None', // @translate
+                        'left-to-right' => 'Left to right', // @translate
+                        'right-to-left' => 'Right to left', // @translate
+                        'top-to-bottom' => 'Top to bottom', // @translate
+                        'bottom-to-top' => 'Bottom to top', // @translate
+                    ],
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_viewing_direction_default',
                 ],
             ])
-            
+
             ->add([
-                'name' => 'iiifserver_manifest_viewing_hint_property',
+                'name' => 'iiifserver_manifest_behavior_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for Viewing Hint (only for iiif 2.0)', // @translate
-                    'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the viewingHint.', // @translate
+                    'label' => 'Property to use for behavior (viewing hint)', // @translate
+                    'info' => 'If any, the first value will be added to indicate the viewing hint of the manifest and the canvas.', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_viewing_hint_property',
+                    'id' => 'iiifserver_manifest_behavior_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
             ])
-            
+
             ->add([
-                'name' => 'iiifserver_manifest_viewing_hint_default',
-                'type' => Element\Text::class,
+                'name' => 'iiifserver_manifest_behavior_default',
+                'type' => Element\MultiCheckbox::class,
                 'options' => [
-                    'label' => 'Default viewingHint (only for iiif 2.0)', // @translate
-                    'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
+                    'label' => 'Default viewing hint', // @translate
+                    'info' => $this->translate('If any, and if there is no metadata for the property above, these values will be added in all manifests and canvases.') // @translate
                         . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                    'value_options' => [
+                        // Commented values are not allowed for manifest, neither canvas.
+                        // @link https://iiif.io/api/presentation/3.0/#a-summary-of-property-requirements
+                        'none' => 'None', // @translate
+                        'auto-advance' => 'Auto-advance', // @translate
+                        'continuous' => 'Continuous', // @translate
+                        'facing-pages' => 'Facing pages', // @translate
+                        'individuals' => 'Individuals', // @translate
+                        // 'multi-part' => 'Multi-part', // @translate
+                        'no-auto-advance' => 'No auto-advance', // @translate
+                        // 'no-nav' => 'No nav', // @translate
+                        'no-repeat' => 'No repeat', // @translate
+                        'non-paged' => 'Non-paged', // @translate
+                        // 'hidden' => 'Hidden', // @translate
+                        'paged' => 'Paged', // @translate
+                        'repeat' => 'Repeat', // @translate
+                        // 'sequence' => 'Sequence', // @translate
+                        // 'thumbnail-nav' => 'Thumbnail nav', // @translate
+                        // 'together' => 'Together', // @translate
+                        'unordered' => 'Unordered', // @translate
+                    ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_viewing_hint_default',
+                    'id' => 'iiifserver_manifest_behavior_default',
                 ],
             ])
 
@@ -564,7 +597,15 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_viewing_hint_property',
+                'name' => 'iiifserver_manifest_viewing_direction_default',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_behavior_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_behavior_default',
                 'required' => false,
             ])
             ->add([

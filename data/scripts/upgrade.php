@@ -158,4 +158,9 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->delete('iiifserver_image_server_base_url');
     $settings->delete('iiifserver_image_server_api_version');
     $settings->delete('iiifserver_image_server_compliance_level');
+
+    $settings->set('iiifserver_manifest_behavior_property', $settings->get('iiifserver_manifest_viewing_hint_property', ''));
+    $settings->delete('iiifserver_manifest_viewing_hint_property');
+    $settings->set('iiifserver_manifest_behavior_default', [$settings->get('iiifserver_manifest_viewing_hint_default', 'none')]);
+    $settings->delete('iiifserver_manifest_viewing_hint_default');
 }

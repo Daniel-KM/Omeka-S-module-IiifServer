@@ -37,9 +37,11 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Manifest extends AbstractResourceType
 {
+    use TraitBehavior;
     use TraitDescriptive;
     use TraitLinking;
     use TraitThumbnail;
+    use TraitViewing;
 
     protected $type = 'Manifest';
 
