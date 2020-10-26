@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -46,7 +46,7 @@ trait TraitThumbnail
      */
     protected $iiifImageUrl;
 
-    protected function initThumbnail()
+    protected function initThumbnail(): void
     {
         $services = $this->resource->getServiceLocator();
         $this->iiifImageUrl = $services->get('ViewHelperManager')->get('iiifImageUrl');

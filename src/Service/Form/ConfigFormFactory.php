@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Service\Form;
 
 use IiifServer\Form\ConfigForm;

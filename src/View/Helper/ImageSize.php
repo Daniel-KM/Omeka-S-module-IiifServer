@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\View\Helper;
 
 // Plugin ImageSize may be overridden by module ImageServer or another one.
 // use IiifServer\Mvc\Controller\Plugin\ImageSize as ImageSizePlugin;
-use Omeka\Mvc\Exception\RuntimeException;
 use Laminas\View\Exception;
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Mvc\Exception\RuntimeException;
 
 class ImageSize extends AbstractHelper
 {

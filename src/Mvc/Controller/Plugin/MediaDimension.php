@@ -1,14 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Mvc\Controller\Plugin;
 
 use JamesHeinrich\GetID3\GetId3;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Adapter\MediaAdapter;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
 use Omeka\Mvc\Exception\RuntimeException;
-use Omeka\Stdlib\Message;
-use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class MediaDimension extends AbstractPlugin
 {

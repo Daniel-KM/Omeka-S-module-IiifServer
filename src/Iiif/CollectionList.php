@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -150,7 +150,7 @@ class CollectionList extends AbstractType
         $this->options = $options;
     }
 
-    public function setServiceLocator($services)
+    public function setServiceLocator($services): void
     {
         $this->serviceLocator = $services;
         $viewHelpers = $services->get('ViewHelperManager');

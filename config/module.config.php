@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * @var string $defaultVersion
  * @var bool $versionAppend

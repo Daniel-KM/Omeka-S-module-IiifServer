@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Service\ControllerPlugin;
 
 // The autoload doesn’t work with GetId3.
 if (!class_exists(\JamesHeinrich\GetID3\GetId3::class)) {
-    require_once dirname(dirname(dirname(__DIR__))) . '/vendor/james-heinrich/getid3/src/GetID3.php';
+    require_once dirname(__DIR__, 3) . '/vendor/james-heinrich/getid3/src/GetID3.php';
 }
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension;

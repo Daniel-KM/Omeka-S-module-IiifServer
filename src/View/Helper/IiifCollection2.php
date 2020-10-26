@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2015-2017 Daniel Berthereau
@@ -30,9 +30,9 @@
 
 namespace IiifServer\View\Helper;
 
+use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemSetRepresentation;
-use Laminas\View\Helper\AbstractHelper;
 
 /**
  * Helper to get a IIIF Collection manifest for an item set

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -36,7 +36,7 @@ trait TraitLinking
      */
     protected $imageSize;
 
-    public function initLinking()
+    public function initLinking(): void
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->imageSize = $viewHelpers->get('imageSize');

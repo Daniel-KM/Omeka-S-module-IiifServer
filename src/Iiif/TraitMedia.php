@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -96,7 +96,7 @@ trait TraitMedia
         'xml' => 'text/xml',
     ];
 
-    protected function initMedia()
+    protected function initMedia(): void
     {
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->mediaDimension = $viewHelpers->get('mediaDimension');

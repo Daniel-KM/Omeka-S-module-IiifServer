@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Service\ViewHelper;
 
-use Interop\Container\ContainerInterface;
 use IiifServer\View\Helper\PublicResourceUrl;
+use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**

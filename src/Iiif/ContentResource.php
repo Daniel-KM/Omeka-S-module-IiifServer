@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -148,7 +148,7 @@ class ContentResource extends AbstractResourceType
         return new ValueLanguage(['none' => $label]);
     }
 
-    protected function prepareMediaId()
+    protected function prepareMediaId(): void
     {
         // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
         $ingester = $this->resource->ingester();

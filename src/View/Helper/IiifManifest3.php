@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright 2020 Daniel Berthereau
@@ -30,10 +30,10 @@
 namespace IiifServer\View\Helper;
 
 use IiifServer\Iiif\Manifest;
+use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\File\TempFileFactory;
-use Laminas\View\Helper\AbstractHelper;
 
 class IiifManifest3 extends AbstractHelper
 {

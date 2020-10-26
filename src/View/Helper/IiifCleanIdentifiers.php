@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\View\Helper;
 
 use CleanUrl\View\Helper\GetIdentifiersFromResources;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * View helper to get the identifier from id and to url encode it.

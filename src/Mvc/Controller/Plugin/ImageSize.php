@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Adapter\Manager as AdapterManager;
 use Omeka\Api\Representation\AssetRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Entity\Asset;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
-use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class ImageSize extends AbstractPlugin
 {

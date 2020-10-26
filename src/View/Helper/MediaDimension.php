@@ -1,10 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\View\Helper;
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension as MediaDimensionPlugin;
-use Omeka\Mvc\Exception\RuntimeException;
 use Laminas\View\Exception;
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Mvc\Exception\RuntimeException;
 
 class MediaDimension extends AbstractHelper
 {

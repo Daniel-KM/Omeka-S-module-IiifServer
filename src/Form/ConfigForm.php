@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 namespace IiifServer\Form;
 
-use Omeka\Form\Element\PropertySelect;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 use Laminas\I18n\Translator\TranslatorAwareInterface;
 use Laminas\I18n\Translator\TranslatorAwareTrait;
+use Omeka\Form\Element\PropertySelect;
 
 class ConfigForm extends Form implements TranslatorAwareInterface
 {
@@ -19,7 +19,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
      */
     protected $hasCleanUrl;
 
-    public function init()
+    public function init(): void
     {
         $this
             ->add([
