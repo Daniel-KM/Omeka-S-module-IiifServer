@@ -227,11 +227,12 @@ seconds that the browser loads all files and prepares them to be displayed.
 TODO / Bugs
 -----------
 
-- Implements ArrayObject to all classes to simplify events.
-- When a item set contains non image items, the left panel with the index is
+- [ ] Implements ArrayObject to all classes to simplify events.
+- [ ] When a item set contains non image items, the left panel with the index is
   displayed only when the first item contains an image (UV).
-- Use the option "no storage" for url of a media for external server.
-- Job to update data of [IIIF Image].
+- [ ] Use the option "no storage" for url of a media for external server.
+- [ ] Job to update data of [IIIF Image].
+- [ ] Use only arrays, not standard objects.
 
 See module [Image Server].
 
