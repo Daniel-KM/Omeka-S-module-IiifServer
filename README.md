@@ -248,13 +248,13 @@ your archives regularly so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on the [module issues] page on GitHub.
+See online issues on the [module issues] page on GitLab.
 
 
 License
 -------
 
-This module is published under the [CeCILL v2.1] licence, compatible with
+This module is published under the [CeCILL v2.1] license, compatible with
 [GNU/GPL] and approved by [FSF] and [OSI].
 
 In consideration of access to the source code and the rights to copy, modify and
@@ -286,46 +286,46 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mines ParisTech].
 
 
-[IIIF Server]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer
-[stable version here]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/tree/3.5.16
+[IIIF Server]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer
+[stable version here]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/tree/3.5.16
 [Omeka S]: https://omeka.org/s
-[Image Server]: https://github.com/Daniel-KM/Omeka-S-module-ImageServer
+[Image Server]: https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer
 [International Image Interoperability Framework]: http://iiif.io
 [IIIF specifications]: http://iiif.io/api/
 [IIP Image]: http://iipimage.sourceforge.net
 [OpenSeadragon]: https://openseadragon.github.io
-[Universal Viewer plugin for Omeka]: https://github.com/Daniel-KM/Omeka-plugin-UniversalViewer
+[Universal Viewer plugin for Omeka]: https://gitlab.com/Daniel-KM/Omeka-plugin-UniversalViewer
 [BibLibre]: https://github.com/biblibre
-[OpenLayers Zoom]: https://github.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
-[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
-[Mirador]: https://github.com/Daniel-KM/Omeka-S-module-Mirador
-[Diva]: https://github.com/Daniel-KM/Omeka-S-module-Diva
+[OpenLayers Zoom]: https://gitlab.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
+[Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
+[Diva]: https://gitlab.com/Daniel-KM/Omeka-S-module-Diva
 [Omeka Classic]: https://omeka.org
 [Iiif Search]: https://github.com/bubdxm/Omeka-S-module-IiifSearch
 [`GD`]: https://secure.php.net/manual/en/book.image.php
 [`Imagick`]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
-[`IiifServer.zip`]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases
+[`IiifServer.zip`]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
 [it doesn't allow the url encoded `/`]: https://stackoverflow.com/questions/13834007/url-with-encoded-slashes-goes-to-404/13839424#13839424
 [url encoded slashes]: https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
-[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Ark]: https://github.com/BibLibre/omeka-s-module-Ark
 [Clean Url]: https://github.com/BibLibre/omeka-s-module-CleanUrl
-[Collection Tree]: https://github.com/Daniel-KM/Omeka-S-module-CollectionTree
+[Collection Tree]: https://gitlab.com/Daniel-KM/Omeka-S-module-CollectionTree
 [Deep Zoom]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Deep Zoom Image]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Zoomify]: http://www.zoomify.com/
 [OpenLayers]: https://openlayers.org/
 [threejs]: https://threejs.org
-[Archive Repertory]: https://github.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
-[Deepzoom library]: https://github.com/Daniel-KM/LibraryDeepzoom
-[Zoomify library]: https://github.com/Daniel-KM/LibraryZoomify
+[Archive Repertory]: https://gitlab.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
+[Deepzoom library]: https://gitlab.com/Daniel-KM/LibraryDeepzoom
+[Zoomify library]: https://gitlab.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
-[#6]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/6
+[#6]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues/6
 [IIIF Image]: https://omeka.org/s/docs/user-manual/content/items/#media
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
@@ -334,4 +334,4 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mines ParisTech]: http://mines-paristech.fr
 [regisrob]: https://github.com/regisrob
 [GitLab]: https://gitlab.com/Daniel-KM
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
