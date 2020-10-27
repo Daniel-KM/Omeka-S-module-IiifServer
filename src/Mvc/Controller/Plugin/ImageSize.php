@@ -84,7 +84,7 @@ class ImageSize extends AbstractPlugin
     protected function sizeMedia(MediaRepresentation $media, $imageType = 'original')
     {
         // Check if this is an image.
-        if (strtok($media->mediaType(), '/') !== 'image') {
+        if (strtok((string) $media->mediaType(), '/') !== 'image') {
             return ['width' => null, 'height' => null];
         }
 

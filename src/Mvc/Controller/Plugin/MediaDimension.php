@@ -75,7 +75,7 @@ class MediaDimension extends AbstractPlugin
     protected function dimensionMedia(MediaRepresentation $media)
     {
         // Check if this is a media (image, video, audio).
-        if (!in_array(strtok($media->mediaType(), '/'), ['image', 'video', 'audio'])) {
+        if (!in_array(strtok((string) $media->mediaType(), '/'), ['image', 'video', 'audio'])) {
             return ['width' => null, 'height' => null, 'duration' => null];
         }
 
