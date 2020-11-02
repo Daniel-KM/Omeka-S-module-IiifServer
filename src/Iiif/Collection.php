@@ -126,7 +126,8 @@ class Collection extends AbstractResourceType
     public function getId()
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
-        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/collection', '3');
+        /** @see \Omeka\Api\Representation\ItemSetRepresentation */
+        return $this->iiifUrl->__invoke($this->resource, 'iiifserver/collection', '3');
     }
 
     public function getItems()
