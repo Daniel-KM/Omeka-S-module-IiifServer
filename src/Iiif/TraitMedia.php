@@ -187,12 +187,11 @@ trait TraitMedia
      */
     protected function isMediaIiif()
     {
-        static $isMediaIiif;
-        if (is_null($isMediaIiif)) {
+        if (is_null($this->isMediaIiif)) {
             $media = $this->resource->primaryMedia();
-            $isMediaIiif = $media && $media->ingester() === 'iiif';
+            $this->isMediaIiif = $media && $media->ingester() === 'iiif';
         }
-        return $isMediaIiif;
+        return $this->isMediaIiif;
     }
 
     protected function mediaSize()
