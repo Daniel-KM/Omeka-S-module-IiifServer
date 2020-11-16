@@ -126,7 +126,7 @@ class IiifManifest2 extends AbstractHelper
             'type' => 'annotation-page',
             'name' => '',
         ]);
-        $this->_baseUrl = mb_substr($this->_baseUrl, 0, mb_strpos($this->_baseUrl, '/annotation-page'));
+        $this->_baseUrl = mb_substr($this->_baseUrl, 0, (int) mb_strpos($this->_baseUrl, '/annotation-page'));
 
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;

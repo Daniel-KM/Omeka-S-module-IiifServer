@@ -48,7 +48,7 @@ class IiifCanvas2 extends AbstractHelper
      *
      * @param MediaRepresentation $resource
      * @param int $index Used to set the standard name of the image.
-     * @return Object|null
+     * @return object|null
      */
     public function __invoke(MediaRepresentation $resource, $index)
     {
@@ -59,7 +59,7 @@ class IiifCanvas2 extends AbstractHelper
             'type' => 'annotation-page',
             'name' => '',
         ]);
-        $this->_baseUrl = mb_substr($this->_baseUrl, 0, mb_strpos($this->_baseUrl, '/annotation-page'));
+        $this->_baseUrl = mb_substr($this->_baseUrl, 0, (int) mb_strpos($this->_baseUrl, '/annotation-page'));
 
         $canvas = [];
 

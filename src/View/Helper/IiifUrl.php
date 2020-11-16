@@ -109,7 +109,7 @@ class IiifUrl extends AbstractHelper
      * @param array $params
      * @return string
      */
-    public function __invoke($resource, $route = '', $version = null, array $params = [])
+    public function __invoke($resource, $route = '', $version = null, array $params = []): string
     {
         $apiVersion = $version ?: $this->defaultVersion;
 
@@ -162,10 +162,10 @@ class IiifUrl extends AbstractHelper
         return $this->forceToIfRequired($urlIiif);
     }
 
-    protected function forceToIfRequired($absoluteUrl)
+    protected function forceToIfRequired($absoluteUrl): string
     {
         return $this->forceFrom && (strpos($absoluteUrl, $this->forceFrom) === 0)
             ? substr_replace($absoluteUrl, $this->forceTo, 0, strlen($this->forceFrom))
-            : $absoluteUrl;
+            : (string) $absoluteUrl;
     }
 }

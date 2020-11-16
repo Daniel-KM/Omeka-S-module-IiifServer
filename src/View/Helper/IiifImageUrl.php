@@ -76,7 +76,7 @@ class IiifImageUrl extends AbstractHelper
      * @param array $params
      * @return string
      */
-    public function __invoke($resource, $route = '', $version = null, array $params = [])
+    public function __invoke($resource, $route = '', $version = null, array $params = []): string
     {
         $route = $route ?: 'imageserver/info';
         $apiVersion = $version ?: $this->defaultVersion;
@@ -87,7 +87,7 @@ class IiifImageUrl extends AbstractHelper
             'prefix' => $this->prefix,
             'id' => $this->iiifCleanIdentifiers->__invoke($id),
         ];
-        $urlIiif = $this->url->__invoke($route, $params, ['force_canonical' => true]);
+        $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
 
         return $this->forceFrom && (strpos($urlIiif, $this->forceFrom) === 0)
             ? substr_replace($urlIiif, $this->forceTo, 0, strlen($this->forceFrom))
