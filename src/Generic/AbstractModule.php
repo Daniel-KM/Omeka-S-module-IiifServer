@@ -184,6 +184,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $form = $services->get('FormElementManager')->get($formClass);
         $form->init();
         $form->setData($data);
+        $form->prepare();
         return $renderer->formCollection($form);
     }
 
