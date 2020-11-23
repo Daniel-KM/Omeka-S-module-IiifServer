@@ -220,7 +220,7 @@ trait TraitLinking
                     $vvalue = $value->value();
                     if ($vvalue) {
                         // TODO Use ValueLanguage.
-                        $seeAlso['label'] = ['none' => $value->value()];
+                        $seeAlso['label'] = ['none' => [$value->value()]];
                     }
                     // TODO Add format and profile of the seealso (require a fetch?).
                     // $seeAlso['format'] = $value->value();
@@ -234,7 +234,7 @@ trait TraitLinking
         $output[] = (object) [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
-            'label' => ['none' => 'application/ld+json'],
+            'label' => ['none' => ['application/ld+json']],
             'format' => 'application/ld+json',
             'profile' => $this->urlHelper->__invoke('api-context', [], ['force_canonical' => true]),
         ];

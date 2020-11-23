@@ -145,7 +145,7 @@ class ContentResource extends AbstractResourceType
         $label = $format
             ? sprintf('%1$s [%2$s]', $this->type, $format)
             : $this->type;
-        return new ValueLanguage(['none' => $label]);
+        return new ValueLanguage(['none' => [$label]]);
     }
 
     protected function prepareMediaId(): void
