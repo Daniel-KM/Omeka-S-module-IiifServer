@@ -32,6 +32,7 @@ namespace IiifServer\Controller;
 
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Mvc\Exception\NotFoundException;
 
 class PresentationController extends AbstractActionController
@@ -172,7 +173,7 @@ class PresentationController extends AbstractActionController
      * @param string $resourceType
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
      */
-    protected function fetchResource($resourceType): ?\Omeka\Api\Representation\AbstractResourceEntityRepresentation
+    protected function fetchResource($resourceType): ?AbstractResourceEntityRepresentation
     {
         $id = $this->params('id');
 
@@ -193,7 +194,7 @@ class PresentationController extends AbstractActionController
      * @param string $resourceType
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
      */
-    protected function fetchResources($resourceType = null)
+    protected function fetchResources($resourceType = null): array
     {
         $params = $this->params();
         $identifiers = $params->fromQuery('id');
@@ -253,13 +254,13 @@ class PresentationController extends AbstractActionController
         return $resources;
     }
 
-    protected function useCleanIdentifier()
+    protected function useCleanIdentifier(): bool
     {
         return $this->viewHelpers()->has('getResourcesFromIdentifiers')
             && $this->settings()->get('iiifserver_identifier_clean');
     }
 
-    protected function requestedVersion()
+    protected function requestedVersion(): ?string
     {
         // Check the version from the url first.
         $version = $this->params('version');
@@ -277,7 +278,7 @@ class PresentationController extends AbstractActionController
         return null;
     }
 
-    protected function jsonError(\Exception $exception, $statusCode = 500)
+    protected function jsonError(\Exception $exception, $statusCode = 500): JsonModel
     {
         $this->getResponse()->setStatusCode($statusCode);
         return new JsonModel([
