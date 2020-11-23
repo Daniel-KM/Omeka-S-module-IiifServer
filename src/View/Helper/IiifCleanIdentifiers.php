@@ -31,6 +31,8 @@ class IiifCleanIdentifiers extends AbstractHelper
     /**
      * Construct the helper.
      *
+     * @todo Manage new CleanUrl.
+     *
      * @param GetIdentifiersFromResources $getIdentifiersFromResources
      * @param bool $prefix
      * @param bool $rawIdentifier

@@ -26,7 +26,7 @@ class IiifCleanIdentifiersFactory implements FactoryInterface
         }
         return new IiifCleanIdentifiers(
             $getIdentifiersFromResources,
-            $settings->get('iiifserver_identifier_prefix', false),
+            $settings->get('iiifserver_identifier_prefix', ''),
             $settings->get('iiifserver_identifier_raw', false)
         );
     }

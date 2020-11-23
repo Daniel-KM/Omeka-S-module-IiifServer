@@ -37,6 +37,11 @@ class IiifJsonLd extends AbstractPlugin
     public function __invoke($data, $version = null)
     {
         $controller = $this->getController();
+
+        /**
+         * @var \Laminas\Http\PhpEnvironment\Request $request
+         * @var \Laminas\Http\PhpEnvironment\Response $response
+         */
         $request = $controller->getRequest();
         $response = $controller->getResponse();
 
@@ -67,8 +72,7 @@ class IiifJsonLd extends AbstractPlugin
 
         //$response->clearBody();
         $body = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $response->setContent($body);
-
-        return $response;
+        return $response
+            ->setContent($body);
     }
 }

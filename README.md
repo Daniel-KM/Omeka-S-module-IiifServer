@@ -233,6 +233,7 @@ TODO / Bugs
 - [ ] Use the option "no storage" for url of a media for external server.
 - [ ] Job to update data of [IIIF Image].
 - [ ] Use only arrays, not standard objects.
+- [ ] Manage url prefix.
 
 See module [Image Server].
 

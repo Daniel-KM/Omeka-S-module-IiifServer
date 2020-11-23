@@ -50,8 +50,8 @@ class PresentationController extends AbstractActionController
         $params = $this->params()->fromRoute();
         $params['action'] = 'manifest';
         $params += [
-            'version' => $settings->get('imageserver_info_default_version', '2'),
-            'prefix' => $settings->get('cleanurl_identifier_prefix'),
+            'version' => $settings->get('iiifserver_manifest_default_version', '2'),
+            'prefix' => $this->params('prefix') ?: $settings->get('iiifserver_identifier_prefix', ''),
         ];
         return $this->forward()->dispatch(__CLASS__, $params);
     }
@@ -77,6 +77,7 @@ class PresentationController extends AbstractActionController
 
     public function listAction()
     {
+        // TODO Set the resource type to fetch resources from identifiers?
         $resources = $this->fetchResources();
         if (!count($resources)) {
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
