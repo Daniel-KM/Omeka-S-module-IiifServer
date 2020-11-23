@@ -152,7 +152,7 @@ abstract class AbstractType implements JsonSerializable
                     $this->getType(), implode('", "', $missingKeys)
                 );
             }
-            throw new \IiifServer\Iiif\Exception\RuntimeException($message);
+            throw new \IiifServer\Iiif\Exception\RuntimeException((string) $message);
         }
 
         return false;
