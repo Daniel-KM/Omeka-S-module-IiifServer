@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\Mvc\Controller\Plugin;
 
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -51,10 +52,10 @@ class ImageSize extends AbstractPlugin
      * @param MediaRepresentation|AssetRepresentation|Media|Asset|string $image
      * Can be a media, an asset, a url or a filepath.
      * @param string $imageType
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
+     * @return array Associative array of width and height of the image file as
+     * integer. Values are empty (null or zero) when the size is undetermined.
      */
-    public function __invoke($image, $imageType = 'original')
+    public function __invoke($image, $imageType = 'original'): array
     {
         if ($image instanceof MediaRepresentation) {
             return $this->sizeMedia($image, $imageType);
@@ -81,7 +82,7 @@ class ImageSize extends AbstractPlugin
      * @return array Associative array of width and height of the image file.
      * Values are empty when the size is undetermined.
      */
-    protected function sizeMedia(MediaRepresentation $media, $imageType = 'original')
+    protected function sizeMedia(MediaRepresentation $media, $imageType = 'original'): array
     {
         // Check if this is an image.
         if (strtok((string) $media->mediaType(), '/') !== 'image') {
@@ -118,7 +119,7 @@ class ImageSize extends AbstractPlugin
      * @return array Associative array of width and height of the image file.
      * Values are empty when the size is undetermined.
      */
-    protected function sizeAsset(AssetRepresentation $asset)
+    protected function sizeAsset(AssetRepresentation $asset): array
     {
         // The storage adapter should be checked for external storage.
         $storagePath = $this->getStoragePath('asset', $asset->filename());
@@ -136,7 +137,7 @@ class ImageSize extends AbstractPlugin
      * @param null|string $extension The file extension
      * @return string
      */
-    protected function getStoragePath($prefix, $name, $extension = '')
+    protected function getStoragePath($prefix, $name, $extension = ''): string
     {
         return sprintf('%s/%s%s', $prefix, $name, strlen($extension) ? '.' . $extension : '');
     }
@@ -148,7 +149,7 @@ class ImageSize extends AbstractPlugin
      * @return array Associative array of width and height of the image file.
      * Values are empty when the size is undetermined.
      */
-    protected function getWidthAndHeight($filepath)
+    protected function getWidthAndHeight($filepath): array
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
@@ -171,7 +172,7 @@ class ImageSize extends AbstractPlugin
      * @return array Associative array of width and height of the image file.
      * Values are empty when the size is undetermined.
      */
-    protected function getWidthAndHeightLocal($filepath)
+    protected function getWidthAndHeightLocal($filepath): array
     {
         $result = getimagesize($filepath);
         if ($result) {
@@ -193,7 +194,7 @@ class ImageSize extends AbstractPlugin
      * @return array Associative array of width and height of the image file.
      * Values are empty when the size is undetermined.
      */
-    protected function getWidthAndHeightUrl($url)
+    protected function getWidthAndHeightUrl(string $url): array
     {
         $width = null;
         $height = null;
