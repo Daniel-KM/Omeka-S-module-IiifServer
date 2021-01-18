@@ -103,7 +103,7 @@ class IiifUrl extends AbstractHelper
      * When a value is a resource, the url cannot be built, because it requires
      * the admin or the site path. In that case, the canonical iiif url is used.
      *
-     * @param AbstractResourceEntityRepresentation|AbstractResourceEntityRepresentation[] $resource
+     * @param AbstractResourceEntityRepresentation|AbstractResourceEntityRepresentation[]|int $resource
      * @param string $route
      * @param string $version
      * @param array $params
@@ -129,9 +129,11 @@ class IiifUrl extends AbstractHelper
                 $resourceName = $params['resource_name'];
             } else {
                 // Generally, the resource is already loaded by doctrine.
-                $resourceName = $this->view->api()->read('resources', ['id' => $id])
-                    ->getContent()
-                    ->resourceName();
+                try {
+                    $resourceName = $this->view->api()->read('resources', ['id' => $id])->getContent()->resourceName();
+                } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                    return '';
+                }
             }
         } else {
             $id = $resource->id();

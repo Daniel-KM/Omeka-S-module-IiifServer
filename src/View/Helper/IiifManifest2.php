@@ -1156,8 +1156,8 @@ class IiifManifest2 extends AbstractHelper
             $stmt = $conn->executeQuery($qb, $qb->getParameters());
             $id = $stmt->fetch(\PDO::FETCH_COLUMN);
             if ($id) {
-                $response = $this->view->api()->read('media', $id);
-                $media = $response->getContent();
+                // Media may be private for the user.
+                $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
             }
         }
 
@@ -1191,8 +1191,8 @@ class IiifManifest2 extends AbstractHelper
             $stmt = $conn->executeQuery($qb, $qb->getParameters());
             $id = $stmt->fetch(\PDO::FETCH_COLUMN);
             if ($id) {
-                $response = $this->view->api()->read('media', $id);
-                $media = $response->getContent();
+                // Media may be private for the user.
+                $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
             }
         }
 
