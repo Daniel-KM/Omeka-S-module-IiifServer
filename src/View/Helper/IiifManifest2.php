@@ -868,35 +868,36 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifCanvasPlaceholder()
     {
-        $translate = $this->getView()->plugin('translate');
+        $translate = $this->view->plugin('translate');
+        $serverUrl = $this->view->serverUrl('');
 
         $canvas = [];
-        $canvas['@id'] = $this->view->basePath('/iiif/ixif-message/canvas/c1');
+        $canvas['@id'] = $serverUrl . $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $canvas['@type'] = 'sc:Canvas';
         $canvas['label'] = $translate('Placeholder image');
 
         $placeholder = 'img/thumbnails/placeholder-image.png';
-        $canvas['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
+        $canvas['thumbnail'] = $serverUrl . $this->view->assetUrl($placeholder, 'ImageServer');
 
-        $imageSize = $this->getWidthAndHeight(OMEKA_PATH . '/modules/IiifServer/asset/' . $placeholder) ?: ['width' => null, 'height' => null];
+        $imageSize = $this->getWidthAndHeight(OMEKA_PATH . '/modules/ImageServer/asset/' . $placeholder) ?: ['width' => null, 'height' => null];
         $canvas['width'] = $imageSize['width'];
         $canvas['height'] = $imageSize['height'];
 
         $image = [];
-        $image['@id'] = $this->view->basePath('/iiif/ixif-message/imageanno/placeholder');
+        $image['@id'] = $serverUrl . $this->view->basePath('/iiif/ixif-message/imageanno/placeholder');
         $image['@type'] = 'oa:Annotation';
         $image['motivation'] = "sc:painting";
 
         // There is only one image (parallel is not managed).
         $imageResource = [];
-        $imageResource['@id'] = $this->view->basePath('/iiif/ixif-message-0/res/placeholder');
+        $imageResource['@id'] = $serverUrl . $this->view->basePath('/iiif-img/ixif-message-0/res/placeholder');
         $imageResource['@type'] = 'dctypes:Image';
         $imageResource['width'] = $imageSize['width'];
         $imageResource['height'] = $imageSize['height'];
         $imageResource = (object) $imageResource;
 
         $image['resource'] = $imageResource;
-        $image['on'] = $this->view->basePath('/iiif/ixif-message/canvas/c1');
+        $image['on'] = $serverUrl . $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $image = (object) $image;
         $images = [$image];
 
