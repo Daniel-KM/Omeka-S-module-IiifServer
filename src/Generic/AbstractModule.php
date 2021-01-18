@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /*
- * Copyright Daniel Berthereau, 2018-2020
+ * Copyright Daniel Berthereau, 2018-2021
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -249,9 +249,6 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         }
     }
 
-    /**
-     * @return string
-     */
     protected function modulePath(): string
     {
         return OMEKA_PATH . '/modules/' . static::NAMESPACE;
