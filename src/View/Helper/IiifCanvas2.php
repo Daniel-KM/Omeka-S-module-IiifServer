@@ -294,18 +294,13 @@ class IiifCanvas2 extends AbstractHelper
         $imageResourceService['@id'] = $imageUrlService;
         $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
 
-        // TODO Use the trait TileInfo of module ImageServer.
-        $viewHelpers = $view->getHelperPluginManager();
-        if ($viewHelpers->has('tileInfo')) {
-            $tilingData = $view->tileInfo($media);
-            $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
-            if ($iiifTileInfo) {
-                $tiles = [];
-                $tiles[] = $iiifTileInfo;
-                $imageResourceService['tiles'] = $tiles;
-                $imageResourceService['width'] = $width;
-                $imageResourceService['height'] = $height;
-            }
+        $iiifTileInfo = $view->iiifTileInfo($media);
+        if ($iiifTileInfo) {
+            $tiles = [];
+            $tiles[] = $iiifTileInfo;
+            $imageResourceService['tiles'] = $tiles;
+            $imageResourceService['width'] = $width;
+            $imageResourceService['height'] = $height;
         }
 
         $imageResourceService = (object) $imageResourceService;
@@ -316,33 +311,5 @@ class IiifCanvas2 extends AbstractHelper
         $image['on'] = $canvasUrl;
 
         return (object) $image;
-    }
-
-    /**
-     * Create the data for a IIIF tile object.
-     *
-     * @param array $tileInfo
-     * @return array|null
-     */
-    protected function iiifTileInfo($tileInfo)
-    {
-        $tile = [];
-
-        $scaleFactors = [];
-        $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
-        $tileSize = $tileInfo['size'];
-        $total = (int) ceil($maxSize / $tileSize);
-        $factor = 1;
-        while ($factor / 2 <= $total) {
-            $scaleFactors[] = $factor;
-            $factor = $factor * 2;
-        }
-        if (count($scaleFactors) <= 1) {
-            return null;
-        }
-
-        $tile['width'] = $tileSize;
-        $tile['scaleFactors'] = $scaleFactors;
-        return $tile;
     }
 }

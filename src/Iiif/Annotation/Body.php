@@ -67,9 +67,9 @@ class Body extends AbstractResourceType
     protected $imageSize;
 
     /**
-     * @var \ImageServer\Mvc\Controller\Plugin\TileInfo|null
+     * @var \IiifServer\View\Helper\IiifTileInfo
      */
-    protected $tileInfo;
+    protected $iiifTileInfo;
 
     /**
      * @var string
@@ -112,10 +112,7 @@ class Body extends AbstractResourceType
         $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
         $this->imageSize = $viewHelpers->get('imageSize');
-
-        // Module Image Server is required to get specific data about the image
-        $plugins = $this->resource->getServiceLocator()->get('ControllerPluginManager');
-        $this->tileInfo = $plugins->has('tileInfo') ? $plugins->get('tileInfo') : null;
+        $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
 
         $setting = $this->setting;
         $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
@@ -202,18 +199,16 @@ class Body extends AbstractResourceType
                 'profile' => 'level2',
             ];
 
-            if ($this->tileInfo) {
-                $tilingData = $this->tileInfo->__invoke($this->resource);
-                $iiifTileInfo = $tilingData ? $this->iiifTileInfo($tilingData) : null;
-                if ($iiifTileInfo) {
-                    $tiles = [];
-                    $tiles[] = $iiifTileInfo;
-                    foreach ($imageResourceServices as &$imageResourceService) {
-                        $imageResourceService['tiles'] = $tiles;
-                        $imageResourceService['height'] = $this->getHeight();
-                        $imageResourceService['width'] = $this->getWidth();
-                    }
+            $iiifTileInfo = $this->iiifTileInfo->__invoke($this->resource);
+            if ($iiifTileInfo) {
+                $tiles = [];
+                $tiles[] = $iiifTileInfo;
+                foreach ($imageResourceServices as &$imageResourceService) {
+                    $imageResourceService['tiles'] = $tiles;
+                    $imageResourceService['height'] = $this->getHeight();
+                    $imageResourceService['width'] = $this->getWidth();
                 }
+                unset($imageResourceService);
             }
 
             return $imageResourceServices;
@@ -241,34 +236,6 @@ class Body extends AbstractResourceType
         return method_exists($this->contentResource, 'getDuration')
             ? $this->contentResource->getDuration()
             : null;
-    }
-
-    /**
-     * Create the data for a IIIF tile object.
-     *
-     * @param array $tileInfo
-     * @return array|null
-     */
-    protected function iiifTileInfo($tileInfo)
-    {
-        $tile = [];
-
-        $scaleFactors = [];
-        $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
-        $tileSize = $tileInfo['size'];
-        $total = (int) ceil($maxSize / $tileSize);
-        $factor = 1;
-        while ($factor / 2 <= $total) {
-            $scaleFactors[] = $factor;
-            $factor = $factor * 2;
-        }
-        if (count($scaleFactors) <= 1) {
-            return null;
-        }
-
-        $tile['width'] = $tileSize;
-        $tile['scaleFactors'] = $scaleFactors;
-        return $tile;
     }
 
     /**

@@ -58,6 +58,7 @@ return [
             'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
             'iiifManifest2' => Service\ViewHelper\IiifManifest2Factory::class,
             'iiifManifest3' => Service\ViewHelper\IiifManifest3Factory::class,
+            'iiifTileInfo' => Service\ViewHelper\IiifTileInfoFactory::class,
             'iiifUrl' => Service\ViewHelper\IiifUrlFactory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
