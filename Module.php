@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -64,6 +64,11 @@ class Module extends AbstractModule
             );
     }
 
+    protected function postInstall(): void
+    {
+        $this->updateWhitelist();
+    }
+
     public function getConfigForm(PhpRenderer $renderer)
     {
         $translate = $renderer->plugin('translate');
@@ -100,5 +105,28 @@ class Module extends AbstractModule
                 : (in_array('none', $params[$key]) ? ['none'] : $params[$key]);
             $settings->set($key, $value);
         }
+    }
+
+    protected function updateWhitelist(): void
+    {
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+
+        $whitelist = $settings->get('media_type_whitelist', []);
+        $whitelist = array_values(array_unique(array_merge(array_values($whitelist), [
+            'model/gltf-binary',
+            'model/gltf+json',
+            'model/vnd.threejs+json',
+            'application/octet-stream',
+        ])));
+        $settings->set('media_type_whitelist', $whitelist);
+
+        $whitelist = $settings->get('extension_whitelist', []);
+        $whitelist = array_values(array_unique(array_merge(array_values($whitelist), [
+            'bin',
+            'glb',
+            'gltf',
+            'json',
+        ])));
+        $settings->set('extension_whitelist', $whitelist);
     }
 }

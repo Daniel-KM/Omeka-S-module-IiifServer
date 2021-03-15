@@ -177,3 +177,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->set('iiifserver_manifest_behavior_default', [$settings->get('iiifserver_manifest_viewing_hint_default', 'none')]);
     $settings->delete('iiifserver_manifest_viewing_hint_default');
 }
+
+if (version_compare($oldVersion, '3.6.3.2', '<')) {
+    $this->updateWhitelist();
+}
