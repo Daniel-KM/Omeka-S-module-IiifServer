@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -32,10 +32,14 @@ namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\AssetRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 
+/**
+ * @todo Remove casting with "(object)", that was used because the json encoding converts array into object or array.
+ */
 class IiifManifest2 extends AbstractHelper
 {
     use \IiifServer\Iiif\TraitRights;
@@ -203,7 +207,7 @@ class IiifManifest2 extends AbstractHelper
 
         $canvases = [];
 
-        // Get all images and non-images and detect json files (for 3D model).
+        // Get all images and non-images and detect 3D models.
         $medias = $item->media();
         $images = [];
         $nonImages = [];
@@ -212,11 +216,11 @@ class IiifManifest2 extends AbstractHelper
             $mediaType = $media->mediaType();
             // Images files.
             // Internal: has_derivative is not only for images.
-            if ($mediaType && strpos($mediaType, 'image/') === 0) {
+            if ($mediaType && substr($mediaType, 0, 6) === 'image/') {
                 $images[] = $media;
             }
             // Handle external IIIF images.
-            elseif ($media->ingester() == 'iiif') {
+            elseif ($media->ingester() === 'iiif') {
                 $images[] = $media;
             }
             // Non-images files.
@@ -226,7 +230,8 @@ class IiifManifest2 extends AbstractHelper
                     $jsonFiles[] = $media;
                 }
                 // Check if this is a json file for old Omeka or old imports.
-                elseif ($mediaType == 'text/plain') {
+                // TODO Convert old "text/plain" into "application/json".
+                elseif ($mediaType === 'text/plain') {
                     // Currently, the extension is "txt", even for json files.
                     // switch (strtolower($media->extension())) {
                     //   case 'json':
@@ -335,7 +340,7 @@ class IiifManifest2 extends AbstractHelper
                         // file is already available for download in the pdf viewer.
                         break;
 
-                    case strpos($mediaType, 'audio/') === 0:
+                    case substr($mediaType, 0, 6) === 'audio/':
                     // case 'audio/ogg':
                     // case 'audio/mp3':
                         $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
@@ -348,7 +353,7 @@ class IiifManifest2 extends AbstractHelper
 
                     // TODO Check/support the media type "application/octet-stream".
                     // case 'application/octet-stream':
-                    case strpos($mediaType, 'video/') === 0:
+                    case substr($mediaType, 0, 6) === 'video/':
                     // case 'video/webm':
                         $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
                             $media,
@@ -367,7 +372,6 @@ class IiifManifest2 extends AbstractHelper
         }
 
         // Thumbnail of the whole work.
-        // TODO Use resource thumbnail (> Omeka 1.3).
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $isThreejs);
 
         // Prepare sequences.
@@ -616,18 +620,7 @@ class IiifManifest2 extends AbstractHelper
         /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
         $thumbnailAsset = $media->thumbnail();
         if ($thumbnailAsset) {
-            $imageUrl = $thumbnailAsset->assetUrl();
-            $size = $this->getView()->imageSize($thumbnailAsset);
-            if ($size) {
-                $thumbnail = [
-                    '@id' => $imageUrl,
-                    '@type' => 'dctypes:Image',
-                    'format' => $thumbnailAsset->mediaType(),
-                    'width' => $size['width'],
-                    'height' => $size['height'],
-                ];
-                return (object) $thumbnail;
-            }
+            return $this->_iiifThumbnailAsset($thumbnailAsset);
         }
 
         if ($media->hasThumbnails()) {
@@ -669,6 +662,27 @@ class IiifManifest2 extends AbstractHelper
         }
 
         return null;
+    }
+
+    /**
+     * Create an IIIF thumbnail object from an Omeka asset file.
+     *
+     * @param AssetRepresentation $asset
+     * @return \stdClass|null
+     */
+    protected function _iiifThumbnailAsset(AssetRepresentation $asset)
+    {
+        $size = $this->getView()->imageSize($asset);
+        if ($size) {
+            $thumbnail = [
+                '@id' => $asset->assetUrl(),
+                '@type' => 'dctypes:Image',
+                'format' => $asset->mediaType(),
+                'width' => $size['width'],
+                'height' => $size['height'],
+            ];
+            return (object) $thumbnail;
+        }
     }
 
     /**
@@ -1131,70 +1145,61 @@ class IiifManifest2 extends AbstractHelper
      * @param bool $isThreejs Manage an exception.
      * @return object The iiif thumbnail.
      */
-    protected function _mainThumbnail(AbstractResourceEntityRepresentation $resource, $isThreejs)
+    protected function _mainThumbnail(AbstractResourceEntityRepresentation $resource, $isThreeJs)
     {
-        $media = null;
-        // Threejs is an exception, because the thumbnail may be a true file
-        // named "thumb.js".
-        if ($isThreejs) {
-            // The connection is used because the api does not allow to search
-            // on source name.
-            $conn = $resource->getServiceLocator()
-                ->get('Omeka\Connection');
-            $qb = $conn->createQueryBuilder()
-                ->select('id')
-                ->from('media', 'media')
-                ->where('item_id = :item_id')
-                ->setParameter(':item_id', $resource->id())
-                ->andWhere('has_thumbnails = 1')
-                ->andWhere('source LIKE "%thumb.jpg"')
-                ->orderBy('id', 'ASC')
-                ->setMaxResults(1);
-            $stmt = $conn->executeQuery($qb, $qb->getParameters());
-            $id = $stmt->fetch(\PDO::FETCH_COLUMN);
-            if ($id) {
-                // Media may be private for the user.
-                $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
-            }
+        $thumbnailAsset = $resource->thumbnail();
+        if ($thumbnailAsset) {
+            return $this->_iiifThumbnailAsset($thumbnailAsset);
         }
 
-        // Standard record.
-        if (empty($media)) {
-            // TODO Use index of the true Omeka representative file (primaryMedia()).
-            // The connection is used because the api does not allow to search
-            // on field "has_thumbnails".
-            // $response = $this->view->api()->search(
-            //     'media',
-            //     [
-            //         'item_id' => $resource->id(),
-            //         'has_thumbnails' => 1,
-            //         'limit' => 1,
-            //     ]
-            // );
-            // $medias = $response->getContent();
-            // $media = reset($medias);
+        // The primary media is not used, because it may not be an image.
+        // The connection is used because the api does not allow to search
+        // on field "has_thumbnails".
+        $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
+            ->get('Omeka\Connection');
+        $qb = $conn->createQueryBuilder()
+            ->select('id')
+            ->from('media', 'media')
+            ->where('item_id = :item_id')
+            ->setParameter(':item_id', $resource->id())
+            ->andWhere('has_thumbnails = 1')
+            ->orderBy('id', 'ASC')
+            ->setMaxResults(1);
 
-            // TODO Use resource thumbnail (> Omeka 1.3).
-            $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
-                ->get('Omeka\Connection');
-            $qb = $conn->createQueryBuilder()
-                ->select('id')
-                ->from('media', 'media')
-                ->where('item_id = :item_id')
-                ->setParameter(':item_id', $resource->id())
-                ->andWhere('has_thumbnails = 1')
-                ->orderBy('id', 'ASC')
-                ->setMaxResults(1);
-            $stmt = $conn->executeQuery($qb, $qb->getParameters());
-            $id = $stmt->fetch(\PDO::FETCH_COLUMN);
-            if ($id) {
-                // Media may be private for the user.
-                $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
-            }
+        if ($isThreeJs) {
+            $qb
+                // The thumbnail is always a real image, so it is possible to
+                // filter the request.
+                // IIIF format doesn't not support other images.
+                // Don't set pdf and jp2, because default Omeka thumbnaillers
+                // don't support them by default, and tiff is not managed by
+                // browsers.
+                // @link https://iiif.io/api/image/3.0/#45-format
+                ->andWhere('media_type IN ("image/jpeg", "image/png", "image/gif", "image/webp")')
+                ->andWhere(
+                    // TODO Check performance between simple IN + simple regex, or a complex regex, or multiple LIKE. Or check another way.
+                    $qb->expr()->orX(
+                        // 'source REGEXP "(?:^|[^\w\s_-])(?:thumb|thumbnail|screenshot|vignette|miniatura)\.(?:jpg|jpeg|png|gif|webp)$"'
+                        'source IN (
+    "thumb.jpg", "thumbnail.jpg", "screenshot.jpg", "vignette.jpg", "miniatura.jpg",
+    "thumb.jpeg", "thumbnail.jpeg", "screenshot.jpeg", "vignette.jpeg", "miniatura.jpeg",
+    "thumb.png", "thumbnail.png", "screenshot.png", "vignette.png", "miniatura.png",
+    "thumb.gif", "thumbnail.gif", "screenshot.gif", "vignette.gif", "miniatura.gif",
+    "thumb.webp", "thumbnail.webp", "screenshot.webp", "vignette.webp", "miniatura.webp"
+)',
+                        'source REGEXP "/(?:thumb|thumbnail|screenshot|vignette|miniatura)\.(?:jpg|jpeg|png|gif|webp)$"'
+                    )
+                );
         }
 
-        if ($media) {
-            return $this->_iiifThumbnail($media);
+        $stmt = $conn->executeQuery($qb, $qb->getParameters());
+        $id = $stmt->fetch(\PDO::FETCH_COLUMN);
+        if ($id) {
+            // Media may be private for the user, so use searchOne, not read.
+            $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
+            if ($media) {
+                return $this->_iiifThumbnail($media);
+            }
         }
     }
 
