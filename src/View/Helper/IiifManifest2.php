@@ -211,7 +211,8 @@ class IiifManifest2 extends AbstractHelper
         $medias = $item->media();
         $images = [];
         $nonImages = [];
-        $jsonFiles = [];
+        $mediaMain3d = null;
+        $mediaType3dModel = null;
         foreach ($medias as $media) {
             $mediaType = $media->mediaType();
             // Images files.
@@ -225,35 +226,57 @@ class IiifManifest2 extends AbstractHelper
             }
             // Non-images files.
             else {
+                // Three js manages many 3d formats with xml and json, but they
+                // may not have a media-type or the media-type may not be
+                // recognized during creation of the media. So only json type is
+                // managed here.
+                // TODO Make support of 3D models more generic.
                 $nonImages[] = $media;
-                if ($mediaType == 'application/json') {
-                    $jsonFiles[] = $media;
+                if ($mediaType === 'application/json') {
+                    // TODO Check if this is really a 3D model for three.js (see https://threejs.org) (store it as media type during import or a job).
+                    // if ($this->isThreeJs($media)) {
+                    $mediaType3dModel = 'model/vnd.threejs+json';
+                    $mediaMain3d = $media;
+                } elseif ($mediaType === 'model/gltf+json') {
+                    $mediaType3dModel = 'model/gltf+json';
+                    $mediaMain3d = $media;
+                } elseif ($mediaType === 'model/gltf-binary') {
+                    // A gltf-binary file is not a gltf bin file attached to a
+                    // gltf+json.
+                    $mediaType3dModel = 'model/gltf-binary';
+                    $mediaMain3d = $media;
                 }
                 // Check if this is a json file for old Omeka or old imports.
-                // TODO Convert old "text/plain" into "application/json".
-                elseif ($mediaType === 'text/plain') {
-                    // Currently, the extension is "txt", even for json files.
-                    // switch (strtolower($media->extension())) {
-                    //   case 'json':
-                    //       $jsonFiles[] = $media;
-                    //       break;
-                    // }
-                    if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'json') {
-                        $jsonFiles[] = $media;
+                else {
+                    $extension = strtolower(pathinfo($media->source(), PATHINFO_EXTENSION));
+                    // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
+                    if ($mediaType === 'text/plain') {
+                        if ($extension === 'json') {
+                            $mediaType3dModel = 'model/vnd.threejs+json';
+                            $mediaMain3d = $media;
+                        } elseif ($extension === 'gltf') {
+                            $mediaType3dModel = 'model/gltf+json';
+                            $mediaMain3d = $media;
+                        }
                     }
+                    // elseif ($mediaType === 'application/octet-stream') {
+                    //     if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'bin') {
+                    //         $gltfFiles[] = $media;
+                    //     }
+                    // }
                 }
             }
         }
         unset($medias);
         $totalImages = count($images);
-        $totalJsonFiles = count($jsonFiles);
 
-        // Prepare an exception.
-        // TODO Check if this is really a 3D model for three.js (see https://threejs.org).
-        $isThreejs = $totalJsonFiles == 1;
+        $is3dModel = isset($mediaMain3d);
+
+        // Thumbnail of the whole work.
+        $manifest['thumbnail'] = $this->_mainThumbnail($item, $is3dModel);
 
         // Process images, except if they belong to a 3D model.
-        if (!$isThreejs) {
+        if (!$is3dModel) {
             $imageNumber = 0;
             foreach ($images as $media) {
                 $canvas = $this->_iiifCanvasImage($media, ++$imageNumber);
@@ -282,8 +305,9 @@ class IiifManifest2 extends AbstractHelper
         // representative file.
 
         // When there are images or one json file, other files may be added to
-        // download section.
-        if ($totalImages || $isThreejs) {
+        // download section, except if they belong to a 3D model, where nothing
+        // is downloadable.
+        if ($totalImages && !$is3dModel) {
             foreach ($nonImages as $media) {
                 $mediaType = $media->mediaType();
                 switch ($mediaType) {
@@ -311,15 +335,23 @@ class IiifManifest2 extends AbstractHelper
                 // TODO Add alto files and search.
                 // TODO Add other content.
             }
+        }
 
+        elseif ($is3dModel) {
             // Prepare the media sequence for threejs.
-            if ($isThreejs) {
-                $mediaSequenceElement = $this->_iiifMediaSequenceThreejs(
-                    $media,
-                    ['label' => $label, 'metadata' => $metadata, 'files' => $images]
-                );
-                $mediaSequencesElements[] = $mediaSequenceElement;
-            }
+            $mediaSequenceElement = $this->_iiifMediaSequenceModel(
+                $mediaMain3d,
+                [
+                    'label' => $label,
+                    'metadata' => $metadata,
+                    // With Universal Viewer, the type should be "dctypes:PhysicalObject"
+                    // or "PhysicalObject", not "Object" neither "Model" (used in v3).
+                    'type' => 'PhysicalObject',
+                    'format' => $mediaType3dModel,
+                    'thumbnail' => $manifest['thumbnail'],
+                ]
+            );
+            $mediaSequencesElements[] = $mediaSequenceElement;
         }
 
         // Else, check if non-images are managed (special content, as pdf).
@@ -371,14 +403,11 @@ class IiifManifest2 extends AbstractHelper
             }
         }
 
-        // Thumbnail of the whole work.
-        $manifest['thumbnail'] = $this->_mainThumbnail($item, $isThreejs);
-
         // Prepare sequences.
         $sequences = [];
 
         // Manage the exception: the media sequence with threejs 3D model.
-        if ($isThreejs && $mediaSequencesElements) {
+        if ($is3dModel && $mediaSequencesElements) {
             $mediaSequence = [];
             $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
             $mediaSequence['@type'] = 'ixif:MediaSequence';
@@ -468,7 +497,7 @@ class IiifManifest2 extends AbstractHelper
             $manifest['sequences'] = $sequences;
         }
 
-        if ($isThreejs) {
+        if ($is3dModel) {
             $manifest['@context'] = [
                 'http://iiif.io/api/presentation/2/context.json',
                 'http://files.universalviewer.io/ld/ixif/0/context.json',
@@ -1075,36 +1104,25 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Create an IIIF media sequence object for a threejs 3D model.
+     * Create an IIIF media sequence object for a 3D model managed by ThreeJs.
      *
      * @param MediaRepresentation $media
-     * @param array $values
+     * @param array $values Contains: label, metadata, format, thumbnail, type.
      * @return \stdClass|null
      */
-    protected function _iiifMediaSequenceThreejs(MediaRepresentation $media, $values)
+    protected function _iiifMediaSequenceModel(MediaRepresentation $media, $values)
     {
         $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl();
-        $mediaSequenceElement['@type'] = 'dctypes:PhysicalObject';
-        $mediaSequenceElement['format'] = 'application/vnd.threejs+json';
+        $mediaSequenceElement['@type'] = $values['type'];
+        $mediaSequenceElement['format'] = $values['format'];
         // TODO If no file metadata, then item ones.
-        // TODO Currently, the main title and metadata are used,
-        // because in Omeka, a 3D model is normally the only one
-        // file.
+        // TODO Currently, the main title and metadata are used, because in Omeka, a 3D model is normally the only one file.
         $mediaSequenceElement['label'] = $values['label'];
         // Metadata are already set at record level.
         // $mediaSequenceElement['metadata'] = $values['metadata'];
-        // Check if there is a "thumb.jpg" that can be managed as a thumbnail.
-        foreach ($values['files'] as $imageFile) {
-            if (basename($imageFile->filename()) == 'thumb.jpg') {
-                // The original is used, because this is already a thumbnail.
-                $thumbnailUrl = $imageFile->originalUrl();
-                if ($thumbnailUrl) {
-                    $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
-                }
-                break;
-            }
-        }
+        // Use the thumbnail of the item for the media too.
+        $mediaSequenceElement['thumbnail'] = $values['thumbnail'];
         // No media sequence service and no sequences.
         $mediaSequenceElement = (object) $mediaSequenceElement;
         return $mediaSequenceElement;
@@ -1141,11 +1159,16 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Get the representative thumbnail of the whole work.
      *
+     * @todo Use the asset of the medias.
+     * Note: for 3d models, it is not the normal way to store the image as asset
+     * of a media, but as asset of the item, or as screenshot. The display of a
+     * json or a binary is not an image.
+     *
      * @param AbstractResourceEntityRepresentation $resource
-     * @param bool $isThreejs Manage an exception.
+     * @param bool $is3dModel Manage an exception.
      * @return object The iiif thumbnail.
      */
-    protected function _mainThumbnail(AbstractResourceEntityRepresentation $resource, $isThreeJs)
+    protected function _mainThumbnail(AbstractResourceEntityRepresentation $resource, $is3dModel)
     {
         $thumbnailAsset = $resource->thumbnail();
         if ($thumbnailAsset) {
@@ -1166,7 +1189,7 @@ class IiifManifest2 extends AbstractHelper
             ->orderBy('id', 'ASC')
             ->setMaxResults(1);
 
-        if ($isThreeJs) {
+        if ($is3dModel) {
             $qb
                 // The thumbnail is always a real image, so it is possible to
                 // filter the request.
@@ -1369,5 +1392,19 @@ class IiifManifest2 extends AbstractHelper
     protected function getContext()
     {
         return 'http://iiif.io/api/presentation/2/context.json';
+    }
+
+    /**
+     * Check if a json file is a threejs one.
+     */
+    protected function isThreeJs(MediaRepresentation $media): bool
+    {
+        // Contain keys "animations", "images", "materials", "metadata", "geometries", "object", "textures".
+        $json = file_get_contents($media->originalUrl());
+        if ($json && $json = json_decode($json, true)) {
+            return isset($json['metadata']['generator'])
+            && $json['metadata']['generator'] === 'io_three';
+        }
+        return false;
     }
 }
