@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -38,22 +38,24 @@ use Laminas\View\Helper\AbstractHelper;
 class IiifCollectionList3 extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified list of resources.
+     * Get the IIIF Collection manifest for the specified list of resources or url.
      *
      * @param array $resources Array of resources.
+     * @param string $url The url of the list (avoid to recreate it). It is
+     * required when the source contains urls.
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return CollectionList|null
      */
-    public function __invoke(array $resources)
+    public function __invoke(array $resourcesOrUrls, $url = null)
     {
-        $collection = new CollectionList($resources);
+        $collection = new CollectionList($resourcesOrUrls, ['iiif_url' => $url]);
 
         // The services cannot be extracted from resources, so set them here.
         $services = @$this->getView()->getHelperPluginManager()->getServiceLocator();
         $collection->setServiceLocator($services);
 
         // Give possibility to customize the manifest.
-        $resource = $resources;
+        $resource = $resourcesOrUrls;
         $format = 'collection';
         $type = 'collection';
         $params = compact('format', 'collection', 'resource', 'type');

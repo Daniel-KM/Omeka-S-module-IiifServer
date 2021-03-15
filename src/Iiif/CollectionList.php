@@ -174,7 +174,7 @@ class CollectionList extends AbstractType
 
     public function getId()
     {
-        return $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
+        return $this->options['iiif_url'] ?? $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
     }
 
     /**
@@ -190,10 +190,22 @@ class CollectionList extends AbstractType
     {
         $items = [];
         foreach ($this->resources as $resource) {
-            if ($resource instanceof ItemRepresentation) {
-                $items[] = new ReferencedManifest($resource);
-            } elseif ($resource instanceof ItemSetRepresentation) {
-                $items[] = new ReferencedCollection($resource);
+            if (is_object($resource)) {
+                if ($resource instanceof ItemRepresentation) {
+                    $items[] = new ReferencedManifest($resource);
+                } elseif ($resource instanceof ItemSetRepresentation) {
+                    $items[] = new ReferencedCollection($resource);
+                }
+            } else {
+                $protocol = substr((string) $resource, 0, 7);
+                // It's not possible to know if it's a collection or a manifest.
+                if ($protocol === 'https:/' || $protocol === 'http://') {
+                    $items[] = [
+                        'id' => $resource,
+                        'type' => 'Manifest',
+                        'label' => new ValueLanguage('[Untitled]', false),
+                    ];
+                }
             }
         }
         return $items;

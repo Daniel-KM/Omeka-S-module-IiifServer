@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -31,26 +31,26 @@ namespace IiifServer\View\Helper;
 
 use IiifServer\Iiif\Collection;
 use Laminas\View\Helper\AbstractHelper;
-use Omeka\Api\Representation\ItemSetRepresentation;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
- * Helper to get a IIIF Collection manifest for an item set
+ * Helper to get a IIIF Collection manifest for an item set or an item with
+ * external manifests.
  */
 class IiifCollection3 extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified item set (API Presentation 3.0).
+     * Get the IIIF Collection manifest for the specified item set or item (API Presentation 3.0).
      *
-     * @param ItemSetRepresentation $itemSet Item set
+     * @param AbstractResourceEntityRepresentation $resource
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Collection|null
      */
-    public function __invoke(ItemSetRepresentation $itemSet)
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
-        $collection = new Collection($itemSet);
+        $collection = new Collection($resource);
 
         // Give possibility to customize the manifest.
-        $resource = $itemSet;
         $format = 'collection';
         $type = 'collection';
         $params = compact('format', 'collection', 'resource', 'type');

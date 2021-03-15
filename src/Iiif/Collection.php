@@ -130,17 +130,53 @@ class Collection extends AbstractResourceType
         return $this->iiifUrl->__invoke($this->resource, 'iiifserver/collection', '3');
     }
 
-    public function getItems()
+    public function getItems(): array
     {
-        if (!($this->resource instanceof ItemSetRepresentation)) {
+        if ($this->resource instanceof ItemSetRepresentation) {
+            $items = [];
+            foreach ($this->api->search('items', ['item_set_id' => $this->resource->id()])->getContent() as $item) {
+                $items[] = new ReferencedManifest($item);
+            }
+            return $items;
+        }
+
+        return $this->externalManifestsOfResource();
+    }
+
+    /**
+     * @todo Merge with helper IiifManifestExternal?
+     */
+    protected function externalManifestsOfResource(): array
+    {
+        $manifestProperty = $this->setting->__invoke('iiifserver_manifest_external_property');
+        if (empty($manifestProperty)) {
             return [];
         }
 
-        $items = [];
-        foreach ($this->api->search('items', ['item_set_id' => $this->resource->id()])->getContent() as $item) {
-            $items[] = new ReferencedManifest($item);
+        $result = [];
+
+        // Manage the case where the url is saved as an uri or a text and the
+        // case where the property contains other values that are not url.
+        foreach ($this->resource->value($manifestProperty, ['all' => true]) as $value) {
+            if ($value->type() === 'uri') {
+                $result[] = [
+                    'id' => $value->uri(),
+                    'type' => 'Manifest',
+                    'label' => new ValueLanguage((string) $value->value(), false, '[Untitled]'),
+                ];
+            } else {
+                $urlManifest = (string) $value;
+                if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
+                    $result[] = [
+                        'id' => $urlManifest,
+                        'type' => 'Manifest',
+                        'label' => new ValueLanguage('[Untitled]', false),
+                    ];
+                }
+            }
         }
-        return $items;
+
+        return $result;
     }
 
     /**
