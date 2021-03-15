@@ -84,7 +84,7 @@ class MediaDimension extends AbstractPlugin
         if (is_array($mediaData)
             && !empty($mediaData['dimensions']['original'])
         ) {
-            return $mediaData['dimensions']['originial'];
+            return $mediaData['dimensions']['original'];
         }
 
         // In order to manage external storage, check if the file is local.
