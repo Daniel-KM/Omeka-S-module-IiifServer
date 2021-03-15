@@ -9,21 +9,16 @@ class IiifManifestExternal extends AbstractHelper
 {
     /**
      * Get the external manifest of a resource.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string|null
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource): ?string
     {
         $manifestProperty = $this->view->setting('iiifserver_manifest_external_property');
         // Manage the case where the url is saved as an uri or a text and the
         // case where the property contains other values that are not url.
-        $urlManifest = $resource->value($manifestProperty, ['type' => 'uri']);
-        if ($urlManifest) {
-            return $urlManifest->uri();
-        }
-        $urlManifest = $resource->value($manifestProperty);
-        if ($urlManifest) {
+        foreach ($resource->value($manifestProperty, ['all' => true]) as $urlManifest) {
+            if ($urlManifest->type() === 'uri') {
+                return $urlManifest->uri();
+            }
             $urlManifest = (string) $urlManifest;
             if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
                 return $urlManifest;
