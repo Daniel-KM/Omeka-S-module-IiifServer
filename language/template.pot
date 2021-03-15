@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-25 00:00+0000\n"
+"POT-Creation-Date: 2021-03-15 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,21 +23,21 @@ msgid ""
 "views)."
 msgstr ""
 
-#: Module.php:71
+#: Module.php:76
 msgid ""
 "The module creates manifests with the properties from each resource (item "
 "set, item and media)."
 msgstr ""
 
-#: Module.php:72
+#: Module.php:77
 msgid "The properties below are used when some metadata are missing."
 msgstr ""
 
-#: Module.php:73
+#: Module.php:78
 msgid "In all cases, empty properties are not set."
 msgstr ""
 
-#: Module.php:74
+#: Module.php:79
 msgid ""
 "Futhermore, the event \"iiifserver.manifest\" is available to change any "
 "data."
@@ -109,23 +109,23 @@ msgid ""
 "unavailable."
 msgstr ""
 
-#: src/View/Helper/IiifCollectionList2.php:83
+#: src/View/Helper/IiifCollectionList2.php:85
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:292
+#: src/View/Helper/IiifManifest2.php:321
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:301
+#: src/View/Helper/IiifManifest2.php:330
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:877
+#: src/View/Helper/IiifManifest2.php:920
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1110
+#: src/View/Helper/IiifManifest2.php:1142
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -505,7 +505,7 @@ msgstr ""
 msgid "Force base of url (to)"
 msgstr ""
 
-#: src/Controller/PresentationController.php:166
+#: src/Controller/PresentationController.php:169
 #, php-format
 msgid "The type \"%s\" is currently only managed as uri, not url"
 msgstr ""

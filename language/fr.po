@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-25 00:00+0000\n"
-"PO-Revision-Date: 2021-01-25 00:00+0000\n"
+"POT-Creation-Date: 2021-03-15 00:00+0000\n"
+"PO-Revision-Date: 2021-03-15 00:00+0000\n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -113,19 +113,19 @@ msgstr ""
 
 #: src/View/Helper/IiifCollectionList2.php:83
 msgid "Dynamic list"
-msgstr ""
+msgstr "Liste dynamique"
 
 #: src/View/Helper/IiifManifest2.php:292
 msgid "Download as PDF"
-msgstr ""
+msgstr "Télécharger en PDF"
 
 #: src/View/Helper/IiifManifest2.php:301
 msgid "Download as XML"
-msgstr ""
+msgstr "Télécharger en XML"
 
 #: src/View/Helper/IiifManifest2.php:877
 msgid "Placeholder image"
-msgstr ""
+msgstr "Image par défaut"
 
 #: src/View/Helper/IiifManifest2.php:1110
 msgid ""
@@ -146,7 +146,7 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:30
 msgid "Default IIIF api version of the manifest"
-msgstr ""
+msgstr "Version API IIIF par défaut pour le manifeste"
 
 #: src/Form/ConfigForm.php:31
 msgid ""
@@ -173,6 +173,9 @@ msgid ""
 "loaded. Usually, the property is \"dcterms:hasFormat\" or \"dcterms:"
 "isFormatOf\"."
 msgstr ""
+"Les manifestes externes ou statiques peuvent être personnalisés et sont plus "
+"rapides à charger. Généralement, la propriété utilisée est \"dcterms:"
+"hasFormat\" ou \"dcterms:isFormatOf\"."
 
 #: src/Form/ConfigForm.php:55 src/Form/ConfigForm.php:81
 #: src/Form/ConfigForm.php:98 src/Form/ConfigForm.php:146
@@ -184,7 +187,7 @@ msgstr "Choisir une propriété…"
 
 #: src/Form/ConfigForm.php:63
 msgid "Content of the manifest"
-msgstr ""
+msgstr "Contenu du manifeste"
 
 #: src/Form/ConfigForm.php:71
 msgid "Property to use for Description"
@@ -202,15 +205,15 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:106
 msgid "Default attribution"
-msgstr ""
+msgstr "Attribution par défaut"
 
 #: src/Form/ConfigForm.php:119
 msgid "Rights (license)"
-msgstr ""
+msgstr "Droits (licence)"
 
 #: src/Form/ConfigForm.php:121
 msgid "No mention"
-msgstr ""
+msgstr "Pas de mention"
 
 #: src/Form/ConfigForm.php:122
 msgid "Specified text below (only for iiif 2.0)"
@@ -249,7 +252,7 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:165
 msgid "Default license text (only for iiif 2.0)"
-msgstr ""
+msgstr "Licence par défaut (seulement pour IIIF v2.0)"
 
 #: src/Form/ConfigForm.php:176
 msgid "Resource link"
@@ -296,11 +299,11 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:244
 msgid "Default viewing direction"
-msgstr ""
+msgstr "Sens de lecture par défaut"
 
 #: src/Form/ConfigForm.php:249
 msgid "Left to right"
-msgstr ""
+msgstr "De gauche à droite"
 
 #: src/Form/ConfigForm.php:250
 msgid "Right to left"
@@ -308,11 +311,11 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:251
 msgid "Top to bottom"
-msgstr ""
+msgstr "De haut en bas"
 
 #: src/Form/ConfigForm.php:252
 msgid "Bottom to top"
-msgstr ""
+msgstr "Du bas en haut"
 
 #: src/Form/ConfigForm.php:264
 msgid "Property to use for behavior (viewing hint)"
@@ -326,11 +329,11 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:280
 msgid "Default behavior (viewing hint)"
-msgstr ""
+msgstr "Comportement par défaut (aide pour la vue)"
 
 #: src/Form/ConfigForm.php:287
 msgid "Auto-advance"
-msgstr ""
+msgstr "Avancée automatique"
 
 #: src/Form/ConfigForm.php:288
 msgid "Continuous"
@@ -338,7 +341,7 @@ msgstr "Continu"
 
 #: src/Form/ConfigForm.php:289
 msgid "Facing pages"
-msgstr ""
+msgstr "Pages en face-à-face"
 
 #: src/Form/ConfigForm.php:290
 msgid "Individuals"
@@ -346,23 +349,23 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:292
 msgid "No auto-advance"
-msgstr ""
+msgstr "Pas d'avancée automatique"
 
 #: src/Form/ConfigForm.php:294
 msgid "No repeat"
-msgstr ""
+msgstr "Pas de répétition"
 
 #: src/Form/ConfigForm.php:295
 msgid "Non-paged"
-msgstr ""
+msgstr "Non paginé"
 
 #: src/Form/ConfigForm.php:297
 msgid "Paged"
-msgstr ""
+msgstr "Paginé"
 
 #: src/Form/ConfigForm.php:298
 msgid "Repeat"
-msgstr ""
+msgstr "Répéter"
 
 #: src/Form/ConfigForm.php:302
 msgid "Unordered"
@@ -380,7 +383,7 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:319
 msgid "Position in sequence"
-msgstr ""
+msgstr "Position dans la séquence"
 
 #: src/Form/ConfigForm.php:320
 msgid "Template title"
@@ -388,7 +391,7 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:322
 msgid "File name"
-msgstr ""
+msgstr "Nom du fichier"
 
 #: src/Form/ConfigForm.php:323
 msgid "Template title, else file name"
@@ -457,11 +460,12 @@ msgstr ""
 
 #: src/Form/ConfigForm.php:480
 msgid "Advanced options for urls"
-msgstr ""
+msgstr "Options avancées pour les urls"
 
 #: src/Form/ConfigForm.php:488
 msgid "Append version to url (to be set inside module.config.php currently)"
 msgstr ""
+"Ajouter la version à l’url (à définir dans le fichier module.config.php)"
 
 #: src/Form/ConfigForm.php:489
 msgid ""
@@ -487,10 +491,12 @@ msgid ""
 "Allows to check identifiers that contains \"/\" from \"ark:/12345/xxx\" and "
 "\"ark:%2F12345%2Fxxx\" (example: \"ark:/12345/\")."
 msgstr ""
+"Vérifie les identifiants qui contiennent une \"/\" dans \"ark:/12345/xxx\" "
+"et \"ark:%2F12345%2Fxxx\" (exemple: \"ark:/12345/\")."
 
 #: src/Form/ConfigForm.php:522
 msgid "Allow raw identifier"
-msgstr ""
+msgstr "Autoriser les identifiants bruts"
 
 #: src/Form/ConfigForm.php:523
 #, php-format
