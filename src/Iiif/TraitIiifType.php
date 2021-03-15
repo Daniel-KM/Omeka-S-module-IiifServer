@@ -36,7 +36,10 @@ trait TraitIiifType
      *
      * Note: the resource class of the item is not used.
      *
+     * @todo Remove this unused variable.
      * @todo Rendering type It's not clealy specified, except in the context. All dctype or not? Other than dctype? Default?
+     *
+     * Important: iiif use "Sound", not "Audio".
      *
      * @link https://iiif.io/api/image/3/context.json
      * @link https://iiif.io/api/presentation/3.0/#type
@@ -45,7 +48,7 @@ trait TraitIiifType
         'dctype:Dataset' => 'Dataset',
         'dctype:StillImage' => 'Image',
         'dctype:MovingImage' => 'Video',
-        'dctype:Sound' => 'Audio',
+        'dctype:Sound' => 'Sound',
         'dctype:Text' => 'Text',
         // TODO This is not specified in the context.
         'dctype:PhysicalObject' => 'Model',
@@ -53,7 +56,7 @@ trait TraitIiifType
 
     protected $mediaTypeTypes = [
         // 'application',
-        'audio' => 'Audio',
+        'audio' => 'Sound',
         // 'example',
         // 'font',
         'image' => 'Image',
@@ -111,7 +114,7 @@ trait TraitIiifType
     protected $mediaLabels = [
         // @see \Omeka\Form\SettingForm::MEDIA_TYPE_WHITELIST
         'application/msword' => 'Document Word',
-        'application/ogg' => 'Audio OGG',
+        'application/ogg' => 'Sound OGG',
         'application/pdf' => 'Document PDF',
         'application/rtf' => 'Document RTF',
         'application/vnd.ms-access' => 'Database Access',
@@ -193,14 +196,14 @@ trait TraitIiifType
         }
 
         /* These cases are normally managed by the media type above.
-         // $extension = $this->resource->extension();
-         if ($renderer === 'file') {
-         // See \Omeka\Media\Renderer::render()
-         // $fileRenderers = $this->resource->getServiceLocator()->get('Config')['file_renderers'] + ['factories' => []];
-         /** @var \Omeka\Media\FileRenderer\Manager $fileRendererManager
-         // $fileRendererManager = $this->resource->getServiceLocator()->get('Omeka\Media\FileRenderer\Manager');
-         }
-         */
+        // $extension = $this->resource->extension();
+        if ($renderer === 'file') {
+            // See \Omeka\Media\Renderer::render()
+            // $fileRenderers = $this->resource->getServiceLocator()->get('Config')['file_renderers'] + ['factories' => []];
+            /** @var \Omeka\Media\FileRenderer\Manager $fileRendererManager
+            // $fileRendererManager = $this->resource->getServiceLocator()->get('Omeka\Media\FileRenderer\Manager');
+        }
+        */
 
         return null;
     }

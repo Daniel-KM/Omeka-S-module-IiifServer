@@ -111,12 +111,12 @@ trait TraitMedia
 
     public function isAudioVideo()
     {
-        return $this->type === 'Video' || $this->type === 'Audio';
+        return $this->type === 'Video' || $this->type === 'Sound';
     }
 
     public function isAudio()
     {
-        return $this->type === 'Audio';
+        return $this->type === 'Sound';
     }
 
     public function isVideo()

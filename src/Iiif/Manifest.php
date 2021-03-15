@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -260,8 +260,8 @@ class Manifest extends AbstractResourceType
             // Painting.
             'Image' => [],
             'Video' => [],
-            'Audio' => [],
-            // Supplementing or Rendering.
+            'Sound' => [],
+            // Supplementing or Rendering (Universal Viewer only for now).
             'Text' => [],
             'Dataset' => [],
             'Model' => [],
@@ -276,7 +276,7 @@ class Manifest extends AbstractResourceType
             $contentResource = new ContentResource($media);
             if ($contentResource->hasIdAndType()) {
                 $type = $contentResource->getType();
-                if (in_array($type, ['Image', 'Video', 'Audio', 'Text'])) {
+                if (in_array($type, ['Image', 'Video', 'Sound', 'Text'])) {
                     $types[$type][$mediaId] = [
                         'content' => $contentResource,
                     ];
@@ -299,16 +299,16 @@ class Manifest extends AbstractResourceType
 
         // Canvas manages only image, audio and video: it requires size and/or
         // duration.
-        // Priorities are Image, then Video, Audio, and Text.
+        // Priorities are Image, then Video, Sound, and Text.
         if ($types['Image']) {
             $canvasPaintings = $types['Image'];
             $types['Image'] = [];
         } elseif ($types['Video']) {
             $canvasPaintings = $types['Video'];
             $types['Video'] = [];
-        } elseif ($types['Audio']) {
-            $canvasPaintings = $types['Audio'];
-            $types['Audio'] = [];
+        } elseif ($types['Sound']) {
+            $canvasPaintings = $types['Sound'];
+            $types['Sound'] = [];
         } elseif ($types['Text']) {
             // For pdf and other texts, Iiif says no painting, but manifest
             // rendering, but UV doesn't display it. Mirador doesn't manage them
@@ -326,7 +326,7 @@ class Manifest extends AbstractResourceType
         }
 
         // All other files are downloadable.
-        $manifestRenderings += array_replace($types['Image'], $types['Video'], $types['Audio'],
+        $manifestRenderings += array_replace($types['Image'], $types['Video'], $types['Sound'],
             $types['Text'], $types['Dataset'], $types['Model'], $types['other']);
 
         // Second loop to store the category.
