@@ -256,7 +256,7 @@ class Manifest extends AbstractResourceType
         $manifestRenderings = [];
 
         // First loop to get the full list of types.
-        $types = [
+        $iiifTypes = [
             // Painting.
             'Image' => [],
             'Video' => [],
@@ -275,18 +275,18 @@ class Manifest extends AbstractResourceType
             $result[$mediaId] = null;
             $contentResource = new ContentResource($media);
             if ($contentResource->hasIdAndType()) {
-                $type = $contentResource->getType();
-                if (in_array($type, ['Image', 'Video', 'Sound', 'Text'])) {
-                    $types[$type][$mediaId] = [
+                $iiifType = $contentResource->getType();
+                if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
+                    $iiifTypes[$iiifType][$mediaId] = [
                         'content' => $contentResource,
                     ];
                 } else {
-                    $types['other'][$mediaId] = [
+                    $iiifTypes['other'][$mediaId] = [
                         'content' => $contentResource,
                     ];
                 }
             } else {
-                $types['invalid'][$mediaId] = [
+                $iiifTypes['invalid'][$mediaId] = [
                     'content' => $contentResource,
                 ];
             }
@@ -299,35 +299,39 @@ class Manifest extends AbstractResourceType
 
         // Canvas manages only image, audio and video: it requires size and/or
         // duration.
-        // Priorities are Image, then Video, Sound, and Text.
-        if ($types['Image']) {
-            $canvasPaintings = $types['Image'];
-            $types['Image'] = [];
-        } elseif ($types['Video']) {
-            $canvasPaintings = $types['Video'];
-            $types['Video'] = [];
-        } elseif ($types['Sound']) {
-            $canvasPaintings = $types['Sound'];
-            $types['Sound'] = [];
-        } elseif ($types['Text']) {
+        // Priorities are Model, Image, then Video, Sound, and Text.
+        // Model has prioritary because when an item is a model, there are
+        // multiple files, including texture images, not to be displayed.
+        if ($iiifTypes['Model']) {
+            // TODO Same issue for Model than for Text?
+            // $canvasRenderings = $iiifTypes['Model'];
+            $canvasPaintings = $iiifTypes['Model'];
+            $iiifTypes['Model'] = [];
+            // When an item is a model, images are skipped.
+            $iiifTypes['Image'] = [];
+        } elseif ($iiifTypes['Image']) {
+            $canvasPaintings = $iiifTypes['Image'];
+            $iiifTypes['Image'] = [];
+        } elseif ($iiifTypes['Video']) {
+            $canvasPaintings = $iiifTypes['Video'];
+            $iiifTypes['Video'] = [];
+        } elseif ($iiifTypes['Sound']) {
+            $canvasPaintings = $iiifTypes['Sound'];
+            $iiifTypes['Sound'] = [];
+        } elseif ($iiifTypes['Text']) {
             // For pdf and other texts, Iiif says no painting, but manifest
             // rendering, but UV doesn't display it. Mirador doesn't manage them
             // anyway.
             // TODO The solution is to manage pdf as a list of images via the image server! And to make it type Image? And to add textual content.
-            $canvasPaintings = $types['Text'];
-            // $canvasRenderings = $types['Text'];
-            // $manifestRendering = $types['Text'];
-            $types['Text'] = [];
-        } elseif ($types['Model']) {
-            // TODO Same issue for Model than for Text?
-            // $canvasRenderings = $types['Model'];
-            $canvasPaintings = $types['Model'];
-            $types['Model'] = [];
+            $canvasPaintings = $iiifTypes['Text'];
+            // $canvasRenderings = $iiifTypes['Text'];
+            // $manifestRendering = $iiifTypes['Text'];
+            $iiifTypes['Text'] = [];
         }
 
         // All other files are downloadable.
-        $manifestRenderings += array_replace($types['Image'], $types['Video'], $types['Sound'],
-            $types['Text'], $types['Dataset'], $types['Model'], $types['other']);
+        $manifestRenderings += array_replace($iiifTypes['Image'], $iiifTypes['Video'], $iiifTypes['Sound'],
+            $iiifTypes['Text'], $iiifTypes['Dataset'], $iiifTypes['Model'], $iiifTypes['other']);
 
         // Second loop to store the category.
         foreach (array_keys($result) as $mediaId) {

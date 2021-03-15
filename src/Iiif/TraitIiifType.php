@@ -52,6 +52,7 @@ trait TraitIiifType
         'dctype:Text' => 'Text',
         // TODO This is not specified in the context.
         'dctype:PhysicalObject' => 'Model',
+        'dctype:Model' => 'Model',
     ];
 
     protected $mediaTypeTypes = [
@@ -61,7 +62,7 @@ trait TraitIiifType
         // 'font',
         'image' => 'Image',
         // 'message',
-        // 'model',
+        'model' => 'Model',
         // 'multipart',
         'text' => 'Text',
         'video' => 'Video',
@@ -93,6 +94,7 @@ trait TraitIiifType
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Text',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Text',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Dataset',
+        'application/vnd.threejs+json' => 'Model',
         'application/x-gzip' => null,
         'application/x-ms-wmp' => null,
         'application/x-msdownload' => null,
@@ -156,7 +158,7 @@ trait TraitIiifType
 
     protected function initIiifType()
     {
-        if ($this->resource->ingester() == 'iiif') {
+        if ($this->resource->ingester() === 'iiif') {
             $mediaData = $this->resource->mediaData();
             if (isset($mediaData['type'])) {
                 $this->type = $mediaData['type'];
@@ -176,6 +178,21 @@ trait TraitIiifType
         }
 
         if ($mediaType) {
+            if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
+                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
+                if ($extension === 'json' || $extension === 'gltf') {
+                    $this->type = 'Model';
+                    return $this->type;
+                }
+            }
+            if ($mediaType === 'application/octet-stream') {
+                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                if ($extension === 'glb') {
+                    $this->type = 'Model';
+                    return $this->type;
+                }
+            }
             $mediaTypeType = strtok($mediaType, '/');
             if (isset($this->mediaTypeTypes[$mediaTypeType])) {
                 $this->type = $this->mediaTypeTypes[$mediaTypeType];

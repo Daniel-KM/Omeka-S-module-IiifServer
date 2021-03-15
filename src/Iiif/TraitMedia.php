@@ -173,6 +173,21 @@ trait TraitMedia
 
         $mediaType = $this->resource->mediaType();
         if ($mediaType) {
+            if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
+                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
+                if ($extension === 'json') {
+                    return 'model/vnd.threejs+json';
+                } elseif ($extension === 'gltf') {
+                    return 'model/gltf+json';
+                }
+            }
+            if ($mediaType === 'application/octet-stream') {
+                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                if ($extension === 'glb') {
+                    return 'model/gltf-binary';
+                }
+            }
             // TODO Don't use the original format for the image?
             return $this->isImage() ? 'image/jpeg' : $mediaType;
         }
