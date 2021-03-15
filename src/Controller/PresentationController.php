@@ -58,7 +58,8 @@ class PresentationController extends AbstractActionController
 
     public function collectionAction()
     {
-        $resource = $this->fetchResource('item_sets');
+        // A collection can be an item set or an item with external manifests.
+        $resource = $this->fetchResource('resources');
         if (!$resource) {
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
@@ -78,16 +79,18 @@ class PresentationController extends AbstractActionController
     public function listAction()
     {
         // TODO Set the resource type to fetch resources from identifiers?
-        $resources = $this->fetchResources();
+        $resources = $this->fetchResourcesAndIiifUrls();
         if (!count($resources)) {
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
+        $query = $this->params()->fromQuery();
         $version = $this->requestedVersion();
+        $currentUrl = $this->url()->fromRoute(null, [], ['query' => $query, 'force_canonical' => true], true);
 
         $iiifCollectionList = $this->viewHelpers()->get('iiifCollectionList');
         try {
-            $manifest = $iiifCollectionList($resources, $version);
+            $manifest = $iiifCollectionList($resources, $version, $currentUrl);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
@@ -104,7 +107,7 @@ class PresentationController extends AbstractActionController
 
         $internal = (bool) $this->params()->fromQuery('internal');
         if (!$internal) {
-            $externalManifest = $this->viewHelpers()->get('iiifManifestExternal')->__invoke($resource);
+            $externalManifest = $this->viewHelpers()->get('iiifManifestExternal')->__invoke($resource, true);
             if ($externalManifest) {
                 return $this->redirect()->toUrl($externalManifest);
             }
@@ -195,7 +198,7 @@ class PresentationController extends AbstractActionController
      * @param string $resourceType
      * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
      */
-    protected function fetchResources($resourceType = null): array
+    protected function fetchResourcesAndIiifUrls($resourceType = null): array
     {
         $params = $this->params();
         $identifiers = $params->fromQuery('id');
@@ -216,16 +219,33 @@ class PresentationController extends AbstractActionController
             return [];
         }
 
+        // Remove all ids that are urls, because they are already iiif urls.
+        $urlIdentifiers = [];
+        $nonUrlIdentifiers = [];
+        foreach ($identifiers as $identifier) {
+            $protocol = substr($identifier, 0, 7);
+            if ($protocol === 'https:/' || $protocol === 'http://') {
+                $urlIdentifiers[] = $identifier;
+            } else {
+                $nonUrlIdentifiers[] = $identifier;
+            }
+        }
+
         // Extract the resources from the identifier.
         $useCleanIdentifier = $this->useCleanIdentifier();
         if ($useCleanIdentifier) {
             $getResourcesFromIdentifiers = $this->viewHelpers()->get('getResourcesFromIdentifiers');
-            $resources = $getResourcesFromIdentifiers($identifiers, $resourceType);
+            $resources = $nonUrlIdentifiers
+                ? $getResourcesFromIdentifiers($nonUrlIdentifiers, $resourceType)
+                : [];
             // A loop is done with identifiers to keep original order and
             // possible duplicates.
             $result = [];
             foreach ($identifiers as $identifier) {
-                if (isset($resources[$identifier])) {
+                $protocol = substr($identifier, 0, 7);
+                if ($protocol === 'https:/' || $protocol === 'http://') {
+                    $result[] = $identifier;
+                } elseif (isset($resources[$identifier])) {
                     $result[] = $resources[$identifier];
                 }
             }
@@ -234,25 +254,31 @@ class PresentationController extends AbstractActionController
 
         $ids = array_filter(array_map('intval', $identifiers));
         if (!$ids) {
-            return [];
+            return $urlIdentifiers;
         }
 
         // Currently, Omeka S doesn't allow to read mixed resources.
         $services = $this->getEvent()->getApplication()->getServiceManager();
         $entityManager = $services->get('Omeka\EntityManager');
-        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)->findBy(['id' => $ids]);
+        $resources = $entityManager->getRepository(\Omeka\Entity\Resource::class)
+            ->findBy(['id' => $ids]);
         // A loop is done with identifiers to keep original order and possible
         // duplicates.
         $adapter = $services->get('Omeka\ApiAdapterManager')->get('resources');
-        $result = [];
+        $resourceList = [];
         foreach ($resources as $resource) {
-            $result[$resource->getId()] = $adapter->getRepresentation($resource);
+            $resourceList[$resource->getId()] = $adapter->getRepresentation($resource);
         }
-        $resources = [];
-        foreach (array_intersect($identifiers, array_keys($result)) as $id) {
-            $resources[] = $result[$id];
+        $result = [];
+        foreach ($identifiers as $identifier) {
+            $protocol = substr($identifier, 0, 7);
+            if ($protocol === 'https:/' || $protocol === 'http://') {
+                $result[] = $identifier;
+            } elseif (isset($resourceList[$identifier])) {
+                $result[] = $resourceList[$identifier];
+            }
         }
-        return $resources;
+        return $result;
     }
 
     protected function useCleanIdentifier(): bool

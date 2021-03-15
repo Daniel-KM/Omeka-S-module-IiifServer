@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -32,27 +32,27 @@ namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Omeka\Api\Representation\ItemSetRepresentation;
 
 /**
- * Helper to get a IIIF Collection manifest for an item set
+ * Helper to get a IIIF Collection manifest for an item set or an item with
+ * external manifests.
  */
 class IiifCollection2 extends AbstractHelper
 {
     use \IiifServer\Iiif\TraitRights;
 
     /**
-     * Get the IIIF Collection manifest for the specified item set.
+     * Get the IIIF Collection manifest for the specified item set or item.
      *
      * @todo Use a representation/context with a getResource(), a toString()
      * that removes empty values, a standard json() without ld and attach it to
      * event in order to modify it if needed.
      * @see IiifManifest
      *
-     * @param ItemSetRepresentation $itemSet Item set
+     * @param AbstractResourceEntityRepresentation $resource
      * @return Object|null
      */
-    public function __invoke(ItemSetRepresentation $itemSet)
+    public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
@@ -79,33 +79,48 @@ class IiifCollection2 extends AbstractHelper
             'manifests' => [],
         ];
 
-        $manifest = array_merge($manifest, $this->buildManifestBase($itemSet));
+        $view = $this->getView();
+        $this->setting = $view->getHelperPluginManager()->get('setting');
 
-        $metadata = $this->iiifMetadata($itemSet);
+        $isItemSet = $resource->resourceName() === 'item_sets';
+
+        if ($isItemSet) {
+            $manifest = array_merge($manifest, $this->buildManifestBase($resource));
+        } else {
+            // Use an item with multiple external manifests as a collection.
+            $manifest['@id'] = $view->url('iiifserver/collection', ['id' => $resource->id(), 'version' => '2'], ['force_canonical' => true], true);
+            $forceFrom = $this->setting->__invoke('iiifserver_url_force_from');
+            if ($forceFrom && (strpos($manifest['@id'], $forceFrom) === 0)) {
+                $manifest['@id'] = substr_replace($manifest['@id'], $this->setting->__invoke('iiifserver_url_force_to'), 0, strlen($forceFrom));
+            }
+            $manifest['@type'] = 'sc:Collection';
+            $manifest['label'] = $resource->displayTitle();
+        }
+
+        $metadata = $this->iiifMetadata($resource);
         $manifest['metadata'] = $metadata;
 
-        $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
+        $descriptionProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags($itemSet->value($descriptionProperty, ['type' => 'literal', 'default' => '']));
+            $description = strip_tags($resource->value($descriptionProperty, ['type' => 'literal', 'default' => '']));
         }
         $manifest['description'] = $description;
 
-        $this->setting = $this->view->getHelperPluginManager()->get('setting');
-        $license = $this->rightsResource($itemSet);
+        $license = $this->rightsResource($resource);
         if ($license) {
             $manifest['license'] = $license;
         }
 
-        $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
+        $attributionProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags($itemSet->value($attributionProperty, ['type' => 'literal', 'default' => '']));
+            $attribution = strip_tags((string) $resource->value($attributionProperty, ['type' => 'literal', 'default' => '']));
         }
         if (empty($attribution)) {
-            $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
+            $attribution = $this->setting->__invoke('iiifserver_manifest_attribution_default');
         }
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
+        $manifest['logo'] = $this->setting->__invoke('iiifserver_manifest_logo_default');
 
         // TODO Use resource thumbnail (> Omeka 1.3).
         // $manifest['thumbnail'] = $thumbnail;
@@ -115,7 +130,7 @@ class IiifCollection2 extends AbstractHelper
          // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.
          $manifest['service'] = [
              '@context' => $this->view->url('api-context', [], ['force_canonical' => true]),
-             '@id' => $itemSet->apiUrl(),
+             '@id' => $resource->apiUrl(),
              'format' =>'application/ld+json',
              // TODO What is the profile of Omeka json-ld?
              // 'profile' => '',
@@ -128,12 +143,12 @@ class IiifCollection2 extends AbstractHelper
          */
 
         $manifest['related'] = [
-            '@id' => $this->view->publicResourceUrl($itemSet, true),
+            '@id' => $this->view->publicResourceUrl($resource, true),
             'format' => 'text/html',
         ];
 
         $manifest['seeAlso'] = [
-            '@id' => $itemSet->apiUrl(),
+            '@id' => $resource->apiUrl(),
             'format' => 'application/ld+json',
             // TODO What is the profile of Omeka json-ld?
             // 'profile' => '',
@@ -143,17 +158,12 @@ class IiifCollection2 extends AbstractHelper
         // $manifest['within'] = $within;
 
         // List of manifests inside the item set.
-        $manifests = [];
-        $response = $this->view->api()->search('items', ['item_set_id' => $itemSet->id()]);
-        $items = $response->getContent();
-        foreach ($items as $item) {
-            $manifests[] = $this->buildManifestBase($item);
-        }
-        $manifest['manifests'] = $manifests;
+        $manifest['manifests'] = $isItemSet
+            ? $this->manifestsForItemSet($resource)
+            : $this->externalManifestsOfResource($resource);
 
         // Give possibility to customize the manifest.
         // TODO Manifest should be a true object, with many sub-objects.
-        $resource = $itemSet;
         $type = 'collection';
         $params = compact('manifest', 'resource', 'type');
         $params = $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
@@ -178,7 +188,7 @@ class IiifCollection2 extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @return array
      */
-    protected function buildManifestBase(AbstractResourceEntityRepresentation $resource)
+    protected function buildManifestBase(AbstractResourceEntityRepresentation $resource): array
     {
         $resourceName = $resource->resourceName();
         $mapRoutes = [
@@ -196,6 +206,53 @@ class IiifCollection2 extends AbstractHelper
         return $manifest;
     }
 
+    protected function manifestsForItemSet(AbstractResourceEntityRepresentation $resource): array
+    {
+        $manifests = [];
+        $response = $this->view->api()->search('items', ['item_set_id' => $resource->id()]);
+        $items = $response->getContent();
+        foreach ($items as $item) {
+            $manifests[] = $this->buildManifestBase($item);
+        }
+        return $manifests;
+    }
+
+    protected function externalManifestsOfResource(AbstractResourceEntityRepresentation $resource): array
+    {
+        $manifestProperty = $this->setting->__invoke('iiifserver_manifest_external_property');
+        if (empty($manifestProperty)) {
+            return [];
+        }
+
+        $result = [];
+
+        // Manage the case where the url is saved as an uri or a text and the
+        // case where the property contains other values that are not url.
+        foreach ($resource->value($manifestProperty, ['all' => true]) as $value) {
+            if ($value->type() === 'uri') {
+                $val = [
+                    '@id' => $value->uri(),
+                    '@type' => 'sc:Manifest',
+                ];
+                $label = $value->value();
+                if (strlen((string) $label)) {
+                    $val['label'] = $label;
+                }
+                $result[] = $val;
+            } else {
+                $urlManifest = (string) $value;
+                if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
+                    $result[] = [
+                        '@id' => $urlManifest,
+                        '@type' => 'sc:Manifest',
+                    ];
+                }
+            }
+        }
+
+        return $result;
+    }
+
     /**
      * Prepare the metadata of a resource.
      *
@@ -204,7 +261,7 @@ class IiifCollection2 extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @return array
      */
-    protected function iiifMetadata(AbstractResourceEntityRepresentation $resource)
+    protected function iiifMetadata(AbstractResourceEntityRepresentation $resource): array
     {
         $jsonLdType = $resource->getResourceJsonLdType();
         $map = [
@@ -246,7 +303,7 @@ class IiifCollection2 extends AbstractHelper
 
         // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
 
-        return $this->view->setting('iiifserver_manifest_html_descriptive')
+        return $this->setting->__invoke('iiifserver_manifest_html_descriptive')
             ? $this->valuesAsHtml($values)
             : $this->valuesAsPlainText($values);
     }
@@ -257,7 +314,7 @@ class IiifCollection2 extends AbstractHelper
      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
      * @return array
      */
-    protected function valuesAsPlainText(array $values)
+    protected function valuesAsPlainText(array $values): array
     {
         $metadata = [];
         $publicResourceUrl = $this->view->plugin('publicResourceUrl');
@@ -281,7 +338,7 @@ class IiifCollection2 extends AbstractHelper
      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
      * @return array
      */
-    protected function valuesAsHtml(array $values)
+    protected function valuesAsHtml(array $values): array
     {
         $metadata = [];
         $publicResourceUrl = $this->view->plugin('publicResourceUrl');
@@ -305,7 +362,7 @@ class IiifCollection2 extends AbstractHelper
     /**
      * Added in order to use trait TraitRights.
      */
-    protected function getContext()
+    protected function getContext(): string
     {
         return 'http://iiif.io/api/presentation/2/context.json';
     }

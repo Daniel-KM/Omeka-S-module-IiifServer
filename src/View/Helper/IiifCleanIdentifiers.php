@@ -50,7 +50,7 @@ class IiifCleanIdentifiers extends AbstractHelper
     /**
      * Get the identifier or the list of identifiers from ids or resources.
      *
-     * @param AbstractResourceEntityRepresentation[]|AbstractResourceEntityRepresentation|int|]|int $resourcesOrIds
+     * @param AbstractResourceEntityRepresentation[]|AbstractResourceEntityRepresentation|int|]|int|string[]|string $resourcesOrIds Or urls.
      * @return string[]|string Order and duplicates are kept. The internal id is
      * returned when there is no identifier.
      */
@@ -60,24 +60,25 @@ class IiifCleanIdentifiers extends AbstractHelper
         $in = $isSingle ? [$resourcesOrIds] : $resourcesOrIds;
         $first = reset($in);
         $isNumeric = is_numeric($first);
+        $isResource = is_object($first);
 
-        if (!$this->getIdentifiersFromResources) {
+        $returnId = function ($v) {
+            return is_object($v) ? (string) $v->id() : (string) $v;
+        };
+
+        if (!$this->getIdentifiersFromResources
+            || (!$isNumeric && !$isResource)
+        ) {
             if ($isNumeric) {
                 return $isSingle
                     ? (string) $first
                     : array_map('strval', $resourcesOrIds);
             }
-            $returnId = function ($v) {
-                return (string) $v->id();
-            };
             return $isSingle
                 ? $returnId($first)
                 : array_map($returnId, $resourcesOrIds);
         }
 
-        $returnId = function ($v) {
-            return $v->id();
-        };
         if (!$isNumeric) {
             $in = $isSingle
                 ? $first->id()
@@ -99,6 +100,7 @@ class IiifCleanIdentifiers extends AbstractHelper
                 };
             }
         } elseif ($this->rawIdentifier) {
+            // Fake function for simplicity.
             $output = function ($v) {
                 return $v;
             };

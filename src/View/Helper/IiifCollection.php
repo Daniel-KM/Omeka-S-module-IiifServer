@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -31,22 +31,23 @@
 namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
-use Omeka\Api\Representation\ItemSetRepresentation;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
- * Helper to get a IIIF Collection manifest for an item set
+ * Helper to get a IIIF Collection manifest for an item set or an item with
+ * external manifests.
  */
 class IiifCollection extends AbstractHelper
 {
     /**
-     * Get the IIIF Collection manifest for the specified item set.
+     * Get the IIIF Collection manifest for the specified item set or item.
      *
-     * @param ItemSetRepresentation $itemSet Item set
+     * @param AbstractResourceEntityRepresentation $resource
      * @param string $version
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke(ItemSetRepresentation $itemSet, $version = null)
+    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null)
     {
         $view = $this->getView();
 
@@ -57,7 +58,7 @@ class IiifCollection extends AbstractHelper
         }
 
         return $version === '2'
-            ? $view->iiifCollection2($itemSet)
-            : $view->iiifCollection3($itemSet);
+            ? $view->iiifCollection2($resource)
+            : $view->iiifCollection3($resource);
     }
 }

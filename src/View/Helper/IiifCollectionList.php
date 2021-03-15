@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -41,10 +41,11 @@ class IiifCollectionList extends AbstractHelper
      *
      * @param array $resources Array of resources.
      * @param string $version
+     * @param string $url The url of the collection (avoid to recreate it).
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke(array $resources, $version = null)
+    public function __invoke(array $resources, $version = null, $url = null)
     {
         $view = $this->getView();
 
@@ -55,7 +56,7 @@ class IiifCollectionList extends AbstractHelper
         }
 
         return $version === '2'
-            ? $view->iiifCollectionList2($resources)
-            : $view->iiifCollectionList3($resources);
+            ? $view->iiifCollectionList2($resources, $url)
+            : $view->iiifCollectionList3($resources, $url);
     }
 }

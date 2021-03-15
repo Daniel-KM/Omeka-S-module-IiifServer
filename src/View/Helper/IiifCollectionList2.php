@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2020 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -40,17 +40,19 @@ class IiifCollectionList2 extends AbstractHelper
     use \IiifServer\Iiif\TraitRights;
 
     /**
-     * Get the IIIF Collection manifest for the specified list of resources.
+     * Get the IIIF Collection manifest for the specified list of resources or url.
      *
      * @todo Use a representation/context with a getResource(), a toString()
      * that removes empty values, a standard json() without ld and attach it to
      * event in order to modify it if needed.
      * @see IiifManifest
      *
-     * @param array $resources Array of resources.
+     * @param array $resources Array of resources or iiif url.
+     * @param string $url The url of the list (avoid to recreate it). It is
+     * required when the source contains urls.
      * @return Object|null
      */
-    public function __invoke(array $resources)
+    public function __invoke(array $resourcesOrUrls, $url = null)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
@@ -78,7 +80,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         $translate = $this->view->plugin('translate');
 
-        $manifest['@id'] = $this->view->iiifUrl($resources, 'iiifserver/set', '2');
+        $manifest['@id'] = $url ?: $this->view->iiifUrl($resourcesOrUrls, 'iiifserver/set', '2');
 
         $label = $translate('Dynamic list');
         $manifest['label'] = $label;
@@ -124,11 +126,22 @@ class IiifCollectionList2 extends AbstractHelper
         // and items, so the global order is not kept for them.
         $collections = [];
         $manifests = [];
-        foreach ($resources as $resource) {
-            if ($resource->resourceName() == 'item_sets') {
-                $collections[] = $this->buildManifestBase($resource);
+        foreach ($resourcesOrUrls as $resource) {
+            if (is_object($resource)) {
+                if ($resource->resourceName() == 'item_sets') {
+                    $collections[] = $this->buildManifestBase($resource);
+                } else {
+                    $manifests[] = $this->buildManifestBase($resource);
+                }
             } else {
-                $manifests[] = $this->buildManifestBase($resource);
+                $protocol = substr((string) $resource, 0, 7);
+                // It's not possible to know if it's a collection or a manifest.
+                if ($protocol === 'https:/' || $protocol === 'http://') {
+                    $manifests[] = [
+                        '@id' => $resource,
+                        '@type' => 'sc:Manifest',
+                    ];
+                }
             }
         }
         $manifest['collections'] = $collections;
@@ -136,7 +149,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         // Give possibility to customize the manifest.
         // TODO Manifest should be a true object, with many sub-objects.
-        $resource = &$resources;
+        $resource = &$resourcesOrUrls;
         $type = 'collection_list';
         $params = compact('manifest', 'resource', 'type');
         $params = $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
@@ -150,8 +163,7 @@ class IiifCollectionList2 extends AbstractHelper
             $manifest['manifests'] = [];
         }
 
-        $manifest = (object) $manifest;
-        return $manifest;
+        return (object) $manifest;
     }
 
     /**
