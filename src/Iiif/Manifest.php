@@ -154,7 +154,7 @@ class Manifest extends AbstractResourceType
         $index = 0;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo['on'] === 'Canvas') {
+            if ($mediaInfo && $mediaInfo['on'] === 'Canvas') {
                 $items[] = new Canvas($media, [
                     'index' => ++$index,
                     'content' => $mediaInfo['content'],
@@ -178,7 +178,7 @@ class Manifest extends AbstractResourceType
         $siteSlug = $site ? $site->slug() : null;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo['on'] === 'Manifest') {
+            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
                 $rendering = new Rendering($media, [
                     'index' => $media->id(),
                     'siteSlug' => $siteSlug,
