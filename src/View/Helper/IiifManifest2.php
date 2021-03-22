@@ -248,7 +248,7 @@ class IiifManifest2 extends AbstractHelper
                 }
                 // Check if this is a json file for old Omeka or old imports.
                 else {
-                    $extension = strtolower(pathinfo($media->source(), PATHINFO_EXTENSION));
+                    $extension = strtolower(pathinfo((string) $media->source(), PATHINFO_EXTENSION));
                     // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
                     if ($mediaType === 'text/plain') {
                         if ($extension === 'json') {
@@ -260,7 +260,7 @@ class IiifManifest2 extends AbstractHelper
                         }
                     }
                     // elseif ($mediaType === 'application/octet-stream') {
-                    //     if (pathinfo($media->source(), PATHINFO_EXTENSION) == 'bin') {
+                    //     if (pathinfo((string) $media->source(), PATHINFO_EXTENSION) == 'bin') {
                     //         $gltfFiles[] = $media;
                     //     }
                     // }

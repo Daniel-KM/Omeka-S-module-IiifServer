@@ -179,7 +179,7 @@ trait TraitIiifType
 
         if ($mediaType) {
             if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
-                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
                 // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
                 if ($extension === 'json' || $extension === 'gltf') {
                     $this->type = 'Model';
@@ -187,7 +187,7 @@ trait TraitIiifType
                 }
             }
             if ($mediaType === 'application/octet-stream') {
-                $extension = strtolower(pathinfo($this->resource->source(), PATHINFO_EXTENSION));
+                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
                 if ($extension === 'glb') {
                     $this->type = 'Model';
                     return $this->type;
