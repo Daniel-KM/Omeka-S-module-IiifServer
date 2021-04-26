@@ -86,7 +86,7 @@ trait TraitDescriptive
 
         $metadata = [];
         foreach ($values as $propertyData) {
-            $metadataValue = new ValueLanguage($propertyData['values'], true);
+            $metadataValue = new ValueLanguage($propertyData['values'], true, null, true);
             if (!$metadataValue->count()) {
                 continue;
             }

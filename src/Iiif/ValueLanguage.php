@@ -36,19 +36,24 @@ use Omeka\Api\Representation\ValueRepresentation;
 class ValueLanguage implements JsonSerializable
 {
     /**
-     * @@var \Omeka\Api\Representation\ValueRepresentation[]
+     * @var \Omeka\Api\Representation\ValueRepresentation[]
      */
     protected $values;
 
     /**
-     * @@var string
+     * @var bool
      */
     protected $allowHtml;
 
     /**
-     * @@var string
+     * @var string
      */
     protected $fallback;
+
+    /**
+     * @var bool
+     */
+    protected $multipleValues;
 
     /**
      * @var ArrayObject
@@ -65,9 +70,11 @@ class ValueLanguage implements JsonSerializable
      * @param bool $allowHtml Html is allowed only in summary, metadata value
      *   and requiredStatement.
      * @param string $fallback
-     * @param array|string $fallback
+     * @param bool $multipleValues Don't keep only the first value of each language.
+     * @param array|string $fallback Should have only one value if only one
+     *   value is allowed.
      */
-    public function __construct($values, $allowHtml = false, $fallback = null)
+    public function __construct($values, bool $allowHtml = false, ?string $fallback = null, bool $multipleValues = false)
     {
         if (is_string($values)) {
             $values = ['none' => [$values]];
@@ -78,6 +85,7 @@ class ValueLanguage implements JsonSerializable
         $this->values = $values;
         $this->allowHtml = $allowHtml;
         $this->fallback = $fallback;
+        $this->multipleValues = $multipleValues;
 
         $this->prepareOutput();
     }
@@ -131,24 +139,35 @@ class ValueLanguage implements JsonSerializable
                     $escapeAttr = $helpers->get('escapeHtmlAttr');
                     foreach ($this->values as $value) {
                         $lang = $value->lang() ?: 'none';
-                        if (strpos($value->type(), 'resource') === 0 && $vr = $value->valueResource()) {
-                            $html = '<a class="resource-link" href="' . $escapeAttr($publicResourceUrl($vr, true)) . '">'
-                                . '<span class="resource-name">' . $escape($vr->displayTitle()) . '</span>'
-                                . '</a>';
-                        } else {
-                            $html = $value->asHtml();
+                        if ($this->multipleValues || empty($this->output[$lang])) {
+                            if (strpos($value->type(), 'resource') === 0 && $vr = $value->valueResource()) {
+                                $html = '<a class="resource-link" href="' . $escapeAttr($publicResourceUrl($vr, true)) . '">'
+                                    . '<span class="resource-name">' . $escape($vr->displayTitle()) . '</span>'
+                                    . '</a>';
+                            } else {
+                                $html = $value->asHtml();
+                            }
+                            $this->output[$lang][] = $html;
                         }
-                        $this->output[$lang][] = $html;
                     }
                 } else {
                     foreach ($this->values as $value) {
                         $lang = $value->lang() ?: 'none';
-                        $this->output[$lang][] = $value->type() === 'uri'
-                            ? $value->uri()
-                            : strip_tags((string) $value);
+                        if ($this->multipleValues || empty($this->output[$lang])) {
+                            $this->output[$lang][] = $value->type() === 'uri'
+                                ? $value->uri()
+                                : strip_tags((string) $value);
+                        }
                     }
                 }
             } else {
+                // This check is normally useless.
+                if (!$this->multipleValues) {
+                    foreach ($this->values as $lang => &$v) {
+                        $v = [reset($v)];
+                    }
+                    unset($v);
+                }
                 $this->output->exchangeArray($this->values);
             }
 
