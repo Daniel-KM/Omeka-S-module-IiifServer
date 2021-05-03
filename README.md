@@ -42,7 +42,7 @@ Installation can be done:
 
 * From the zip
 
-Download the last release [`IiifServer.zip`] from the list of releases (the
+Download the last release [IiifServer.zip] from the list of releases (the
 master does not contain the dependencies), uncompress it in the `modules`
 directory, and rename the module folder `IiifServer`.
 
@@ -70,8 +70,8 @@ audio and video files too.
 
 PHP should be installed with the extension `exif` in order to get the size of
 images. This is the case for all major distributions and providers. At least one
-of the php extensions [`GD`] or [`Imagick`] are recommended. They are installed
-by default in most servers. If not, the image server will use the command line
+of the php extensions [GD] or [Imagick] are recommended. They are installed by
+default in most servers. If not, the image server will use the command line
 [ImageMagick] tool `convert` automatically.
 
 ### Web server and identifiers containing `/`
@@ -98,6 +98,12 @@ If you cannot access to config of the server, two settings can fix it in the
 config of the module :
 - disable the advanced option "Use the identifiers from Clean Url";
 - set the "Prefix to use for identifier".
+
+### Local access to iiif source
+
+The iiif authentication api is not yet integrated. Anyway, to access iiif
+resources when authenticated, the [fix #omeka/omeka-s/1714] can be patched or
+the module [Guest] can be used.
 
 
 Notes
@@ -442,10 +448,12 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Diva]: https://gitlab.com/Daniel-KM/Omeka-S-module-Diva
 [Omeka Classic]: https://omeka.org
 [Iiif Search]: https://github.com/bubdxm/Omeka-S-module-IiifSearch
-[`GD`]: https://secure.php.net/manual/en/book.image.php
-[`Imagick`]: https://php.net/manual/en/book.imagick.php
+[GD]: https://secure.php.net/manual/en/book.image.php
+[Imagick]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
-[`IiifServer.zip`]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
+[IiifServer.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
+[fix #omeka/omeka-s/1714]: https://github.com/omeka/omeka-s/pull/1714
+[Guest]: https://gitlab.com/Daniel-KM/Omeka-S-module-Guest
 [it doesn't allow the url encoded `/`]: https://stackoverflow.com/questions/13834007/url-with-encoded-slashes-goes-to-404/13839424#13839424
 [url encoded slashes]: https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
