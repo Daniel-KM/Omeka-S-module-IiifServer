@@ -130,10 +130,14 @@ class Body extends AbstractResourceType
             // "the URL may be the complete URL to a particular size of the image
             // content", so the large one here, and it's always a jpeg.
             // It's not needed to use the full original size.
-            $sizeLarge = $this->imageSize->__invoke($this->resource, 'large');
+            // Nevertheless, UniversalViewer requires the original size image,
+            // because it doesn't load the info.json, but only the id: it
+            // considers it as the whole image.
+            // $size = $this->imageSize->__invoke($this->resource, 'large');
+            $size = $this->imageSize->__invoke($this->resource, 'original');
             return $this->iiifImageUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
-                'size' => !empty($sizeLarge) ? $sizeLarge['width'] . ',' . $sizeLarge['height'] : 'max',
+                'size' => !empty($size) ? $size['width'] . ',' . $size['height'] : 'max',
                 'rotation' => 0,
                 'quality' => 'default',
                 'format' => 'jpg',
