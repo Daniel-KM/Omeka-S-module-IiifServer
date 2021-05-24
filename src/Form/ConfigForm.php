@@ -2,6 +2,7 @@
 
 namespace IiifServer\Form;
 
+use IiifServer\Form\Element\OptionalUrl;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
@@ -547,6 +548,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_url_force_to',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_image_server',
+                'type' => OptionalUrl::class,
+                'options' => [
+                    'label' => 'External image server url', // @translate
+                    'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_image_server',
                 ],
             ])
         ;

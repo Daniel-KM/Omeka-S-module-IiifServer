@@ -68,6 +68,9 @@ return [
         ],
     ],
     'form_elements' => [
+        'invokables' => [
+            Form\Element\OptionalUrl::class => Form\Element\OptionalUrl::class,
+        ],
         'factories' => [
             Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
@@ -388,6 +391,8 @@ return [
             // These options allows to bypass a proxy issue.
             'iiifserver_url_force_from' => '',
             'iiifserver_url_force_to' => '',
+            // This option is used by module Bulk Import and for a future improvement.
+            'iiifserver_image_server' => '',
         ],
     ],
 ];
