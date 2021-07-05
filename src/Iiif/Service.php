@@ -59,7 +59,12 @@ class Service extends AbstractType
 
     protected $id;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource = null, array $options = null)
+    /**
+     * @var array
+     */
+    protected $options;
+
+    public function __construct(AbstractResourceEntityRepresentation $resource = null, array $options = [])
     {
         if (isset($options['@id'])) {
             $options['id'] = $options['@id'];
@@ -69,8 +74,7 @@ class Service extends AbstractType
             $options['type'] = $options['@type'];
             unset($options['@type']);
         }
-        $options = array_filter($options);
-        parent::__construct($resource, $options);
+        $this->options = array_filter($options);
     }
 
     public function getContent()
