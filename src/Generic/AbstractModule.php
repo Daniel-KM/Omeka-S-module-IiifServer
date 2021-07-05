@@ -77,7 +77,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         }
         if (!$this->checkAllResourcesToInstall()) {
             $message = new Message(
-                $translator->translate('This module has resources that connot be installed.') // @translate
+                $translator->translate('This module has resources that cannot be installed.') // @translate
             );
             throw new ModuleCannotInstallException((string) $message);
         }
