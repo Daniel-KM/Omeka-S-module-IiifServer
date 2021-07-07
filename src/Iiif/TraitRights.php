@@ -110,6 +110,10 @@ trait TraitRights
                 return null;
         }
 
+        if($url){
+            return $url;
+        }
+
         // Text is not allowed for presentation 3.
         $isPresentation3 = $this->getContext() === 'http://iiif.io/api/presentation/3/context.json';
         $orText = $orText && !$isPresentation3;
