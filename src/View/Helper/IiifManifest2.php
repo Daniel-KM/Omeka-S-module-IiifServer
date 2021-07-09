@@ -780,30 +780,34 @@ class IiifManifest2 extends AbstractHelper
             'format' => 'jpg',
         ]);
 
-        $imageResource['@id'] = $imageUrl;
+        $imageApiDisabled = $this->view->setting('iiifserver_manifest_image_api_disabled');
+
+        $imageResource['@id'] = $imageApiDisabled ? $media->originalUrl() : $imageUrl;
         $imageResource['@type'] = 'dctypes:Image';
         $imageResource['format'] = 'image/jpeg';
         $imageResource['width'] = $width;
         $imageResource['height'] = $height;
 
-        $imageUrlService = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
-        $imageResourceService = [];
-        $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
-        $imageResourceService['@id'] = $imageUrlService;
-        $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
+        if (!$imageApiDisabled) {
+            $imageUrlService = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
+            $imageResourceService = [];
+            $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
+            $imageResourceService['@id'] = $imageUrlService;
+            $imageResourceService['profile'] = 'http://iiif.io/api/image/2/level2.json';
 
-        $iiifTileInfo = $view->iiifTileInfo($media);
-        if ($iiifTileInfo) {
-            $tiles = [];
-            $tiles[] = $iiifTileInfo;
-            $imageResourceService['tiles'] = $tiles;
-            $imageResourceService['width'] = $width;
-            $imageResourceService['height'] = $height;
+            $iiifTileInfo = $view->iiifTileInfo($media);
+            if ($iiifTileInfo) {
+                $tiles = [];
+                $tiles[] = $iiifTileInfo;
+                $imageResourceService['tiles'] = $tiles;
+                $imageResourceService['width'] = $width;
+                $imageResourceService['height'] = $height;
+            }
+
+            $imageResourceService = (object) $imageResourceService;
+            $imageResource['service'] = $imageResourceService;
+            $imageResource = (object) $imageResource;
         }
-
-        $imageResourceService = (object) $imageResourceService;
-        $imageResource['service'] = $imageResourceService;
-        $imageResource = (object) $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;

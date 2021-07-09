@@ -475,6 +475,18 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_image_api_disabled',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Disable IIIF Image API (only for iiif 2.0)', // @translate
+                    'info' => 'Disable IIIF Image API service with resource-limited servers.',  // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_image_api_disabled',
+                ],
+            ])
+
+            ->add([
                 'name' => 'fieldset_urls',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
