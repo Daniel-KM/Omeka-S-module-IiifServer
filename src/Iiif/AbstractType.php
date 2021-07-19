@@ -112,6 +112,8 @@ abstract class AbstractType implements JsonSerializable
     /**
      * Check validity for the object and related objects.
      *
+     * @todo Add a debug mode: the method "isValid()" is useless in production.
+     *
      * @param bool $throwException
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return bool
@@ -120,7 +122,7 @@ abstract class AbstractType implements JsonSerializable
     {
         $output = $this->getCleanContent();
 
-        // Check if all required data are present.
+        // Check if all required data are present in root keys.
         $requiredKeys = array_filter($this->keys, function ($v) {
             return $v === self::REQUIRED;
         });

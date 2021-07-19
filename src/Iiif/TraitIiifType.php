@@ -178,6 +178,7 @@ trait TraitIiifType
         }
 
         if ($mediaType) {
+            // TODO Improve detection of type "Model".
             if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
                 $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
                 // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".

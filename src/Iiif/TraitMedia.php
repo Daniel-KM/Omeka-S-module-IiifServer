@@ -222,6 +222,7 @@ trait TraitMedia
     {
         if (!array_key_exists('media_dimension', $this->_storage)) {
             $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
+            /** @var ?\Omeka\Api\Representation\MediaRepresentation $media*/
             $media = $this->resource->primaryMedia();
             if (!$media) {
                 return $this->_storage['media_dimension'];
