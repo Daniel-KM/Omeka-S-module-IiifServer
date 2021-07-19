@@ -188,182 +188,17 @@ modules [Ark] and/or [Clean Url].
 3D models
 ---------
 
-### Support
-
 3D models are not supported by the IIIF standard, that manages only images,
 audio and video files. Nevertheless, it is possible to create manifests that
 follows the standard except the format of the file, like an extended version of
 the standard. Only the widget [Universal Viewer] supports it natively since
-version 2.3, via the [threejs] library. It is called "ixif".
+version 2.3, via the [three.js] library. It is called "ixif".
 
 The other viewers integrated via modules ([Diva] and [Mirador]) in Omeka don’t
 support 3D.
 
-The [threejs] library supports only some 3D formats. It can be its own format (a
-json file with data, see below example with The Kiss), or [glTF]™.
-
-The Graphics Language Transmission Format is a royalty-free publishing 3D format
-designed for sharing and web, unlike many other 3D formats that are designed for
-edition. It is supported by all professional 3D software and browsers, so it is
-the recommended format.
-
-The [threejs] library included in Universal Viewer doesn't include all its own
-extensions that can be used to manage 3D models. In particular, the draco
-compressor extension is not included. It's not so important, because the files
-are usually zipped by the server if you configured it so. For example, add this
-to your Apache config or in the file `.htaccess` at the root of Omeka:
-
-```htaccess
-<IfModule mod_deflate.c>
-    <IfModule mod_filter.c>
-        AddOutputFilterByType DEFLATE text/plain text/html text/css text/javascript application/javascript application/x-javascript application/ld+json application/json text/xml application/xml model/gltf-binary model/gltf+json
-    </IfModule>
-</IfModule>
-```
-
-### Deprecated support
-
-***Important***: For IIIF Presentation v2, only the threejs format (see example
-below) is really supported. The manifest can managed glTF files (as json or
-binary), but Universal Viewer may or may not support them. For IIIF Presentation
-v3, only glTF version 2 is supported, not the threejs format, neither deprecated
-version 1 of glTF. You can convert these formats between them lossless.
-
-If you need support for other 3D models formats, you need to compile the
-Universal Viewer with the right extensions for the ThreeJs part.
-
-### Cors
-
-To share the `json` with other IIIF servers, the server may need to allow CORS
-(see above).
-
-### Media-types and security issue
-
-By default, the 3D models are not allowed in the default global settings. The
-module adds them during install, but if they are removed, you have to re-add
-them:
-
-- extension `.glb` and media type `model/gltf-binary` (single file glTF);
-- extension `.gltf` and media type `model/gltf+json` (main file of a glTF media);
-- extension `.json` and media type `model/vnd.threejs+json` (main file of a threejs media);
-- extension `.json` and media type `application/json` (to manage the case where
-  the files are authenticated as json, instead of a 3D model);
-- extension `.bin` and media type `application/octet-stream` (binary file).
-
-In some cases, if you use single file, the `.glb` files or the related `.bin`
-are identified as `application/octet-stream`, that means that they are not
-recognized. If you can't upload these files for security reasons (a bin file can
-be a malware), you need to disable the file validation in the global settings.
-Don't forget to reenable it after upload, because it is a security issue, or add
-other security checks somewhere else, in particular during authentication or
-with a server virus scanner (generally the [clam av] on Linux server).
-
-### Size warning
-
-It is important to warn visitors about the size of the 3D models: not everyone
-has the fiber. Unlike big images that can be tiled statically or dynamically, no
-3D model streaming format is supported for now and 3D models should be fully
-loaded to be displayed, in particular when they are served as one binary file.
-
-The examples below are 46 MB (Flying Helmet, [17 files], glTF) and 16 MB (The Kiss,
-3 files, ThreeJs).
-
-### Possible requirement
-
-The module [Archive Repertory] must be installed when the json files that
-represent the 3D models use files that are identified by a basename and not a
-full url. This is generally the case, because the model contains external
-images for textures and binary files for data. Like Omeka hashes filenames when
-it ingests files, the files can’t be retrieved by the Universal Viewer.
-
-This module is not required when there is no external images or when these
-images are referenced in the json files with a full url.
-
-***Important***: When using [Archive Repertory] and when two files have the same
-base name (for example "thekiss.jpg" and "thekiss.json" below), the image, that
-is referenced inside the json, must be uploaded before the json in order to keep
-the original name (the json file will be renamed thekiss.1.json). The issue is
-the same with gltf files: if there is a "my-object.gltf" and a "my-object.bin",
-the file "my-object.bin" should be loaded before.
-
-More generally, all files must have a different filename, excluding the
-extension. So when there are more than one duplicate filename, you have to
-rename all referenced filenames.
-
-If you want another order, save the item one time with the order above, then
-reorder medias and save the item.
-
-The list of files should be flat. If the images or any other files are in a
-subdirectory, for example "textures/example61_baseColor.png", you have two
-possibilities:
-- move all files to the root of the main file and update the main file with the
-  new filenames "example61_baseColor.png",
-- create the subdirectories ("textures" here) in the item directory, so "files/original/xxx/textures/",
-  "files/large/xxx/textures/", "files/medium/xxx/textures/", and "files/square/xxx/textures/",
-  move the files inside them, and update the value in the database, prepending
-  "textures/" to the value in the column `storage id` of the table `media`.
-This last point will be managed automatically in a future version of the module
-[Archive Repertory].
-
-### Thumbnail
-
-Because 3D models are mainly data and textures, no thumbnail can be created with
-standard tools (GD or Image Magick). In order to display an image in the pages
-"documents browse" or "document view", a thumbnail can be added to the item.
-
-It can be done as an asset attached to the item, that is the simpler way, or as
-the first media of the item. In this second case, it should be the first media
-and the original filename should be "thumb", "thumbnail", "screenshot",
-"vignette", or "miniatura". The extension should be "png", "jpeg", "jpg", "gif",
-or "webp". This name allows to make the distinction between the thumbnail and
-the textures that belong to the item.
-
-### Examples
-
-#### Example with glTF
-
-With glTF, a 3D media can be a single file that contains all data, binary data
-and textures, or a main file that references many other files. Of course, it is
-simpler to manage only one file, but it may be not the better choice in all the
-cases, in particular when the media are big (not everyone has the fiber).
-
-With a single file, no special configuration is needed: just load it as a
-standard media or url.
-
-With a multi-files media, you need to import the thumbnail first (or as asset),
-then the binary file if the filename is the same than the main json file, then
-the shaders and textures.
-
-- Create a new item with the following metadata:
-  - Title: Flight Helmet
-  - License: Public domain
-  - Add this file as thumbnail of the item: https://github.com/KhronosGroup/glTF-Sample-Models/blob/master/2.0/FlightHelmet/screenshot/screenshot.jpg
-- Add all the files in the directory https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/FlightHelmet/glTF,
-  starting with the file "FlightHelmet.bin".
-- Go to the public page of the item and watch it!
-
-Of course, it is simpler to use a spreadsheet with modules [Bulk Import] or [CSV Import].
-
-#### Example with a threejs file
-
-This example requires to enable the extension and media types for json (see
-above) and requires the module [Archive Repertory].
-
-- Create a new item with the following metadata:
-  - Title: The Kiss
-  - Date: 2015-11-27
-  - Description: Soap stone statuette of Rodin’s The Kiss. Found at Snooper’s Paradise in Brighton UK.
-  - Rights: 3D model produced by Sophie Dixon
-  - License (or Rights): by-nc-nd
-- Add the next three files (as uploaded files or as url if they are served by a
-  https server), taken from the official examples:
-  - http://files.universalviewer.io/manifests/foundobjects/thekiss/thumb.jpg
-  - http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.jpg
-  - http://files.universalviewer.io/manifests/foundobjects/thekiss/thekiss.json
-- Go to the public page of the item and watch it!
-
-Note that the three files above should be uploaded because the server "http://files.universalviewer.io"
-has an issue with its certificate.
+For more info about support of 3D models and possible other requirements, see
+the module [Three JS Model viewer].
 
 
 TODO / Bugs
@@ -375,9 +210,6 @@ TODO / Bugs
 - [ ] Job to update data of [IIIF Image].
 - [ ] Use only arrays, not standard objects.
 - [ ] Manage url prefix.
-- [ ] Manage all 3D formats (glTD binary, [see example] or https://iiif-3d-manifests.netlify.app).
-- [ ] Store the json precise type (model/gltf+json and model/vnd.threejs?) in media during import or via a job (see module ExtractOcr for xml).
-- [ ] Manage subdirectories with module Archive Repertory.
 
 See module [Image Server].
 
@@ -446,6 +278,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
 [Diva]: https://gitlab.com/Daniel-KM/Omeka-S-module-Diva
+[Three JS Model viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-ThreeJs
 [Omeka Classic]: https://omeka.org
 [Iiif Search]: https://github.com/bubdxm/Omeka-S-module-IiifSearch
 [GD]: https://secure.php.net/manual/en/book.image.php
@@ -466,14 +299,7 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Deep Zoom Image]: https://msdn.microsoft.com/en-us/library/cc645022(v=vs.95).aspx
 [Zoomify]: http://www.zoomify.com/
 [OpenLayers]: https://openlayers.org/
-[threejs]: https://threejs.org
-[17 files]: https://github.com/KhronosGroup/glTF-Sample-Models/tree/master/2.0/FlightHelmet
-[clam av]: https://www.clamav.net
-[glTF]: https://en.wikipedia.org/wiki/GlTF
-[Archive Repertory]: https://gitlab.com/Daniel-KM/Omeka-S-module-ArchiveRepertory
-[Bulk Import]: https://gitlab.com/Daniel-KM/Omeka-S-module-BulkImport
-[CSV Import]: https://github.com/omeka-s-modules/CSVImport
-[see example]: https://www.morphosource.org/manifests/1fbaa268-b02f-4b46-a249-cef46bcbe04c
+[three.js]: https://threejs.org
 [Deepzoom library]: https://gitlab.com/Daniel-KM/LibraryDeepzoom
 [Zoomify library]: https://gitlab.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom

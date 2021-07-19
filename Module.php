@@ -113,6 +113,7 @@ class Module extends AbstractModule
 
         $whitelist = $settings->get('media_type_whitelist', []);
         $whitelist = array_values(array_unique(array_merge(array_values($whitelist), [
+            'image/ktx2',
             'model/gltf-binary',
             'model/gltf+json',
             'model/vnd.threejs+json',
@@ -126,6 +127,7 @@ class Module extends AbstractModule
             'glb',
             'gltf',
             'json',
+            'ktx2',
         ])));
         $settings->set('extension_whitelist', $whitelist);
     }
