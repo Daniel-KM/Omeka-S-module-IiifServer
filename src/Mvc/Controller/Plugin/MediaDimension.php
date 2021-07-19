@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\Mvc\Controller\Plugin;
 
 use JamesHeinrich\GetID3\GetId3;
@@ -172,6 +173,7 @@ class MediaDimension extends AbstractPlugin
     {
         $getId3 = new GetId3();
         $data = $getId3->analyze($filepath);
+        $data = $this->fixOggDuration($data);
         $width = empty($data['video']['resolution_x']) ? null : $data['video']['resolution_x'];
         $height = !$width || empty($data['video']['resolution_y']) ? null : $data['video']['resolution_y'];
         $duration = empty($data['playtime_seconds']) ? null : $data['playtime_seconds'];
@@ -181,5 +183,27 @@ class MediaDimension extends AbstractPlugin
             'height' => $height,
             'duration' => $duration,
         ];
+    }
+
+    /**
+     * GetId3 does not support extraction of ogg duration for now, but it can be
+     * determined indirectly.
+     */
+    private function fixOggDuration(array $data): array
+    {
+        if ($data['mime_type'] !== 'audio/ogg' && $data['mime_type'] !== 'video/ogg') {
+            return $data;
+        }
+        if (!empty($data['playtime_seconds'])
+            || empty($data['ogg']['pageheader']['eos']['segment_table'])
+        ) {
+            return $data;
+        }
+        // Use 1 to avoid an issue with the manifest when duration is required.
+        $frames = array_sum($data['ogg']['pageheader']['eos']['segment_table']) ?: 1;
+        $frameRate = $data['video']['frame_rate']
+            ?? (($data['ogg']['pageheader']['theora']['frame_rate_numerator'] ?? 25) / ($data['ogg']['pageheader']['theora']['frame_rate_denominator'] ?? 1));
+        $data['playtime_seconds'] = ceil($frames / ($frameRate ?: 1));
+        return $data;
     }
 }
