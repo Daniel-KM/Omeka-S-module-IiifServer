@@ -384,6 +384,7 @@ return [
             'iiifserver_manifest_properties_item_blacklist' => [],
             'iiifserver_manifest_properties_media_blacklist' => [],
             'iiifserver_manifest_image_api_disabled' => false,
+            'iiifserver_manifest_structures_property' => '',
             // Urls.
             'iiifserver_url_version_add' => false,
             'iiifserver_identifier_clean' => true,

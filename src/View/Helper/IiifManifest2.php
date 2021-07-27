@@ -497,6 +497,78 @@ class IiifManifest2 extends AbstractHelper
             $manifest['sequences'] = $sequences;
         }
 
+        if (true) {
+            $structures = [];
+
+            $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
+            $stValue = strip_tags((string) $item->value($stProperty, ['type' => 'literal', 'default' => '']));
+            
+            //Split by newline code
+            $stLines = explode("\n",$stValue);
+            for($l = 0; $l < count($stLines); $l++){
+                $stElements = explode(",",$stLines[$l]);
+                $stSize = count($stElements);
+                //If the format of the element is not correct
+                if($stSize != 3 && $stSize != 4){
+                    continue;
+                }
+
+                //Apply trim() to each line
+                $stElements = array_map('trim', $stElements);
+
+                $stId = $stElements[0];
+                $stLabel = $stElements[1];
+                $stIndexes = $stElements[2];
+                //$stChildIds = $stSize == 4 ? $stElements[3] : null;
+
+                $structure = [];
+
+                //Split the index
+                $stIndexes = explode(";", $stIndexes);
+                //Apply trim() to each line
+                $stIndexes = array_map('trim', $stIndexes);
+                //Remove lines with zero characters.
+                $stIndexes = array_filter($stIndexes, 'strlen');
+                $stCanvases = [];
+                for($i = 0; $i < count($stIndexes); $i++){
+                    $stIndex = $stIndexes[$i];
+                    if(is_numeric($stIndex)){
+                        $stIndex = intval($stIndex);
+                        if($stIndex < count($canvases)){
+                            $canvas = $canvases[$stIndex];
+                            $stCanvases[] = ((array) $canvas)["@id"];
+                        }
+                    }
+                }
+
+                if(count($stCanvases) > 0){
+                    $structure["@id"] = $this->_baseUrl . '/range/' . ($stId != "" ? $stId : $l);
+                    $structure["@type"] = "sc:Range";
+                    $structure["label"] = $stLabel;
+                    $structure["canvases"] = $stCanvases;
+                
+                    /*
+                    if($stChildIds){
+                        $ranges = [];
+                        $stChildIds = explode(";", $stChildIds);
+                        $stChildIds = array_map('trim', $stChildIds);
+                        for($j = 0; $j < count($stChildIds); $j++){
+                            $ranges[] = $this->_baseUrl . '/range/' . $stChildIds[$j];
+                        }
+                        $structure["ranges"] = $ranges;
+                    }
+                    */
+
+                    $structures[] = (object) $structure;
+                }
+
+            }
+            
+            if(count($structures) > 0){
+                $manifest["structures"] = $structures;
+            }
+        }
+
         if ($is3dModel) {
             $manifest['@context'] = [
                 'http://iiif.io/api/presentation/2/context.json',
@@ -572,9 +644,15 @@ class IiifManifest2 extends AbstractHelper
             : $resource->values();
 
         $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+
+        if ($this->view->setting('iiifserver_manifest_structures_property')){
+            $blacklist[] = $this->view->setting('iiifserver_manifest_structures_property');
+        }
+
         if ($blacklist) {
             $values = array_diff_key($values, array_flip($blacklist));
         }
+
         if (empty($values)) {
             return [];
         }

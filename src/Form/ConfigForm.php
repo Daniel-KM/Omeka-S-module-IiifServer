@@ -487,6 +487,23 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_structures_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property for structures (only for iiif 2.0)', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                    'info' => 'Please refer to the following URL for the input format.',  // @translate
+                    'documentation' => 'https://gitlab.com/nakamura196/Omeka-S-module-IiifServer/-/wikis/Input-format-of-the-property-for-structures-(only-for-iiif-2.0)',
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_structures_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'fieldset_urls',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
@@ -667,6 +684,10 @@ class ConfigForm extends Form implements TranslatorAwareInterface
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media_blacklist',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_structures_property',
                 'required' => false,
             ])
         ;
