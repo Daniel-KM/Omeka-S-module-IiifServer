@@ -335,9 +335,7 @@ class IiifManifest2 extends AbstractHelper
                 // TODO Add alto files and search.
                 // TODO Add other content.
             }
-        }
-
-        elseif ($is3dModel) {
+        } elseif ($is3dModel) {
             // Prepare the media sequence for threejs.
             $mediaSequenceElement = $this->_iiifMediaSequenceModel(
                 $mediaMain3d,
@@ -497,19 +495,19 @@ class IiifManifest2 extends AbstractHelper
             $manifest['sequences'] = $sequences;
         }
 
-        if (true) {
+        $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
+        if ($stProperty) {
             $structures = [];
 
-            $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
             $stValue = strip_tags((string) $item->value($stProperty, ['type' => 'literal', 'default' => '']));
-            
+
             //Split by newline code
-            $stLines = explode("\n",$stValue);
-            for($l = 0; $l < count($stLines); $l++){
-                $stElements = explode(",",$stLines[$l]);
+            $stLines = explode("\n", $stValue);
+            for ($l = 0; $l < count($stLines); $l++) {
+                $stElements = explode(",", $stLines[$l]);
                 $stSize = count($stElements);
                 //If the format of the element is not correct
-                if($stSize != 3 && $stSize != 4){
+                if ($stSize != 3 && $stSize != 4) {
                     continue;
                 }
 
@@ -521,8 +519,6 @@ class IiifManifest2 extends AbstractHelper
                 $stIndexes = $stElements[2];
                 //$stChildIds = $stSize == 4 ? $stElements[3] : null;
 
-                $structure = [];
-
                 //Split the index
                 $stIndexes = explode(";", $stIndexes);
                 //Apply trim() to each line
@@ -530,23 +526,25 @@ class IiifManifest2 extends AbstractHelper
                 //Remove lines with zero characters.
                 $stIndexes = array_filter($stIndexes, 'strlen');
                 $stCanvases = [];
-                for($i = 0; $i < count($stIndexes); $i++){
+                for ($i = 0; $i < count($stIndexes); $i++) {
                     $stIndex = $stIndexes[$i];
-                    if(is_numeric($stIndex)){
+                    if (is_numeric($stIndex)) {
                         $stIndex = intval($stIndex);
-                        if($stIndex < count($canvases)){
+                        if ($stIndex < count($canvases)) {
                             $canvas = $canvases[$stIndex];
                             $stCanvases[] = ((array) $canvas)["@id"];
                         }
                     }
                 }
 
-                if(count($stCanvases) > 0){
-                    $structure["@id"] = $this->_baseUrl . '/range/' . ($stId != "" ? $stId : $l);
+                if (count($stCanvases) > 0) {
+                    $structure = [];
+                    $structure["@id"] = $this->_baseUrl . '/range/' . ($stId != "" ? $stId : 'r'.$l);
                     $structure["@type"] = "sc:Range";
                     $structure["label"] = $stLabel;
                     $structure["canvases"] = $stCanvases;
-                
+
+                    // TODO Add a hierarchy of structures.
                     /*
                     if($stChildIds){
                         $ranges = [];
@@ -561,10 +559,9 @@ class IiifManifest2 extends AbstractHelper
 
                     $structures[] = (object) $structure;
                 }
-
             }
-            
-            if(count($structures) > 0){
+
+            if (count($structures) > 0) {
                 $manifest["structures"] = $structures;
             }
         }
@@ -645,7 +642,7 @@ class IiifManifest2 extends AbstractHelper
 
         $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
 
-        if ($this->view->setting('iiifserver_manifest_structures_property')){
+        if ($this->view->setting('iiifserver_manifest_structures_property')) {
             $blacklist[] = $this->view->setting('iiifserver_manifest_structures_property');
         }
 
