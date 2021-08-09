@@ -189,8 +189,8 @@ class MediaDimension extends AbstractPlugin
             if ($result) {
                 list($width, $height) = $result;
                 return [
-                    'width' => $width,
-                    'height' => $height,
+                    'width' => (int) $width,
+                    'height' => (int) $height,
                     'duration' => null,
                 ];
             }
@@ -199,9 +199,9 @@ class MediaDimension extends AbstractPlugin
         $getId3 = new GetId3();
         $data = $getId3->analyze($filepath);
         $data = $this->fixOggDuration($data);
-        $width = empty($data['video']['resolution_x']) ? null : $data['video']['resolution_x'];
-        $height = !$width || empty($data['video']['resolution_y']) ? null : $data['video']['resolution_y'];
-        $duration = empty($data['playtime_seconds']) ? null : $data['playtime_seconds'];
+        $width = empty($data['video']['resolution_x']) ? null : (int) $data['video']['resolution_x'];
+        $height = !$width || empty($data['video']['resolution_y']) ? null : (int) $data['video']['resolution_y'];
+        $duration = empty($data['playtime_seconds']) ? null : (string) $data['playtime_seconds'];
 
         return [
             'width' => $width,

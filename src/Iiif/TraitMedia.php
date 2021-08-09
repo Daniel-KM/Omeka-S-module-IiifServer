@@ -131,6 +131,9 @@ trait TraitMedia
         return $this->mediaSize()['width'];
     }
 
+    /**
+     * Duration is a string, because the format is not defined: time, seconds, or float.
+     */
     public function duration(): ?string
     {
         return $this->mediaDimension()['duration'];
@@ -220,6 +223,7 @@ trait TraitMedia
             if (!$media) {
                 return $this->_storage['media_dimension'];
             }
+
             // Automatic check via the ingester.
             $ingester = $media->ingester();
             switch ($ingester) {
@@ -227,28 +231,31 @@ trait TraitMedia
                     // Currently, Omeka manages only images, but doesn't check.
                     $mediaData = $media->mediaData();
                     if (isset($mediaData['width'])) {
-                        $this->_storage['media_dimension']['width'] = $mediaData['width'];
+                        $this->_storage['media_dimension']['width'] = (int) $mediaData['width'];
                     }
                     if (isset($mediaData['height'])) {
-                        $this->_storage['media_dimension']['height'] = $mediaData['height'];
+                        $this->_storage['media_dimension']['height'] = (int) $mediaData['height'];
                     }
                     if (isset($mediaData['duration'])) {
-                        $this->_storage['media_dimension']['duration'] = $mediaData['duration'];
+                        $this->_storage['media_dimension']['duration'] = (string) $mediaData['duration'];
                     }
                     return $this->_storage['media_dimension'];
                 // TODO Manage other type of media (youtube, etc.).
                 default:
                     break;
             }
+
             // Manual check.
             if ($this->isAudioVideo()) {
                 $this->_storage['media_dimension'] = $this->mediaDimension->__invoke($media);
             } elseif ($this->isImage()) {
                 $this->_storage['media_dimension'] = $this->imageSize->__invoke($media);
-                if ($this->_storage['media_dimension']) {
-                    $this->_storage['media_dimension']['duration'] = null;
-                }
+                $this->_storage['media_dimension']['duration'] = null;
             }
+            // Data may be stored in a bad format.
+            $this->_storage['media_dimension']['width'] = $this->_storage['media_dimension']['width'] ? (int) $this->_storage['media_dimension']['width'] : null;
+            $this->_storage['media_dimension']['height'] = $this->_storage['media_dimension']['height'] ? (int) $this->_storage['media_dimension']['height'] : null;
+            $this->_storage['media_dimension']['duration'] = $this->_storage['media_dimension']['duration'] ? (string) $this->_storage['media_dimension']['duration'] : null;
         }
         return $this->_storage['media_dimension'];
     }
