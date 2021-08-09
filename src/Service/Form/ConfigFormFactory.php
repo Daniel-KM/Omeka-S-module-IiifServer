@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\Service\Form;
 
 use IiifServer\Form\ConfigForm;
@@ -16,7 +17,6 @@ class ConfigFormFactory implements FactoryInterface
 
         $form = new ConfigForm(null, $options);
         $form
-            ->setTranslator($services->get('MvcTranslator'))
             ->setHasCleanUrl($hasCleanUrl)
             ->setEventManager($services->get('EventManager'));
         return $form;

@@ -7,19 +7,16 @@ use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
-use Laminas\I18n\Translator\TranslatorAwareInterface;
-use Laminas\I18n\Translator\TranslatorAwareTrait;
 use Omeka\Form\Element\PropertySelect;
 
-class ConfigForm extends Form implements TranslatorAwareInterface
+class ConfigForm extends Form
 {
     use EventManagerAwareTrait;
-    use TranslatorAwareTrait;
 
     /**
      * @var bool
      */
-    protected $hasCleanUrl;
+    protected $hasCleanUrl = false;
 
     public function init(): void
     {
@@ -70,8 +67,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for Description', // @translate
-                    'info' => $this->translate('If any, the first metadata of the record will be added in all manifests and viewers for main description.') // @translate
-                        . ' ' . $this->translate('It’s recommended to use "Dublin Core:Bibliographic Citation".'), // @translate
+                    'info' => 'If any, the first metadata of the record will be added in all manifests and viewers for main description. It’s recommended to use "Dublin Core:Bibliographic Citation".', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                     'use_hidden_element' => true,
@@ -105,8 +101,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Default attribution', // @translate
-                    'info' => $this->translate('If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers.') // @translate
-                        . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                    'info' => 'If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers. It will be used as pop up in the Universal Viewer too, if enabled.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_attribution_default',
@@ -243,8 +238,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Default viewing direction', // @translate
-                    'info' => $this->translate('If any, and if there is no metadata for the property above, this value will be added in all manifests.') // @translate
-                        . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                    'info' => 'If any, and if there is no metadata for the property above, this value will be added in all manifests.', // @translate
                     'value_options' => [
                         'none' => 'None', // @translate
                         'left-to-right' => 'Left to right', // @translate
@@ -279,8 +273,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\MultiCheckbox::class,
                 'options' => [
                     'label' => 'Default behavior (viewing hint)', // @translate
-                    'info' => $this->translate('If any, and if there is no metadata for the property above, these values will be added in all manifests and canvases.') // @translate
-                        . ' ' . $this->translate('It will be used as pop up in the Universal Viewer too, if enabled.'),  // @translate
+                    'info' => 'If any, and if there is no metadata for the property above, these values will be added in all manifests and canvases.', // @translate
                     'value_options' => [
                         // Commented values are not allowed for manifest, neither canvas.
                         // @link https://iiif.io/api/presentation/3.0/#a-summary-of-property-requirements
@@ -562,8 +555,7 @@ class ConfigForm extends Form implements TranslatorAwareInterface
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Force base of url (from)', // @translate
-                    'info' => $this->translate('When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url.')
-                        . ' ' . $this->translate('For example, when the server is secured, the "http:" urls may be replaced by "https:".'), // @translate
+                    'info' => 'When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url. For example, when the server is secured, the "http:" urls may be replaced by "https:".', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_url_force_from',
@@ -694,12 +686,6 @@ class ConfigForm extends Form implements TranslatorAwareInterface
 
         $filterEvent = new Event('form.add_input_filters', $this, ['inputFilter' => $inputFilter]);
         $this->getEventManager()->triggerEvent($filterEvent);
-    }
-
-    protected function translate($args)
-    {
-        $translator = $this->getTranslator();
-        return $translator->translate($args);
     }
 
     public function setHasCleanUrl($hasCleanUrl)
