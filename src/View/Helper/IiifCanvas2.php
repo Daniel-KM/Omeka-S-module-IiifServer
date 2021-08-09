@@ -47,7 +47,7 @@ class IiifCanvas2 extends AbstractHelper
      * @todo Factorize with IiifManifest2.
      *
      * @param MediaRepresentation $resource
-     * @param int $index Used to set the standard name of the image.
+     * @param int|string $index Used to set the standard name of the image.
      * @return object|null
      */
     public function __invoke(MediaRepresentation $resource, $index)
@@ -64,7 +64,8 @@ class IiifCanvas2 extends AbstractHelper
         $canvas = [];
 
         $titleFile = $resource->displayTitle();
-        $canvasUrl = $this->_baseUrl . '/canvas/p' . $index;
+        $prefixIndex = (string) (int) $index === (string) $index ? 'p' : '';
+        $canvasUrl = $this->_baseUrl . '/canvas/' . $prefixIndex . $index;
 
         $canvas['@id'] = $canvasUrl;
         $canvas['@type'] = 'sc:Canvas';

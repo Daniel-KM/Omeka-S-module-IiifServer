@@ -122,6 +122,10 @@ class Canvas extends AbstractResourceType
     {
         parent::__construct($resource, $options);
         // TODO Add linking properties when not in manifest.
+        // The option should contain an index, that is the position from 1 in
+        // the list of canvases (available in storage too).
+        $this->options['target_type'] = 'canvas';
+        $this->options['target_name'] = 'p' . $this->options['index'];
     }
 
     public function id(): ?string
@@ -129,7 +133,7 @@ class Canvas extends AbstractResourceType
         // TODO Use a specific value if any in the resource.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',
-            'name' => $this->resource->id(),
+            'name' => $this->options['target_name'],
         ]);
     }
 

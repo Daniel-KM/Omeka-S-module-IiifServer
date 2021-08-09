@@ -930,14 +930,15 @@ class IiifManifest2 extends AbstractHelper
      * Create an IIIF canvas object for an image.
      *
      * @param MediaRepresentation $media
-     * @param int $index Used to set the standard name of the image.
+     * @param int|string $index Used to set the standard name of the image.
      * @return \stdClass|null
      */
     protected function _iiifCanvasImage(MediaRepresentation $media, $index)
     {
         $canvas = [];
 
-        $canvasUrl = $this->_baseUrl . '/canvas/p' . $index;
+        $prefixIndex = (string) (int) $index === (string) $index ? 'p' : '';
+        $canvasUrl = $this->_baseUrl . '/canvas/' . $prefixIndex . $index;
 
         $canvas['@id'] = $canvasUrl;
         $canvas['@type'] = 'sc:Canvas';

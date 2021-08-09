@@ -192,4 +192,15 @@ abstract class AbstractResourceType extends AbstractType
         }
         return new ValueLanguage($values, false, '[Untitled]');
     }
+
+    /**
+     * Get the resource used to create this part of the manifest.
+     *
+     * It avoids to do reverse engineering to determine it, in particular inside
+     * the controller or in the event iiifserver.manifest.
+     */
+    public function resource(): AbstractResourceEntityRepresentation
+    {
+        return $this->resource;
+    }
 }

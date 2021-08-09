@@ -112,9 +112,10 @@ class Annotation extends AbstractResourceType
 
     public function target(): ?string
     {
+        // TODO Annotation target may not be a canvas (but for now it's always the case).
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
-            'type' => 'canvas',
-            'name' => $this->resource->id(),
+            'type' => $this->options['target_type'] ?? 'canvas',
+            'name' => $this->options['target_name'] ?? $this->resource->id(),
         ]);
     }
 }

@@ -115,40 +115,6 @@ class PresentationController extends AbstractActionController
         return $this->iiifJsonLd($manifest, $version);
     }
 
-    public function canvasAction()
-    {
-        // TODO Check for clean url.
-        // Not found exception is automatically thrown.
-        $id = $this->params('id');
-        try {
-            $resource = $this->api()->read('items', $id)->getContent();
-            $version = '3';
-            $name = $this->params('name');
-            $index = preg_replace('/[^0-9]/', '', $name);
-            $resource = $this->api()->read('media', $name)->getContent();
-        } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            try {
-                $resource = $this->api()->read('media', $id)->getContent();
-            } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
-            }
-            $version = '2';
-            $name = $this->params('name');
-            $index = preg_replace('/[^0-9]/', '', $name);
-        }
-
-        // $version = $this->requestedVersion();
-
-        $iiifCanvas = $this->viewHelpers()->get('iiifCanvas');
-        try {
-            $manifest = $iiifCanvas($resource, $index, $version);
-        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
-            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
-        }
-
-        return $this->iiifJsonLd($manifest, $version);
-    }
-
     public function genericAction()
     {
         $type = $this->params('type');
@@ -159,6 +125,69 @@ class PresentationController extends AbstractActionController
             'The type "%s" is currently only managed as uri, not url', // @translate
             $type
         ), \Laminas\Http\Response::STATUS_CODE_501);
+    }
+
+    protected function canvasAction()
+    {
+        // The canvases are no more media ids in this implementation of iiif v3,
+        // but the media position in a item like in iiif v2, or any name via the
+        // structure. It may be used in Iiif Search too.
+        // Note: the position is not the item's one, non-iiif media are skipped.
+
+        // A canvas name can be hard coded in a table of contents, for example "cover".
+
+        $name = $this->params('name');
+        if (!$name) {
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $version = $this->requestedVersion();
+
+        // When the id is a clean url identifier, the id is already extracted.
+
+        $id = $this->params('id');
+        try {
+            $item = $this->api()->read('items', ['id' => $id])->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        // In the manifest, the position is not the one set by the item.
+        // The simplest way to check it is to recreate the manifest.
+        // Furthermore, it allows to manage alphanumeric canvas names.
+
+        // Normally, the identifier is the same in version 2 and version 3, so
+        // use the manifest version 3, that can output the original resource.
+        $viewHelpers = $this->viewHelpers();
+        /** @var \IiifServer\Iiif\Manifest $manifest */
+        try {
+            $manifest = $viewHelpers->get('iiifManifest')->__invoke($item, '3');
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+        }
+        $found = false;
+        // In iiif, here, items means canvases.
+        foreach ($manifest->items() as $canvas) {
+            if ($name === basename($canvas->id())) {
+                $found = true;
+                break;
+            }
+        }
+
+        if (!$found) {
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        if ($version === '2') {
+            $iiifCanvas = $viewHelpers->get('iiifCanvas2');
+            try {
+                $canvas = $iiifCanvas($canvas->resource(), $name);
+            } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+                return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+            }
+        }
+
+        return $this->iiifJsonLd($canvas, $version);
     }
 
     /**
