@@ -522,68 +522,70 @@ class IiifManifest2 extends AbstractHelper
 
             $stValue = strip_tags((string) $item->value($stProperty, ['type' => 'literal', 'default' => '']));
 
-            //Split by newline code
+            // Split by newline code, but don't filter empty lines in order to
+            // keep range indexes in complex cases.
+            // Example of a line: "r1, Introduction, 2;3;4;5".
             $stLines = explode("\n", $stValue);
-            for ($l = 0; $l < count($stLines); $l++) {
-                $stElements = explode(",", $stLines[$l]);
+            foreach ($stLines as $indexLine => $stLine) {
+                $stElements = explode(',', $stLine);
                 $stSize = count($stElements);
-                //If the format of the element is not correct
-                if ($stSize != 3 && $stSize != 4) {
+                // If the format of the element is not correct.
+                if ($stSize !== 3 && $stSize !== 4) {
                     continue;
                 }
 
-                //Apply trim() to each line
+                // Clean each element.
                 $stElements = array_map('trim', $stElements);
 
                 $stId = $stElements[0];
                 $stLabel = $stElements[1];
                 $stIndexes = $stElements[2];
-                //$stChildIds = $stSize == 4 ? $stElements[3] : null;
+                // $stChildIds = $stSize == 4 ? $stElements[3] : null;
 
-                //Split the index
-                $stIndexes = explode(";", $stIndexes);
-                //Apply trim() to each line
-                $stIndexes = array_map('trim', $stIndexes);
-                //Remove lines with zero characters.
-                $stIndexes = array_filter($stIndexes, 'strlen');
+                // Clean indexes.
+                $stIndexes = array_filter(array_map('trim', explode(';', $stIndexes)), 'is_numeric');
+                if (!count($stIndexes)) {
+                    continue;
+                }
+
+                $stIndexes = array_map('intval', $stIndexes);
                 $stCanvases = [];
-                for ($i = 0; $i < count($stIndexes); $i++) {
-                    $stIndex = $stIndexes[$i];
-                    if (is_numeric($stIndex)) {
-                        $stIndex = intval($stIndex);
-                        if ($stIndex < count($canvases)) {
-                            $canvas = $canvases[$stIndex];
-                            $stCanvases[] = ((array) $canvas)["@id"];
-                        }
+                foreach ($stIndexes as $stIndex) {
+                    // Start from 1 in value, but internally from 0 in array.
+                    --$stIndex;
+                    if (isset($canvases[$stIndex])) {
+                        $canvas = $canvases[$stIndex];
+                        $stCanvases[] = ((array) $canvas)['@id'];
                     }
                 }
 
-                if (count($stCanvases) > 0) {
-                    $structure = [];
-                    $structure["@id"] = $this->_baseUrl . '/range/' . ($stId != "" ? $stId : 'r'.$l);
-                    $structure["@type"] = "sc:Range";
-                    $structure["label"] = $stLabel;
-                    $structure["canvases"] = $stCanvases;
-
-                    // TODO Add a hierarchy of structures.
-                    /*
-                    if($stChildIds){
-                        $ranges = [];
-                        $stChildIds = explode(";", $stChildIds);
-                        $stChildIds = array_map('trim', $stChildIds);
-                        for($j = 0; $j < count($stChildIds); $j++){
-                            $ranges[] = $this->_baseUrl . '/range/' . $stChildIds[$j];
-                        }
-                        $structure["ranges"] = $ranges;
-                    }
-                    */
-
-                    $structures[] = (object) $structure;
+                if (!count($stCanvases)) {
+                    continue;
                 }
+
+                $structure = [];
+                $structure['@id'] = $this->_baseUrl . '/range/' . ($stId === '' ? 'r' . ($indexLine + 1) : $stId);
+                $structure['@type'] = 'sc:Range';
+                $structure['label'] = $stLabel;
+                $structure['canvases'] = $stCanvases;
+
+                // TODO Add a hierarchy of structures.
+                /*
+                if ($stChildIds) {
+                    $ranges = [];
+                    $stChildIds = array_map('trim', explode(';', $stChildIds));
+                    foreach ($stChildIds as $stChildId) {
+                        $ranges[] = $this->_baseUrl . '/range/' . $stChildId;
+                    }
+                    $structure['ranges'] = $ranges;
+                }
+                */
+
+                $structures[] = (object) $structure;
             }
 
             if (count($structures) > 0) {
-                $manifest["structures"] = $structures;
+                $manifest['structures'] = $structures;
             }
         }
 
