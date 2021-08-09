@@ -518,70 +518,83 @@ class IiifManifest2 extends AbstractHelper
 
         $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
         if ($stProperty) {
-            $structures = [];
+            // Iiif v2 supports only one structure.
+            $stValue = (string) $item->value($stProperty, ['type' => 'literal', 'default' => '']);
 
-            $stValue = strip_tags((string) $item->value($stProperty, ['type' => 'literal', 'default' => '']));
-
-            // Split by newline code, but don't filter empty lines in order to
-            // keep range indexes in complex cases.
-            // Example of a line: "r1, Introduction, 2;3;4;5".
-            $stLines = explode("\n", $stValue);
-            foreach ($stLines as $indexLine => $stLine) {
-                $stElements = explode(',', $stLine);
-                $stSize = count($stElements);
-                // If the format of the element is not correct.
-                if ($stSize !== 3 && $stSize !== 4) {
-                    continue;
+            $structures = @json_decode($stValue, true);
+            if ($structures && is_array($structures)) {
+                $firstRange = reset($structures);
+                if (is_array($firstRange) && isset($firstRange['type'])) {
+                    $structures = $this->convertToStructure2($structures);
                 }
+            } else {
+                $structures = [];
 
-                // Clean each element.
-                $stElements = array_map('trim', $stElements);
-
-                $stId = $stElements[0];
-                $stLabel = $stElements[1];
-                $stIndexes = $stElements[2];
-                // $stChildIds = $stSize == 4 ? $stElements[3] : null;
-
-                // Clean indexes.
-                $stIndexes = array_filter(array_map('trim', explode(';', $stIndexes)), 'is_numeric');
-                if (!count($stIndexes)) {
-                    continue;
-                }
-
-                $stIndexes = array_map('intval', $stIndexes);
-                $stCanvases = [];
-                foreach ($stIndexes as $stIndex) {
-                    // Start from 1 in value, but internally from 0 in array.
-                    --$stIndex;
-                    if (isset($canvases[$stIndex])) {
-                        $canvas = $canvases[$stIndex];
-                        $stCanvases[] = ((array) $canvas)['@id'];
+                // Split by newline code, but don't filter empty lines in order to
+                // keep range indexes in complex cases.
+                // Example of lines:
+                // ```
+                // cover, Front cover, 1
+                // r1, Introduction, 2;3;4;5
+                // ```
+                $stLines = explode("\n", $stValue);
+                foreach ($stLines as $indexLine => $stLine) {
+                    $stElements = explode(',', $stLine);
+                    $stSize = count($stElements);
+                    // If the format of the element is not correct.
+                    if ($stSize !== 3 && $stSize !== 4) {
+                        continue;
                     }
-                }
 
-                if (!count($stCanvases)) {
-                    continue;
-                }
+                    // Clean each element.
+                    $stElements = array_map('trim', $stElements);
 
-                $structure = [];
-                $structure['@id'] = $this->_baseUrl . '/range/' . ($stId === '' ? 'r' . ($indexLine + 1) : $stId);
-                $structure['@type'] = 'sc:Range';
-                $structure['label'] = $stLabel;
-                $structure['canvases'] = $stCanvases;
+                    $stId = $stElements[0];
+                    $stLabel = $stElements[1];
+                    $stIndexes = $stElements[2];
+                    // $stChildIds = $stSize == 4 ? $stElements[3] : null;
 
-                // TODO Add a hierarchy of structures.
-                /*
-                if ($stChildIds) {
-                    $ranges = [];
-                    $stChildIds = array_map('trim', explode(';', $stChildIds));
-                    foreach ($stChildIds as $stChildId) {
-                        $ranges[] = $this->_baseUrl . '/range/' . $stChildId;
+                    // Clean indexes.
+                    $stIndexes = array_filter(array_map('trim', explode(';', $stIndexes)), 'is_numeric');
+                    if (!count($stIndexes)) {
+                        continue;
                     }
-                    $structure['ranges'] = $ranges;
-                }
-                */
 
-                $structures[] = (object) $structure;
+                    $stIndexes = array_map('intval', $stIndexes);
+                    $stCanvases = [];
+                    foreach ($stIndexes as $stIndex) {
+                        // Start from 1 in value, but internally from 0 in array.
+                        --$stIndex;
+                        if (isset($canvases[$stIndex])) {
+                            $canvas = $canvases[$stIndex];
+                            $stCanvases[] = ((array) $canvas)['@id'];
+                        }
+                    }
+
+                    if (!count($stCanvases)) {
+                        continue;
+                    }
+
+                    $structure = [];
+                    $structure['@id'] = $this->_baseUrl . '/range/' . ($stId === '' ? 'r' . ($indexLine + 1) : $stId);
+                    $structure['@type'] = 'sc:Range';
+                    $structure['label'] = $stLabel;
+                    $structure['canvases'] = $stCanvases;
+
+                    // TODO Add a hierarchy of structures.
+                    /*
+                    if ($stChildIds) {
+                        $ranges = [];
+                        $stChildIds = array_map('trim', explode(';', $stChildIds));
+                        foreach ($stChildIds as $stChildId) {
+                            $ranges[] = $this->_baseUrl . '/range/' . $stChildId;
+                        }
+                        $structure['ranges'] = $ranges;
+                    }
+                    */
+
+                    $structures[] = (object) $structure;
+                }
             }
 
             if (count($structures) > 0) {
@@ -1255,6 +1268,14 @@ class IiifManifest2 extends AbstractHelper
         $sequence = (object) $sequence;
 
         return $sequence;
+    }
+
+    /**
+     * @todo Convert a v3 structure into a v2 structure.
+     */
+    protected function convertToStructure2(array $structure): array
+    {
+        return [];
     }
 
     /**
