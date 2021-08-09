@@ -530,6 +530,8 @@ class IiifManifest2 extends AbstractHelper
             } else {
                 $structures = [];
 
+                $rangeToArray = $this->getView()->plugin('rangeToArray');
+
                 // Split by newline code, but don't filter empty lines in order to
                 // keep range indexes in complex cases.
                 // Example of lines:
@@ -555,12 +557,12 @@ class IiifManifest2 extends AbstractHelper
                     // $stChildIds = $stSize == 4 ? $stElements[3] : null;
 
                     // Clean indexes.
-                    $stIndexes = array_filter(array_map('trim', explode(';', $stIndexes)), 'is_numeric');
+                    // TODO Support alphanumeric names.
+                    $stIndexes = $rangeToArray($stIndexes, 1, null, true);
                     if (!count($stIndexes)) {
                         continue;
                     }
 
-                    $stIndexes = array_map('intval', $stIndexes);
                     $stCanvases = [];
                     foreach ($stIndexes as $stIndex) {
                         // Start from 1 in value, but internally from 0 in array.
