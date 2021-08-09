@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -30,7 +30,7 @@
 namespace IiifServer\Iiif;
 
 use ArrayObject;
-use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use JsonSerializable;
 use Omeka\Stdlib\Message;
 
@@ -91,8 +91,9 @@ abstract class AbstractType implements JsonSerializable
         $allowedKeys = array_filter($this->keys, function ($v) {
             return $v !== self::NOT_ALLOWED;
         });
+        $inflector = InflectorFactory::create()->build();
         foreach (array_keys($allowedKeys) as $key) {
-            $method = 'get' . Inflector::classify(str_replace('@', '', $key));
+            $method = 'get' . $inflector->classify(str_replace('@', '', $key));
             if (method_exists($this, $method)) {
                 $this->content[$key] = $this->$method();
             }
