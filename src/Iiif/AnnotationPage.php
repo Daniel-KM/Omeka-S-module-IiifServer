@@ -89,7 +89,7 @@ class AnnotationPage extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
@@ -103,7 +103,7 @@ class AnnotationPage extends AbstractResourceType
      * The canvas can have multiple items, for example when a page is composed
      * of fragments.
      */
-    public function getItems(): array
+    public function items(): array
     {
         $item = new Annotation($this->resource, $this->options);
         return [$item];

@@ -56,7 +56,7 @@ trait TraitRights
      * Warning: the option for Iiif Server (manifest) and Image Server (info.json)
      * are different, so they can be used independantly.
      */
-    public function getRights(): ?string
+    public function rights(): ?string
     {
         // For simplicity for info.json, use another method.
         return $this->rightsResource($this->resource);
@@ -77,7 +77,7 @@ trait TraitRights
         $param = $this->setting->__invoke('iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
-                if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
+                if ($this->context() === 'http://iiif.io/api/presentation/3/context.json') {
                     return null;
                 }
                 $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
@@ -105,7 +105,7 @@ trait TraitRights
         }
 
         // Text is not allowed for presentation 3.
-        $isPresentation3 = $this->getContext() === 'http://iiif.io/api/presentation/3/context.json';
+        $isPresentation3 = $this->context() === 'http://iiif.io/api/presentation/3/context.json';
         $orText = $orText && !$isPresentation3;
 
         if (!$url) {

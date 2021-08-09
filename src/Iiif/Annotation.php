@@ -91,7 +91,7 @@ class Annotation extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation',
@@ -99,17 +99,17 @@ class Annotation extends AbstractResourceType
         ]);
     }
 
-    public function getMotivation(): ?string
+    public function motivation(): ?string
     {
         return isset($this->options['motivation']) ? $this->options['motivation'] : null;
     }
 
-    public function getBody(): Annotation\Body
+    public function body(): Annotation\Body
     {
         return new Annotation\Body($this->resource, $this->options);
     }
 
-    public function getTarget(): ?string
+    public function target(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',

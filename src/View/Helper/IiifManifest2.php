@@ -1469,7 +1469,7 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Added in order to use trait TraitRights.
      */
-    protected function getContext(): ?string
+    protected function context(): ?string
     {
         return 'http://iiif.io/api/presentation/2/context.json';
     }

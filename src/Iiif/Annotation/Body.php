@@ -114,7 +114,7 @@ class Body extends AbstractResourceType
         $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
@@ -148,23 +148,23 @@ class Body extends AbstractResourceType
             ]);
         }
 
-        return $this->contentResource->getId();
+        return $this->contentResource->id();
     }
 
-    public function getType(): ?string
+    public function type(): ?string
     {
-        return $this->contentResource->getType();
+        return $this->contentResource->type();
     }
 
-    public function getFormat(): ?string
+    public function format(): ?string
     {
-        return $this->contentResource->getFormat();
+        return $this->contentResource->format();
     }
 
     /**
      * @todo Return array of Service.
      */
-    public function getService(): ?array
+    public function service(): ?array
     {
         // TODO Move this in ContentResource or TraitMedia.
 
@@ -208,8 +208,8 @@ class Body extends AbstractResourceType
                 $tiles[] = $iiifTileInfo;
                 foreach ($imageResourceServices as &$imageResourceService) {
                     $imageResourceService['tiles'] = $tiles;
-                    $imageResourceService['height'] = $this->getHeight();
-                    $imageResourceService['width'] = $this->getWidth();
+                    $imageResourceService['height'] = $this->height();
+                    $imageResourceService['width'] = $this->width();
                 }
                 unset($imageResourceService);
             }
@@ -220,24 +220,24 @@ class Body extends AbstractResourceType
         return null;
     }
 
-    public function getHeight(): ?int
+    public function height(): ?int
     {
-        return method_exists($this->contentResource, 'getHeight')
-            ? $this->contentResource->getHeight()
+        return method_exists($this->contentResource, 'height')
+            ? $this->contentResource->height()
             : null;
     }
 
-    public function getWidth(): ?int
+    public function width(): ?int
     {
-        return method_exists($this->contentResource, 'getWidth')
-        ? $this->contentResource->getWidth()
-        : null;
+        return method_exists($this->contentResource, 'width')
+            ? $this->contentResource->width()
+            : null;
     }
 
-    public function getDuration(): ?string
+    public function duration(): ?string
     {
-        return method_exists($this->contentResource, 'getDuration')
-            ? $this->contentResource->getDuration()
+        return method_exists($this->contentResource, 'duration')
+            ? $this->contentResource->duration()
             : null;
     }
 

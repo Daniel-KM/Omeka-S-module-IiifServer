@@ -82,22 +82,22 @@ class Service extends AbstractType
         return new \ArrayObject($this->options);
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->options['id'] ?? null;
     }
 
-    public function getType(): ?string
+    public function type(): ?string
     {
         return $this->options['type'] ?? null;
     }
 
-    public function getProfile(): ?string
+    public function profile(): ?string
     {
         return $this->options['profile'] ?? null;
     }
 
-    public function getLabel(): ?string
+    public function label(): ?string
     {
         return $this->options['label'] ?? null;
     }

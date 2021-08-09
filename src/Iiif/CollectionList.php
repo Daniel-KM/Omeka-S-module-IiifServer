@@ -168,23 +168,23 @@ class CollectionList extends AbstractType
         return $this;
     }
 
-    public function getContext(): ?string
+    public function context(): ?string
     {
         return 'http://iiif.io/api/presentation/3/context.json';
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->options['iiif_url'] ?? $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
     }
 
-    public function getLabel(): ?ValueLanguage
+    public function label(): ?ValueLanguage
     {
         $values = ['none' => ['Collection list']];
         return new ValueLanguage($values);
     }
 
-    public function getItems(): array
+    public function items(): array
     {
         $items = [];
         foreach ($this->resources as $resource) {

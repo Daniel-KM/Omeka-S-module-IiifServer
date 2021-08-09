@@ -123,14 +123,14 @@ class Canvas extends AbstractResourceType
         // TODO Add linking properties when not in manifest.
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/canvas', '3', [
             'name' => $this->resource->id(),
         ]);
     }
 
-    public function getLabel(): ?ValueLanguage
+    public function label(): ?ValueLanguage
     {
         $setting = $this->setting;
         $labelOption = $setting('iiifserver_manifest_canvas_label');
@@ -176,7 +176,7 @@ class Canvas extends AbstractResourceType
      * As the process converts Omeka resource, there is only one file by canvas
      * currently.
      */
-    public function getItems(): array
+    public function items(): array
     {
         if (!array_key_exists('items', $this->_storage)) {
             $this->_storage['items'] = [];
@@ -190,7 +190,7 @@ class Canvas extends AbstractResourceType
         return $this->_storage['items'];
     }
 
-    public function getAnnotations(): array
+    public function annotations(): array
     {
         if (!array_key_exists('annotations', $this->_storage)) {
             $this->_storage['annotations'] = [];
@@ -204,7 +204,7 @@ class Canvas extends AbstractResourceType
         return $this->_storage['annotations'];
     }
 
-    public function getRendering(): array
+    public function rendering(): array
     {
         if (!array_key_exists('rendering', $this->_storage)) {
             $this->_storage['rendering'] = [];
@@ -216,17 +216,17 @@ class Canvas extends AbstractResourceType
         return $this->_storage['rendering'];
     }
 
-    public function getHeight(): ?int
+    public function height(): ?int
     {
         return $this->canvasDimensions()['height'];
     }
 
-    public function getWidth(): ?int
+    public function width(): ?int
     {
         return $this->canvasDimensions()['width'];
     }
 
-    public function getDuration(): ?string
+    public function duration(): ?string
     {
         return $this->canvasDimensions()['duration'];
     }
@@ -237,20 +237,20 @@ class Canvas extends AbstractResourceType
             $heights = [0];
             $widths = [0];
             $durations = [0];
-            foreach ($this->getItems() as $item) {
-                foreach ($item->getItems() as $itemItem) {
-                    if ($itemItem->getMotivation() !== 'painting') {
+            foreach ($this->items() as $item) {
+                foreach ($item->items() as $itemItem) {
+                    if ($itemItem->motivation() !== 'painting') {
                         continue;
                     }
-                    $body = $itemItem->getBody();
-                    if (method_exists($body, 'getHeight')) {
-                        $heights[] = $body->getHeight();
+                    $body = $itemItem->body();
+                    if (method_exists($body, 'height')) {
+                        $heights[] = $body->height();
                     }
-                    if (method_exists($body, 'getWidth')) {
-                        $widths[] = $body->getWidth();
+                    if (method_exists($body, 'width')) {
+                        $widths[] = $body->width();
                     }
-                    if (method_exists($body, 'getDuration')) {
-                        $durations[] = $body->getDuration();
+                    if (method_exists($body, 'duration')) {
+                        $durations[] = $body->duration();
                     }
                 }
             }

@@ -121,17 +121,17 @@ trait TraitMedia
         return $this->type === 'Video';
     }
 
-    public function getHeight(): ?int
+    public function height(): ?int
     {
         return $this->mediaSize()['height'];
     }
 
-    public function getWidth(): ?int
+    public function width(): ?int
     {
         return $this->mediaSize()['width'];
     }
 
-    public function getDuration(): ?string
+    public function duration(): ?string
     {
         return $this->mediaDimension()['duration'];
     }
@@ -142,7 +142,7 @@ trait TraitMedia
      * @todo Manage the format of non-file resources (iiif, oembed, etc.).
      * @todo Manage the preferred output for the format.
      */
-    public function getFormat(): ?string
+    public function format(): ?string
     {
         if ($this->isMediaIiif()) {
             // @link https://iiif.io/api/image/3.0/compliance/

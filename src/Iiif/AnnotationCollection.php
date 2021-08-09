@@ -86,7 +86,7 @@ class AnnotationCollection extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-collection',

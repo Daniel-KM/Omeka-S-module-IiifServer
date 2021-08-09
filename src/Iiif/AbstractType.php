@@ -75,7 +75,7 @@ abstract class AbstractType implements JsonSerializable
      */
     protected $_storage = [];
 
-    public function getType(): ?string
+    public function type(): ?string
     {
         return (string) $this->type;
     }
@@ -90,7 +90,7 @@ abstract class AbstractType implements JsonSerializable
         });
         $inflector = InflectorFactory::create()->build();
         foreach (array_keys($allowedKeys) as $key) {
-            $method = 'get' . $inflector->classify(str_replace('@', '', $key));
+            $method = $inflector->camelize(str_replace('@', '', $key));
             if (method_exists($this, $method)) {
                 $this->content[$key] = $this->$method();
             }
@@ -142,12 +142,12 @@ abstract class AbstractType implements JsonSerializable
             } elseif (isset($this->resource)) {
                 $message = new Message(
                     'Missing required keys for resource type "%1$s": "%2$s" (resource #%3$d).', // @translate
-                    $this->getType(), implode('", "', $missingKeys), $this->resource->id()
+                    $this->type(), implode('", "', $missingKeys), $this->resource->id()
                 );
             } else {
                 $message = new Message(
                     'Missing required keys for resource type "%1$s": "%2$s".', // @translate
-                    $this->getType(), implode('", "', $missingKeys)
+                    $this->type(), implode('", "', $missingKeys)
                 );
             }
             throw new \IiifServer\Iiif\Exception\RuntimeException((string) $message);

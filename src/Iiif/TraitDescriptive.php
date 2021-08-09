@@ -42,7 +42,7 @@ trait TraitDescriptive
      * @todo Use displayValues() or the event?
      * @todo Remove special properties used in other keys.
      */
-    public function getMetadata(): array
+    public function metadata(): array
     {
         $jsonLdType = $this->resource->getResourceJsonLdType();
         $map = [
@@ -104,7 +104,7 @@ trait TraitDescriptive
         return $metadata;
     }
 
-    public function getSummary(): ValueLanguage
+    public function summary(): ValueLanguage
     {
         $summaryProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         $values = [];
@@ -119,7 +119,7 @@ trait TraitDescriptive
      *
      * @return ValueLanguage[]
      */
-    public function getRequiredStatement()
+    public function requiredStatement()
     {
         $license = [];
         $licenseProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');

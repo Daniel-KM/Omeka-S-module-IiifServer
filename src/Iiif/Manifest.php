@@ -128,7 +128,7 @@ class Manifest extends AbstractResourceType
         $this->initThumbnail();
     }
 
-    public function getId(): string
+    public function id(): string
     {
         return $this->iiifUrl->__invoke($this->resource, 'iiifserver/manifest', '3');
     }
@@ -146,7 +146,7 @@ class Manifest extends AbstractResourceType
      *
      * @todo Manage multiple files by canvas for supplementing and rendering.
      */
-    public function getItems(): array
+    public function items(): array
     {
         $items = [];
         $index = 0;
@@ -167,7 +167,7 @@ class Manifest extends AbstractResourceType
     /**
      * In manifest, the rendering is used for media to be downloaded.
      */
-    public function getRendering(): array
+    public function rendering(): array
     {
         $renderings = [];
         $site = $this->defaultSite();
@@ -181,7 +181,7 @@ class Manifest extends AbstractResourceType
                     'content' => $mediaInfo['content'],
                     'on' => 'Manifest',
                 ]);
-                if ($rendering->getId() && $rendering->getType()) {
+                if ($rendering->id() && $rendering->type()) {
                     $renderings[] = $rendering;
                 }
             }
@@ -189,7 +189,7 @@ class Manifest extends AbstractResourceType
         return $renderings;
     }
 
-    public function getService(): ?array
+    public function service(): ?array
     {
         return $this->service;
     }
@@ -265,7 +265,7 @@ class Manifest extends AbstractResourceType
             $result[$mediaId] = null;
             $contentResource = new ContentResource($media);
             if ($contentResource->hasIdAndType()) {
-                $iiifType = $contentResource->getType();
+                $iiifType = $contentResource->type();
                 if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
                     $iiifTypes[$iiifType][$mediaId] = [
                         'content' => $contentResource,

@@ -57,7 +57,7 @@ trait TraitThumbnail
     /**
      * @todo Normalize and factorize as a standard image.
      */
-    public function getThumbnail()
+    public function thumbnail()
     {
         /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
         $thumbnailAsset = $this->resource->thumbnail();

@@ -168,17 +168,17 @@ abstract class AbstractResourceType extends AbstractType
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 
-    public function getContext(): ?string
+    public function context(): ?string
     {
         return 'http://iiif.io/api/presentation/3/context.json';
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         return null;
     }
 
-    public function getLabel(): ?ValueLanguage
+    public function label(): ?ValueLanguage
     {
         $template = $this->resource->resourceTemplate();
         if ($template && $template->titleProperty()) {

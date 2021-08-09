@@ -38,7 +38,7 @@ trait TraitViewing
         'bottom-to-top',
     ];
 
-    public function getViewingDirection(): ?string
+    public function viewingDirection(): ?string
     {
         $viewingDirectionProperty = $this->setting->__invoke('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {

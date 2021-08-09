@@ -31,7 +31,7 @@ namespace IiifServer\Iiif;
 
 trait TraitBehavior
 {
-    public function getBehavior(): ?array
+    public function behavior(): ?array
     {
         $behaviorProperty = $this->setting->__invoke('iiifserver_manifest_behavior_property', []);
         if ($behaviorProperty) {

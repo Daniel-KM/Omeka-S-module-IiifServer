@@ -61,7 +61,7 @@ class Rendering extends AbstractResourceType
         $this->initIiifType();
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         if (!array_key_exists('id', $this->_storage)) {
             // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
@@ -90,13 +90,13 @@ class Rendering extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
      */
-    public function getLabel(): ?ValueLanguage
+    public function label(): ?ValueLanguage
     {
         if (!$this->type) {
             return null;
         }
 
-        $format = $this->getFormat();
+        $format = $this->format();
         if (isset($this->mediaLabels[$format])) {
             $format = $this->mediaLabels[$format];
         }
@@ -111,7 +111,7 @@ class Rendering extends AbstractResourceType
      *
      * @todo Manage the format of non-file resources (iiif, oembed, etc.).
      */
-    public function getFormat(): ?string
+    public function format(): ?string
     {
         $mediaType = $this->resource->mediaType();
         if ($mediaType) {

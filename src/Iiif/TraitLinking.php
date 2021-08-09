@@ -50,7 +50,7 @@ trait TraitLinking
      *
      * @return \stdClass
      */
-    public function getHomepage()
+    public function homepage()
     {
         $output = new \ArrayObject;
 
@@ -162,7 +162,7 @@ trait TraitLinking
      *
      * @return \stdClass
      */
-    public function getLogo()
+    public function logo()
     {
         $setting = $this->setting;
         $url = $setting('iiifserver_manifest_logo_default');
@@ -208,7 +208,7 @@ trait TraitLinking
      *
      * @return \stdClass
      */
-    public function getSeeAlso()
+    public function seeAlso()
     {
         $output = new \ArrayObject;
 

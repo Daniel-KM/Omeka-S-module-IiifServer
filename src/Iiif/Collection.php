@@ -123,14 +123,14 @@ class Collection extends AbstractResourceType
         $this->initThumbnail();
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
         /** @see \Omeka\Api\Representation\ItemSetRepresentation */
         return $this->iiifUrl->__invoke($this->resource, 'iiifserver/collection', '3');
     }
 
-    public function getItems(): array
+    public function items(): array
     {
         if ($this->resource instanceof ItemSetRepresentation) {
             $items = [];

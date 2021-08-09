@@ -113,7 +113,7 @@ class ContentResource extends AbstractResourceType
         return $this->id && $this->type;
     }
 
-    public function getId(): ?string
+    public function id(): ?string
     {
         if ($this->id) {
             return $this->id;
@@ -130,15 +130,15 @@ class ContentResource extends AbstractResourceType
      * label is already known.
      *
      * {@inheritDoc}
-     * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
+     * @see \IiifServer\Iiif\AbstractResourceType::label()
      */
-    public function getLabel(): ?ValueLanguage
+    public function label(): ?ValueLanguage
     {
         if (!$this->type) {
             return null;
         }
 
-        $format = $this->getFormat();
+        $format = $this->format();
         if (isset($this->mediaLabels[$format])) {
             $format = $this->mediaLabels[$format];
         }
