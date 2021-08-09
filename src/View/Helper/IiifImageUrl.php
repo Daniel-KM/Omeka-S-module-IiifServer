@@ -26,6 +26,11 @@ class IiifImageUrl extends AbstractHelper
     protected $defaultVersion;
 
     /**
+     * @var array
+     */
+    protected $supportedVersions;
+
+    /**
      * @var string
      */
     protected $prefix;
@@ -44,6 +49,7 @@ class IiifImageUrl extends AbstractHelper
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
      * @param string $defaultVersion
+     * @param string $supportedVersions
      * @param string $prefix
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
@@ -52,6 +58,7 @@ class IiifImageUrl extends AbstractHelper
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
         $defaultVersion,
+        $supportedVersions,
         $prefix,
         $forceUrlFrom,
         $forceUrlTo
@@ -59,6 +66,7 @@ class IiifImageUrl extends AbstractHelper
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
         $this->defaultVersion = $defaultVersion;
+        $this->supportedVersions = $supportedVersions;
         $this->prefix = $prefix;
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;

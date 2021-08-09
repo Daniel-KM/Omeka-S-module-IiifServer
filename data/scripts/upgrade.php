@@ -183,5 +183,23 @@ if (version_compare($oldVersion, '3.6.3.2', '<')) {
 }
 
 if (version_compare($oldVersion, '3.6.5.3', '<')) {
-    $settings->set('iiifserver_media_api_default_version', $settings->get('imageserver_info_default_version', '2'));
+    $supportedVersions = $settings->get('iiifserver_manifest_image_api_disabled') ? [] : ['2/2', '3/2'];
+    $defaultVersion = $supportedVersions ? $settings->get('imageserver_info_default_version', '2') : '0';
+    $settings->set('iiifserver_media_api_default_version', $defaultVersion);
+    $settings->set('iiifserver_media_api_supported_versions', $supportedVersions);
+    $settings->set('iiifserver_media_api_default_supported_version', $defaultVersion
+        ? ['service' => $defaultVersion, 'level' => '2']
+        : ['service' => '0', 'level' => '0']
+    );
+    $settings->delete('iiifserver_manifest_image_api_disabled');
+
+    $messenger = new Messenger();
+    $message = new Message(
+        'The module IIIF Server is now totally independant from the module Image Server and any other external image server can be used.' // @translate
+    );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'Check the config of the image server, if any, in the config of this module.' // @translate
+    );
+    $messenger->addWarning($message);
 }

@@ -468,18 +468,6 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_image_api_disabled',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'Disable IIIF Image API (only for iiif 2.0)', // @translate
-                    'info' => 'Disable IIIF Image API service with resource-limited servers.',  // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_manifest_image_api_disabled',
-                ],
-            ])
-
-            ->add([
                 'name' => 'iiifserver_manifest_structures_property',
                 'type' => PropertySelect::class,
                 'options' => [
@@ -572,6 +560,9 @@ class ConfigForm extends Form
                 ],
             ])
 
+            // TODO Use the json from the image server.
+            // The same keys are used in the module Image Server.
+
             ->add([
                 'name' => 'fieldset_media_api',
                 'type' => \Laminas\Form\Fieldset::class,
@@ -599,6 +590,7 @@ class ConfigForm extends Form
                     'label' => 'Default IIIF image api version', // @translate
                     'info' => 'Set the version of the iiif info.json to provide. The image server should support it.', // @translate
                     'value_options' => [
+                        '0' => 'No image server', // @translate
                         '1' => 'Image Api 1', // @translate
                         '2' => 'Image Api 2', // @translate
                         '3' => 'Image Api 3', // @translate
@@ -607,6 +599,28 @@ class ConfigForm extends Form
                 'attributes' => [
                     'id' => 'iiifserver_media_api_default_version',
                     'required' => true,
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_media_api_supported_versions',
+                'type' => Element\MultiCheckbox::class,
+                'options' => [
+                    'label' => 'Supported IIIF image api versions and max compliance level', // @translate
+                    'value_options' => [
+                        '1/0' => 'Image Api 1 level 0', // @translate
+                        '1/1' => 'Image Api 1 level 1', // @translate
+                        '1/2' => 'Image Api 1 level 2', // @translate
+                        '2/0' => 'Image Api 2 level 0', // @translate
+                        '2/1' => 'Image Api 2 level 1', // @translate
+                        '2/2' => 'Image Api 2 level 2', // @translate
+                        '3/0' => 'Image Api 3 level 0', // @translate
+                        '3/1' => 'Image Api 3 level 1', // @translate
+                        '3/2' => 'Image Api 3 level 2', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_supported_versions',
                 ],
             ])
         ;
@@ -706,6 +720,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_structures_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_media_api_supported_versions',
                 'required' => false,
             ])
         ;

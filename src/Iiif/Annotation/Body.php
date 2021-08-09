@@ -77,6 +77,11 @@ class Body extends AbstractResourceType
     protected $imageApiVersion;
 
     /**
+     * @var array
+     */
+    protected $imageApiSupportedVersions;
+
+    /**
      * @var \IiifServer\Iiif\ContentResource
      */
     protected $contentResource;
@@ -112,6 +117,7 @@ class Body extends AbstractResourceType
 
         $setting = $this->setting;
         $this->imageApiVersion = $setting('iiifserver_media_api_default_version', '2');
+        $this->imageApiSupportedVersions = (array) $setting('iiifserver_media_api_supported_versions', ['2/2', '3/2']);
     }
 
     public function id(): ?string
@@ -206,31 +212,28 @@ class Body extends AbstractResourceType
         }
 
         if ($this->contentResource->isImage()) {
-            // TODO Use the json from the image server.
+            $resourceIiifTileInfo = $this->iiifTileInfo->__invoke($this->resource);
+            if ($resourceIiifTileInfo) {
+                $resourceIiifTileInfo = [
+                    'tiles' => [$resourceIiifTileInfo],
+                    'height' => $this->height(),
+                    'width' => $this->width(),
+                ];
+            } else {
+                $resourceIiifTileInfo = [];
+            }
 
-            // The image server supports the two services.
             $imageResourceServices = [];
-            $imageResourceServices[] = [
-                'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', '2'),
-                'type' => 'ImageService2',
-                'profile' => 'level2',
-            ];
-            $imageResourceServices[] = [
-                'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', '3'),
-                'type' => 'ImageService3',
-                'profile' => 'level2',
-            ];
-
-            $iiifTileInfo = $this->iiifTileInfo->__invoke($this->resource);
-            if ($iiifTileInfo) {
-                $tiles = [];
-                $tiles[] = $iiifTileInfo;
-                foreach ($imageResourceServices as &$imageResourceService) {
-                    $imageResourceService['tiles'] = $tiles;
-                    $imageResourceService['height'] = $this->height();
-                    $imageResourceService['width'] = $this->width();
-                }
-                unset($imageResourceService);
+            foreach ($this->imageApiSupportedVersions as $supportedVersion) {
+                $service = strtok($supportedVersion, '/');
+                $level = strtok('/') ?: '0';
+                $imageResourceService = [
+                    'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', $service),
+                    'type' => 'ImageService' . $service,
+                    'profile' => 'level' . $level,
+                ];
+                $imageResourceService += $imageResourceService;
+                $imageResourceServices[] = $imageResourceService;
             }
 
             return $imageResourceServices;
@@ -277,6 +280,8 @@ class Body extends AbstractResourceType
     /**
      * Helper to set the compliance level to the IIIF Image API, based on the
      * compliance level URI
+     *
+     * @see https://iiif.io/api/image/1.1/compliance/
      *
      * @param array|string $profile Contents of the `profile` property from the
      * info.json

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\View\Helper;
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension as MediaDimensionPlugin;

@@ -105,6 +105,57 @@ class Module extends AbstractModule
                 : (in_array('none', $params[$key]) ? ['none'] : $params[$key]);
             $settings->set($key, $value);
         }
+
+        $this->normalizeMediaApiSettings($params);
+    }
+
+    /**
+     * Same in Iiif server and Image server.
+     *
+     * @see \ImageServer\Module::normalizeMediaApiSettings()
+     */
+    protected function normalizeMediaApiSettings(array $params): void
+    {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        // Check and normalize image api versions.
+        $defaultVersion = $params['iiifserver_media_api_default_version'] ?: '0';
+        $has = ['1' => null, '2' => null, '3' => null];
+        foreach ($params['iiifserver_media_api_supported_versions'] ?? [] as $supportedVersion) {
+            $service = strtok($supportedVersion, '/');
+            $level = strtok('/') ?: '0';
+            $has[$service] = isset($has[$service]) && $has[$service] > $level
+                ? $has[$service]
+                : $level;
+        }
+        $has = array_filter($has);
+        if ($defaultVersion && !isset($has[$defaultVersion])) {
+            $has[$defaultVersion] = '0';
+        }
+        ksort($has);
+        $supportedVersions = [];
+        foreach ($has as $service => $level) {
+            $supportedVersions[] = $service . '/' . $level;
+        }
+        $settings->set('iiifserver_media_api_default_version', $defaultVersion);
+        $settings->set('iiifserver_media_api_supported_versions', $supportedVersions);
+
+        // Avoid to do the computation each time for manifest v2, that supports
+        // only one service.
+        $defaultSupportedVersion = ['service' => '0', 'level' => '0'];
+        foreach ($supportedVersions as $supportedVersion) {
+            $service = strtok($supportedVersion, '/');
+            if ($service === $defaultVersion) {
+                $level = strtok('/') ?: '0';
+                $defaultSupportedVersion = [
+                    'service' => $service,
+                    'level' => $level,
+                ];
+                break;
+            }
+        }
+        $settings->set('iiifserver_media_api_default_supported_version', $defaultSupportedVersion);
     }
 
     protected function updateWhitelist(): void

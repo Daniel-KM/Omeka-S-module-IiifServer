@@ -290,7 +290,6 @@ return [
             'iiifserver_manifest_properties_collection_blacklist' => [],
             'iiifserver_manifest_properties_item_blacklist' => [],
             'iiifserver_manifest_properties_media_blacklist' => [],
-            'iiifserver_manifest_image_api_disabled' => false,
             'iiifserver_manifest_structures_property' => '',
             // Urls.
             'iiifserver_url_version_add' => false,
@@ -300,10 +299,20 @@ return [
             // These options allows to bypass a proxy issue.
             'iiifserver_url_force_from' => '',
             'iiifserver_url_force_to' => '',
-            // Iiif Image Api (Image server).
+            // TODO Fetch the config of the image server directly via the endpoint.
+            // The same keys for Iiif Image Api are used in module Image server (except url).
             // This option is used by module Bulk Import and for a future improvement.
             'iiifserver_media_api_url' => '',
             'iiifserver_media_api_default_version' => '2',
+            'iiifserver_media_api_supported_versions' => [
+                '2/2',
+                '3/2',
+            ],
+            // Hidden option.
+            'iiifserver_media_api_default_supported_version' => [
+                'service' => '2',
+                'level' => '2',
+            ],
         ],
     ],
 ];
