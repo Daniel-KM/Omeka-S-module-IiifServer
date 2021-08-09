@@ -541,19 +541,20 @@ class IiifManifest2 extends AbstractHelper
                 // ```
                 $stLines = explode("\n", $stValue);
                 foreach ($stLines as $indexLine => $stLine) {
-                    $stElements = explode(',', $stLine);
-                    $stSize = count($stElements);
-                    // If the format of the element is not correct.
-                    if ($stSize !== 3 && $stSize !== 4) {
+                    // Don't use explode: a comma may be added in the label.
+                    // So the label is everything between first and last comma.
+                    $firstComma = strpos($stLine, ',');
+                    if ($firstComma === false) {
+                        continue;
+                    }
+                    $lastComma = strrpos($stLine, ',');
+                    if ($lastComma === false || $firstComma === $lastComma) {
                         continue;
                     }
 
-                    // Clean each element.
-                    $stElements = array_map('trim', $stElements);
-
-                    $stId = $stElements[0];
-                    $stLabel = $stElements[1];
-                    $stIndexes = $stElements[2];
+                    $stId = trim(mb_substr($stLine, 0, $firstComma));
+                    $stLabel = trim(mb_substr($stLine, $firstComma + 1, $lastComma - $firstComma - 1));
+                    $stIndexes = trim(mb_substr($stLine, $lastComma));
                     // $stChildIds = $stSize == 4 ? $stElements[3] : null;
 
                     // Clean indexes.

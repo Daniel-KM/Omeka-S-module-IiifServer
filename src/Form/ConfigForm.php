@@ -471,11 +471,11 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_manifest_structures_property',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Property for structures (only for iiif 2.0)', // @translate
+                    'label' => 'Property for structures', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                     'info' => 'Please refer to the following URL for the input format.',  // @translate
-                    'documentation' => 'https://gitlab.com/nakamura196/Omeka-S-module-IiifServer/-/wikis/Input-format-of-the-property-for-structures-(only-for-iiif-2.0)',
+                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents',
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_structures_property',

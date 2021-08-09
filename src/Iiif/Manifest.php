@@ -122,9 +122,18 @@ class Manifest extends AbstractResourceType
      */
     protected $services = [];
 
+    /**
+     * @var \IiifServer\Mvc\Controller\Plugin\RangeToArray
+     */
+    protected $rangeToArray;
+
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
+
+        $services = $this->resource->getServiceLocator();
+        $this->rangeToArray = $services->get('ControllerPluginManager')->get('rangeToArray');
+
         $this->initLinking();
         $this->initThumbnail();
     }
@@ -163,6 +172,185 @@ class Manifest extends AbstractResourceType
             }
         }
         return $items;
+    }
+
+    public function structures(): array
+    {
+        $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
+        $stProperty = $settings()->get('iiifserver_manifest_structures_property');
+        if (!$stProperty) {
+            return [];
+        }
+
+        $stValues = $this->resource->value($stProperty, ['type' => 'literal', 'all' => true]);
+        if (!count($stValues)) {
+            return [];
+        }
+
+        $structures = [];
+        foreach ($stValues as $index => $stValue) {
+            $structure = $this->extractStructure((string) $stValue, ++$index);
+            if (!empty($structure)) {
+                $structures[] = $structure;
+            }
+        }
+
+        return $structures;
+    }
+
+    /**
+     * Convert a literal structure into a range.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#54-range
+     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     */
+    protected function extractStructure(string $literalStructure, int $indexStructure): array
+    {
+        $structure = @json_decode($literalStructure, true);
+        if ($structure && is_array($structure)) {
+            $firstRange = reset($structure);
+            if (!is_array($firstRange)) {
+                return [];
+            }
+            // TODO Return an array Range in order to check the json.
+            return isset($firstRange['@type'])
+                ? $this->convertToStructure3($structure)
+                // Ideally, the json should be checked.
+                : $structure;
+        }
+
+        // TODO Improve process to use Range (conversion via an array recursive walk and by-reference variables).
+
+        $structure = [];
+        $ranges = [];
+        $rangesChildren = [];
+        $canvases = [];
+
+        $isInteger = function ($value): bool {
+            return (string) (int) $value === (string) $value;
+        };
+
+        // Convert the literal value and prepare all the ranges.
+
+        // Split by newline code, but don't filter empty lines in order to
+        // keep range indexes in complex cases.
+        $lines = explode("\n", $literalStructure);
+        $matches = [];
+        foreach ($lines as $lineIndex => $line) {
+            $line = trim($line);
+            if (!$line || !preg_match('~^(?<name>[^,]*?)\s*,\s*(?<label>.*?)\s*,\s*(?<children>[^,]+?)$~u', $line, $matches)) {
+                continue;
+            }
+            $name = strlen($matches['name']) === 0 ? 'r' . ($lineIndex + 1) : $matches['name'];
+            $label = $matches['label'];
+            $children = $this->rangeToArray->__invoke($matches['children'], 1, null, false, false, ';');
+            if (!count($children)) {
+                continue;
+            }
+
+            $rangeId = $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+                'type' => 'range',
+                'name' => $isInteger($name) ? 'r' . $name : $name,
+            ]);
+
+            // A line is always a range to display.
+            $ranges[$name] = [
+                'id' => $rangeId,
+                'type' => 'Range',
+                'label' => new ValueLanguage($label),
+                'items' => [],
+            ];
+            $rangesChildren[$name] = $children;
+        }
+
+        // If the values wasn't a formatted structure, there is no indexes.
+        if (!count($ranges)) {
+            return [];
+        }
+
+        // Prepare the list of canvases. This second step is needed because the
+        // list of ranges should be complete to determine if an index is a
+        // range or a canvas.
+        foreach ($rangesChildren as $name => $itemNames) {
+            foreach ($itemNames as $itemName) {
+                $itemName = (string) $itemName;
+                // Manage an exception: protected duplicate name for a canvas
+                // and a range).
+                $isProtected = mb_strlen($itemName) > 1 && mb_substr($itemName, 0, 1) === '"' && mb_substr($itemName, -1, 1) === '"';
+                $cleanItemName = $isProtected
+                    ? trim(mb_substr($itemName, 1, -1))
+                    : $itemName;
+                if ((isset($ranges[$cleanItemName]) && !$isProtected)
+                    || isset($canvases[$cleanItemName])
+                ) {
+                    continue;
+                }
+                // This is not a full Canvas, just a reference, so skip label.
+                $canvases[$itemName] = [
+                    'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+                        'type' => 'canvas',
+                        'name' => $isInteger($cleanItemName) ? 'p' . $cleanItemName : $cleanItemName,
+                    ]),
+                    'type' => 'Canvas',
+                ];
+            }
+        }
+
+        $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants) use ($ranges, $canvases, $rangesChildren, $isInteger, &$buildStructure): void {
+            foreach ($itemNames as $itemName) {
+                if (isset($canvases[$itemName])) {
+                    $parentRange['items'][] = $canvases[$itemName];
+                    continue;
+                }
+                // TODO The type may be "SpecificResource" too (canvas part: fragment of an image, etc.).
+                // The index is a range.
+                // Check if the item is in ascendants to avoid an infinite loop.
+                if (in_array($itemName, $ascendants)) {
+                    $canvases[$itemName] = [
+                        'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+                            'type' => 'canvas',
+                            'name' => $isInteger($itemName) ? 'p' . $itemName : $itemName,
+                        ]),
+                        'type' => 'Canvas',
+                    ];
+                    $parentRange['items'][] = $canvases[$itemName];
+                    continue;
+                }
+                $ascendants[] = $itemName;
+                $range = $ranges[$itemName];
+                $buildStructure($rangesChildren[$itemName], $range, $ascendants);
+                $parentRange['items'][] = $range;
+                array_pop($ascendants);
+            }
+        };
+
+        // Unlike iiif v2, there can be only one root, so a range may be added
+        // to wrap the structure.
+        $allIndexes = array_fill_keys(array_merge(...array_values($rangesChildren)), true);
+        $roots = array_keys(array_diff_key($ranges, $allIndexes));
+        if (count($roots) === 1) {
+            $structure = $ranges[reset($roots)];
+            $rangesToBuild = $roots;
+        } else {
+            $structure = [
+                'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+                    'type' => 'range',
+                    'name' => 'rstructure' . $indexStructure,
+                ]),
+                'type' => 'Range',
+                'label' => new ValueLanguage('Content'),
+                'items' => [],
+            ];
+            $rangesToBuild = count($roots)
+                ? $roots
+                // No loop means an infinite loop, that is managed directly.
+                : array_keys($ranges);
+        }
+
+        $ascendants = [];
+        $buildStructure($rangesToBuild, $structure, $ascendants);
+
+        return $structure;
     }
 
     /**
@@ -350,5 +538,13 @@ class Manifest extends AbstractResourceType
         }
 
         return $result;
+    }
+
+    /**
+     * @todo Convert a v2 structure into a v3 structure.
+     */
+    protected function convertToStructure3(array $structure): array
+    {
+        return [];
     }
 }
