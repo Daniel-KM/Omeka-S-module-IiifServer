@@ -115,14 +115,17 @@ trait IiifServerControllerTrait
             return $this->forward()->dispatch(\IiifServer\Controller\PresentationController::class, $params);
         }
 
-        // Don't only add "/info.json", but get the canonical url.
-        $version = $this->requestedVersion()
-            ?? $this->settings()->get('iiifserver_media_api_default_version', '2') ?: '2';
-        $url = $this->url()->fromRoute($this->routeInfo, [
+        // Don't only add "/info.json", but get the canonical url, that may be
+        // different for image and non-image.
+        /** @var \IiifServer\View\Helper\IiifMediaUrl $iiifMediaUrl */
+        $iiifMediaUrl = $this->viewHelpers()->get('iiifMediaUrl');
+        $version = $this->requestedVersion();
+        $params = [
             'version' => $version,
             'prefix' => empty($params['prefix']) ? $settings->get('iiifserver_media_api_prefix', '') : $params['prefix'],
             'id' => $params['id'],
-        ], ['force_canonical' => true]);
+        ];
+        $url = $iiifMediaUrl($resource, null, $version, $params);
         $response = $this->getResponse();
         $response
             ->getHeaders()->addHeaderLine('Location', $url);

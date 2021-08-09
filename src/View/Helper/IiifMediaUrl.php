@@ -6,9 +6,9 @@ use Laminas\View\Helper\AbstractHelper;
 use Laminas\View\Helper\Url;
 
 /**
- * @todo FIXME Rename helper iiifImageUrl, because it is used for media too.
+ * @todo FIXME Rename helper iiifMediaUrl, because it is used for media too.
  */
-class IiifImageUrl extends AbstractHelper
+class IiifMediaUrl extends AbstractHelper
 {
     /**
      * @var \Laminas\View\Helper\Url
@@ -92,51 +92,51 @@ class IiifImageUrl extends AbstractHelper
     }
 
     /**
-     * Return an iiif image url.
+     * Return an iiif image (or any media) url.
      *
      * It takes care of external server and of the option to force base url.
      * @see \IiifServer\View\Helper\IiifUrl
      *
      * @param \Omeka\Api\Representation\MediaRepresentation|int $resource
-     * @param string $route
-     * @param string $version
-     * @param array $params
-     * @return string
      */
-    public function __invoke($resource, ?string $route = '', ?string $version = null, array $params = []): string
+    public function __invoke($resource, ?string $route = null, ?string $version = null, array $params = []): string
     {
-        $route = $route ?: 'imageserver/info';
-        $apiVersion = $version ?: $this->defaultVersion;
-        $isNumeric = is_numeric($resource);
-        $id = $isNumeric ? $resource : $resource->id();
+        if (is_numeric($resource)) {
+            $id = $resource;
+            try {
+                $resource = $this->view->api()->read('media', ['id' => $resource])->getContent();
+            } catch (\Exception $e) {
+                return '';
+            }
+        } else {
+            $id = $resource->id();
+        }
 
         if ($this->mediaIdentifier === 'storage_id' || $this->mediaIdentifier === 'filename') {
-            if ($isNumeric) {
-                try {
-                    $resource = $this->view->api()->read('media', ['id' => $id])->getContent();
-                } catch (\Exception $e) {
-                    $identifier = $id;
-                }
-            }
-            if (is_object($resource)) {
-                $identifier = $this->mediaIdentifier === 'storage_id'
-                    ? $resource->storageId()
-                    : $resource->filename();
-                $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
-            }
+            $identifier = $this->mediaIdentifier === 'storage_id'
+                ? $resource->storageId()
+                : $resource->filename();
+            $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
         } elseif ($this->mediaIdentifier === 'media_id') {
             $identifier = $id;
         } else {
             // The identifier will be the identifier set in clean url or the
             // media id.
-            $identifier = $this->iiifCleanIdentifiers->__invoke($id);
+            $identifier = $this->iiifCleanIdentifiers->__invoke($resource);
+        }
+
+        if (!$route) {
+            $route = substr((string) $resource->mediaType(), 0, 6) === 'image/'
+                ? 'imageserver/info'
+                : 'mediaserver/info';
         }
 
         $params += [
-            'version' => $apiVersion,
+            'version' => $version ?: $this->defaultVersion,
             'prefix' => $this->prefix,
             'id' => $identifier,
         ];
+
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
 
         if ($this->imageApiUrl

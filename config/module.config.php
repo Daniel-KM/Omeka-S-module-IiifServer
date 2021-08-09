@@ -97,9 +97,9 @@ return [
         ],
         'factories' => [
             'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,
-            'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
             'iiifInfo2' => Service\ViewHelper\IiifInfo2Factory::class,
             'iiifInfo3' => Service\ViewHelper\IiifInfo3Factory::class,
+            'iiifMediaUrl' => Service\ViewHelper\IiifMediaUrlFactory::class,
             'iiifManifest2' => Service\ViewHelper\IiifManifest2Factory::class,
             'iiifManifest3' => Service\ViewHelper\IiifManifest3Factory::class,
             'iiifTileInfo' => Service\ViewHelper\IiifTileInfoFactory::class,

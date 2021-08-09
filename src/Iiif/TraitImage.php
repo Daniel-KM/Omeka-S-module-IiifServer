@@ -39,15 +39,15 @@ trait TraitImage
     protected $imageSize;
 
     /**
-     * @var \IiifServer\View\Helper\IiifImageUrl
+     * @var \IiifServer\View\Helper\IiifMediaUrl
      */
-    protected $iiifImageUrl;
+    protected $iiifMediaUrl;
 
     protected function initImage(): void
     {
         $services = $this->resource->getServiceLocator();
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
-        $this->iiifImageUrl = $services->get('ViewHelperManager')->get('iiifImageUrl');
+        $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
     }
 
     public function isImage(): bool

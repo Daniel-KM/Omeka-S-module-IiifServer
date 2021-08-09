@@ -46,9 +46,9 @@ class IiifUrl extends AbstractHelper
     protected $iiifCleanIdentifiers;
 
     /**
-     * @var IiifImageUrl
+     * @var IiifMediaUrl
      */
-    protected $iiifImageUrl;
+    protected $iiifMediaUrl;
 
     /**
      * @var string
@@ -73,7 +73,7 @@ class IiifUrl extends AbstractHelper
     /**
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
-     * @param IiifImageUrl $iifImageUrl
+     * @param IiifMediaUrl $iifImageUrl
      * @param string $defaultVersion
      * @param string $prefix
      * @param string $forceUrlFrom
@@ -82,7 +82,7 @@ class IiifUrl extends AbstractHelper
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
-        IiifImageUrl $iifImageUrl,
+        IiifMediaUrl $iifImageUrl,
         $defaultVersion,
         $prefix,
         $forceUrlFrom,
@@ -90,7 +90,7 @@ class IiifUrl extends AbstractHelper
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
-        $this->iiifImageUrl = $iifImageUrl;
+        $this->iiifMediaUrl = $iifImageUrl;
         $this->defaultVersion = $defaultVersion;
         $this->prefix = $prefix;
         $this->forceUrlFrom = $forceUrlFrom;
@@ -142,7 +142,7 @@ class IiifUrl extends AbstractHelper
         }
 
         if ($resourceName === 'media') {
-            return $this->iiifImageUrl->__invoke($resource, 'imageserver/info', $version, $params);
+            return $this->iiifMediaUrl->__invoke($resource, null, $version, $params);
         }
 
         $mapRouteNames = [

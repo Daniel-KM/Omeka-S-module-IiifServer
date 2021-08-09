@@ -131,7 +131,7 @@ class ImageService3 extends AbstractResourceType
 
     public function id(): ?string
     {
-        return $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', '3');
+        return $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/id', '3');
     }
 
     public function protocol(): ?string

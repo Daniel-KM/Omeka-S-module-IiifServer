@@ -42,14 +42,14 @@ trait TraitThumbnail
     protected $imageSize;
 
     /**
-     * @var \IiifServer\View\Helper\IiifImageUrl
+     * @var \IiifServer\View\Helper\IiifMediaUrl
      */
-    protected $iiifImageUrl;
+    protected $iiifMediaUrl;
 
     protected function initThumbnail(): AbstractType
     {
         $services = $this->resource->getServiceLocator();
-        $this->iiifImageUrl = $services->get('ViewHelperManager')->get('iiifImageUrl');
+        $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
         return $this;
     }

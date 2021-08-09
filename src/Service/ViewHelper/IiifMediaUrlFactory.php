@@ -2,18 +2,18 @@
 
 namespace IiifServer\Service\ViewHelper;
 
-use IiifServer\View\Helper\IiifImageUrl;
+use IiifServer\View\Helper\IiifMediaUrl;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
-class IiifImageUrlFactory implements FactoryInterface
+class IiifMediaUrlFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $helpers = $services->get('ViewHelperManager');
         $settings = $services->get('Omeka\Settings');
         $urlHelper = $helpers->get('url');
-        return new IiifImageUrl(
+        return new IiifMediaUrl(
             $urlHelper,
             $helpers->get('iiifCleanIdentifiers'),
             $urlHelper('top', [], ['force_canonical' => true]),

@@ -57,9 +57,9 @@ class Body extends AbstractResourceType
     ];
 
     /**
-     * @var \IiifServer\View\Helper\IiifImageUrl
+     * @var \IiifServer\View\Helper\IiifMediaUrl
      */
-    protected $iiifImageUrl;
+    protected $iiifMediaUrl;
 
     /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
@@ -111,7 +111,7 @@ class Body extends AbstractResourceType
 
         $services = $this->resource->getServiceLocator();
         $viewHelpers = $services->get('ViewHelperManager');
-        $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+        $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
 
@@ -156,7 +156,7 @@ class Body extends AbstractResourceType
                 $iiifSize = $size['width'] . ',' . $size['height'];
             }
 
-            return $this->iiifImageUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
+            return $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
                 'size' => $iiifSize,
                 'rotation' => 0,
@@ -167,7 +167,7 @@ class Body extends AbstractResourceType
 
         if ($this->contentResource->isAudioVideo()) {
             // TODO Manage iiif 3 audio video.
-            $imageUrl = $this->iiifImageUrl;
+            $imageUrl = $this->iiifMediaUrl;
             return $imageUrl($this->resource, 'mediaserver/media', $this->imageApiVersion, [
                 'format' => $this->resource->extension(),
             ]);
@@ -228,7 +228,7 @@ class Body extends AbstractResourceType
                 $service = strtok($supportedVersion, '/');
                 $level = strtok('/') ?: '0';
                 $imageResourceService = [
-                    'id' => $this->iiifImageUrl->__invoke($this->resource, 'imageserver/id', $service),
+                    'id' => $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/id', $service),
                     'type' => 'ImageService' . $service,
                     'profile' => 'level' . $level,
                 ];

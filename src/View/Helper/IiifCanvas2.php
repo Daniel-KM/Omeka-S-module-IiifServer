@@ -219,7 +219,7 @@ class IiifCanvas2 extends AbstractHelper
 
         $thumbnail = [];
 
-        $imageUrl = $view->iiifImageUrl($media, 'imageserver/media', '2', [
+        $imageUrl = $view->iiifMediaUrl($media, 'imageserver/media', '2', [
             'region' => 'full',
             'size' => $width . ',' . $height,
             'rotation' => 0,
@@ -230,7 +230,7 @@ class IiifCanvas2 extends AbstractHelper
 
         $thumbnailService = [];
         $thumbnailService['@context'] = 'http://iiif.io/api/image/2/context.json';
-        $thumbnailServiceUrl = $view->iiifImageUrl($media, 'imageserver/id', '2');
+        $thumbnailServiceUrl = $view->iiifMediaUrl($media, 'imageserver/id', '2');
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
         $thumbnailService = (object) $thumbnailService;
@@ -275,7 +275,7 @@ class IiifCanvas2 extends AbstractHelper
         // content", so the large one here, and it's always a jpeg.
         $imageSize = $view->imageSize($media, 'large');
         list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
-        $imageUrl = $view->iiifImageUrl($media, 'imageserver/media', '2', [
+        $imageUrl = $view->iiifMediaUrl($media, 'imageserver/media', '2', [
             'region' => 'full',
             'size' => $widthLarge . ',' . $heightLarge,
             'rotation' => 0,
@@ -289,7 +289,7 @@ class IiifCanvas2 extends AbstractHelper
         $imageResource['width'] = $width;
         $imageResource['height'] = $height;
 
-        $imageUrlService = $view->iiifImageUrl($media, 'imageserver/id', '2');
+        $imageUrlService = $view->iiifMediaUrl($media, 'imageserver/id', '2');
         $imageResourceService = [];
         $imageResourceService['@context'] = 'http://iiif.io/api/image/2/context.json';
         $imageResourceService['@id'] = $imageUrlService;

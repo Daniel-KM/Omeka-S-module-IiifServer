@@ -88,7 +88,7 @@ class IiifInfo2 extends AbstractHelper
             $imageSize = $view->imageSize($media, $imageType);
             $width = $imageSize['width'];
             $height = $imageSize['height'];
-            $imageUrl = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
+            $imageUrl = $this->view->iiifMediaUrl($media, 'imageserver/id', '2');
 
             // Check if Image Server is available.
             $tiles = [];
@@ -150,7 +150,7 @@ class IiifInfo2 extends AbstractHelper
                 'http://wellcomelibrary.org/ld/ixif/0/context.json',
                 // WEB_ROOT . '/ld/ixif/0/context.json',
             ];
-            $fileUrl = $this->view->iiifImageUrl($media, 'mediaserver/id', '2');
+            $fileUrl = $this->view->iiifMediaUrl($media, 'mediaserver/id', '2');
             $info['@id'] = $fileUrl;
             // See MediaController::contextAction()
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';

@@ -15,7 +15,7 @@ class IiifUrlFactory implements FactoryInterface
         return new IiifUrl(
             $helpers->get('url'),
             $helpers->get('iiifCleanIdentifiers'),
-            $helpers->get('iiifImageUrl'),
+            $helpers->get('iiifMediaUrl'),
             // TODO Remove dependencies to image server.
             $settings->get('iiifserver_manifest_default_version', '2'),
             $settings->get('iiifserver_identifier_prefix', ''),
