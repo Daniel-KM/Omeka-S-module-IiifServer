@@ -46,6 +46,11 @@ class IiifImageUrl extends AbstractHelper
     protected $forceUrlTo;
 
     /**
+     * @var string
+     */
+    protected $mediaIdentifier;
+
+    /**
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
      * @param string $defaultVersion
@@ -53,6 +58,7 @@ class IiifImageUrl extends AbstractHelper
      * @param string $prefix
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
+     * @param string $mediaIdentifier
      */
     public function __construct(
         Url $url,
@@ -61,7 +67,8 @@ class IiifImageUrl extends AbstractHelper
         $supportedVersions,
         $prefix,
         $forceUrlFrom,
-        $forceUrlTo
+        $forceUrlTo,
+        $mediaIdentifier
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
@@ -70,6 +77,7 @@ class IiifImageUrl extends AbstractHelper
         $this->prefix = $prefix;
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
+        $this->mediaIdentifier = $mediaIdentifier;
     }
 
     /**
@@ -84,16 +92,39 @@ class IiifImageUrl extends AbstractHelper
      * @param array $params
      * @return string
      */
-    public function __invoke($resource, $route = '', $version = null, array $params = []): string
+    public function __invoke($resource, ?string $route = '', ?string $version = null, array $params = []): string
     {
         $route = $route ?: 'imageserver/info';
         $apiVersion = $version ?: $this->defaultVersion;
-        $id = is_numeric($resource) ? $resource : $resource->id();
+        $isNumeric = is_numeric($resource);
+        $id = $isNumeric ? $resource : $resource->id();
+
+        if ($this->mediaIdentifier === 'storage_id' || $this->mediaIdentifier === 'filename') {
+            if ($isNumeric) {
+                try {
+                    $resource = $this->view->api()->read('media', ['id' => $id])->getContent();
+                } catch (\Exception $e) {
+                    $identifier = $id;
+                }
+            }
+            if (is_object($resource)) {
+                $identifier = $this->mediaIdentifier === 'storage_id'
+                    ? $resource->storageId()
+                    : $resource->filename();
+                $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
+            }
+        } elseif ($this->mediaIdentifier === 'media_id') {
+            $identifier = $id;
+        } else {
+            // The identifier will be the identifier set in clean url or the
+            // media id.
+            $identifier = $this->iiifCleanIdentifiers->__invoke($id);
+        }
 
         $params += [
             'version' => $apiVersion,
             'prefix' => $this->prefix,
-            'id' => $this->iiifCleanIdentifiers->__invoke($id),
+            'id' => $identifier,
         ];
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
 

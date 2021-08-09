@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\View\Helper;
 
 use CleanUrl\View\Helper\GetIdentifiersFromResources;
@@ -79,7 +80,7 @@ class IiifCleanIdentifiers extends AbstractHelper
                 : array_map($returnId, $resourcesOrIds);
         }
 
-        if (!$isNumeric) {
+        if ($isResource) {
             $in = $isSingle
                 ? $first->id()
                 : array_map($returnId, $in);

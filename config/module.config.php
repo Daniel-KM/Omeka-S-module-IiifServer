@@ -308,6 +308,9 @@ return [
                 '2/2',
                 '3/2',
             ],
+            // The prefix should be set in module config routing for now.
+            'iiifserver_media_api_prefix' => '',
+            'iiifserver_media_api_identifier' => 'media_id',
             // Hidden option.
             'iiifserver_media_api_default_supported_version' => [
                 'service' => '2',

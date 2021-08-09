@@ -623,6 +623,39 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_media_api_supported_versions',
                 ],
             ])
+
+            /*
+            ->add([
+                'name' => 'iiifserver_media_api_prefix',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @translate
+                    'info' => 'If set, the prefix will be added after the version: "iiif-img/3/xxx".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_prefix',
+                ],
+            ])
+            */
+
+            ->add([
+                'name' => 'iiifserver_media_api_identifier',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Media identifier', // @translate
+                    'info' => 'Using the full filename allows to use an image server like Cantaloupe sharing the Omeka original files directory.', // @translate
+                    'value_options' => [
+                        'default' => 'Default', // @translate
+                        'media_id' => 'Media id', // @translate
+                        'storage_id' => 'Filename', // @translate
+                        'filename' => 'Filename with extension', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_identifier',
+                    'required' =>  true,
+                ],
+            ])
         ;
 
         $addEvent = new Event('form.add_elements', $this);
