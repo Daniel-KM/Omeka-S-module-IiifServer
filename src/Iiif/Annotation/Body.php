@@ -126,14 +126,33 @@ class Body extends AbstractResourceType
             // "the URL may be the complete URL to a particular size of the image
             // content", so the large one here, and it's always a jpeg.
             // It's not needed to use the full original size.
-            // Nevertheless, UniversalViewer requires the original size image,
+            // TODO Check if Universal Viewer 2 is fixed for the body id.
+            // Nevertheless, UniversalViewer 2 requires the original size image,
             // because it doesn't load the info.json, but only the id: it
             // considers it as the whole image.
             // $size = $this->imageSize->__invoke($this->resource, 'large');
             $size = $this->imageSize->__invoke($this->resource, 'original');
+            if (empty($size)) {
+                $size = $this->imageSize->__invoke($this->resource, 'large');
+                if (empty($size)) {
+                    $iiifSize = $this->imageApiVersion === '3' ? 'max' : 'full';
+                } else {
+                    $iiifSize = $size['width'] . ',' . $size['height'];
+                }
+            } else {
+                // Nevertheless, to avoid to big files, a limit of 1000 px is set.
+                if ($size['width'] > 1000 || $size['height'] > 1000) {
+                    $sizeLarge = $this->imageSize->__invoke($this->resource, 'large');
+                    if ($sizeLarge) {
+                        $size = $sizeLarge;
+                    }
+                }
+                $iiifSize = $size['width'] . ',' . $size['height'];
+            }
+
             return $this->iiifImageUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
                 'region' => 'full',
-                'size' => !empty($size) ? $size['width'] . ',' . $size['height'] : 'max',
+                'size' => $iiifSize,
                 'rotation' => 0,
                 'quality' => 'default',
                 'format' => 'jpg',
