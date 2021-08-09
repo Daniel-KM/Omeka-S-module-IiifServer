@@ -10,12 +10,12 @@ use Omeka\Mvc\Exception\RuntimeException;
 class ImageSize extends AbstractHelper
 {
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize|\ImageServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSizePlugin;
 
     /**
-     * @param \IiifServer\Mvc\Controller\Plugin\ImageSize|\ImageServer\Mvc\Controller\Plugin\ImageSize $imageSizePlugin
+     * @param \IiifServer\Mvc\Controller\Plugin\ImageSize $imageSizePlugin
      */
     public function __construct($imageSizePlugin)
     {

@@ -63,12 +63,12 @@ class IiifUrl extends AbstractHelper
     /**
      * @var string
      */
-    protected $forceFrom;
+    protected $forceUrlFrom;
 
     /**
      * @var string
      */
-    protected $forceTo;
+    protected $forceUrlTo;
 
     /**
      * @param Url $url
@@ -166,8 +166,8 @@ class IiifUrl extends AbstractHelper
 
     protected function forceToIfRequired($absoluteUrl): string
     {
-        return $this->forceFrom && (strpos($absoluteUrl, $this->forceFrom) === 0)
-            ? substr_replace($absoluteUrl, $this->forceTo, 0, strlen($this->forceFrom))
+        return $this->forceUrlFrom && (strpos($absoluteUrl, $this->forceUrlFrom) === 0)
+            ? substr_replace($absoluteUrl, $this->forceUrlTo, 0, strlen($this->forceUrlFrom))
             : (string) $absoluteUrl;
     }
 }

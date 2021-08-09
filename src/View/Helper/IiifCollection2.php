@@ -89,9 +89,10 @@ class IiifCollection2 extends AbstractHelper
         } else {
             // Use an item with multiple external manifests as a collection.
             $manifest['@id'] = $view->url('iiifserver/collection', ['id' => $resource->id(), 'version' => '2'], ['force_canonical' => true], true);
-            $forceFrom = $this->setting->__invoke('iiifserver_url_force_from');
-            if ($forceFrom && (strpos($manifest['@id'], $forceFrom) === 0)) {
-                $manifest['@id'] = substr_replace($manifest['@id'], $this->setting->__invoke('iiifserver_url_force_to'), 0, strlen($forceFrom));
+            $forceUrlFrom = $this->setting->__invoke('iiifserver_url_force_from');
+            if ($forceUrlFrom && (strpos($manifest['@id'], $forceUrlFrom) === 0)) {
+                $forceUrlTo = $this->setting->__invoke('iiifserver_url_force_to');
+                $manifest['@id'] = substr_replace($manifest['@id'], $forceUrlTo, 0, strlen($forceUrlFrom));
             }
             $manifest['@type'] = 'sc:Collection';
             $manifest['label'] = $resource->displayTitle();

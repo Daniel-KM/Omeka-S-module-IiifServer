@@ -49,7 +49,6 @@ return [
             'iiifCanvas' => View\Helper\IiifCanvas::class,
             'iiifCanvas2' => View\Helper\IiifCanvas2::class,
             'iiifCanvas3' => View\Helper\IiifCanvas3::class,
-            'iiifForceBaseUrlIfRequired' => View\Helper\IiifForceBaseUrlIfRequired::class,
             'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifManifestExternal' => View\Helper\IiifManifestExternal::class,
         ],

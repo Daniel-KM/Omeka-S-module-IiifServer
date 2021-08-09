@@ -33,12 +33,12 @@ class IiifImageUrl extends AbstractHelper
     /**
      * @var string
      */
-    protected $forceFrom;
+    protected $forceUrlFrom;
 
     /**
      * @var string
      */
-    protected $forceTo;
+    protected $forceUrlTo;
 
     /**
      * @param Url $url
@@ -89,8 +89,8 @@ class IiifImageUrl extends AbstractHelper
         ];
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
 
-        return $this->forceFrom && (strpos($urlIiif, $this->forceFrom) === 0)
-            ? substr_replace($urlIiif, $this->forceTo, 0, strlen($this->forceFrom))
+        return $this->forceUrlFrom && (strpos($urlIiif, $this->forceUrlFrom) === 0)
+            ? substr_replace($urlIiif, $this->forceUrlTo, 0, strlen($this->forceUrlFrom))
             : $urlIiif;
     }
 }

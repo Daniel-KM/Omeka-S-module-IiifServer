@@ -52,8 +52,6 @@ class ImageSize extends AbstractPlugin
      *
      * If media is not an image, width and height are null.
      *
-     * @see \ImageServer\Mvc\Controller\Plugin\ImageSize
-     *
      * @param MediaRepresentation|AssetRepresentation|Media|Asset|string $image
      * Can be a media, an asset, a url or a filepath.
      * @param string $type

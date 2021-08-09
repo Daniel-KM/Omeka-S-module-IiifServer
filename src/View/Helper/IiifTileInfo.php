@@ -36,7 +36,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 class IiifTileInfo extends AbstractHelper
 {
     /**
-     * @var \ImageServer\Mvc\Controller\Plugin\TileInfo
+     * @var \ImageServer\Mvc\Controller\Plugin\TileInfo|null
      */
     protected $tileInfo;
 
