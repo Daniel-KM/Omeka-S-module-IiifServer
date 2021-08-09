@@ -668,6 +668,18 @@ class ConfigForm extends Form
                     'required' =>  true,
                 ],
             ])
+
+            ->add([
+                'name' => 'iiifserver_media_api_support_non_image',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Support non-image files', // @translate
+                    'info' => 'If unchecked, audio, video, models, pdf, etc. will be served through Omeka.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_support_non_image',
+                ],
+            ])
         ;
 
         $addEvent = new Event('form.add_elements', $this);

@@ -60,6 +60,11 @@ class IiifImageUrl extends AbstractHelper
      */
     protected $mediaIdentifier;
 
+    /**
+     * @var bool
+     */
+    protected $supportNonImages;
+
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
@@ -70,7 +75,8 @@ class IiifImageUrl extends AbstractHelper
         ?string $prefix,
         ?string $forceUrlFrom,
         ?string $forceUrlTo,
-        ?string $mediaIdentifier
+        ?string $mediaIdentifier,
+        bool $supportNonImages
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
@@ -82,6 +88,7 @@ class IiifImageUrl extends AbstractHelper
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
         $this->mediaIdentifier = $mediaIdentifier;
+        $this->supportNonImages = $supportNonImages;
     }
 
     /**
@@ -132,7 +139,9 @@ class IiifImageUrl extends AbstractHelper
         ];
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
 
-        if ($this->imageApiUrl) {
+        if ($this->imageApiUrl
+            && ($this->supportNonImages || substr($route, 0, 11) === 'imageserver')
+        ) {
             $urlIiif = substr_replace($urlIiif, $this->imageApiUrl, 0, strlen($this->baseUrl));
         }
 

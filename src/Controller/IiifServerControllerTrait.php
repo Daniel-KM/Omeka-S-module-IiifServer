@@ -37,6 +37,23 @@ use Omeka\Stdlib\Message;
 
 trait IiifServerControllerTrait
 {
+    /**
+     * Full path to the files.
+     *
+     * @var string
+     */
+    protected $basePath;
+
+    /**
+     * @var string
+     */
+    protected $version;
+
+    /**
+     * @var string
+     */
+    protected $requestedApiVersion;
+
     public function indexAction()
     {
         return $this->jsonError(new BadRequestException(), \Laminas\Http\Response::STATUS_CODE_404);
@@ -194,6 +211,18 @@ trait IiifServerControllerTrait
             && $this->settings()->get('iiifserver_identifier_clean');
     }
 
+    /**
+     * Get a storage path.
+     *
+     * @param string $prefix The storage prefix
+     * @param string $name The file name, or basename if extension is passed
+     * @param string $extension The file extension
+     */
+    protected function getStoragePath(string $prefix, string $name, string $extension = ''): string
+    {
+        return sprintf('%s/%s%s', $prefix, $name, strlen($extension) ? '.' . $extension : '');
+    }
+
     protected function requestedVersion(): ?string
     {
         // Check the version from the url first.
@@ -214,6 +243,28 @@ trait IiifServerControllerTrait
             return '2';
         }
         return null;
+    }
+
+    /**
+     * Get the requested version from the route, headers, or settings.
+     */
+    protected function requestedVersionMedia(): string
+    {
+        // Check the version from the url first.
+        $this->requestedApiVersion = $this->params('version');
+        if ($this->requestedApiVersion === '2' || $this->requestedApiVersion === '3') {
+            return $this->requestedApiVersion;
+        }
+
+        $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
+        if (strpos($accept, 'iiif.io/api/image/3/context.json')) {
+            $this->requestedApiVersion = '3';
+        } elseif (strpos($accept, 'iiif.io/api/image/2/context.json')) {
+            $this->requestedApiVersion = '2';
+        } else {
+            $this->requestedApiVersion = $this->settings()->get('iiifserver_media_api_default_version', '2') ?: '2';
+        }
+        return $this->requestedApiVersion;
     }
 
     protected function jsonError($exceptionOrMessage, $statusCode = 500): JsonModel
