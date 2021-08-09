@@ -954,20 +954,20 @@ class IiifManifest2 extends AbstractHelper
         switch ($labelOption) {
             case 'property':
                 $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
-                return $media->value($labelProperty, ['default' => $fallback]);
+                return (string) $media->value($labelProperty, ['default' => $fallback]);
 
             case 'property_or_source':
                 $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
-                $label = $media->value($labelProperty, ['default' => '']);
+                $label = (string) $media->value($labelProperty, ['default' => '']);
                 if (strlen($label)) {
                     return $label;
                 }
                 // no break;
             case 'source':
-                return $media->displayTitle($fallback);
+                return (string)$media->displayTitle($fallback);
 
             case 'template_or_source':
-                $fallback = $media->displayTitle($fallback);
+                $fallback = (string) $media->displayTitle($fallback);
                 // no break;
             case 'template':
                 $template = $media->resourceTemplate();
@@ -978,7 +978,7 @@ class IiifManifest2 extends AbstractHelper
                 if (!$label) {
                     $label = $media->value('dcterms:title', ['default' => $fallback]);
                 }
-                return $label;
+                return (string) $label;
 
             case 'position':
             default:
