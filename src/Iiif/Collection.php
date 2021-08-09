@@ -83,6 +83,7 @@ class Collection extends AbstractResourceType
         'partOf' => self::OPTIONAL,
         'start' => self::NOT_ALLOWED,
         'supplementary' => self::NOT_ALLOWED,
+        'services' => self::OPTIONAL,
 
         // Structural properties.
         'items' => self::REQUIRED,

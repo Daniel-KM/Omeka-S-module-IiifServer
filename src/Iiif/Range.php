@@ -75,6 +75,7 @@ class Range extends AbstractResourceType
         'partOf' => self::OPTIONAL,
         'start' => self::OPTIONAL,
         'supplementary' => self::OPTIONAL,
+        'services' => self::NOT_ALLOWED,
 
         // Structural properties.
         'items' => self::REQUIRED,

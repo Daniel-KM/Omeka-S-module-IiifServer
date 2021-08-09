@@ -90,6 +90,7 @@ class Manifest extends AbstractResourceType
         'partOf' => self::OPTIONAL,
         'start' => self::OPTIONAL,
         'supplementary' => self::NOT_ALLOWED,
+        'services' => self::OPTIONAL,
 
         // Structural properties.
         'items' => self::REQUIRED,
@@ -119,7 +120,7 @@ class Manifest extends AbstractResourceType
     /**
      * @var array
      */
-    protected $service = [];
+    protected $services = [];
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
@@ -189,14 +190,14 @@ class Manifest extends AbstractResourceType
         return $renderings;
     }
 
-    public function service(): ?array
+    public function services(): ?array
     {
-        return $this->service;
+        return $this->services;
     }
 
     public function appendService(Service $service): AbstractType
     {
-        $this->service[] = $service;
+        $this->services[] = $service;
         return $this;
     }
 

@@ -75,6 +75,7 @@ class AnnotationCollection extends AbstractResourceType
         'partOf' => self::OPTIONAL,
         'start' => self::NOT_ALLOWED,
         'supplementary' => self::NOT_ALLOWED,
+        'services' => self::NOT_ALLOWED,
 
         // Structural properties.
         'items' => self::NOT_ALLOWED,
