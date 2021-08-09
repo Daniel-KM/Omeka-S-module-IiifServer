@@ -202,4 +202,11 @@ if (version_compare($oldVersion, '3.6.5.3', '<')) {
         'Check the config of the image server, if any, in the config of this module.' // @translate
     );
     $messenger->addWarning($message);
+    $message = new Message(
+        'The module IIIF Server supports creation of structures through a table-of-contents-like value: see %sreadme%s.', // @translate
+        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents" target="_blank">',
+        '</a>'
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addSuccess($message);
 }
