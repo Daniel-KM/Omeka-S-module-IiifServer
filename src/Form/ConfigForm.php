@@ -575,7 +575,7 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_media_api_url',
                 'type' => OptionalUrl::class,
                 'options' => [
-                    'label' => 'External image server url', // @translate
+                    'label' => 'External image server base url', // @translate
                     'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate
                 ],
                 'attributes' => [
@@ -624,13 +624,25 @@ class ConfigForm extends Form
                 ],
             ])
 
+            ->add([
+                'name' => 'iiifserver_media_api_version_append',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Append the version to the url (to be set inside module.config.php currently)', // @translate
+                    'info' => 'If set, the version will be appended to the url of the server: "iiif/3".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_version_append',
+                ],
+            ])
+
             /*
             ->add([
                 'name' => 'iiifserver_media_api_prefix',
                 'type' => Element\Text::class,
                 'options' => [
                     'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @translate
-                    'info' => 'If set, the prefix will be added after the version: "iiif-img/3/xxx".', // @translate
+                    'info' => 'If set, the prefix will be added after the version: "iiif/3/xxx".', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_prefix',

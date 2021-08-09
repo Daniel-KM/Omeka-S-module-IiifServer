@@ -31,29 +31,16 @@
 namespace IiifServer\Controller;
 
 use Laminas\Mvc\Controller\AbstractActionController;
-use Laminas\View\Model\JsonModel;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Mvc\Exception\NotFoundException;
+use Omeka\Stdlib\Message;
 
 class PresentationController extends AbstractActionController
 {
-    /**
-     * Forward to the 'manifest' action.
-     *
-     * @internal Unlike info.json, the redirect is not required.
-     *
-     * @see self::manifestAction()
-     */
+    use IiifServerControllerTrait;
+
     public function indexAction()
     {
-        $settings = $this->settings();
-        $params = $this->params()->fromRoute();
-        $params['action'] = 'manifest';
-        $params += [
-            'version' => $settings->get('iiifserver_manifest_default_version', '2'),
-            'prefix' => $this->params('prefix') ?: $settings->get('iiifserver_identifier_prefix', ''),
-        ];
-        return $this->forward()->dispatch(__CLASS__, $params);
+        return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
     }
 
     public function collectionAction()
@@ -100,7 +87,10 @@ class PresentationController extends AbstractActionController
 
     public function manifestAction()
     {
-        $resource = $this->fetchResource('items');
+        $params = $this->params()->fromRoute();
+
+        // It can be a forward from the module Image Server.
+        $resource = $params['resource'] ?? $this->fetchResource('items');
         if (!$resource) {
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
@@ -165,33 +155,10 @@ class PresentationController extends AbstractActionController
         if ($type === 'canvas' && $this->params('name')) {
             return $this->canvasAction();
         }
-        return $this->jsonError(new NotFoundException(
-            sprintf('The type "%s" is currently only managed as uri, not url', $type), // @translate
-            \Laminas\Http\Response::STATUS_CODE_501
-        ));
-    }
-
-    /**
-     * @todo Factorize with ImageServer.
-     *
-     * @param string $resourceType
-     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation|null
-     */
-    protected function fetchResource($resourceType): ?AbstractResourceEntityRepresentation
-    {
-        $id = $this->params('id');
-
-        $useCleanIdentifier = $this->useCleanIdentifier();
-        if ($useCleanIdentifier) {
-            $getResourceFromIdentifier = $this->viewHelpers()->get('getResourceFromIdentifier');
-            return $getResourceFromIdentifier($id, $resourceType);
-        }
-
-        try {
-            return $this->api()->read($resourceType, $id)->getContent();
-        } catch (\Omeka\Api\Exception\NotFoundException $e) {
-            return null;
-        }
+        return $this->jsonError(new Message(
+            'The type "%s" is currently only managed as uri, not url', // @translate
+            $type
+        ), \Laminas\Http\Response::STATUS_CODE_501);
     }
 
     /**
@@ -230,6 +197,8 @@ class PresentationController extends AbstractActionController
                 $nonUrlIdentifiers[] = $identifier;
             }
         }
+
+        // TODO Manage media naming for iiif lists.
 
         // Extract the resources from the identifier.
         $useCleanIdentifier = $this->useCleanIdentifier();
@@ -279,38 +248,5 @@ class PresentationController extends AbstractActionController
             }
         }
         return $result;
-    }
-
-    protected function useCleanIdentifier(): bool
-    {
-        return $this->viewHelpers()->has('getResourcesFromIdentifiers')
-            && $this->settings()->get('iiifserver_identifier_clean');
-    }
-
-    protected function requestedVersion(): ?string
-    {
-        // Check the version from the url first.
-        $version = $this->params('version');
-        if ($version === '2' || $version === '3') {
-            return $version;
-        }
-
-        $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
-        if (strpos($accept, 'iiif.io/api/presentation/3/context.json')) {
-            return '3';
-        }
-        if (strpos($accept, 'iiif.io/api/presentation/2/context.json')) {
-            return '2';
-        }
-        return null;
-    }
-
-    protected function jsonError(\Exception $exception, $statusCode = 500): JsonModel
-    {
-        $this->getResponse()->setStatusCode($statusCode);
-        return new JsonModel([
-            'status' => 'error',
-            'message' => $exception->getMessage(),
-        ]);
     }
 }

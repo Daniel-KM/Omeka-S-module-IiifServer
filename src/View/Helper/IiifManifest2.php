@@ -61,6 +61,21 @@ class IiifManifest2 extends AbstractHelper
      */
     protected $basePath;
 
+    /**
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
+     * @var string
+     */
+    protected $_baseUrl;
+
+    /**
+     * @var string
+     */
+    protected $_baseUrlImageServer;
+
     public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
         $this->tempFileFactory = $tempFileFactory;
@@ -125,18 +140,22 @@ class IiifManifest2 extends AbstractHelper
 
         $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
 
+        // Required for TraitRights.
+        $helpers = $this->getView()->getHelperPluginManager();
+        $this->setting = $helpers->get('setting');
+
         // The base url for some other ids to quick process.
         $this->_baseUrl = $this->view->iiifUrl($item, 'iiifserver/uri', '2', [
             'type' => 'annotation-page',
             'name' => '',
         ]);
         $this->_baseUrl = mb_substr($this->_baseUrl, 0, (int) mb_strpos($this->_baseUrl, '/annotation-page'));
+        $this->_baseUrlImageServer = rtrim($this->view->setting('iiifserver_media_api_url'), '/ ') ?: $this->_baseUrl;
 
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
-        $plugins = $this->getView()->getHelperPluginManager();
-        $label = $plugins->get('escapeHtml')->__invoke($item->displayTitle('') ?: $manifest['@id']);
+        $label = $this->view->escapeHtml($item->displayTitle('') ?: $manifest['@id']);
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
@@ -147,7 +166,6 @@ class IiifManifest2 extends AbstractHelper
         }
         $manifest['description'] = $description;
 
-        $this->setting = $plugins->get('setting');
         $license = $this->rightsResource($item);
         if ($license) {
             $manifest['license'] = $license;
@@ -1014,7 +1032,7 @@ class IiifManifest2 extends AbstractHelper
 
         // There is only one image (parallel is not managed).
         $imageResource = [];
-        $imageResource['@id'] = $serverUrl . $this->view->basePath('/iiif-img/ixif-message-0/res/placeholder');
+        $imageResource['@id'] = $serverUrl . $this->view->basePath('/iiif/ixif-message-0/res/placeholder');
         $imageResource['@type'] = 'dctypes:Image';
         $imageResource['width'] = $imageSize['width'];
         $imageResource['height'] = $imageSize['height'];

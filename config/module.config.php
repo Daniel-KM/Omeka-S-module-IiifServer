@@ -1,8 +1,19 @@
 <?php declare(strict_types=1);
 /**
+ * Some variables should be manually set for now.
+ *
  * @var string $defaultVersion
  * @var bool $versionAppend
  * @var string $prefix
+ *
+ * @var string $defaultVersionMedia
+ * @var bool $versionAppendMedia
+ * @var string $prefixMedia
+ *
+ * Unlike presentation api, the identifier must be url encoded in image api.
+ * Nevertheless, when a prefix is set in the config, it can be bypassed to allow
+ * the raw or the url-encoded identifier.
+ * @link https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
  */
 namespace IiifServer;
 
@@ -32,8 +43,39 @@ if ($prefix) {
     $prefix = '';
 }
 
+// Idem to get urls for the image/media server.
+
+// Write the default version ("2" or "3") here (and in image server if needed).
+if (!isset($defaultVersionMedia)) {
+    $defaultVersionMedia = '';
+}
+if (!isset($versionAppendMedia)) {
+    $versionAppendMedia = false;
+}
+// If the version is set here, the route will skip it.
+$versionMedia = $versionAppendMedia ? '' : $defaultVersionMedia;
+
+// Write the prefix between the top of the iiif server and the identifier.
+// This option allows to manage arks identifiers not url-encoded.
+// The url encoding is required for image api, but not for presentation api.
+// So prefix can be "ark:/12345/".
+if (!isset($prefixMedia)) {
+    $prefixMedia = '';
+}
+if ($prefixMedia) {
+    $urlEncodedPrefixMedia = rawurlencode($prefixMedia);
+    $constraintPrefixMedia = $prefixMedia . '|' . $urlEncodedPrefixMedia . '|' . str_replace('%3A', ':', $urlEncodedPrefixMedia);
+    $prefixMedia = '[:prefix]';
+} else {
+    $constraintPrefixMedia = '';
+    $prefixMedia = '';
+}
+
 return [
     'view_manager' => [
+        'template_path_stack' => [
+            dirname(__DIR__) . '/view',
+        ],
         'strategies' => [
             'ViewJsonStrategy',
         ],
@@ -76,6 +118,7 @@ return [
     ],
     'controllers' => [
         'invokables' => [
+            Controller\NoopServerController::class => Controller\NoopServerController::class,
             Controller\PresentationController::class => Controller\PresentationController::class,
         ],
     ],
@@ -91,6 +134,11 @@ return [
     'router' => [
         // In order to use clean urls, the identifier "id" can be any string without "/", not only Omeka id.
         // A specific config file is used is used to manage identifiers with "/", like arks.
+
+        // The routes for the image server are set too: the IIIF server should
+        // be able to create urls to it, whether it is the module Image Server
+        // or an external one.
+
         'routes' => [
             // The Api version 2 and 3 are supported via the optional "/version".
             // When version is not indicated in url, the default version is the one set in headers, else
@@ -116,7 +164,6 @@ return [
                 'options' => [
                     'route' => '/iiif',
                     'defaults' => [
-                        '__API__' => true,
                         '__NAMESPACE__' => 'IiifServer\Controller',
                         'controller' => Controller\PresentationController::class,
                         'action' => 'index',
@@ -156,7 +203,7 @@ return [
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
-                                'id' => '[^/]+',
+                                'id' => '[^\/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
@@ -171,7 +218,7 @@ return [
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
-                                'id' => '[^/]+',
+                                'id' => '[^\/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
@@ -180,21 +227,22 @@ return [
                         ],
                     ],
                     // The redirection is not required for presentation, but a forward is possible.
-                    'manifest-id' => [
+                    'id' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
                             'route' => "[/:version]/$prefix:id",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
-                                'id' => '[^/]+',
+                                'id' => '[^\/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
-                                'action' => 'manifest',
+                                'action' => 'id',
                             ],
                         ],
                     ],
+                    // The type "manifest" is included in route "uri", but allows to create the url simpler.
                     'manifest' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
@@ -202,28 +250,11 @@ return [
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
-                                'id' => '[^/]+',
+                                'id' => '[^\/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
                                 'action' => 'manifest',
-                            ],
-                        ],
-                    ],
-                    // In 2.1, canvas id is media id and name is p + index.
-                    // In 3.0, canvas id is item id and name is media id, but configurable.
-                    'canvas' => [
-                        'type' => \Laminas\Router\Http\Segment::class,
-                        'options' => [
-                            'route' => "[/:version]/$prefix:id/canvas/:name",
-                            'constraints' => [
-                                'version' => '2|3',
-                                'prefix' => $constraintPrefix,
-                                'id' => '[^/]+',
-                            ],
-                            'defaults' => [
-                                'version' => $version,
-                                'action' => 'canvas',
                             ],
                         ],
                     ],
@@ -239,11 +270,196 @@ return [
                             'constraints' => [
                                 'version' => '2|3',
                                 // 'id' => '(?:\d+\,?)*',
-                                'id' => '[^/]*',
+                                'id' => '[^\/]*',
                             ],
                             'defaults' => [
                                 'version' => $version,
                                 'action' => 'list',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+
+            // The following routes allow to build the urls to the media
+            // on the image server. They are required even when there is
+            // no image server. The real urls may be rerouted by the web
+            // server (apache/nginx) or overridden by the module Image Server.
+
+            // The Api version 2 and 3 are supported via the optional "/version".
+            // When version is not indicated in url, the default version is the one set in headers, else
+            // via the setting "iiifserver_media_api_default_version".
+
+            // @link http://iiif.io/api/image/2.0
+            // @link http://iiif.io/api/image/3.0
+            // Image          {scheme}://{server}{/prefix}/{identifier}
+
+            'imageserver' => [
+                'type' => \Laminas\Router\Http\Literal::class,
+                'options' => [
+                    'route' => '/iiif',
+                    'defaults' => [
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\NoopServerController::class,
+                        'action' => 'index',
+                    ],
+                ],
+                'may_terminate' => false,
+                'child_routes' => [
+                    // This is the same url than the manifest, so a check is done
+                    // to redirect to "manifest" or "info.json", that is the
+                    // image server if the web server proxies to it.
+                    // It allows to check rights too (the image server may not
+                    // aware of it).
+                    // This is the uri of the image (@id) and the base url.
+                    // The specification requires a 303 redirect to the info.json.
+                    'id' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'id',
+                            ],
+                        ],
+                    ],
+                    // This route should be set before imageserver/media in
+                    // order to be processed by module ImageServer.
+                    'media-bad' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/iiif-media-bad-fake',
+                        ],
+                    ],
+                    'info' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id/info.json",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'info',
+                            ],
+                        ],
+                    ],
+                    // There is not check of the right media: the module Iiif Server
+                    // is not a media server.
+                    'media' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id/:region/:size/:rotation/:quality:.:format",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                                'region' => '[^\/]+',
+                                'size' => '[^\/]+',
+                                'rotation' => '[^\/]+',
+                                'quality' => '[^\/]+',
+                                'format' => '[^\/]+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'fetch',
+                            ],
+                        ],
+                    ],
+
+                    // Special route for the canvas placeholder in manifest v2,
+                    // that is used in particular when there is no image server
+                    // or when the media is private.
+                    // @see \IiifServer\View\Helper\IiifManifest2::_iiifCanvasPlaceholder()
+                    'placeholder' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '[/:version]/ixif-message-0/res/placeholder',
+                            'constraints' => [
+                                'version' => '2|3',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'placeholder',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+
+            'mediaserver' => [
+                'type' => \Laminas\Router\Http\Literal::class,
+                'options' => [
+                    'route' => '/iiif',
+                    'defaults' => [
+                        '__NAMESPACE__' => 'IiifServer\Controller',
+                        'controller' => Controller\NoopServerController::class,
+                        'action' => 'index',
+                    ],
+                ],
+                'may_terminate' => false,
+                'child_routes' => [
+                    // A redirect to the info.json is required by the specification.
+                    'id' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'id',
+                            ],
+                        ],
+                    ],
+                    // This route should be set before mediaserver/media in
+                    // order to be processed by module ImageServer.
+                    'media-bad' => [
+                        'type' => \Laminas\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/iiif-media-bad-fake',
+                        ],
+                    ],
+                    'info' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id/info.json",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'info',
+                            ],
+                        ],
+                    ],
+                    // Warning: the format is separated with a ".", not a "/".
+                    // TODO pdf is not an audio video media.
+                    'media' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => "[/:version]/$prefixMedia:id:.:format",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefixMedia,
+                                'id' => '[^\/]+',
+                                'format' => '.+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'fetch',
                             ],
                         ],
                     ],
@@ -308,7 +524,8 @@ return [
                 '2/2',
                 '3/2',
             ],
-            // The prefix should be set in module config routing for now.
+            // The version and the prefix should be set in module config routing for now.
+            'iiifserver_media_api_version_append' => false,
             'iiifserver_media_api_prefix' => '',
             'iiifserver_media_api_identifier' => 'media_id',
             // Hidden option.

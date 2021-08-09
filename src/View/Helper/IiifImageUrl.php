@@ -23,6 +23,16 @@ class IiifImageUrl extends AbstractHelper
     /**
      * @var string
      */
+    protected $baseUrl;
+
+    /**
+     * @var string
+     */
+    protected $imageApiUrl;
+
+    /**
+     * @var string
+     */
     protected $defaultVersion;
 
     /**
@@ -50,28 +60,22 @@ class IiifImageUrl extends AbstractHelper
      */
     protected $mediaIdentifier;
 
-    /**
-     * @param Url $url
-     * @param IiifCleanIdentifiers $iiifCleanIdentifiers
-     * @param string $defaultVersion
-     * @param string $supportedVersions
-     * @param string $prefix
-     * @param string $forceUrlFrom
-     * @param string $forceUrlTo
-     * @param string $mediaIdentifier
-     */
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
-        $defaultVersion,
-        $supportedVersions,
-        $prefix,
-        $forceUrlFrom,
-        $forceUrlTo,
-        $mediaIdentifier
+        ?string $baseUrl,
+        ?string $imageApiUrl,
+        ?string $defaultVersion,
+        array $supportedVersions,
+        ?string $prefix,
+        ?string $forceUrlFrom,
+        ?string $forceUrlTo,
+        ?string $mediaIdentifier
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
+        $this->baseUrl = $baseUrl;
+        $this->imageApiUrl = $imageApiUrl;
         $this->defaultVersion = $defaultVersion;
         $this->supportedVersions = $supportedVersions;
         $this->prefix = $prefix;
@@ -127,6 +131,10 @@ class IiifImageUrl extends AbstractHelper
             'id' => $identifier,
         ];
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
+
+        if ($this->imageApiUrl) {
+            $urlIiif = substr_replace($urlIiif, $this->imageApiUrl, 0, strlen($this->baseUrl));
+        }
 
         return $this->forceUrlFrom && (strpos($urlIiif, $this->forceUrlFrom) === 0)
             ? substr_replace($urlIiif, $this->forceUrlTo, 0, strlen($this->forceUrlFrom))

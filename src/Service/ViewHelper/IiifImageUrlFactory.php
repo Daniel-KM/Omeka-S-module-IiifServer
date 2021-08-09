@@ -12,9 +12,12 @@ class IiifImageUrlFactory implements FactoryInterface
     {
         $helpers = $services->get('ViewHelperManager');
         $settings = $services->get('Omeka\Settings');
+        $urlHelper = $helpers->get('url');
         return new IiifImageUrl(
-            $helpers->get('url'),
+            $urlHelper,
             $helpers->get('iiifCleanIdentifiers'),
+            $urlHelper('top', [], ['force_canonical' => true]),
+            $settings->get('iiifserver_media_api_url', ''),
             $settings->get('iiifserver_media_api_default_version', '2'),
             $settings->get('iiifserver_media_api_supported_versions', ['2/2', '3/2']),
             $settings->get('iiifserver_identifier_prefix', ''),
