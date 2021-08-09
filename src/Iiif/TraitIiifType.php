@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -156,17 +156,17 @@ trait TraitIiifType
         'tile' => 'Image',
     ];
 
-    protected function initIiifType()
+    protected function initIiifType(): AbstractType
     {
         if ($this->resource->ingester() === 'iiif') {
             $mediaData = $this->resource->mediaData();
             if (isset($mediaData['type'])) {
                 $this->type = $mediaData['type'];
-                return $this->type;
+                return $this;
             }
             if (isset($mediaData['@type'])) {
                 $this->type = $mediaData['@type'];
-                return $this->type;
+                return $this;
             }
             if (isset($mediaData['format'])) {
                 $mediaType = $mediaData['format'];
@@ -184,33 +184,33 @@ trait TraitIiifType
                 // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
                 if ($extension === 'json' || $extension === 'gltf') {
                     $this->type = 'Model';
-                    return $this->type;
+                    return $this;
                 }
             }
             if ($mediaType === 'application/octet-stream') {
                 $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
                 if ($extension === 'glb') {
                     $this->type = 'Model';
-                    return $this->type;
+                    return $this;
                 }
             }
             $mediaTypeType = strtok($mediaType, '/');
             if (isset($this->mediaTypeTypes[$mediaTypeType])) {
                 $this->type = $this->mediaTypeTypes[$mediaTypeType];
-                return $this->type;
+                return $this;
             }
         }
 
         // Managed some other common media types.
         if (isset($this->mediaTypes[$mediaType])) {
             $this->type = $this->mediaTypes[$mediaType];
-            return $this->type;
+            return $this;
         }
 
         $renderer = $this->resource->renderer();
         if (isset($this->rendererTypes[$renderer])) {
             $this->type = $this->rendererTypes[$renderer];
-            return $this->type;
+            return $this;
         }
 
         /* These cases are normally managed by the media type above.
@@ -223,6 +223,6 @@ trait TraitIiifType
         }
         */
 
-        return null;
+        return $this;
     }
 }

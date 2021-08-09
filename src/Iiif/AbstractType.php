@@ -75,15 +75,12 @@ abstract class AbstractType implements JsonSerializable
      */
     protected $_storage = [];
 
-    /**
-     * @return string
-     */
-    public function getType()
+    public function getType(): ?string
     {
         return (string) $this->type;
     }
 
-    public function getContent()
+    public function getContent(): ArrayObject
     {
         // Always refresh the content.
         $this->content = new ArrayObject;
@@ -115,11 +112,9 @@ abstract class AbstractType implements JsonSerializable
      *
      * @todo Add a debug mode: the method "isValid()" is useless in production.
      *
-     * @param bool $throwException
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return bool
      */
-    public function isValid($throwException = false)
+    public function isValid(bool $throwException = false): bool
     {
         $output = $this->getCleanContent();
 
@@ -168,7 +163,7 @@ abstract class AbstractType implements JsonSerializable
      *
      * @return array
      */
-    protected function getCleanContent()
+    protected function getCleanContent(): array
     {
         return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v) {
             if ($v instanceof ArrayObject) {

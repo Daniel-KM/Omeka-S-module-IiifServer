@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
@@ -13,22 +14,15 @@ class DefaultSiteSlug extends AbstractHelper
      */
     protected $defaultSiteSlug;
 
-    /**
-     * Construct the helper.
-     *
-     * @param string|null $defaultSiteSlug
-     */
-    public function __construct($defaultSiteSlug)
+    public function __construct(?string $defaultSiteSlug)
     {
         $this->defaultSiteSlug = $defaultSiteSlug;
     }
 
     /**
      * Return the default site slug, or the first one.
-     *
-     * @return string|null
      */
-    public function __invoke()
+    public function __invoke(): ?string
     {
         return $this->defaultSiteSlug;
     }

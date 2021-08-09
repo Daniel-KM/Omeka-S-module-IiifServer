@@ -119,7 +119,7 @@ class Manifest extends AbstractResourceType
     /**
      * @var array
      */
-    protected $service;
+    protected $service = [];
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
@@ -128,7 +128,7 @@ class Manifest extends AbstractResourceType
         $this->initThumbnail();
     }
 
-    public function getId()
+    public function getId(): string
     {
         return $this->iiifUrl->__invoke($this->resource, 'iiifserver/manifest', '3');
     }
@@ -145,10 +145,8 @@ class Manifest extends AbstractResourceType
      * canvas rendering.
      *
      * @todo Manage multiple files by canvas for supplementing and rendering.
-     *
-     * @return array
      */
-    public function getItems()
+    public function getItems(): array
     {
         $items = [];
         $index = 0;
@@ -168,10 +166,8 @@ class Manifest extends AbstractResourceType
 
     /**
      * In manifest, the rendering is used for media to be downloaded.
-     *
-     * @return array
      */
-    public function getRendering()
+    public function getRendering(): array
     {
         $renderings = [];
         $site = $this->defaultSite();
@@ -193,12 +189,12 @@ class Manifest extends AbstractResourceType
         return $renderings;
     }
 
-    public function getService()
+    public function getService(): ?array
     {
         return $this->service;
     }
 
-    public function appendService(Service $service)
+    public function appendService(Service $service): AbstractType
     {
         $this->service[] = $service;
         return $this;
@@ -212,16 +208,12 @@ class Manifest extends AbstractResourceType
      * can be a canvas motivation painting or supplementing, or a canvas
      * rendering, or a manifest rendering.
      */
-    protected function mediaInfo(MediaRepresentation $media)
+    protected function mediaInfo(MediaRepresentation $media): ?array
     {
         if (!array_key_exists('media_info', $this->_storage)) {
             $this->_storage['media_info'] = $this->prepareMediaLists();
         }
-
-        $mediaId = $media->id();
-        return isset($this->_storage['media_info'][$mediaId])
-            ? $this->_storage['media_info'][$mediaId]
-            : null;
+        return $this->_storage['media_info'][$media->id()] ?? null;
     }
 
     /**
@@ -240,10 +232,8 @@ class Manifest extends AbstractResourceType
      *   3D model, to be downloaded.
      *
      * @todo Better manage mixed painting in canvas, for example an image that is part a video. In such a case, the manifest is generally build manually, so it's not the purpose of this module currently.
-     *
-     * @return array
      */
-    protected function prepareMediaLists()
+    protected function prepareMediaLists(): array
     {
         // TODO Use ContentResources.
         // Note: hasThumbnails() is not only for images.

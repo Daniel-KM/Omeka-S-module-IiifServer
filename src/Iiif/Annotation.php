@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -91,7 +91,7 @@ class Annotation extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
-    public function getId()
+    public function getId(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation',
@@ -99,17 +99,17 @@ class Annotation extends AbstractResourceType
         ]);
     }
 
-    public function getMotivation()
+    public function getMotivation(): ?string
     {
         return isset($this->options['motivation']) ? $this->options['motivation'] : null;
     }
 
-    public function getBody()
+    public function getBody(): Annotation\Body
     {
         return new Annotation\Body($this->resource, $this->options);
     }
 
-    public function getTarget()
+    public function getTarget(): ?string
     {
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',

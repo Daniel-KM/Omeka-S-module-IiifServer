@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -77,36 +77,28 @@ class Service extends AbstractType
         $this->options = array_filter($options);
     }
 
-    public function getContent()
+    public function getContent(): \ArrayObject
     {
         return new \ArrayObject($this->options);
     }
 
-    public function getId()
+    public function getId(): ?string
     {
-        return isset($this->options['id'])
-            ? $this->options['id']
-            : null;
+        return $this->options['id'] ?? null;
     }
 
-    public function getType()
+    public function getType(): ?string
     {
-        return isset($this->options['type'])
-            ? $this->options['type']
-            : null;
+        return $this->options['type'] ?? null;
     }
 
-    public function getProfile()
+    public function getProfile(): ?string
     {
-        return isset($this->options['profile'])
-            ? $this->options['profile']
-            : null;
+        return $this->options['profile'] ?? null;
     }
 
-    public function getLabel()
+    public function getLabel(): ?string
     {
-        return isset($this->options['label'])
-            ? $this->options['label']
-            : null;
+        return $this->options['label'] ?? null;
     }
 }

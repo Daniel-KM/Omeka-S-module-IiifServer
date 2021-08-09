@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -41,10 +41,8 @@ trait TraitDescriptive
      * @todo Remove some settings for v3.0.
      * @todo Use displayValues() or the event?
      * @todo Remove special properties used in other keys.
-     *
-     * @return array
      */
-    public function getMetadata()
+    public function getMetadata(): array
     {
         $jsonLdType = $this->resource->getResourceJsonLdType();
         $map = [
@@ -106,10 +104,7 @@ trait TraitDescriptive
         return $metadata;
     }
 
-    /**
-     * @return ValueLanguage
-     */
-    public function getSummary()
+    public function getSummary(): ValueLanguage
     {
         $summaryProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         $values = [];
@@ -120,6 +115,8 @@ trait TraitDescriptive
     }
 
     /**
+     * @todo Normalize format of required statement.
+     *
      * @return ValueLanguage[]
      */
     public function getRequiredStatement()

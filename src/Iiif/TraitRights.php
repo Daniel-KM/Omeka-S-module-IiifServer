@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -55,11 +55,8 @@ trait TraitRights
      *
      * Warning: the option for Iiif Server (manifest) and Image Server (info.json)
      * are different, so they can be used independantly.
-     *
-     * @param AbstractResourceEntityRepresentation $resource
-     * @return string|null
      */
-    public function getRights()
+    public function getRights(): ?string
     {
         // For simplicity for info.json, use another method.
         return $this->rightsResource($this->resource);
@@ -70,11 +67,8 @@ trait TraitRights
      *
      * @todo Add a way to manage image server settings.
      * Note: in api 2, the value can be a list.
-     *
-     * @param AbstractResourceEntityRepresentation|null $resource
-     * @return string|null
      */
-    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null)
+    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null): ?string
     {
         $url = null;
         $orUrl = false;
@@ -86,10 +80,10 @@ trait TraitRights
                 if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
                     return null;
                 }
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_text');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
                 break;
             case 'url':
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_url');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_url') ?: null;
                 break;
             case 'property_or_text':
                 $orText = !empty($this->setting->__invoke('iiifserver_manifest_rights_text'));
@@ -102,7 +96,7 @@ trait TraitRights
             case 'property':
                 if ($resource) {
                     $property = $this->setting->__invoke('iiifserver_manifest_rights_property');
-                    $url = (string) $resource->value($property);
+                    $url = ((string) $resource->value($property)) ?: null;
                 }
                 break;
             case 'none':
@@ -116,9 +110,9 @@ trait TraitRights
 
         if (!$url) {
             if ($orUrl) {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_url');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_url') ?: null;
             } elseif ($orText) {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_text');
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
             } else {
                 return null;
             }

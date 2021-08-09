@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -46,17 +46,19 @@ trait TraitThumbnail
      */
     protected $iiifImageUrl;
 
-    protected function initThumbnail(): void
+    protected function initThumbnail(): AbstractType
     {
         $services = $this->resource->getServiceLocator();
         $this->iiifImageUrl = $services->get('ViewHelperManager')->get('iiifImageUrl');
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
+        return $this;
     }
 
+    /**
+     * @todo Normalize and factorize as a standard image.
+     */
     public function getThumbnail()
     {
-        // TODO Factorize as a standard image.
-
         /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
         $thumbnailAsset = $this->resource->thumbnail();
         if ($thumbnailAsset) {
@@ -131,7 +133,7 @@ trait TraitThumbnail
      * supported by the server
      * @return string IIIF thumbnail URL
      */
-    protected function _iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel)
+    protected function _iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel): string
     {
         // NOTE: this function does not support level0 implementations (need to use `sizes` from the info.json)
         // TODO handle square thumbnails, depending on server capabilities (see 'regionSquare' feature https://iiif.io/api/image/2.1/#profile-description): e.g. $baseUri . '/square/200,200/0/default.jpg';
@@ -159,7 +161,7 @@ trait TraitThumbnail
      * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
-    protected function _iiifComplianceLevel($profile)
+    protected function _iiifComplianceLevel($profile): string
     {
         // In Image API 2.1, the profile property is a list, and the first entry
         // is the compliance level URI.
@@ -200,6 +202,8 @@ trait TraitThumbnail
      * supported by the server
      * @return object $service IIIF Image API service block to be appended to
      * the Manifest
+     *
+     * @todo Normalize iiif image service as Service.
      */
     protected function _iiifImageService($baseUri, $contextUri, $complianceLevelUri)
     {

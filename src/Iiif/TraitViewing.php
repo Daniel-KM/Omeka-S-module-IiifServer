@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -38,10 +38,7 @@ trait TraitViewing
         'bottom-to-top',
     ];
 
-    /**
-     * @return string
-     */
-    public function getViewingDirection()
+    public function getViewingDirection(): ?string
     {
         $viewingDirectionProperty = $this->setting->__invoke('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {

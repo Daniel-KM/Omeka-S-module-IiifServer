@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -91,45 +91,47 @@ trait TraitMedia
         'xml' => 'text/xml',
     ];
 
-    protected function initMedia(): void
+    protected function initMedia(): AbstractType
     {
         $services = $this->resource->getServiceLocator();
         $controllerPlugins = $services->get('ControllerPluginManager');
         $this->mediaDimension = $controllerPlugins->get('mediaDimension');
         $this->imageSize = $controllerPlugins->get('imageSize');
+        return $this;
     }
 
-    public function isImage()
+    public function isImage(): bool
     {
         return $this->type === 'Image';
     }
 
-    public function isAudioVideo()
+    public function isAudioVideo(): bool
     {
-        return $this->type === 'Video' || $this->type === 'Sound';
+        return $this->type === 'Video'
+            || $this->type === 'Sound';
     }
 
-    public function isAudio()
+    public function isAudio(): bool
     {
         return $this->type === 'Sound';
     }
 
-    public function isVideo()
+    public function isVideo(): bool
     {
         return $this->type === 'Video';
     }
 
-    public function getHeight()
+    public function getHeight(): ?int
     {
         return $this->mediaSize()['height'];
     }
 
-    public function getWidth()
+    public function getWidth(): ?int
     {
         return $this->mediaSize()['width'];
     }
 
-    public function getDuration()
+    public function getDuration(): ?string
     {
         return $this->mediaDimension()['duration'];
     }
@@ -139,10 +141,8 @@ trait TraitMedia
      *
      * @todo Manage the format of non-file resources (iiif, oembed, etc.).
      * @todo Manage the preferred output for the format.
-     *
-     * @return string|null
      */
-    public function getFormat()
+    public function getFormat(): ?string
     {
         if ($this->isMediaIiif()) {
             // @link https://iiif.io/api/image/3.0/compliance/
@@ -192,10 +192,8 @@ trait TraitMedia
 
     /**
      * Manage iiif media.
-     *
-     * @return bool
      */
-    protected function isMediaIiif()
+    protected function isMediaIiif(): bool
     {
         if (is_null($this->isMediaIiif)) {
             $media = $this->resource->primaryMedia();
@@ -204,7 +202,7 @@ trait TraitMedia
         return $this->isMediaIiif;
     }
 
-    protected function mediaSize()
+    protected function mediaSize(): array
     {
         $data = $this->mediaDimension();
         return [
@@ -213,7 +211,7 @@ trait TraitMedia
         ];
     }
 
-    protected function mediaDimension()
+    protected function mediaDimension(): array
     {
         if (!array_key_exists('media_dimension', $this->_storage)) {
             $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];

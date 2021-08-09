@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -81,11 +81,6 @@ class Body extends AbstractResourceType
      */
     protected $contentResource;
 
-    /**
-     * @param AbstractResourceEntityRepresentation $resource
-     * @param array $options
-     * @return self
-     */
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         $this->contentResource = $options['content'];
@@ -119,7 +114,7 @@ class Body extends AbstractResourceType
         $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
@@ -156,17 +151,20 @@ class Body extends AbstractResourceType
         return $this->contentResource->getId();
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->contentResource->getType();
     }
 
-    public function getFormat()
+    public function getFormat(): ?string
     {
         return $this->contentResource->getFormat();
     }
 
-    public function getService()
+    /**
+     * @todo Return array of Service.
+     */
+    public function getService(): ?array
     {
         // TODO Move this in ContentResource or TraitMedia.
 
@@ -222,21 +220,21 @@ class Body extends AbstractResourceType
         return null;
     }
 
-    public function getHeight()
+    public function getHeight(): ?int
     {
         return method_exists($this->contentResource, 'getHeight')
             ? $this->contentResource->getHeight()
             : null;
     }
 
-    public function getWidth()
+    public function getWidth(): ?int
     {
         return method_exists($this->contentResource, 'getWidth')
         ? $this->contentResource->getWidth()
         : null;
     }
 
-    public function getDuration()
+    public function getDuration(): ?string
     {
         return method_exists($this->contentResource, 'getDuration')
             ? $this->contentResource->getDuration()
@@ -245,11 +243,8 @@ class Body extends AbstractResourceType
 
     /**
      * Get the iiif type from the context.
-     *
-     * @param string $context
-     * @return string
      */
-    protected function _iiifType($context)
+    protected function _iiifType(string $context): ?string
     {
         $contexts = [
             'http://library.stanford.edu/iiif/image-api/context.json' => 'ImageService1',
@@ -268,7 +263,7 @@ class Body extends AbstractResourceType
      * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
-    protected function _iiifComplianceLevel($profile)
+    protected function _iiifComplianceLevel($profile): string
     {
         // In Image API 2.1, the profile property is a list, and the first entry
         // is the compliance level URI.

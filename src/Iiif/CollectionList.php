@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -155,7 +155,7 @@ class CollectionList extends AbstractType
         $this->options = $options;
     }
 
-    public function setServiceLocator($services): void
+    public function setServiceLocator($services): AbstractType
     {
         $this->serviceLocator = $services;
         $viewHelpers = $services->get('ViewHelperManager');
@@ -165,28 +165,26 @@ class CollectionList extends AbstractType
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
+        return $this;
     }
 
-    public function getContext()
+    public function getContext(): ?string
     {
         return 'http://iiif.io/api/presentation/3/context.json';
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         return $this->options['iiif_url'] ?? $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
     }
 
-    /**
-     * @return ValueLanguage
-     */
-    public function getLabel()
+    public function getLabel(): ?ValueLanguage
     {
         $values = ['none' => ['Collection list']];
         return new ValueLanguage($values);
     }
 
-    public function getItems()
+    public function getItems(): array
     {
         $items = [];
         foreach ($this->resources as $resource) {
@@ -211,7 +209,7 @@ class CollectionList extends AbstractType
         return $items;
     }
 
-    protected function getCleanContent()
+    protected function getCleanContent(): array
     {
         return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v, $k) {
             if ($k === 'items') {

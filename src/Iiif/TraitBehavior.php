@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -31,10 +31,7 @@ namespace IiifServer\Iiif;
 
 trait TraitBehavior
 {
-    /**
-     * @return string
-     */
-    public function getBehavior()
+    public function getBehavior(): ?array
     {
         $behaviorProperty = $this->setting->__invoke('iiifserver_manifest_behavior_property', []);
         if ($behaviorProperty) {
@@ -48,6 +45,8 @@ trait TraitBehavior
                 unset($behaviors[$key]);
             }
         }
-        return empty($behaviors) || in_array('none', $behaviors) ? null : $behaviors;
+        return empty($behaviors) || in_array('none', $behaviors)
+            ? null
+            : $behaviors;
     }
 }

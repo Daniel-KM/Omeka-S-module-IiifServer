@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -29,6 +29,8 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\SiteRepresentation;
+
 trait TraitLinking
 {
     /**
@@ -36,13 +38,16 @@ trait TraitLinking
      */
     protected $imageSize;
 
-    public function initLinking(): void
+    public function initLinking(): AbstractType
     {
         $services = $this->resource->getServiceLocator();
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
+        return $this;
     }
 
     /**
+     * @todo Normalize getHomepage().
+     *
      * @return \stdClass
      */
     public function getHomepage()
@@ -153,6 +158,8 @@ trait TraitLinking
     }
 
     /**
+     * @todo Normalize getLogo().
+     *
      * @return \stdClass
      */
     public function getLogo()
@@ -197,6 +204,8 @@ trait TraitLinking
     }
 
     /**
+     * @todo Normalize getSeeAlso().
+     *
      * @return \stdClass
      */
     public function getSeeAlso()
@@ -241,10 +250,7 @@ trait TraitLinking
         return $output->getArrayCopy();
     }
 
-    /**
-     * @return \Omeka\Api\Representation\SiteRepresentation|null
-     */
-    protected function defaultSite()
+    protected function defaultSite(): ?SiteRepresentation
     {
         if (!array_key_exists('site', $this->_storage)) {
             $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');

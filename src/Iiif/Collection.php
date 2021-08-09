@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -123,7 +123,7 @@ class Collection extends AbstractResourceType
         $this->initThumbnail();
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
         /** @see \Omeka\Api\Representation\ItemSetRepresentation */
@@ -185,7 +185,7 @@ class Collection extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractType::getCleanContent()
      */
-    protected function getCleanContent()
+    protected function getCleanContent(): array
     {
         return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v, $k) {
             if ($k === 'items') {

@@ -14,12 +14,7 @@ class PublicResourceUrl extends AbstractHelper
      */
     protected $defaultSiteSlug;
 
-    /**
-     * Construct the helper.
-     *
-     * @param string|null $defaultSiteSlug
-     */
-    public function __construct($defaultSiteSlug)
+    public function __construct(?string $defaultSiteSlug)
     {
         $this->defaultSiteSlug = $defaultSiteSlug;
     }
@@ -28,12 +23,8 @@ class PublicResourceUrl extends AbstractHelper
      * Return the url to the public default site page or a resource.
      *
      * @uses AbstractResourceRepresentation::siteUrl()
-     *
-     * @param AbstractResourceRepresentation $resource
-     * @param bool $canonical Whether to return an absolute URL
-     * @return string
      */
-    public function __invoke(AbstractResourceRepresentation $resource, $canonical = false)
+    public function __invoke(AbstractResourceRepresentation $resource, bool $canonical = false): string
     {
         // Manage the case where there is no site.
         return $this->defaultSiteSlug

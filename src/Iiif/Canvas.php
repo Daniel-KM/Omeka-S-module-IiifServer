@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -114,14 +114,23 @@ class Canvas extends AbstractResourceType
         'unordered' => self::NOT_ALLOWED,
     ];
 
+    /**
+     * This construct is required, because the resource must be a media.
+     */
     public function __construct(MediaRepresentation $resource, array $options = null)
     {
-        // This construct is required, because the resource must be a media.
         parent::__construct($resource, $options);
         // TODO Add linking properties when not in manifest.
     }
 
-    public function getLabel()
+    public function getId(): ?string
+    {
+        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/canvas', '3', [
+            'name' => $this->resource->id(),
+        ]);
+    }
+
+    public function getLabel(): ?ValueLanguage
     {
         $setting = $this->setting;
         $labelOption = $setting('iiifserver_manifest_canvas_label');
@@ -163,18 +172,11 @@ class Canvas extends AbstractResourceType
         return new ValueLanguage($values, false, $fallback);
     }
 
-    public function getId()
-    {
-        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/canvas', '3', [
-            'name' => $this->resource->id(),
-        ]);
-    }
-
     /**
      * As the process converts Omeka resource, there is only one file by canvas
      * currently.
      */
-    public function getItems()
+    public function getItems(): array
     {
         if (!array_key_exists('items', $this->_storage)) {
             $this->_storage['items'] = [];
@@ -188,7 +190,7 @@ class Canvas extends AbstractResourceType
         return $this->_storage['items'];
     }
 
-    public function getAnnotations()
+    public function getAnnotations(): array
     {
         if (!array_key_exists('annotations', $this->_storage)) {
             $this->_storage['annotations'] = [];
@@ -202,7 +204,7 @@ class Canvas extends AbstractResourceType
         return $this->_storage['annotations'];
     }
 
-    public function getRendering()
+    public function getRendering(): array
     {
         if (!array_key_exists('rendering', $this->_storage)) {
             $this->_storage['rendering'] = [];
@@ -214,22 +216,22 @@ class Canvas extends AbstractResourceType
         return $this->_storage['rendering'];
     }
 
-    public function getHeight()
+    public function getHeight(): ?int
     {
         return $this->canvasDimensions()['height'];
     }
 
-    public function getWidth()
+    public function getWidth(): ?int
     {
         return $this->canvasDimensions()['width'];
     }
 
-    public function getDuration()
+    public function getDuration(): ?string
     {
         return $this->canvasDimensions()['duration'];
     }
 
-    protected function canvasDimensions()
+    protected function canvasDimensions(): array
     {
         if (!array_key_exists('dimension', $this->_storage)) {
             $heights = [0];

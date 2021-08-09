@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -108,12 +108,12 @@ class ContentResource extends AbstractResourceType
         $this->prepareMediaId();
     }
 
-    public function hasIdAndType()
+    public function hasIdAndType(): bool
     {
         return $this->id && $this->type;
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         if ($this->id) {
             return $this->id;
@@ -132,7 +132,7 @@ class ContentResource extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
      */
-    public function getLabel()
+    public function getLabel(): ?ValueLanguage
     {
         if (!$this->type) {
             return null;
@@ -148,7 +148,7 @@ class ContentResource extends AbstractResourceType
         return new ValueLanguage(['none' => [$label]]);
     }
 
-    protected function prepareMediaId(): void
+    protected function prepareMediaId(): AbstractType
     {
         // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
         $ingester = $this->resource->ingester();
@@ -156,10 +156,10 @@ class ContentResource extends AbstractResourceType
             $mediaData = $this->resource->mediaData();
             if (isset($mediaData['id'])) {
                 $this->id = $mediaData['id'];
-                return;
+                return $this;
             } elseif (isset($mediaData['@id'])) {
                 $this->id = $mediaData['@id'];
-                return;
+                return $this;
             }
         }
 
@@ -171,5 +171,7 @@ class ContentResource extends AbstractResourceType
                 $this->id = $this->resource->siteUrl($siteSlug, true);
             }
         }
+
+        return $this;
     }
 }

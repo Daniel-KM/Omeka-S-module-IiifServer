@@ -34,7 +34,7 @@ use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class IiifJsonLd extends AbstractPlugin
 {
-    public function __invoke($data, $version = null)
+    public function __invoke($data, $version = null): \Laminas\Http\PhpEnvironment\Response
     {
         $controller = $this->getController();
 

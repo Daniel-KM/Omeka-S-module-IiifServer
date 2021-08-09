@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020 Daniel Berthereau
+ * Copyright 2020-2021 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -61,7 +61,7 @@ class Rendering extends AbstractResourceType
         $this->initIiifType();
     }
 
-    public function getId()
+    public function getId(): ?string
     {
         if (!array_key_exists('id', $this->_storage)) {
             // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
@@ -90,7 +90,7 @@ class Rendering extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
      */
-    public function getLabel()
+    public function getLabel(): ?ValueLanguage
     {
         if (!$this->type) {
             return null;
@@ -110,10 +110,8 @@ class Rendering extends AbstractResourceType
      * Get the media type of the resource.
      *
      * @todo Manage the format of non-file resources (iiif, oembed, etc.).
-     *
-     * @return string|null
      */
-    public function getFormat()
+    public function getFormat(): ?string
     {
         $mediaType = $this->resource->mediaType();
         if ($mediaType) {
