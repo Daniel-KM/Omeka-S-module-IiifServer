@@ -573,14 +573,40 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_image_server',
+                'name' => 'fieldset_media_api',
+                'type' => \Laminas\Form\Fieldset::class,
+                'options' => [
+                    'label' => 'Image server', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_media_api_url',
                 'type' => OptionalUrl::class,
                 'options' => [
                     'label' => 'External image server url', // @translate
                     'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_image_server',
+                    'id' => 'iiifserver_media_api_url',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_media_api_default_version',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Default IIIF image api version', // @translate
+                    'info' => 'Set the version of the iiif info.json to provide. The image server should support it.', // @translate
+                    'value_options' => [
+                        '1' => 'Image Api 1', // @translate
+                        '2' => 'Image Api 2', // @translate
+                        '3' => 'Image Api 3', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_default_version',
+                    'required' => true,
                 ],
             ])
         ;

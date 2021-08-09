@@ -111,7 +111,7 @@ class Body extends AbstractResourceType
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
 
         $setting = $this->setting;
-        $this->imageApiVersion = $setting('imageserver_info_default_version', '3');
+        $this->imageApiVersion = $setting('iiifserver_media_api_default_version', '2');
     }
 
     public function id(): ?string

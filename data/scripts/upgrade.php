@@ -181,3 +181,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
 if (version_compare($oldVersion, '3.6.3.2', '<')) {
     $this->updateWhitelist();
 }
+
+if (version_compare($oldVersion, '3.6.5.3', '<')) {
+    $settings->set('iiifserver_media_api_default_version', $settings->get('imageserver_info_default_version', '2'));
+}
