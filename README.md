@@ -7,27 +7,19 @@ IIIF Server (module for Omeka S)
 
 [![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer)
 
-**IMPORTANT**: This readme is for the development version of IIIF Server. See
-[stable version here]. This new version is working, but requires the module [Image Server].
-
 [IIIF Server] is a module for [Omeka S] that integrates the [IIIF specifications]
 to allow to process and share instantly images of any size and medias (pdf,
-audio, video, 3D…) in the desired formats. It requires an image server, like the
-module [Image Server].
+audio, video, 3D…) in the desired formats. It can use any image server to display
+images and media, like the module [Image Server], but you can use any other
+external one, like [Cantaloupe] or [IIP Image].
 
 The full specifications of the [International Image Interoperability Framework]
-standard are supported (level 2), so any widget that supports it can use it.
-Rotation, zoom, inside search, etc. may be managed too. Dynamic lists of records
-may be created, for example for browse pages.
-
-This [Omeka S] module is a rewrite of the [Universal Viewer plugin for Omeka] by
-[BibLibre] with the same features as the original plugin, but separated into two
-modules (the IIIF server and the widget Universal Viewer). It integrates the
-tiler [Zoomify] that was used the plugin [OpenLayers Zoom] for [Omeka Classic]
-and another tiler to support the [Deep Zoom Image] tile format.
+standard are supported (service 2 or 3, level 2), so any widget that supports it
+can use it. Rotation, zoom, inside search, etc. may be managed too. Dynamic
+lists of records may be created, for example for browse pages.
 
 The IIIF manifests can be displayed with many viewers, the integrated [OpenSeadragon],
-the [Universal Viewer], the advanced [Mirador], or the ligher and themable [Diva],
+the [Universal Viewer], the advanced [Mirador], or the lighter and themable [Diva],
 or any other IIIF compatible viewer.
 
 The search is provided by the module [Iiif Search] for common xml formats.
@@ -59,12 +51,6 @@ Then install it like any other Omeka module.
 
 Note: To keep old options from [Universal Viewer], upgrade it to version 3.4.3
 before enabling of IiifServer. Else, simply set them in the config form.
-
-### Image server
-
-An image server is required to display the images. It can be the module [Image Server],
-or any other IIIF compliant image server. The image server is used to display
-audio and video files too.
 
 ### PHP
 
@@ -105,6 +91,56 @@ The iiif authentication api is not yet integrated. Anyway, to access iiif
 resources when authenticated, the [fix #omeka/omeka-s/1714] can be patched or
 the module [Guest] can be used.
 
+Image server
+------------
+
+Except if all your manifests are external or if you have no media, you will need
+a IIIF image server. It can be the module [Image Server] or an external server,
+like [Cantaloupe] or [IIP Image]. The image server may be used to display audio
+and video files too, if it supports them, else they will be served by Omeka.
+
+### Module Image Server
+
+The module [Image Server] serves original images and can create tile statically
+or dynamically. This is the simplest way to get instant big images with Omeka.
+The images are the original ones, stored by Omeka.
+
+### External images servers
+
+For other image servers, two configurations are possible.
+
+#### Use the Omeka media type "IIIF Image"
+
+The first possibility is to use an external server with a specific url path or a
+subdomain. In that case, you have to create or import all your images as media
+"[IIIF Image]". With this media type, the full json is saved in metadata of the
+media itself and the original images remain separate from Omeka.
+
+This is the simplest when your images are already managed by one or multiple
+dedicated third-party image server (for instance one of the software listed in
+the [official list](https://github.com/IIIF/awesome-iiif/#image-servers) of the
+IIIF community).
+
+Of course, it requires a second tool to manage your images, at least to copy
+your directories of images in the image server (generally by ftp or a shared
+disk space).
+
+#### Use original files as storage for the image server
+
+The second possibility is to use the original images, so the files inside the
+directory "files/original". In that cases, the original files are managed by
+Omeka with the media types "Upload" or "Url". This possibility requires that the
+image server to be on the same server than Omeka, or at least that the image
+server can access the original directory via the file system of via http, or any
+another protocol.
+
+Three params should be set:
+- set the original directory as the base path in your image server (option "FilesystemSource.BasicLookupStrategy.path_prefix"
+  for Cantaloupe);
+- set the option "filename with extension" in the config of the module.
+- add some rules in Apache config or in htaccess to redirect request to the
+  image server. Normally, a regex starting with iiif/ and finishing with the
+  supported file extensions is enough.
 
 Notes
 -----
@@ -127,23 +163,353 @@ in the specified element of a record. The viewer included on that record’s
 display page will use that manifest URL to retrieve images and metadata for the
 viewer.
 
-Of course, if you use only externally supplied IIIF manifests, you don't need
-this module.
+### Config options for manifest
 
-### Using a third-party IIIF Image server via the Omeka media type "IIIF Image"
+#### Input format of the property for structures (table of contents)
 
-If your images are already managed by one or multiple dedicated third-party
-image server (for instance one of the software listed in the [official list](https://github.com/IIIF/awesome-iiif/#image-servers)
-of the IIIF community), you can use them directly in your items: create or
-import them as media "[IIIF Image]". With this media type, the full json is
-saved in metadata of the media itself.
+The default structure is the simple sequential list of iiif medias.
 
-If you don’t want to manage a dedicated image server, you can simply install the
-module [Image Server].
+To build structures for a complex document with a table of contents, you can use
+a specific property and fill a value with the needed json, or with a literal
+value with the following format. Each row is a part of the structure:
+
+```
+{id}, {label}, {canvasIndexOrRangeId1}; {canvasIndexOrRangeId2}; ...; {canvasIndexOrRangeIdN}
+```
+
+Example:
+
+```
+cover, Front Cover, 1
+r1, Introduction, 2; 3; 4; 5
+backCover, Back Cover, 6
+```
+
+The range id (first part of a row) is the name of the range, that will be used
+to create the uri. To avoid collision with other indexes, it should not be a
+numeric value. It should be a simple alphanumeric name, without space, diacritic
+or any other special character (so stable among all coding standards). It must
+not contain a "/". Anyway, this name is url-encoded in the final uri.
+
+Furthermore, the range ids must be unique in all the item.
+
+It can be skipped, so the line number will be used. In that case, keep the first
+comma to indicate that there is no specific range name. For example if `r1` was
+not provided above, the range id will be `r2`, so `r` for range and `2` for
+second line. Nevertheless, this possibility is not recommended because the uri
+will change when a new line will be inserted.
+
+The second part of the row is the label of the range, for example a chapter. If
+empty, it will be used for the structure, but not displayed in the table of the
+viewer.
+
+The last part of the row is the list of the top canvases or top ranges that the
+current range contains, so generally a list of images and sub-sections.
+
+In most of the cases, the canvas index is the media position. Only medias that
+are used in the iiif are enumerated, not the specific medias, like pdf, xml, etc.
+attached to the item, so take care of its value, that may be different from the
+Omeka internal position in the list of attached medias to an item. Other indexes
+will be managed as range indexes if they are in the list of the range ids (first
+part of the row). If not, it will be a canvas alphanumeric name.
+
+The first range id of the first line is  the root of the tree. There can be only
+one root. If there are multiple roots (see below), a main range is added with
+all the roots as branches.
+
+So it's possible to build complex hierarchical table of contents from this
+literal value, with such an incomplete and incorrect example:
+
+```
+toc, Table of Contents, cover; intro; r1; r2; backcover
+    cover, Front cover, cover
+    intro, Introduction, 2-5
+    r1, First chapter, 6; r1-1; r1-2; 12
+        r1-1, First section, r1-1-1; r1-1-2; illustration1; illus2
+            r1-1-1, First sub-section, 8-9
+            r1-1-2, Second sub-section, 9-10
+    r2, Second chapter, 13
+    backcover, Back cover, "backcover"
+illustration1, First illustration non paginated, illus1
+illustration3, Third illustration non paginated, illus3
+```
+
+to this json output (iiif v2):
+
+```json
+[
+  {
+    "@id": "https://example.org/iiif/book1/range/toc",
+    "@type": "sc:Range",
+    "label": "Table of Contents",
+    "ranges": [
+      {
+        "@id": "https://example.org/iiif/book1/range/cover",
+        "@type": "sc:Range",
+        "label": "Front cover",
+        "ranges": [
+          {
+            "@id": "https://example.org/iiif/book1/range/cover",
+            "@type": "sc:Range",
+            "label": "Front cover"
+          }
+        ]
+      },
+      {
+        "@id": "https://example.org/iiif/book1/range/intro",
+        "@type": "sc:Range",
+        "label": "Introduction",
+        "canvases": [
+          "https://example.org/iiif/book1/canvas/p2",
+          "https://example.org/iiif/book1/canvas/p3",
+          "https://example.org/iiif/book1/canvas/p4",
+          "https://example.org/iiif/book1/canvas/p5"
+        ]
+      },
+      {
+        "@id": "https://example.org/iiif/book1/range/r1",
+        "@type": "sc:Range",
+        "label": "First chapter",
+        "members": [
+          {
+            "@id": "https://example.org/iiif/book1/canvas/p6",
+            "@type": "sc:Canvas",
+            "label": "[6]"
+          },
+          {
+            "@id": "https://example.org/iiif/book1/range/r1-1",
+            "@type": "sc:Range",
+            "label": "First section",
+            "members": [
+              {
+                "@id": "https://example.org/iiif/book1/range/r1-1-1",
+                "@type": "sc:Range",
+                "label": "First sub-section",
+                "canvases": [
+                  "https://example.org/iiif/book1/canvas/p8",
+                  "https://example.org/iiif/book1/canvas/p9"
+                ]
+              },
+              {
+                "@id": "https://example.org/iiif/book1/range/r1-1-2",
+                "@type": "sc:Range",
+                "label": "Second sub-section",
+                "canvases": [
+                  "https://example.org/iiif/book1/canvas/p9",
+                  "https://example.org/iiif/book1/canvas/p10"
+                ]
+              },
+              {
+                "@id": "https://example.org/iiif/book1/range/illustration1",
+                "@type": "sc:Range",
+                "label": "First illustration non paginated",
+                "canvases": [
+                  "https://example.org/iiif/book1/canvas/illus1"
+                ]
+              },
+              {
+                "@id": "https://example.org/iiif/book1/canvas/illus2",
+                "@type": "sc:Canvas",
+                "label": "illus2"
+              }
+            ]
+          },
+          {
+            "@id": "https://example.org/iiif/book1/canvas/r1-2",
+            "@type": "sc:Canvas",
+            "label": "r1-2"
+          },
+          {
+            "@id": "https://example.org/iiif/book1/canvas/p12",
+            "@type": "sc:Canvas",
+            "label": "[12]"
+          }
+        ]
+      },
+      {
+        "@id": "https://example.org/iiif/book1/range/r2",
+        "@type": "sc:Range",
+        "label": "Second chapter",
+        "canvases": [
+          "https://example.org/iiif/book1/canvas/p13"
+        ]
+      },
+      {
+        "@id": "https://example.org/iiif/book1/range/backcover",
+        "@type": "sc:Range",
+        "label": "Back cover",
+        "canvases": [
+          "https://example.org/iiif/book1/canvas/backcover"
+        ]
+      }
+    ]
+  },
+  {
+    "@id": "https://example.org/iiif/book1/range/illustration3",
+    "@type": "sc:Range",
+    "label": "Third illustration non paginated",
+    "canvases": [
+      "https://example.org/iiif/book1/canvas/illus3"
+    ]
+  }
+]
+```
+
+or to this json output (iiif v3), a little more verbose:
+
+```json
+[
+  {
+    "id": "https://example.org/iiif/book1/range/rstructure1",
+    "type": "Range",
+    "label": { "none": [ "Content" ] },
+    "items": [
+      {
+        "id": "https://example.org/iiif/book1/range/toc",
+        "type": "Range",
+        "label": { "none": [ "Table of Contents" ] },
+        "items": [
+          {
+            "id": "https://example.org/iiif/book1/range/cover",
+            "type": "Range",
+            "label": { "none": [ "Front cover" ] },
+            "items": [
+              { "id": "https://example.org/iiif/book1/canvas/cover", "type": "Canvas" }
+            ]
+          },
+          {
+            "id": "https://example.org/iiif/book1/range/intro",
+            "type": "Range",
+            "label": { "none": [ "Introduction" ] },
+            "items": [
+              { "id": "https://example.org/iiif/book1/canvas/p2", "type": "Canvas" },
+              { "id": "https://example.org/iiif/book1/canvas/p3", "type": "Canvas" },
+              { "id": "https://example.org/iiif/book1/canvas/p4", "type": "Canvas" },
+              { "id": "https://example.org/iiif/book1/canvas/p5", "type": "Canvas" }
+            ]
+          },
+          {
+            "id": "https://example.org/iiif/book1/range/r1",
+            "type": "Range",
+            "label": { "none": [ "First chapter" ] },
+            "items": [
+              { "id": "https://example.org/iiif/book1/canvas/p6", "type": "Canvas" },
+              {
+                "id": "https://example.org/iiif/book1/range/r1-1",
+                "type": "Range",
+                "label": { "none": [ "First section" ] },
+                "items": [
+                  {
+                    "id": "https://example.org/iiif/book1/range/r1-1-1",
+                    "type": "Range",
+                    "label": { "none": [ "First sub-section" ] },
+                    "items": [
+                      { "id": "https://example.org/iiif/book1/canvas/p8", "type": "Canvas" },
+                      { "id": "https://example.org/iiif/book1/canvas/p9", "type": "Canvas" }
+                    ]
+                  },
+                  {
+                    "id": "https://example.org/iiif/book1/range/r1-1-2",
+                    "type": "Range",
+                    "label": { "none": [ "Second sub-section" ] },
+                    "items": [
+                      { "id": "https://example.org/iiif/book1/canvas/p9", "type": "Canvas" },
+                      { "id": "https://example.org/iiif/book1/canvas/p10", "type": "Canvas" }
+                    ]
+                  },
+                  {
+                    "id": "https://example.org/iiif/book1/range/illustration1",
+                    "type": "Range",
+                    "label": { "none": [ "First illustration non paginated" ] },
+                    "items": [
+                      { "id": "https://example.org/iiif/book1/canvas/illus1", "type": "Canvas" }
+                    ]
+                  },
+                  { "id": "https://example.org/iiif/book1/canvas/illus2", "type": "Canvas" }
+                ]
+              },
+              { "id": "https://example.org/iiif/book1/canvas/r1-2", "type": "Canvas" },
+              { "id": "https://example.org/iiif/book1/canvas/p12", "type": "Canvas" }
+            ]
+          },
+          {
+            "id": "https://example.org/iiif/book1/range/r2",
+            "type": "Range",
+            "label": { "none": [ "Second chapter" ] },
+            "items": [
+              { "id": "https://example.org/iiif/book1/canvas/p13", "type": "Canvas" }
+            ]
+          },
+          {
+            "id": "https://example.org/iiif/book1/range/backcover",
+            "type": "Range",
+            "label": { "none": [ "Back cover" ] },
+            "items": [
+              { "id": "https://example.org/iiif/book1/canvas/backcover", "type": "Canvas" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "https://example.org/iiif/book1/range/illustration3",
+        "type": "Range",
+        "label": { "none": [ "Third illustration non paginated" ] },
+        "items": [
+          { "id": "https://example.org/iiif/book1/canvas/illus3", "type": "Canvas" }
+        ]
+      }
+    ]
+  }
+]
+```
+
+Notes to understand the conversion and to fix issues from the literal data:
+
+- The named canvases may not be supported, so you may have to avoid them.
+- The indentation is not required, but it simplifies literal visualisation.
+- The lines must be ordered as a table of contents or as an index, so the parser
+  can understand the structure.
+- Each line will be a range, even if it refers to a single canvas, because only
+  ranges are displayed to the user. So the cover, the second chapter and the
+  illustration are ranges with a single item that is a canvas.
+- There are some missing pages (not scanned or lost).
+- The names have some meanings ("r1-1-1"), but it's not needed.
+- The cover refers to itself, so it's a named canvas within a range. This is not
+  possible for iiif v2, so wrap it with double quotes.
+- The backcover has a canvas wrapped by double quotes to force it to be a canvas.
+- The sub-sections share one page (9).
+- The index "r1-2" in the indexes of the first chapter is missing, so it is
+  added as a named canvas.
+- The index "12" is a canvas, so it is added to the list, and, as a canvas,
+  won't be displayed in the index of the viewer.
+- The "illustration1" has a named canvas, since "illus1" is not a range.
+- The index "illustration1" of the first section is a range, but it is missing
+  from the ordered list below the first section. So it is added directly at the
+  right place and removed from the end.
+- The illustration3 is not used as a range, so it is a root, so there is more
+  than one root, so a range is added to wrap all the structure.
+
+Take care of nested structures: items must not belong to themselves, else they
+will be managed as canvases.
+
+Of course, if the literal structure is well formed, you don't have to consider
+these fixes.
+
+Otherwise, in IIIF v3, multiple structures are appended when there are multiple
+values in the item. For example, in a newspaper, it's possible to have a
+structure by page like a common table of contents, and a structure by articles.
+Indeed, an article can be written on multiple and non-sequential pages, and a
+page can contain many articles, illustrations, ads, etc. When there are multiple
+structures, the names of the ranges should have the same meaning between each
+structure (for example the index "cover" should be the front cover in all
+structures), because their uri will be the same.
+
+More info about structures for [IIIF presentation 2.1] and [IIIF presentation 3.0].
 
 ### Customize data of manifests
 
-The module creates manifests with all the metadata of each record. The event
+The module creates manifests with all the metadata of each record. A lot of
+config options allows to define each part of them. If it's not enough, the event
 `iiifserver.manifest` can be used to modify the exposed data of a manifest for
 items, collections, collection lists (search results) and media (`info.json`).
 So, it is possible, for example, to modify the citation, to remove or to add
@@ -169,11 +535,11 @@ these urls (replace :id by a true id):
 - https://example.org/iiif/set?id[]=:id,:id[]=:id,id[]=:id,id[]=:id…;
 - https://example.org/iiif/set/:id,:id,:id,:id is supported too;
 
-- https://example.org/iiif-img/:id/info.json for images files;
-- https://example.org/iiif-img/:id/:region/:size/:rotation/:quality.:format for
-  images, for example: https://example.org/iiif-img/1/full/full/270/gray.png;
-- https://example.org/ixif-media/:id/info.json for other files;
-- https://example.org/ixif-media/:id.:format for the files.
+- https://example.org/iiif/:id/info.json for images files;
+- https://example.org/iiif/:id/:region/:size/:rotation/:quality.:format for
+  images, for example: https://example.org/iiif/1/full/full/270/gray.png;
+- https://example.org/iiif/:id/info.json for other files;
+- https://example.org/iiif/:id.:format for the files.
 
 By default, ids are the internal ids of Omeka S, but it is recommended to use
 your own single and permanent identifiers that don’t depend on an internal
@@ -187,11 +553,11 @@ modules [Ark] and/or [Clean Url].
 3D models
 ---------
 
-3D models are not supported by the IIIF standard, that manages only images,
-audio and video files. Nevertheless, it is possible to create manifests that
-follows the standard except the format of the file, like an extended version of
-the standard. Only the widget [Universal Viewer] supports it natively since
-version 2.3, via the [three.js] library. It is called "ixif".
+3D models are not supported by the IIIF standard, that manages only images (IIIF v2),
+and audio and video files (IIIF v3). Nevertheless, it is possible to create
+manifests that follows the standard except the format of the file, like an
+extended version of the standard. Only the widget [Universal Viewer] supports it
+natively since version 2.3, via the [three.js] library. It is called "ixif".
 
 The other viewers integrated via modules ([Diva] and [Mirador]) in Omeka don’t
 support 3D.
@@ -209,6 +575,12 @@ TODO / Bugs
 - [ ] Job to update data of [IIIF Image].
 - [ ] Use only arrays, not standard objects.
 - [ ] Manage url prefix.
+- [ ] Implements recursive ranges in structures for IIIF v2.
+- [ ] Normalize the format of the structure: csv? ini? yaml? xml? Provide an automatic upgrade too.
+- [ ] Convert structure v3 to v2 and vice-versa.
+- [x] Fully support alphanumeric name for canvas id.
+- [ ] Support translation of structure (use the language of the value?).
+- [ ] Full support of named canvases.
 
 See module [Image Server].
 
@@ -258,22 +630,25 @@ Copyright
 * Copyright Daniel Berthereau, 2015-2021 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
 * Copyright Régis Robineau, 2019 (see [regisrob])
+* Copyright Satoru Nakamura, 2021 (see [nakamura196])
 
 First version of this plugin was built for the [Bibliothèque patrimoniale] of
-[Mines ParisTech].
+[Mines ParisTech]. This [Omeka S] module is a rewrite of the [Universal Viewer plugin for Omeka]
+by [BibLibre] with the same features. Next, it was , but separated into three
+modules: the IIIF server, the [Image Server] and the viewer [Universal Viewer].
+This viewer integrates the tiler [Zoomify] that was used the plugin [OpenLayers Zoom]
+for [Omeka Classic] and another tiler to support the [Deep Zoom Image] tile
+format.
 
 
 [IIIF Server]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer
-[stable version here]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/tree/3.5.16
 [Omeka S]: https://omeka.org/s
 [Image Server]: https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer
 [International Image Interoperability Framework]: http://iiif.io
 [IIIF specifications]: http://iiif.io/api/
+[Cantaloupe]: https://cantaloupe-project.github.io
 [IIP Image]: http://iipimage.sourceforge.net
 [OpenSeadragon]: https://openseadragon.github.io
-[Universal Viewer plugin for Omeka]: https://gitlab.com/Daniel-KM/Omeka-plugin-UniversalViewer
-[BibLibre]: https://github.com/biblibre
-[OpenLayers Zoom]: https://gitlab.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
 [Diva]: https://gitlab.com/Daniel-KM/Omeka-S-module-Diva
@@ -291,6 +666,8 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[IIIF presentation 2.1]: https://iiif.io/api/presentation/2.1/#range
+[IIIF presentation 3.0]: https://iiif.io/api/presentation/3.0/#54-range
 [Ark]: https://gitlab.com/Daniel-KM/omeka-s-module-Ark
 [Clean Url]: https://gitlab.com/Daniel-KM/omeka-s-module-CleanUrl
 [Collection Tree]: https://gitlab.com/Daniel-KM/Omeka-S-module-CollectionTree
@@ -311,6 +688,10 @@ First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [OSI]: http://opensource.org
 [Bibliothèque patrimoniale]: https://patrimoine.mines-paristech.fr
 [Mines ParisTech]: http://mines-paristech.fr
-[regisrob]: https://github.com/regisrob
+[Universal Viewer plugin for Omeka]: https://gitlab.com/Daniel-KM/Omeka-plugin-UniversalViewer
+[BibLibre]: https://github.com/biblibre
+[OpenLayers Zoom]: https://gitlab.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
+[nakamura196]: https://github.com/nakamura196
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
