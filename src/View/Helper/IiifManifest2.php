@@ -335,7 +335,10 @@ class IiifManifest2 extends AbstractHelper
                 // TODO Add alto files and search.
                 // TODO Add other content.
             }
-        } elseif ($is3dModel) {
+        }
+
+        // The media is a 3d model.
+        elseif ($is3dModel) {
             // Prepare the media sequence for threejs.
             $mediaSequenceElement = $this->_iiifMediaSequenceModel(
                 $mediaMain3d,
@@ -747,7 +750,7 @@ class IiifManifest2 extends AbstractHelper
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
             // In 3.0, the "@id" property becomes "id".
-            $imageBaseUri = isset($mediaData['@id']) ? $mediaData['@id'] : $mediaData['id'];
+            $imageBaseUri = $mediaData['@id'] ?? $mediaData['id'];
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
             $imageApiContextUri = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $imageComplianceLevelUri = is_array($mediaData['profile']) ? $mediaData['profile'][0] : $mediaData['profile'];
@@ -820,7 +823,7 @@ class IiifManifest2 extends AbstractHelper
         if ($media->ingester() == 'iiif') {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
-            $imageBaseUri = isset($mediaData['@id']) ? $mediaData['@id'] : $mediaData['id'];
+            $imageBaseUri = $mediaData['@id'] ?? $mediaData['id'];
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
             $imageApiContextUri = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             // In Image API 3.0, the "@id" property becomes "id".
@@ -1439,9 +1442,7 @@ class IiifManifest2 extends AbstractHelper
             'level2' => 'level2',
         ];
 
-        return isset($profileToLlevels[$profile])
-            ? $profileToLlevels[$profile]
-            : 'level0';
+        return $profileToLlevels[$profile] ?? 'level0';
     }
 
     /**

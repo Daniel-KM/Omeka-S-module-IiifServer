@@ -158,8 +158,8 @@ class Manifest extends AbstractResourceType
                 $items[] = new Canvas($media, [
                     'index' => ++$index,
                     'content' => $mediaInfo['content'],
-                    'key' => isset($mediaInfo['key']) ? $mediaInfo['key'] : null,
-                    'motivation' => isset($mediaInfo['motivation']) ? $mediaInfo['motivation'] : null,
+                    'key' => $mediaInfo['key'] ?? null,
+                    'motivation' => $mediaInfo['motivation'] ?? null,
                 ]);
             }
         }

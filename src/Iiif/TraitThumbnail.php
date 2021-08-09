@@ -99,7 +99,7 @@ trait TraitThumbnail
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $primaryMedia->mediaData();
             // Before 3.0, the "id" property was "@id".
-            $imageBaseUri = isset($mediaData['id']) ? $mediaData['id'] : $mediaData['@id'];
+            $imageBaseUri = $mediaData['id'] ?? $mediaData['@id'];
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
             $imageApiContextUri = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $imageComplianceLevelUri = is_array($mediaData['profile']) ? $mediaData['profile'][0] : $mediaData['profile'];
@@ -186,9 +186,7 @@ trait TraitThumbnail
             'level2' => 'level2',
         ];
 
-        return isset($profileToLlevels[$profile])
-            ? $profileToLlevels[$profile]
-            : 'level0';
+        return $profileToLlevels[$profile] ?? 'level0';
     }
 
     /**

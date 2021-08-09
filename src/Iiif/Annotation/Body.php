@@ -122,7 +122,7 @@ class Body extends AbstractResourceType
     {
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
-            return isset($mediaData['id']) ? $mediaData['id'] : $mediaData['@id'];
+            return $mediaData['id'] ?? $mediaData['@id'];
         }
 
         if ($this->contentResource->isImage()) {
@@ -173,7 +173,7 @@ class Body extends AbstractResourceType
             $mediaData = $this->resource->mediaData();
             $imageResourceServices = [];
             $context = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
-            $id = isset($mediaData['id']) ? $mediaData['id'] : $mediaData['@id'];
+            $id = $mediaData['id'] ?? $mediaData['@id'];
             $type = $this->_iiifType($context);
             $profile = $this->_iiifComplianceLevel($mediaData['profile']);
             if (!$id || !$type || !$profile) {
@@ -256,9 +256,7 @@ class Body extends AbstractResourceType
             'http://iiif.io/api/image/2/context.json' => 'ImageService2',
             'http://iiif.io/api/image/3/context.json' => 'ImageService3',
         ];
-        return isset($contexts[$context])
-           ? $contexts[$context]
-            : null;
+        return $contexts[$context] ?? null;
     }
 
     /**
@@ -296,8 +294,6 @@ class Body extends AbstractResourceType
             'level2' => 'level2',
         ];
 
-        return isset($profileToLlevels[$profile])
-            ? $profileToLlevels[$profile]
-            : 'level0';
+        return $profileToLlevels[$profile] ?? 'level0';
     }
 }
