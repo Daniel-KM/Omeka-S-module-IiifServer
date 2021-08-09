@@ -24,15 +24,18 @@ class MediaDimension extends AbstractHelper
     /**
      * Get an array of the width, height, and/or duration of a media or file.
      *
-     * @todo Store dimensions in the data of the media. Or use numeric properties (with units).
+     * Unlike the controller plugin, the possibility to force extraction of
+     * dimensions in disabled, because it is useless in a view.
      *
-     * @param \Omeka\Api\Representation\MediaRepresentation|string $media Can be an
-     * media, an url or a filepath.
+     * @param MediaRepresentation|Media|string $media Can be a media, an url or a filepath.
+     * @param string $type "original", "large", "medium", "square", or any other
+     * subdirectory of the directory "files".
+     * @return array Associative array of width, height, and/or duration of the
+     * media. A dimension may be null. All dimensions are null for media that
+     * are not an image, an audio or a video.
      * @throws RuntimeException
-     * @return array|null Associative array of width, height, and/or duration of
-     * the media, else null.
      */
-    public function __invoke($media)
+    public function __invoke($media, string $type = 'original'): array
     {
         try {
             return $this->mediaDimensionPlugin->__invoke($media);

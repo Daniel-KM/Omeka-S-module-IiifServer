@@ -62,7 +62,7 @@ class Body extends AbstractResourceType
     protected $iiifImageUrl;
 
     /**
-     * @var \IiifServer\View\Helper\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
 
@@ -109,10 +109,11 @@ class Body extends AbstractResourceType
 
         $this->initMedia();
 
-        $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
+        $services = $this->resource->getServiceLocator();
+        $viewHelpers = $services->get('ViewHelperManager');
         $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
-        $this->imageSize = $viewHelpers->get('imageSize');
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
+        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
 
         $setting = $this->setting;
         $this->imageApiVersion = $setting('imageserver_info_default_version', '3');

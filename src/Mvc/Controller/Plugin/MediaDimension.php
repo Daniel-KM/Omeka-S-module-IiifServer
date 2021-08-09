@@ -2,6 +2,7 @@
 
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use finfo;
 use JamesHeinrich\GetID3\GetId3;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Adapter\MediaAdapter;
@@ -28,12 +29,18 @@ class MediaDimension extends AbstractPlugin
     protected $mediaAdapter;
 
     /**
-     * @param string $basePath
-     * @param TempFileFactory $tempFileFactory
-     * @param MediaAdapter $mediaAdapter
+     * The default output when the file is unavailable or unknown.
+     *
+     * @var array
      */
+    protected $emptyDimensions = [
+        'width' => null,
+        'height' => null,
+        'duration' => null,
+    ];
+
     public function __construct(
-        $basePath,
+        ?string $basePath,
         TempFileFactory $tempFileFactory,
         MediaAdapter $mediaAdapter
     ) {
@@ -45,132 +52,150 @@ class MediaDimension extends AbstractPlugin
     /**
      * Get an array of the width, height, and/or duration of a media or file.
      *
-     * @todo Store dimensions in the data of the media. Or use numeric properties (with units).
+     * Data can be stored in media data via the module Image Server or a job in
+     * module Bulk Check.
      *
-     * @param MediaRepresentation|Media|string $media
-     * Can be a media, an url or a filepath.
+     * @todo Use the storage adapter.
+     *
+     * @param MediaRepresentation|Media|string $media Can be a media, an url or a filepath.
+     * @param string $type "original", "large", "medium", "square", or any other
+     * subdirectory of the directory "files".
+     * @param bool $force Get dimensions from the file, not from the media data.
+     * @return array Associative array of width, height, and/or duration of the
+     * media. A dimension may be null. All dimensions are null for media that
+     * are not an image, an audio or a video.
      * @throws RuntimeException
-     * @return array|null Associative array of width, height, and/or duration of
-     * the media, else null.
      */
-    public function __invoke($media)
+    public function __invoke($media, string $type = 'original', bool $force = false): array
     {
         if ($media instanceof MediaRepresentation) {
-            return $this->dimensionMedia($media);
+            return $this->dimensionMedia($media, $type, $force);
         }
         if ($media instanceof Media) {
             $media = $this->mediaAdapter->getRepresentation($media);
-            return $this->dimensionMedia($media);
+            return $this->dimensionMedia($media, $type, $force);
         }
-        return $this->getDimensions($media);
+        // For file path.
+        return $this->getDimensions((string) $media);
     }
 
     /**
      * Get an array of the width, height, and/or duration of a media.
      *
-     * @param MediaRepresentation $media
      * @throws RuntimeException
-     * @return array|null Associative array of width, height, and/or duration of
-     * the media, else null.
      */
-    protected function dimensionMedia(MediaRepresentation $media)
+    protected function dimensionMedia(MediaRepresentation $media, string $type, bool $force): array
     {
         // Check if this is a media (image, video, audio).
-        if (!in_array(strtok((string) $media->mediaType(), '/'), ['image', 'video', 'audio'])) {
-            return ['width' => null, 'height' => null, 'duration' => null];
+        $mainMediaType = substr((string) $media->mediaType(), 0, 5);
+        if (!in_array($mainMediaType, ['image', 'video', 'audio'])
+            // A security check.
+            || strpos($type, '/..') !== false
+            || strpos($type, '../') !== false
+        ) {
+            return $this->emptyDimensions;
         }
 
         // Check if size is already stored. The stored dimension may be null.
-        $mediaData = $media->mediaData();
-        if (is_array($mediaData)
-            && !empty($mediaData['dimensions']['original'])
-        ) {
-            return $mediaData['dimensions']['original'];
+        if (!$force) {
+            $mediaData = $media->mediaData();
+            if (is_array($mediaData)
+                && !empty($mediaData['dimensions'][$type])
+            ) {
+                return $mediaData['dimensions'][$type];
+            }
         }
 
         // In order to manage external storage, check if the file is local.
-        $storagePath = $this->getStoragePath('original', $media->filename());
+        if ($type === 'original') {
+            $storagePath = $this->getStoragePath($type, $media->filename());
+            $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+            return file_exists($filepath)
+                ? $this->getDimensionsLocal($filepath, $mainMediaType)
+                : $this->getDimensionsUrl($media->originalUrl(), $mainMediaType);
+        }
+
+        $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
         $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        return file_exists($filepath) && is_readable($filepath)
-            ? $this->getDimensionsLocal($filepath)
-            : $this->getDimensionsUrl($media->originalUrl());
+        return file_exists($filepath)
+            ? $this->getDimensionsLocal($filepath, $mainMediaType)
+            : $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
     }
 
     /**
      * Get a storage path.
-     *
-     * @param string $prefix The storage prefix
-     * @param string $name The file name, or basename if extension is passed
-     * @param null|string $extension The file extension
-     * @return string
      */
-    protected function getStoragePath($prefix, $name, $extension = '')
+    protected function getStoragePath(string $prefix, ?string $name, string $extension = ''): string
     {
         return sprintf('%s/%s%s', $prefix, $name, strlen($extension) ? '.' . $extension : '');
     }
 
     /**
      * Helper to get width, height, and/or duration of a media.
-     *
-     * @param string $filepath It should be a video/audio/image (no check here).
-     * @return array Associative array of width, height, and/or duration of the
-     * media. Values are empty when the size is undetermined.
      */
-    protected function getDimensions($filepath)
+    protected function getDimensions(string $filepath): array
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
             return $this->getDimensionsUrl($filepath);
         }
         // A normal path.
-        if (file_exists($filepath) && is_readable($filepath)) {
+        if (file_exists($filepath) && is_file($filepath) && is_readable($filepath) && filesize($filepath)) {
             return $this->getDimensionsLocal($filepath);
         }
-        return [
-            'width' => null,
-            'height' => null,
-            'duration' => null,
-        ];
+        return $this->emptyDimensions;
     }
 
-    /**
-     * Helper to get width, height, and/or duration of a media (path is alreacy checked).
-     *
-     * @param string $filepath It should be a video/audio/image (no check here).
-     * @return array Associative array of width, height, and/or duration of the
-     * media. Values are empty when the size is undetermined.
-     */
-    protected function getDimensionsLocal($filepath)
+    protected function getDimensionsUrl(?string $url, ?string $mainMediaType = null): array
     {
-        return $this->getId3Dimensions($filepath);
-    }
+        if (empty($url)) {
+            return $this->emptyDimensions;
+        }
 
-    protected function getDimensionsUrl($filepath)
-    {
         $tempFile = $this->tempFileFactory->build();
         $tempPath = $tempFile->getTempPath();
         $tempFile->delete();
-        $handle = @fopen($filepath, 'rb');
+        $handle = @fopen($url, 'rb');
         if ($handle) {
             $result = file_put_contents($tempPath, $handle);
             @fclose($handle);
             if ($result) {
-                $dimensions = $this->getId3Dimensions($tempPath);
+                $dimensions = $this->getDimensionsLocal($tempPath, $mainMediaType);
                 unlink($tempPath);
                 return $dimensions;
             }
             unlink($tempPath);
         }
 
-        return [
-            'width' => null,
-            'height' => null,
-            'duration' => null,
-        ];
+        return $this->emptyDimensions;
     }
 
-    protected function getId3Dimensions($filepath)
+    /**
+     * Helper to get width, height, and/or duration of a media.
+     *
+     *  The path should be already checked.
+     */
+    protected function getDimensionsLocal(string $filepath, ?string $mainMediaType = null): array
     {
+        // Do a quick check for images: getimagesize is nearly instant and
+        // GetId3 doesn't support jpeg2000, etc.
+        if (!$mainMediaType) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mainMediaType = strtok((string) $finfo->file($filepath), '/');
+        }
+
+        if ($mainMediaType === 'image') {
+            $result = getimagesize($filepath);
+            if ($result) {
+                list($width, $height) = $result;
+                return [
+                    'width' => $width,
+                    'height' => $height,
+                    'duration' => null,
+                ];
+            }
+        }
+
         $getId3 = new GetId3();
         $data = $getId3->analyze($filepath);
         $data = $this->fixOggDuration($data);

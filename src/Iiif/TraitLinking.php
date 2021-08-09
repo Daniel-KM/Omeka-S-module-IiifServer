@@ -32,15 +32,14 @@ namespace IiifServer\Iiif;
 trait TraitLinking
 {
     /**
-     * @var \IiifServer\View\Helper\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
 
     public function initLinking(): void
     {
-        $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        $this->imageSize = $viewHelpers->get('imageSize');
-        $this->iiifImageUrl = $viewHelpers->get('iiifImageUrl');
+        $services = $this->resource->getServiceLocator();
+        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
     }
 
     /**

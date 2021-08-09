@@ -28,12 +28,17 @@ class ImageSize extends AbstractPlugin
     protected $adapterManager;
 
     /**
-     * @param string $basePath
-     * @param TempFileFactory $tempFileFactory
-     * @param AdapterManager $adapterManager
+     * The default output when the file is unavailable or unknown.
+     *
+     * @var array
      */
+    protected $emptySize = [
+        'width' => null,
+        'height' => null,
+    ];
+
     public function __construct(
-        $basePath,
+        ?string $basePath,
         TempFileFactory $tempFileFactory,
         AdapterManager $adapterManager
     ) {
@@ -51,136 +56,118 @@ class ImageSize extends AbstractPlugin
      *
      * @param MediaRepresentation|AssetRepresentation|Media|Asset|string $image
      * Can be a media, an asset, a url or a filepath.
-     * @param string $imageType
+     * @param string $type
+     * @param bool $force Get size from the file, not from the media data.
      * @return array Associative array of width and height of the image file as
      * integer. Values are empty (null or zero) when the size is undetermined.
      */
-    public function __invoke($image, $imageType = 'original'): array
+    public function __invoke($image, string $type = 'original', bool $force = false): array
     {
         if ($image instanceof MediaRepresentation) {
-            return $this->sizeMedia($image, $imageType);
+            return $this->sizeMedia($image, $type, $force);
         }
         if ($image instanceof AssetRepresentation) {
-            return $this->sizeAsset($image);
+            return $this->sizeAsset($image, $force);
         }
         if ($image instanceof Media) {
             $image = $this->adapterManager->get('media')->getRepresentation($image);
-            return $this->sizeMedia($image, $imageType);
+            return $this->sizeMedia($image, $type, $force);
         }
         if ($image instanceof Asset) {
             $image = $this->adapterManager->get('assets')->getRepresentation($image);
-            return $this->sizeAsset($image);
+            return $this->sizeAsset($image, $force);
         }
-        return $this->getWidthAndHeight($image);
+        return $this->getWidthAndHeight((string) $image);
     }
 
     /**
      * Get an array of the width and height of the image file from a media.
-     *
-     * @param MediaRepresentation $media
-     * @param string $imageType
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
      */
-    protected function sizeMedia(MediaRepresentation $media, $imageType = 'original'): array
+    protected function sizeMedia(MediaRepresentation $media, string $type, bool $force): array
     {
         // Check if this is an image.
-        if (strtok((string) $media->mediaType(), '/') !== 'image') {
-            return ['width' => null, 'height' => null];
+        $mainMediaType = substr((string) $media->mediaType(), 0, 5);
+        if ($mainMediaType !== 'image'
+            // A security check.
+            || strpos($type, '/..') !== false
+            || strpos($type, '../') !== false
+        ) {
+            return $this->emptySize;
         }
 
         // Check if size is already stored. The stored dimension may be null.
-        $mediaData = $media->mediaData();
-        if (is_array($mediaData)
-            && !empty($mediaData['dimensions'][$imageType])
-        ) {
-            return $mediaData['dimensions'][$imageType];
+        if (!$force) {
+            $mediaData = $media->mediaData();
+            if (is_array($mediaData)
+                && !empty($mediaData['dimensions'][$type])
+            ) {
+                return $mediaData['dimensions'][$type];
+            }
         }
 
         // In order to manage external storage, check if the file is local.
-        $storagePath = $imageType == 'original'
-            ? $this->getStoragePath($imageType, $media->filename())
-            : $this->getStoragePath($imageType, $media->storageId(), 'jpg');
-        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        if (file_exists($filepath) && is_readable($filepath)) {
-            return $this->getWidthAndHeightLocal($filepath);
+        if ($type === 'original') {
+            $storagePath = $this->getStoragePath($type, $media->filename());
+            $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+            return file_exists($filepath)
+                ? $this->getWidthAndHeightLocal($filepath)
+                : $this->getWidthAndHeightUrl($media->originalUrl());
         }
 
-        $filepath = $imageType == 'original'
-            ? $media->originalUrl()
-            : $media->thumbnailUrl($imageType);
-        return $this->getWidthAndHeightUrl($filepath);
+        $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
+        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+        return file_exists($filepath)
+            ? $this->getWidthAndHeightLocal($filepath)
+            : $this->getWidthAndHeightUrl($media->thumbnailUrl($type));
     }
 
     /**
      * Get an array of the width and height of the image file from an asset.
-     *
-     * @param AssetRepresentation $asset
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
      */
     protected function sizeAsset(AssetRepresentation $asset): array
     {
         // The storage adapter should be checked for external storage.
         $storagePath = $this->getStoragePath('asset', $asset->filename());
         $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        return file_exists($filepath) && is_readable($filepath)
+        return file_exists($filepath)
             ? $this->getWidthAndHeightLocal($filepath)
             : $this->getWidthAndHeightUrl($asset->assetUrl());
     }
 
     /**
      * Get a storage path.
-     *
-     * @param string $prefix The storage prefix
-     * @param string $name The file name, or basename if extension is passed
-     * @param null|string $extension The file extension
-     * @return string
      */
-    protected function getStoragePath($prefix, $name, $extension = ''): string
+    protected function getStoragePath(string $prefix, ?string $name, string $extension = ''): string
     {
         return sprintf('%s/%s%s', $prefix, $name, strlen($extension) ? '.' . $extension : '');
     }
 
     /**
      * Helper to get width and height of an image, local or remote.
-     *
-     * @param string $filepath This should be an image (no check here).
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
      */
-    protected function getWidthAndHeight($filepath): array
+    protected function getWidthAndHeight(string $filepath): array
     {
         // An internet path.
         if (strpos($filepath, 'https://') === 0 || strpos($filepath, 'http://') === 0) {
             return $this->getWidthAndHeightUrl($filepath);
         }
         // A normal path.
-        if (file_exists($filepath) && is_readable($filepath)) {
+        if (file_exists($filepath) && is_file($filepath) && is_readable($filepath) && filesize($filepath)) {
             return $this->getWidthAndHeightLocal($filepath);
         }
-        return [
-            'width' => null,
-            'height' => null,
-        ];
+        return $this->emptySize;
     }
 
     /**
      * Helper to get width and height of an image (path is already checked).
-     *
-     * @param string $filepath This should be an image (no check here).
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
      */
-    protected function getWidthAndHeightLocal($filepath): array
+    protected function getWidthAndHeightLocal(string $filepath): array
     {
         $result = getimagesize($filepath);
-        if ($result) {
-            list($width, $height) = $result;
-        } else {
-            $width = null;
-            $height = null;
+        if (!$result) {
+            return $this->emptySize;
         }
+        list($width, $height) = $result;
         return [
             'width' => $width,
             'height' => $height,
@@ -189,10 +176,6 @@ class ImageSize extends AbstractPlugin
 
     /**
      * Helper to get width and height of an image url.
-     *
-     * @param string $url This should be an image (no check here).
-     * @return array Associative array of width and height of the image file.
-     * Values are empty when the size is undetermined.
      */
     protected function getWidthAndHeightUrl(string $url): array
     {

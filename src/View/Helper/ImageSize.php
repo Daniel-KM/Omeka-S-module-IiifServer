@@ -25,20 +25,20 @@ class ImageSize extends AbstractHelper
     /**
      * Get an array of the width and height of the image file from a media.
      *
-     * @todo Store size in the data of the media. Or use numeric properties (with units).
+     * Unlike the controller plugin, the possibility to force extraction of
+     * dimensions in disabled, because it is useless in a view.
      *
      * @param \Omeka\Api\Representation\MediaRepresentation|\Omeka\Api\Representation\AssetRepresentation|string $image Can
      * be a media, an asset, an url or a filepath.
      * @param string $imageType
+     * @return array Associative array of width and height of the image file.
      * @throws RuntimeException
-     * @return array|null Associative array of width and height of the image
-     * file, else null.
      */
-    public function __invoke($image, $imageType = 'original')
+    public function __invoke($image, string $type = 'original'): array
     {
         $imageSize = $this->imageSizePlugin;
         try {
-            return $imageSize($image, $imageType);
+            return $imageSize($image, $type);
         } catch (RuntimeException $e) {
             throw new Exception\RuntimeException($e->getMessage());
         }

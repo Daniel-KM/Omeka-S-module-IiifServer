@@ -32,19 +32,14 @@ namespace IiifServer\Iiif;
 trait TraitMedia
 {
     /**
-     * @var \IiifServer\View\Helper\MediaDimension
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
     protected $mediaDimension;
 
     /**
-     * @var \IiifServer\View\Helper\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
-
-    /**
-     * @var \IiifServer\View\Helper\IiifImageUrl
-     */
-    protected $iiifImageUrl;
 
     /**
      * @var bool
@@ -98,10 +93,10 @@ trait TraitMedia
 
     protected function initMedia(): void
     {
-        $viewHelpers = $this->resource->getServiceLocator()->get('ViewHelperManager');
-        $this->mediaDimension = $viewHelpers->get('mediaDimension');
-        // It's quicker to use image size helper for images.
-        $this->imageSize = $viewHelpers->get('imageSize');
+        $services = $this->resource->getServiceLocator();
+        $controllerPlugins = $services->get('ControllerPluginManager');
+        $this->mediaDimension = $controllerPlugins->get('mediaDimension');
+        $this->imageSize = $controllerPlugins->get('imageSize');
     }
 
     public function isImage()
@@ -222,7 +217,7 @@ trait TraitMedia
     {
         if (!array_key_exists('media_dimension', $this->_storage)) {
             $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
-            /** @var ?\Omeka\Api\Representation\MediaRepresentation $media*/
+            /** @var ?\Omeka\Api\Representation\MediaRepresentation $media */
             $media = $this->resource->primaryMedia();
             if (!$media) {
                 return $this->_storage['media_dimension'];
@@ -231,7 +226,7 @@ trait TraitMedia
             $ingester = $media->ingester();
             switch ($ingester) {
                 case 'iiif':
-                    // Currently, Omeka manages only images, but doesn't check..
+                    // Currently, Omeka manages only images, but doesn't check.
                     $mediaData = $media->mediaData();
                     if (isset($mediaData['width'])) {
                         $this->_storage['media_dimension']['width'] = $mediaData['width'];
