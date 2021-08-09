@@ -6,7 +6,8 @@
     "minimum-stability": "beta",
     "prefer-stable": true,
     "require": {
-        "james-heinrich/getid3": "^2.0"
+        "james-heinrich/getid3": "^2.0",
+        "doctrine/inflector": "^2.0"
     },
     "require-dev": {
         "biblibre/omeka-s-test-helper": "dev-master"
