@@ -145,34 +145,6 @@ return [
                             ],
                         ],
                     ],
-                    // @deprecated Use route "iiif/set" below instead: "/iiif/set?id[]=xx".
-                    //
-                    // Special route for the dynamic collections, search or browse pages.
-                    // If the list contains only one id, the comma is required to avoid confusion
-                    // with a normal collection.
-                    // For compatibility with Omeka Classic requests, the id may be prefixed
-                    // by a letter "c", "i", "f", or "m" to distinct collections, items and files/media.
-                    // It is not required when the identifier is always unique for all of  resources.
-                    // The default letter is "i", so it is not required when all ids are items (the
-                    // most common case).
-                    // This route should be set before the "iiifserver/collection".
-                    'collection-list' => [
-                        'type' => \Laminas\Router\Http\Segment::class,
-                        'options' => [
-                            'route' => "[/:version]/collection/$prefix:id",
-                            'constraints' => [
-                                'version' => '2|3',
-                                'prefix' => $constraintPrefix,
-                                // 'id' => '(?:[cimf]?\-?\d+\,?)+',
-                                'id' => '[^/]+',
-                            ],
-                            'defaults' => [
-                                'version' => $version,
-                                'action' => 'list',
-                                'is_deprecated' => 'use /set',
-                            ],
-                        ],
-                    ],
 
                     // For collections, the spec doesn't specify a name for the manifest itself.
                     // Libraries use an empty name or "manifests", "manifest.json", "manifest",
@@ -185,8 +157,7 @@ return [
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
-                                // "," is not allowed in order to allow deprecated collection list.
-                                'id' => '[^,/]+',
+                                'id' => '[^/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
@@ -241,7 +212,7 @@ return [
                         ],
                     ],
                     // In 2.1, canvas id is media id and name is p + index.
-                    // In 3.0, canvas id is item id and name is media id.
+                    // In 3.0, canvas id is item id and name is media id, but configurable.
                     'canvas' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
@@ -276,69 +247,6 @@ return [
                                 'action' => 'list',
                             ],
                         ],
-                    ],
-                ],
-            ],
-
-            /* @deprecated Will be removed in Omeka version 3.0. */
-            // Keep some deprecated routes for compatibility with old modules UniversalViewer, Mirador and Diva.
-            'iiifserver_presentation_collection_list' => [
-                'type' => \Laminas\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/collection/:id',
-                    'constraints' => [
-                        'id' => '(?:[cim]?\-?\d+\,?)+',
-                    ],
-                    'defaults' => [
-                        '__API__' => true,
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'list',
-                    ],
-                ],
-            ],
-            'iiifserver_presentation_collection' => [
-                'type' => \Laminas\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/collection/:id',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__API__' => true,
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'collection',
-                    ],
-                ],
-            ],
-            'iiifserver_presentation_item' => [
-                'type' => \Laminas\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/:id/manifest',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__API__' => true,
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'manifest',
-                    ],
-                ],
-            ],
-            'iiifserver_presentation_item_redirect' => [
-                'type' => \Laminas\Router\Http\Segment::class,
-                'options' => [
-                    'route' => '/iiif/:id',
-                    'constraints' => [
-                        'id' => '\d+',
-                    ],
-                    'defaults' => [
-                        '__API__' => true,
-                        '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\PresentationController::class,
-                        'action' => 'manifest',
                     ],
                 ],
             ],
