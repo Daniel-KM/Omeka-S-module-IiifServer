@@ -91,12 +91,15 @@ return [
             'iiifCanvas' => View\Helper\IiifCanvas::class,
             'iiifCanvas2' => View\Helper\IiifCanvas2::class,
             'iiifCanvas3' => View\Helper\IiifCanvas3::class,
+            'iiifInfo' => View\Helper\IiifInfo::class,
             'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifManifestExternal' => View\Helper\IiifManifestExternal::class,
         ],
         'factories' => [
             'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,
             'iiifImageUrl' => Service\ViewHelper\IiifImageUrlFactory::class,
+            'iiifInfo2' => Service\ViewHelper\IiifInfo2Factory::class,
+            'iiifInfo3' => Service\ViewHelper\IiifInfo3Factory::class,
             'iiifManifest2' => Service\ViewHelper\IiifManifest2Factory::class,
             'iiifManifest3' => Service\ViewHelper\IiifManifest3Factory::class,
             'iiifTileInfo' => Service\ViewHelper\IiifTileInfoFactory::class,
@@ -122,9 +125,13 @@ return [
             Controller\NoopServerController::class => Controller\NoopServerController::class,
             Controller\PresentationController::class => Controller\PresentationController::class,
         ],
+        'factories' => [
+            Controller\MediaController::class => Service\Controller\MediaControllerFactory::class,
+        ],
     ],
     'controller_plugins' => [
         'invokables' => [
+            'iiifImageJsonLd' => Mvc\Controller\Plugin\IiifImageJsonLd::class,
             'iiifJsonLd' => Mvc\Controller\Plugin\IiifJsonLd::class,
             'rangeToArray' => Mvc\Controller\Plugin\RangeToArray::class,
         ],
@@ -402,12 +409,13 @@ return [
                     'route' => '/iiif',
                     'defaults' => [
                         '__NAMESPACE__' => 'IiifServer\Controller',
-                        'controller' => Controller\NoopServerController::class,
+                        'controller' => Controller\MediaController::class,
                         'action' => 'index',
                     ],
                 ],
                 'may_terminate' => false,
                 'child_routes' => [
+                    // Same as iiifserver/id and imageserver/id, but needed to create urls.
                     // A redirect to the info.json is required by the specification.
                     'id' => [
                         'type' => \Laminas\Router\Http\Segment::class,
@@ -424,14 +432,27 @@ return [
                             ],
                         ],
                     ],
-                    // This route should be set before mediaserver/media in
-                    // order to be processed by module ImageServer.
+                    // This route is a garbage collector that allows to return an error 400 or 501 to
+                    // invalid or not implemented requests, as required by specification.
+                    // This route should be set before the mediaserver/media in order to be
+                    // processed after it.
                     'media-bad' => [
-                        'type' => \Laminas\Router\Http\Literal::class,
+                        'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
-                            'route' => '/iiif-media-bad-fake',
+                            'route' => "[/:version]/$prefix:id:.:format",
+                            'constraints' => [
+                                'version' => '2|3',
+                                'prefix' => $constraintPrefix,
+                                'id' => '[^\/]+',
+                                'format' => '.+',
+                            ],
+                            'defaults' => [
+                                'version' => $version,
+                                'action' => 'bad',
+                            ],
                         ],
                     ],
+                    // Same as imageserver/info, but needed to create urls.
                     'info' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
@@ -457,7 +478,8 @@ return [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefixMedia,
                                 'id' => '[^\/]+',
-                                'format' => '.+',
+                                'format' => 'pdf|mp3|ogg|mp4|webm|ogv',
+                                // 'format' => '.+',
                             ],
                             'defaults' => [
                                 'version' => $versionMedia,
@@ -467,6 +489,12 @@ return [
                     ],
                 ],
             ],
+
+            // For IXIF, some json files should be available to describe media for context.
+            // This is not used currently: the Wellcome uris are kept because they are set
+            // for main purposes in ImageServer.
+            // @link https://gist.github.com/tomcrane/7f86ac08d3b009c8af7c
+
         ],
     ],
     'translator' => [

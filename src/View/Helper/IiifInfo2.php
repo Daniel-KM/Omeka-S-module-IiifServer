@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2017 Daniel Berthereau
+ * Copyright 2015-2021 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -28,7 +28,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\View\Helper;
+namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
@@ -51,6 +51,11 @@ class IiifInfo2 extends AbstractHelper
      */
     protected $basePath;
 
+    /**
+     * @var bool
+     */
+    protected $hasImageServer = false;
+
     public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
         $this->tempFileFactory = $tempFileFactory;
@@ -64,13 +69,15 @@ class IiifInfo2 extends AbstractHelper
      *
      * @link https://iiif.io/api/image/2.1
      *
-     * @param MediaRepresentation|null $media
      * @return Object|null
      */
     public function __invoke(MediaRepresentation $media)
     {
+        $view = $this->getView();
+        $helpers = $view->getHelperPluginManager();
+        $this->hasImageServer = $helpers->has('tileMediaInfo');
+
         if (strpos($media->mediaType(), 'image/') === 0) {
-            $view = $this->getView();
             $sizes = [];
             $availableTypes = ['medium', 'large', 'original'];
             foreach ($availableTypes as $imageType) {
@@ -83,12 +90,15 @@ class IiifInfo2 extends AbstractHelper
             $height = $imageSize['height'];
             $imageUrl = $this->view->iiifImageUrl($media, 'imageserver/id', '2');
 
+            // Check if Image Server is available.
             $tiles = [];
-            $tilingData = $view->tileMediaInfo($media);
-            if ($tilingData) {
-                $iiifTileInfo = $this->iiifTileInfo($tilingData);
-                if ($iiifTileInfo) {
-                    $tiles[] = $iiifTileInfo;
+            if ($this->hasImageServer) {
+                $tilingData = $view->tileMediaInfo($media);
+                if ($tilingData) {
+                    $iiifTileInfo = $this->iiifTileInfo($tilingData);
+                    if ($iiifTileInfo) {
+                        $tiles[] = $iiifTileInfo;
+                    }
                 }
             }
 
@@ -156,21 +166,19 @@ class IiifInfo2 extends AbstractHelper
         // Give possibility to customize the info.json.
         // TODO Manifest (info) should be a true object, with many sub-objects.
         $manifest = &$info;
+        $format = 'info';
         $resource = $media;
         $type = 'file';
-        $params = compact('manifest', 'resource', 'type');
-        $params = $this->view->plugin('trigger')->__invoke('imageserver.manifest', $params, true);
+        $params = compact('manifest', 'info', 'resource', 'type');
+        $params = $helpers->get('trigger')->__invoke('iiifserver.manifest', $params, true);
         $info = $params['manifest'];
         return (object) $info;
     }
 
     /**
      * Create the data for a IIIF tile object.
-     *
-     * @param array $tileInfo
-     * @return array|null
      */
-    protected function iiifTileInfo($tileInfo)
+    protected function iiifTileInfo(array $tileInfo): ?array
     {
         $tile = [];
 
@@ -184,7 +192,7 @@ class IiifInfo2 extends AbstractHelper
             $factor = $factor * 2;
         }
         if (count($scaleFactors) <= 1) {
-            return;
+            return null;
         }
 
         $tile['width'] = $tileSize;
@@ -194,29 +202,27 @@ class IiifInfo2 extends AbstractHelper
 
     /**
      * @see \IiifServer\Iiif\TraitRights
-     * @param MediaRepresentation $resource
-     * @return string|null
      */
-    protected function rightsResource(MediaRepresentation $resource = null)
+    protected function rightsResource(MediaRepresentation $resource = null): ?string
     {
         $helper = $this->getView()->getHelperPluginManager()->get('setting');
         $url = null;
         $orUrl = false;
         $orText = false;
 
-        $param = $helper('imageserver_manifest_rights');
+        $param = $helper($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
                 // if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
                 //     return null;
                 // }
-                $url = $helper('imageserver_manifest_rights_text');
+                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iifserver_manifest_rights_text');
                 break;
             case 'url':
-                $url = $helper('imageserver_manifest_rights_url');
+                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
                 break;
             case 'property_or_text':
-                $orText = !empty($helper('imageserver_manifest_rights_text'));
+                $orText = !empty($helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text'));
                 // no break.
             case 'property_or_url':
                 if ($param === 'property_or_url') {
@@ -225,7 +231,7 @@ class IiifInfo2 extends AbstractHelper
                 // no break.
             case 'property':
                 if ($resource) {
-                    $property = $helper('imageserver_manifest_rights_property');
+                    $property = $helper($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
                     $url = (string) $resource->value($property);
                 }
                 break;
@@ -241,9 +247,9 @@ class IiifInfo2 extends AbstractHelper
 
         if (!$url) {
             if ($orUrl) {
-                $url = $helper('imageserver_manifest_rights_url');
+                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
             } elseif ($orText) {
-                $url = $helper('imageserver_manifest_rights_text');
+                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text');
             } else {
                 return null;
             }

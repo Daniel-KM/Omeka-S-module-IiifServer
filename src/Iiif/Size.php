@@ -27,9 +27,8 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\Iiif;
+namespace IiifServer\Iiif;
 
-use IiifServer\Iiif\AbstractType;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**

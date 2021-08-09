@@ -59,6 +59,7 @@ class Module extends AbstractModule
             ->allow(
                 null,
                 [
+                    \IiifServer\Controller\MediaController::class,
                     \IiifServer\Controller\NoopServerController::class,
                     \IiifServer\Controller\PresentationController::class,
                 ]

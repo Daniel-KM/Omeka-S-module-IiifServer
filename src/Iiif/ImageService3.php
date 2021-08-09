@@ -27,11 +27,8 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\Iiif;
+namespace IiifServer\Iiif;
 
-use IiifServer\Iiif\AbstractResourceType;
-use IiifServer\Iiif\TraitRights;
-use IiifServer\Iiif\ValueLanguage;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**
@@ -84,7 +81,12 @@ class ImageService3 extends AbstractResourceType
     ];
 
     /**
-     * @var \ImageServer\Mvc\Controller\Plugin\TileMediaInfo
+     * @var bool
+     */
+    protected $hasImageServer;
+
+    /**
+     * @var ?\ImageServer\Mvc\Controller\Plugin\TileMediaInfo
      */
     protected $tileMediaInfo;
 
@@ -98,7 +100,8 @@ class ImageService3 extends AbstractResourceType
         parent::__construct($resource, $options);
 
         $plugins = $this->resource->getServiceLocator()->get('ControllerPluginManager');
-        $this->tileMediaInfo = $plugins->get('tileMediaInfo');
+        $this->hasImageServer = $plugins->has('tileMediaInfo');
+        $this->tileMediaInfo = $this->hasImageServer ? $plugins->get('tileMediaInfo') : null;
 
         // TODO Use subclass to manage image or media. Currently, only image.
         $this->initImage();
@@ -179,7 +182,7 @@ class ImageService3 extends AbstractResourceType
 
     public function tiles(): ?array
     {
-        if (!$this->isImage()) {
+        if (!$this->hasImageServer || !$this->isImage()) {
             return null;
         }
 
@@ -188,7 +191,7 @@ class ImageService3 extends AbstractResourceType
         // TODO Use a standard json-serializable TileInfo.
         $tilingData = $this->tileMediaInfo->__invoke($this->resource);
         if ($tilingData) {
-            $iiifTileInfo = new Tile($this->resource, ['tilingData' => $tilingData]);
+            $iiifTileInfo = new \ImageServer\Iiif\Tile($this->resource, ['tilingData' => $tilingData]);
             if ($iiifTileInfo->hasTilingInfo()) {
                 $tiles[] = $iiifTileInfo;
             }
@@ -214,16 +217,16 @@ class ImageService3 extends AbstractResourceType
         $url = null;
         $orUrl = false;
 
-        $param = $this->setting->__invoke('imageserver_info_rights');
+        $param = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'url':
-                $url = $this->setting->__invoke('imageserver_info_rights_url');
+                $url = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
                 break;
             case 'property_or_url':
                 $orUrl = true;
                 // no break.
             case 'property':
-                $property = $this->setting->__invoke('imageserver_info_rights_property');
+                $property = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
                 $url = (string) $this->resource->value($property);
                 break;
             case 'item_or_url':
@@ -244,7 +247,7 @@ class ImageService3 extends AbstractResourceType
         }
 
         if (!$url && $orUrl) {
-            $url = $this->setting->__invoke('imageserver_info_rights_url');
+            $url = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
         }
 
         if ($url) {

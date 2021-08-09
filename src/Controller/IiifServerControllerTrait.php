@@ -33,6 +33,7 @@ use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Omeka\Api\Exception\BadRequestException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Stdlib\Message;
 
 trait IiifServerControllerTrait
@@ -131,10 +132,49 @@ trait IiifServerControllerTrait
     }
 
     /**
+     * Send "info.json" for the current file.
+     *
+     * The info is managed by the ImageControler because it indicates
+     * capabilities of the Image server for the request of a file.
+     */
+    public function infoAction()
+    {
+        $resource = $this->fetchResource('media');
+        if (!$resource) {
+            return $this->jsonError(new Message(
+                'Media "%s" not found.', // @translate
+                $this->params('id')
+            ), \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $this->requestedVersionMedia();
+
+        /** @var \IiifServer\View\Helper\IiifInfo $iiifInfo */
+        $iiifInfo = $this->viewHelpers()->get('iiifInfo');
+        try {
+            $info = $iiifInfo($resource, $this->requestedApiVersion);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+        }
+
+        return $this->iiifImageJsonLd($info, $this->requestedApiVersion);
+    }
+
+    protected function isImageResource(MediaRepresentation $media): bool
+    {
+        return substr((string) $media->mediaType(), 0, 6) === 'image/';
+    }
+
+    /**
      * Similar to \IiifServer\Controller\PresentationController::fetchResource().
      */
     protected function fetchResource(string $resourceType = 'resources'): ?AbstractResourceEntityRepresentation
     {
+        $resource = $this->params()->fromRoute('resource');
+        if ($resource) {
+            return $resource;
+        }
+
         $id = $this->params('id');
 
         // We don't know yet if it is a resource or a media.

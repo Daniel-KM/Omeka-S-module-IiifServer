@@ -27,9 +27,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\Iiif;
-
-use IiifServer\Iiif\TraitThumbnail;
+namespace IiifServer\Iiif;
 
 trait TraitImage
 {

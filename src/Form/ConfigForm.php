@@ -567,7 +567,7 @@ class ConfigForm extends Form
                 'name' => 'fieldset_media_api',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
-                    'label' => 'Image server', // @translate
+                    'label' => 'External image server', // @translate
                 ],
             ])
 

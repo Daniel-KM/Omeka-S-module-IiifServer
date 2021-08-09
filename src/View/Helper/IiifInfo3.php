@@ -27,9 +27,9 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\View\Helper;
+namespace IiifServer\View\Helper;
 
-use ImageServer\Iiif\ImageService3;
+use IiifServer\Iiif\ImageService3;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
@@ -62,11 +62,9 @@ class IiifInfo3 extends AbstractHelper
      *
      * @link https://iiif.io/api/image/3.0
      *
-     * @param MediaRepresentation|null $media
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return ImageService3
      */
-    public function __invoke(MediaRepresentation $media)
+    public function __invoke(MediaRepresentation $media): ImageService3
     {
         $info = new ImageService3($media, ['version' => '3']);
 

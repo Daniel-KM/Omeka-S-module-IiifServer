@@ -28,7 +28,7 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace ImageServer\View\Helper;
+namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
@@ -48,7 +48,7 @@ class IiifInfo extends AbstractHelper
      * @param MediaRepresentation|null $media
      * @param string $version
      * @throws \IiifServer\Iiif\Exception\RuntimeException
-     * @return \ImageServer\View\Helper\IiifInfo3||\ImageServer\View\Helper\IiifInfo2|null
+     * @return \IiifServer\View\Helper\IiifInfo3||\IiifServer\View\Helper\IiifInfo2|null
      */
     public function __invoke(MediaRepresentation $media, $version = null)
     {

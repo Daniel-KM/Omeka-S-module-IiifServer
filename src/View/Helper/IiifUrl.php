@@ -130,10 +130,11 @@ class IiifUrl extends AbstractHelper
             } else {
                 // Generally, the resource is already loaded by doctrine.
                 try {
-                    $resourceName = $this->view->api()->read('resources', ['id' => $id])->getContent()->resourceName();
+                    $resource = $this->view->api()->read('resources', ['id' => $id])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                     return '';
                 }
+                $resourceName = $resource->resourceName();
             }
         } else {
             $id = $resource->id();

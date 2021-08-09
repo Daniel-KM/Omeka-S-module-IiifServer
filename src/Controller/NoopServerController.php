@@ -50,6 +50,13 @@ class NoopServerController extends AbstractActionController
                 $this->params('id')
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
+
+        if (!$this->isImageResource($resource)) {
+            $params = $this->params()->fromRoute();
+            $params['resource'] = $resource;
+            return $this->forward()->dispatch(\IiifServer\Controller\MediaController::class, $params);
+        }
+
         return $this->jsonError(new Message(
             'The media server is unavailable for resource "%s".', // @translate
             $this->params('id')

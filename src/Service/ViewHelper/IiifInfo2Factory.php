@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
-namespace ImageServer\Service\ViewHelper;
 
-use ImageServer\View\Helper\IiifInfo2;
+namespace IiifServer\Service\ViewHelper;
+
+use IiifServer\View\Helper\IiifInfo2;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
