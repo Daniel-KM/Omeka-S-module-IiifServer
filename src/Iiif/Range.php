@@ -29,6 +29,8 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+
 /**
  *@link https://iiif.io/api/presentation/3.0/#54-range
  */
@@ -101,4 +103,39 @@ class Range extends AbstractResourceType
         'together' => self::NOT_ALLOWED,
         'unordered' => self::OPTIONAL,
     ];
+
+    /**
+     * The option "index" or "target_name" is required.
+     */
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    {
+        parent::__construct($resource, $options);
+        $this->options['target_type'] = 'range';
+        if (empty($this->options['target_name'])) {
+            $name = $this->options['index'] ?? '0';
+            $this->options['target_name'] = (string) (int) $name === (string) $name
+                ? 'p' . $name
+                : $name;
+        }
+    }
+
+    public function id(): ?string
+    {
+        return $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+            'type' => 'range',
+            'name' => $this->options['target_name'],
+        ]);
+    }
+
+    public function label(): ?ValueLanguage
+    {
+        return isset($this->options['label'])
+            ? new ValueLanguage($this->options['label'])
+            : null;
+    }
+
+    public function items(): array
+    {
+        return $this->options['items'] ?? [];
+    }
 }

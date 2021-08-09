@@ -174,6 +174,9 @@ class Manifest extends AbstractResourceType
         return $items;
     }
 
+    /**
+     * @return Range[]
+     */
     public function structures(): array
     {
         $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
@@ -187,9 +190,26 @@ class Manifest extends AbstractResourceType
             return [];
         }
 
+        // TODO A structure requires a media for now to build reference to canvas..
+        if (!$this->resource->primaryMedia()) {
+            return [];
+        }
+
         $structures = [];
-        foreach ($stValues as $index => $stValue) {
-            $structure = $this->extractStructure((string) $stValue, ++$index);
+        foreach ($stValues as $index => $literalStructure) {
+            $structure = @json_decode((string) $literalStructure, true);
+            if ($structure && is_array($structure)) {
+                $firstRange = reset($structure);
+                if (!is_array($firstRange)) {
+                    continue;
+                }
+                $structure = isset($firstRange['@type'])
+                    ? $this->convertToStructure3($structure)
+                    // : $this->checkStructure($structure);
+                    : $structure;
+            } else {
+                $structure = $this->extractStructure((string) $literalStructure, ++$index);
+            }
             if (!empty($structure)) {
                 $structures[] = $structure;
             }
@@ -204,31 +224,12 @@ class Manifest extends AbstractResourceType
      * @see https://iiif.io/api/presentation/3.0/#54-range
      * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
      */
-    protected function extractStructure(string $literalStructure, int $indexStructure): array
+    protected function extractStructure(string $literalStructure, int $indexStructure): ?Range
     {
-        $structure = @json_decode($literalStructure, true);
-        if ($structure && is_array($structure)) {
-            $firstRange = reset($structure);
-            if (!is_array($firstRange)) {
-                return [];
-            }
-            // TODO Return an array Range in order to check the json.
-            return isset($firstRange['@type'])
-                ? $this->convertToStructure3($structure)
-                // Ideally, the json should be checked.
-                : $structure;
-        }
-
-        // TODO Improve process to use Range (conversion via an array recursive walk and by-reference variables).
-
         $structure = [];
         $ranges = [];
         $rangesChildren = [];
         $canvases = [];
-
-        $isInteger = function ($value): bool {
-            return (string) (int) $value === (string) $value;
-        };
 
         // Convert the literal value and prepare all the ranges.
 
@@ -248,25 +249,17 @@ class Manifest extends AbstractResourceType
                 continue;
             }
 
-            $rangeId = $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
-                'type' => 'range',
-                'name' => $isInteger($name) ? 'r' . $name : $name,
-            ]);
-
             // A line is always a range to display.
-            $ranges[$name] = [
-                'id' => $rangeId,
-                'type' => 'Range',
-                'label' => new ValueLanguage($label),
-                'items' => [],
-            ];
+            $ranges[$name] = $label;
             $rangesChildren[$name] = $children;
         }
 
         // If the values wasn't a formatted structure, there is no indexes.
         if (!count($ranges)) {
-            return [];
+            return null;
         }
+
+        // TODO For canvases, the primary media should not be used, only the right media, even if it is useless for a reference.
 
         // Prepare the list of canvases. This second step is needed because the
         // list of ranges should be complete to determine if an index is a
@@ -286,17 +279,15 @@ class Manifest extends AbstractResourceType
                     continue;
                 }
                 // This is not a full Canvas, just a reference, so skip label.
-                $canvases[$itemName] = [
-                    'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
-                        'type' => 'canvas',
-                        'name' => $isInteger($cleanItemName) ? 'p' . $cleanItemName : $cleanItemName,
-                    ]),
-                    'type' => 'Canvas',
-                ];
+                $canvases[$itemName] = new ReferencedCanvas($this->resource->primaryMedia(), [
+                    'index' => $cleanItemName,
+                ]);
             }
         }
 
-        $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants) use ($ranges, $canvases, $rangesChildren, $isInteger, &$buildStructure): void {
+        // TODO Improve process to avoid recursive process (one loop and by-reference variables).
+
+        $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants) use ($ranges, $canvases, $rangesChildren, &$buildStructure): void {
             foreach ($itemNames as $itemName) {
                 if (isset($canvases[$itemName])) {
                     $parentRange['items'][] = $canvases[$itemName];
@@ -306,20 +297,21 @@ class Manifest extends AbstractResourceType
                 // The index is a range.
                 // Check if the item is in ascendants to avoid an infinite loop.
                 if (in_array($itemName, $ascendants)) {
-                    $canvases[$itemName] = [
-                        'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
-                            'type' => 'canvas',
-                            'name' => $isInteger($itemName) ? 'p' . $itemName : $itemName,
-                        ]),
-                        'type' => 'Canvas',
-                    ];
+                    $canvases[$itemName] = new ReferencedCanvas($this->resource->primaryMedia(), [
+                        'index' => $itemName,
+                    ]);
                     $parentRange['items'][] = $canvases[$itemName];
                     continue;
                 }
                 $ascendants[] = $itemName;
-                $range = $ranges[$itemName];
+                $range = ['items' => []];
                 $buildStructure($rangesChildren[$itemName], $range, $ascendants);
-                $parentRange['items'][] = $range;
+                $parentRange['items'][] = new Range($this->resource, [
+                    'index' => $itemName,
+                    'label' => $ranges[$itemName],
+                    'items' => $range['items'],
+                    'skip' => ['@context' => true],
+                ]);
                 array_pop($ascendants);
             }
         };
@@ -329,26 +321,29 @@ class Manifest extends AbstractResourceType
         $allIndexes = array_fill_keys(array_merge(...array_values($rangesChildren)), true);
         $roots = array_keys(array_diff_key($ranges, $allIndexes));
         if (count($roots) === 1) {
-            $structure = $ranges[reset($roots)];
             $rangesToBuild = $roots;
         } else {
-            $structure = [
-                'id' => $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
-                    'type' => 'range',
-                    'name' => 'rstructure' . $indexStructure,
-                ]),
-                'type' => 'Range',
-                'label' => new ValueLanguage('Content'),
-                'items' => [],
-            ];
             $rangesToBuild = count($roots)
                 ? $roots
                 // No loop means an infinite loop, that is managed directly.
                 : array_keys($ranges);
         }
 
+        $structure = ['items' => []];
         $ascendants = [];
         $buildStructure($rangesToBuild, $structure, $ascendants);
+
+        // TODO Modify the process to create the root directly in buildStructure().
+        if (count($roots) === 1) {
+            $structure = reset($structure['items']);
+        } else {
+            $structure = new Range($this->resource, [
+                'index' => 'rstructure' . $indexStructure,
+                'label' => 'Content',
+                'items' => $structure['items'],
+                'skip' => ['@context' => true],
+            ]);
+        }
 
         return $structure;
     }
@@ -541,10 +536,18 @@ class Manifest extends AbstractResourceType
     }
 
     /**
+     * @todo Check a json structure for iiif v3.
+     */
+    protected function checkStructure(array $structure): ?Range
+    {
+        return null;
+    }
+
+    /**
      * @todo Convert a v2 structure into a v3 structure.
      */
-    protected function convertToStructure3(array $structure): array
+    protected function convertToStructure3(array $structure): ?Range
     {
-        return [];
+        return null;
     }
 }

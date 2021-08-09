@@ -64,7 +64,10 @@ class Service extends AbstractType
      */
     protected $options;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource = null, array $options = [])
+    /**
+     * @todo The resource is useless, but kept for Iiif Search.
+     */
+    public function __construct(?AbstractResourceEntityRepresentation $resource = null, array $options = [])
     {
         if (isset($options['@id'])) {
             $options['id'] = $options['@id'];

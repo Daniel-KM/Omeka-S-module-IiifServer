@@ -160,7 +160,7 @@ abstract class AbstractResourceType extends AbstractType
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         $this->resource = $resource;
-        $this->options = $options;
+        $this->options = $options ?? [];
         $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
         $this->setting = $viewHelpers->get('setting');
         $this->urlHelper = $viewHelpers->get('url');
@@ -171,7 +171,9 @@ abstract class AbstractResourceType extends AbstractType
 
     public function context(): ?string
     {
-        return 'http://iiif.io/api/presentation/3/context.json';
+        return empty($this->options['skip']['@context'])
+            ? 'http://iiif.io/api/presentation/3/context.json'
+            : null;
     }
 
     public function id(): ?string
