@@ -116,25 +116,32 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         }
     }
 
-    /**
-     * @return bool
-     */
-    public function checkAllResourcesToInstall(): bool
+    public function getInstallResources(): ?InstallResources
     {
         if (!class_exists(\Generic\InstallResources::class)) {
-            if (file_exists(dirname(__DIR__, 3) . '/Generic/InstallResources.php')) {
-                require_once dirname(__DIR__, 3) . '/Generic/InstallResources.php';
-            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
-                require_once __DIR__ . '/InstallResources.php';
+            // Use the module file first, since it must be present with the
+            // right version, even if AbstractModule is older in another module.
+            if (file_exists($filepath = OMEKA_PATH . '/modules/' . static::NAMESPACE . '/src/Generic/InstallResources.php')) {
+                require_once $filepath;
+            } elseif (file_exists($filepath = dirname(__DIR__, 3) . '/Generic/InstallResources.php')) {
+                require_once $filepath;
+            } elseif (file_exists($filepath = __DIR__ . '/InstallResources.php')) {
+                require_once $filepath;
             } else {
-                // Nothing to install.
-                return true;
+                return null;
             }
         }
-
         $services = $this->getServiceLocator();
-        $installResources = new \Generic\InstallResources($services);
-        return $installResources->checkAllResources(static::NAMESPACE);
+        return new \Generic\InstallResources($services);
+    }
+
+    public function checkAllResourcesToInstall(): bool
+    {
+        $installResources = $this->getInstallResources();
+        return $installResources
+            ? $installResources->checkAllResources(static::NAMESPACE)
+            // Nothing to install.
+            : true;
     }
 
     /**
@@ -142,19 +149,11 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      */
     public function installAllResources(): AbstractModule
     {
-        if (!class_exists(\Generic\InstallResources::class)) {
-            if (file_exists(dirname(__DIR__, 3) . '/Generic/InstallResources.php')) {
-                require_once dirname(__DIR__, 3) . '/Generic/InstallResources.php';
-            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
-                require_once __DIR__ . '/InstallResources.php';
-            } else {
-                // Nothing to install.
-                return $this;
-            }
+        $installResources = $this->getInstallResources();
+        if (!$installResources) {
+            // Nothing to install.
+            return $this;
         }
-
-        $services = $this->getServiceLocator();
-        $installResources = new \Generic\InstallResources($services);
         $installResources->createAllResources(static::NAMESPACE);
         return $this;
     }
@@ -563,7 +562,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $stmt = $connection->executeQuery($sql, ['target_id' => $id]);
         } else {
             $sql = sprintf('SELECT id, value FROM %s', $settings->getTableName());
-            $stmt = $connection->executeQuery($sql);
+            $stmt = $connection->query($sql);
         }
 
         $currentSettings = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
@@ -639,6 +638,25 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     {
         return empty($this->dependencies)
             || $this->areModulesActive($this->dependencies);
+    }
+
+    /**
+     * Check the version of a module.
+     */
+    protected function isModuleVersionAtLeast(string $module, string $version): bool
+    {
+        $services = $this->getServiceLocator();
+        /** @var \Omeka\Module\Manager $moduleManager */
+        $moduleManager = $services->get('Omeka\ModuleManager');
+        $module = $moduleManager->getModule($module);
+        if (!$module) {
+            return false;
+        }
+
+        $moduleVersion = $module->getIni('version');
+        return $moduleVersion
+            ? version_compare($moduleVersion, $version, '>=')
+            : false;
     }
 
     /**
