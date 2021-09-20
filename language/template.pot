@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-15 00:00+0000\n"
+"POT-Creation-Date: 2021-09-20 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,69 +23,24 @@ msgid ""
 "views)."
 msgstr ""
 
-#: Module.php:76
+#: Module.php:78
 msgid ""
 "The module creates manifests with the properties from each resource (item "
 "set, item and media)."
 msgstr ""
 
-#: Module.php:77
+#: Module.php:79
 msgid "The properties below are used when some metadata are missing."
 msgstr ""
 
-#: Module.php:78
+#: Module.php:80
 msgid "In all cases, empty properties are not set."
 msgstr ""
 
-#: Module.php:79
+#: Module.php:81
 msgid ""
 "Futhermore, the event \"iiifserver.manifest\" is available to change any "
 "data."
-msgstr ""
-
-#: src/Form/ConfigForm.php:72
-msgid ""
-"If any, the first metadata of the record will be added in all manifests and "
-"viewers for main description."
-msgstr ""
-
-#: src/Form/ConfigForm.php:73
-msgid "It’s recommended to use \"Dublin Core:Bibliographic Citation\"."
-msgstr ""
-
-#: src/Form/ConfigForm.php:107
-msgid ""
-"If any, and if there is no metadata for the property above, this text will "
-"be added in all manifests and viewers."
-msgstr ""
-
-#: src/Form/ConfigForm.php:108 src/Form/ConfigForm.php:246
-#: src/Form/ConfigForm.php:282
-msgid "It will be used as pop up in the Universal Viewer too, if enabled."
-msgstr ""
-
-#: src/Form/ConfigForm.php:245
-msgid ""
-"If any, and if there is no metadata for the property above, this value will "
-"be added in all manifests."
-msgstr ""
-
-#: src/Form/ConfigForm.php:281
-msgid ""
-"If any, and if there is no metadata for the property above, these values "
-"will be added in all manifests and canvases."
-msgstr ""
-
-#: src/Form/ConfigForm.php:535
-msgid ""
-"When a proxy or a firewall is used, or when the config is specific, it may "
-"be needed to change the base url."
-msgstr ""
-
-#: src/Form/ConfigForm.php:536
-msgid ""
-"For example, when the server is secured, the \"http:\" urls may be replaced "
-"by \"https:\"."
 msgstr ""
 
 #: src/Generic/AbstractModule.php:66
@@ -99,10 +54,10 @@ msgid "This module requires modules \"%s\"."
 msgstr ""
 
 #: src/Generic/AbstractModule.php:80
-msgid "This module has resources that connot be installed."
+msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:707
+#: src/Generic/AbstractModule.php:725
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -113,19 +68,19 @@ msgstr ""
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:321
+#: src/View/Helper/IiifManifest2.php:339
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:330
+#: src/View/Helper/IiifManifest2.php:348
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:920
+#: src/View/Helper/IiifManifest2.php:960
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1142
+#: src/View/Helper/IiifManifest2.php:1182
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -142,389 +97,604 @@ msgid ""
 "two modules."
 msgstr ""
 
-#: src/Form/ConfigForm.php:30
+#: data/scripts/upgrade.php:198
+msgid ""
+"The module IIIF Server is now totally independant from the module Image "
+"Server and any other external image server can be used."
+msgstr ""
+
+#: data/scripts/upgrade.php:202
+msgid ""
+"Check the config of the image server, if any, in the config of this module."
+msgstr ""
+
+#: data/scripts/upgrade.php:206
+#, php-format
+msgid ""
+"The module IIIF Server supports creation of structures through a table-of-"
+"contents-like value: see %sreadme%s."
+msgstr ""
+
+#: src/Form/ConfigForm.php:28
 msgid "Default IIIF api version of the manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:31
+#: src/Form/ConfigForm.php:29
 msgid ""
 "Set the version of the manifest to provide. Note that the version is "
 "automatically selected when a request specifies it in headers, or via the "
 "specific url (iiif/2/ or iiif/3/)."
 msgstr ""
 
-#: src/Form/ConfigForm.php:33
+#: src/Form/ConfigForm.php:31
 msgid "2"
 msgstr ""
 
-#: src/Form/ConfigForm.php:34
+#: src/Form/ConfigForm.php:32
 msgid "3"
 msgstr ""
 
-#: src/Form/ConfigForm.php:46
+#: src/Form/ConfigForm.php:44
 msgid "Property supplying an external manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:47
+#: src/Form/ConfigForm.php:45
 msgid ""
 "External or static manifests can be more customized and may be quicker to be "
 "loaded. Usually, the property is \"dcterms:hasFormat\" or \"dcterms:"
 "isFormatOf\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:55 src/Form/ConfigForm.php:81
-#: src/Form/ConfigForm.php:98 src/Form/ConfigForm.php:146
-#: src/Form/ConfigForm.php:205 src/Form/ConfigForm.php:220
-#: src/Form/ConfigForm.php:236 src/Form/ConfigForm.php:272
-#: src/Form/ConfigForm.php:344
+#: src/Form/ConfigForm.php:53 src/Form/ConfigForm.php:78
+#: src/Form/ConfigForm.php:95 src/Form/ConfigForm.php:142
+#: src/Form/ConfigForm.php:201 src/Form/ConfigForm.php:216
+#: src/Form/ConfigForm.php:232 src/Form/ConfigForm.php:267
+#: src/Form/ConfigForm.php:338 src/Form/ConfigForm.php:483
 msgid "Select a property…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:63
+#: src/Form/ConfigForm.php:61
 msgid "Content of the manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:71
+#: src/Form/ConfigForm.php:69
 msgid "Property to use for Description"
 msgstr ""
 
-#: src/Form/ConfigForm.php:89
+#: src/Form/ConfigForm.php:70
+msgid ""
+"If any, the first metadata of the record will be added in all manifests and "
+"viewers for main description. It’s recommended to use \"Dublin Core:"
+"Bibliographic Citation\"."
+msgstr ""
+
+#: src/Form/ConfigForm.php:86
 msgid "Property to use for Attribution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:90
+#: src/Form/ConfigForm.php:87
 msgid ""
 "If any, the first metadata of the resource will be added in all manifests "
 "and viewers to indicate the attribution."
 msgstr ""
 
-#: src/Form/ConfigForm.php:106
+#: src/Form/ConfigForm.php:103
 msgid "Default attribution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:119
+#: src/Form/ConfigForm.php:104
+msgid ""
+"If any, and if there is no metadata for the property above, this text will "
+"be added in all manifests and viewers. It will be used as pop up in the "
+"Universal Viewer too, if enabled."
+msgstr ""
+
+#: src/Form/ConfigForm.php:115
 msgid "Rights (license)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:121
+#: src/Form/ConfigForm.php:117
 msgid "No mention"
 msgstr ""
 
-#: src/Form/ConfigForm.php:122
+#: src/Form/ConfigForm.php:118
 msgid "Specified text below (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:123
+#: src/Form/ConfigForm.php:119
 msgid "Specified license below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:124 src/Form/ConfigForm.php:183
-#: src/Form/ConfigForm.php:321
+#: src/Form/ConfigForm.php:120 src/Form/ConfigForm.php:179
+#: src/Form/ConfigForm.php:315
 msgid "Specified property below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:125
+#: src/Form/ConfigForm.php:121
 msgid "Property if any, else specified license text (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:126
+#: src/Form/ConfigForm.php:122
 msgid "Property if any, else specified license"
 msgstr ""
 
-#: src/Form/ConfigForm.php:139
+#: src/Form/ConfigForm.php:135
 msgid "Property to use for rights"
 msgstr ""
 
-#: src/Form/ConfigForm.php:154
+#: src/Form/ConfigForm.php:150
 msgid "Url of the license"
 msgstr ""
 
-#: src/Form/ConfigForm.php:155
+#: src/Form/ConfigForm.php:151
 msgid ""
 "The license of the item must be an url from https://creativecommons.org or "
 "https://rightsstatements.org."
 msgstr ""
 
-#: src/Form/ConfigForm.php:165
+#: src/Form/ConfigForm.php:161
 msgid "Default license text (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:176
+#: src/Form/ConfigForm.php:172
 msgid "Resource link"
 msgstr ""
 
-#: src/Form/ConfigForm.php:177 src/Form/ConfigForm.php:198
+#: src/Form/ConfigForm.php:173 src/Form/ConfigForm.php:194
 msgid ""
 "In some cases, the resources are external and the link to it may be specific."
 msgstr ""
 
-#: src/Form/ConfigForm.php:180
+#: src/Form/ConfigForm.php:176
 msgid "No link"
 msgstr ""
 
-#: src/Form/ConfigForm.php:182
+#: src/Form/ConfigForm.php:178
 msgid "Resource page"
 msgstr ""
 
-#: src/Form/ConfigForm.php:184
+#: src/Form/ConfigForm.php:180
 msgid "Property if any, else resource page"
 msgstr ""
 
-#: src/Form/ConfigForm.php:185
+#: src/Form/ConfigForm.php:181
 msgid "Property if any, and resource page"
 msgstr ""
 
-#: src/Form/ConfigForm.php:197
+#: src/Form/ConfigForm.php:193
 msgid "Property for resource link"
 msgstr ""
 
-#: src/Form/ConfigForm.php:213
+#: src/Form/ConfigForm.php:209
 msgid "Property for machine-readable \"See also\" links"
 msgstr ""
 
-#: src/Form/ConfigForm.php:228
+#: src/Form/ConfigForm.php:224
 msgid "Property to use for viewing direction"
 msgstr ""
 
-#: src/Form/ConfigForm.php:229
+#: src/Form/ConfigForm.php:225
 msgid ""
 "If any, the first value will be added to indicate the viewing direction of "
 "the manifest."
 msgstr ""
 
-#: src/Form/ConfigForm.php:244
+#: src/Form/ConfigForm.php:240
 msgid "Default viewing direction"
 msgstr ""
 
-#: src/Form/ConfigForm.php:249
+#: src/Form/ConfigForm.php:241
+msgid ""
+"If any, and if there is no metadata for the property above, this value will "
+"be added in all manifests."
+msgstr ""
+
+#: src/Form/ConfigForm.php:244
 msgid "Left to right"
 msgstr ""
 
-#: src/Form/ConfigForm.php:250
+#: src/Form/ConfigForm.php:245
 msgid "Right to left"
 msgstr ""
 
-#: src/Form/ConfigForm.php:251
+#: src/Form/ConfigForm.php:246
 msgid "Top to bottom"
 msgstr ""
 
-#: src/Form/ConfigForm.php:252
+#: src/Form/ConfigForm.php:247
 msgid "Bottom to top"
 msgstr ""
 
-#: src/Form/ConfigForm.php:264
+#: src/Form/ConfigForm.php:259
 msgid "Property to use for behavior (viewing hint)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:265
+#: src/Form/ConfigForm.php:260
 msgid ""
 "If any, the first value will be added to indicate the viewing hint of the "
 "manifest and the canvas."
 msgstr ""
 
-#: src/Form/ConfigForm.php:280
+#: src/Form/ConfigForm.php:275
 msgid "Default behavior (viewing hint)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:287
+#: src/Form/ConfigForm.php:276
+msgid ""
+"If any, and if there is no metadata for the property above, these values "
+"will be added in all manifests and canvases."
+msgstr ""
+
+#: src/Form/ConfigForm.php:281
 msgid "Auto-advance"
 msgstr ""
 
-#: src/Form/ConfigForm.php:288
+#: src/Form/ConfigForm.php:282
 msgid "Continuous"
 msgstr ""
 
-#: src/Form/ConfigForm.php:289
+#: src/Form/ConfigForm.php:283
 msgid "Facing pages"
 msgstr ""
 
-#: src/Form/ConfigForm.php:290
+#: src/Form/ConfigForm.php:284
 msgid "Individuals"
 msgstr ""
 
-#: src/Form/ConfigForm.php:292
+#: src/Form/ConfigForm.php:286
 msgid "No auto-advance"
 msgstr ""
 
-#: src/Form/ConfigForm.php:294
+#: src/Form/ConfigForm.php:288
 msgid "No repeat"
 msgstr ""
 
-#: src/Form/ConfigForm.php:295
+#: src/Form/ConfigForm.php:289
 msgid "Non-paged"
 msgstr ""
 
-#: src/Form/ConfigForm.php:297
+#: src/Form/ConfigForm.php:291
 msgid "Paged"
 msgstr ""
 
-#: src/Form/ConfigForm.php:298
+#: src/Form/ConfigForm.php:292
 msgid "Repeat"
 msgstr ""
 
-#: src/Form/ConfigForm.php:302
+#: src/Form/ConfigForm.php:296
 msgid "Unordered"
 msgstr ""
 
-#: src/Form/ConfigForm.php:314
+#: src/Form/ConfigForm.php:308
 msgid "Label for each file"
 msgstr ""
 
-#: src/Form/ConfigForm.php:315
+#: src/Form/ConfigForm.php:309
 msgid ""
 "This value can be used to indicate the page number in multi-paged documents. "
 "The position is used when there is no value."
 msgstr ""
 
-#: src/Form/ConfigForm.php:319
+#: src/Form/ConfigForm.php:313
 msgid "Position in sequence"
 msgstr ""
 
-#: src/Form/ConfigForm.php:320
+#: src/Form/ConfigForm.php:314
 msgid "Template title"
 msgstr ""
 
-#: src/Form/ConfigForm.php:322
+#: src/Form/ConfigForm.php:316
 msgid "File name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:323
+#: src/Form/ConfigForm.php:317
 msgid "Template title, else file name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:324
+#: src/Form/ConfigForm.php:318
 msgid "Property if any, else file name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:330
+#: src/Form/ConfigForm.php:324
 msgid "Select an option…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:337
+#: src/Form/ConfigForm.php:331
 msgid "Property for files label"
 msgstr ""
 
-#: src/Form/ConfigForm.php:352
+#: src/Form/ConfigForm.php:346
 msgid "Logo of the institution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:363
+#: src/Form/ConfigForm.php:357
 msgid "Link for descriptive metadata"
 msgstr ""
 
-#: src/Form/ConfigForm.php:364
+#: src/Form/ConfigForm.php:358
 msgid ""
 "Some viewers display urls (for resources and uris) as plain text. This "
 "option presents them as a html link."
 msgstr ""
 
-#: src/Form/ConfigForm.php:376
+#: src/Form/ConfigForm.php:370
 msgid "Limit properties for collection in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:377 src/Form/ConfigForm.php:396
-#: src/Form/ConfigForm.php:415
+#: src/Form/ConfigForm.php:371 src/Form/ConfigForm.php:390
+#: src/Form/ConfigForm.php:409
 msgid "If empty, all public values will be output."
 msgstr ""
 
-#: src/Form/ConfigForm.php:388 src/Form/ConfigForm.php:407
-#: src/Form/ConfigForm.php:426 src/Form/ConfigForm.php:442
-#: src/Form/ConfigForm.php:457 src/Form/ConfigForm.php:472
+#: src/Form/ConfigForm.php:382 src/Form/ConfigForm.php:401
+#: src/Form/ConfigForm.php:420 src/Form/ConfigForm.php:436
+#: src/Form/ConfigForm.php:451 src/Form/ConfigForm.php:466
 msgid "Select one or more properties…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:395
+#: src/Form/ConfigForm.php:389
 msgid "Limit properties for item in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:414
+#: src/Form/ConfigForm.php:408
 msgid "Limit properties for media in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:434
+#: src/Form/ConfigForm.php:428
 msgid "Skip properties for collection in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:449
+#: src/Form/ConfigForm.php:443
 msgid "Skip properties for item in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:464
+#: src/Form/ConfigForm.php:458
 msgid "Skp properties for media in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:480
+#: src/Form/ConfigForm.php:474
+msgid "Property for structures"
+msgstr ""
+
+#: src/Form/ConfigForm.php:477
+msgid "Please refer to the following URL for the input format."
+msgstr ""
+
+#: src/Form/ConfigForm.php:491
 msgid "Advanced options for urls"
 msgstr ""
 
-#: src/Form/ConfigForm.php:488
+#: src/Form/ConfigForm.php:499
 msgid "Append version to url (to be set inside module.config.php currently)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:489
+#: src/Form/ConfigForm.php:500 src/Form/ConfigForm.php:632
 msgid ""
 "If set, the version will be appended to the url of the server: \"iiif/3\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:500
+#: src/Form/ConfigForm.php:511
 msgid "Use the identifiers from Clean Url"
 msgstr ""
 
-#: src/Form/ConfigForm.php:501
+#: src/Form/ConfigForm.php:512
 msgid "Use the identifiers from Clean Url (unavailable)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:511
+#: src/Form/ConfigForm.php:522
 msgid ""
 "Prefix to use for identifier (to be set inside module.config.php currently)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:512
+#: src/Form/ConfigForm.php:523
 #, php-format
 msgid ""
 "Allows to check identifiers that contains \"/\" from \"ark:/12345/xxx\" and "
 "\"ark:%2F12345%2Fxxx\" (example: \"ark:/12345/\")."
 msgstr ""
 
-#: src/Form/ConfigForm.php:522
+#: src/Form/ConfigForm.php:533
 msgid "Allow raw identifier"
 msgstr ""
 
-#: src/Form/ConfigForm.php:523
+#: src/Form/ConfigForm.php:534
 #, php-format
 msgid ""
 "So an ark identifier will be available as \"ark:/12345/betz\" and \"ark:"
 "%2F12345%2Fbetz\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:534
+#: src/Form/ConfigForm.php:545
 msgid "Force base of url (from)"
 msgstr ""
 
 #: src/Form/ConfigForm.php:546
+msgid ""
+"When a proxy or a firewall is used, or when the config is specific, it may "
+"be needed to change the base url. For example, when the server is secured, "
+"the \"http:\" urls may be replaced by \"https:\"."
+msgstr ""
+
+#: src/Form/ConfigForm.php:556
 msgid "Force base of url (to)"
 msgstr ""
 
-#: src/Controller/PresentationController.php:169
+#: src/Form/ConfigForm.php:570
+msgid "External image server"
+msgstr ""
+
+#: src/Form/ConfigForm.php:578
+msgid "External image server base url"
+msgstr ""
+
+#: src/Form/ConfigForm.php:579
+msgid ""
+"This url may be used by external modules when the images are provided via an "
+"external server."
+msgstr ""
+
+#: src/Form/ConfigForm.php:590
+msgid "Default IIIF image api version"
+msgstr ""
+
+#: src/Form/ConfigForm.php:591
+msgid ""
+"Set the version of the iiif info.json to provide. The image server should "
+"support it."
+msgstr ""
+
+#: src/Form/ConfigForm.php:593
+msgid "No image server"
+msgstr ""
+
+#: src/Form/ConfigForm.php:594
+msgid "Image Api 1"
+msgstr ""
+
+#: src/Form/ConfigForm.php:595
+msgid "Image Api 2"
+msgstr ""
+
+#: src/Form/ConfigForm.php:596
+msgid "Image Api 3"
+msgstr ""
+
+#: src/Form/ConfigForm.php:609
+msgid "Supported IIIF image api versions and max compliance level"
+msgstr ""
+
+#: src/Form/ConfigForm.php:611
+msgid "Image Api 1 level 0"
+msgstr ""
+
+#: src/Form/ConfigForm.php:612
+msgid "Image Api 1 level 1"
+msgstr ""
+
+#: src/Form/ConfigForm.php:613
+msgid "Image Api 1 level 2"
+msgstr ""
+
+#: src/Form/ConfigForm.php:614
+msgid "Image Api 2 level 0"
+msgstr ""
+
+#: src/Form/ConfigForm.php:615
+msgid "Image Api 2 level 1"
+msgstr ""
+
+#: src/Form/ConfigForm.php:616
+msgid "Image Api 2 level 2"
+msgstr ""
+
+#: src/Form/ConfigForm.php:617
+msgid "Image Api 3 level 0"
+msgstr ""
+
+#: src/Form/ConfigForm.php:618
+msgid "Image Api 3 level 1"
+msgstr ""
+
+#: src/Form/ConfigForm.php:619
+msgid "Image Api 3 level 2"
+msgstr ""
+
+#: src/Form/ConfigForm.php:631
+msgid ""
+"Append the version to the url (to be set inside module.config.php currently)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:635
+msgid "iiifserver_media_api_version_append"
+msgstr ""
+
+#: src/Form/ConfigForm.php:657
+msgid "Media identifier"
+msgstr ""
+
+#: src/Form/ConfigForm.php:658
+msgid ""
+"Using the full filename allows to use an image server like Cantaloupe "
+"sharing the Omeka original files directory."
+msgstr ""
+
+#: src/Form/ConfigForm.php:661
+msgid "Media id"
+msgstr ""
+
+#: src/Form/ConfigForm.php:662
+msgid "Filename"
+msgstr ""
+
+#: src/Form/ConfigForm.php:663
+msgid "Filename with extension"
+msgstr ""
+
+#: src/Form/ConfigForm.php:676
+msgid "Support non-image files"
+msgstr ""
+
+#: src/Form/ConfigForm.php:677
+msgid ""
+"If unchecked, audio, video, models, pdf, etc. will be served through Omeka."
+msgstr ""
+
+#: src/Controller/NoopServerController.php:49
+#: src/Controller/NoopServerController.php:71
+#: src/Controller/IiifServerControllerTrait.php:98
+#: src/Controller/IiifServerControllerTrait.php:148
+#: src/Controller/MediaController.php:67
+#, php-format
+msgid "Media \"%s\" not found."
+msgstr ""
+
+#: src/Controller/NoopServerController.php:61
+#: src/Controller/NoopServerController.php:76
+#, php-format
+msgid "The media server is unavailable for resource \"%s\"."
+msgstr ""
+
+#: src/Controller/PresentationController.php:125
 #, php-format
 msgid "The type \"%s\" is currently only managed as uri, not url"
 msgstr ""
 
-#: src/Iiif/AbstractType.php:146
+#: src/Controller/IiifServerControllerTrait.php:69
+msgid ""
+"The Image server cannot fulfill the request: the arguments are incorrect."
+msgstr ""
+
+#: src/Controller/MediaController.php:79
+msgid ""
+"The IXIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the requested format is not supported."
+msgstr ""
+
+#: src/Controller/MediaController.php:91
+msgid ""
+"The IXIF server encountered an unexpected error that prevented it from "
+"fulfilling the request: the resulting file is not found."
+msgstr ""
+
+#: src/View/Helper/IiifManifest2.php:483
+msgid "elements"
+msgstr ""
+
+#: src/Iiif/AbstractType.php:144
 #, php-format
 msgid ""
 "Missing required keys for resource type \"%1$s\": \"%2$s\" (resource #%3$d)."
 msgstr ""
 
-#: src/Iiif/AbstractType.php:151
+#: src/Iiif/AbstractType.php:149
 #, php-format
 msgid "Missing required keys for resource type \"%1$s\": \"%2$s\"."
 msgstr ""
 
-#: src/Iiif/TraitDescriptive.php:147
+#: src/Iiif/TraitDescriptive.php:144
 msgid "Attribution"
 msgstr ""
 
-#: config/module.config.php:361
+#: config/module.config.php:517
 msgid "Provided by Example Organization"
 msgstr ""

@@ -336,7 +336,7 @@ class IiifManifest2 extends AbstractHelper
                         $render = [];
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
-                        $render['label'] = $translate('Download as PDF');
+                        $render['label'] = $translate('Download as PDF'); // @translate
                         $render = (object) $render;
                         $rendering[] = $render;
                         break;
@@ -345,7 +345,7 @@ class IiifManifest2 extends AbstractHelper
                         $render = [];
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
-                        $render['label'] = $translate('Download as XML');
+                        $render['label'] = $translate('Download as XML'); // @translate
                         $render = (object) $render;
                         $rendering[] = $render;
                         break;
@@ -498,7 +498,7 @@ class IiifManifest2 extends AbstractHelper
                 $render = [];
                 $render['@id'] = $this->view->assetUrl($placeholder, 'IiifServer');
                 $render['format'] = 'image/jpeg';
-                $render['label'] = $translate('Unsupported content.');
+                $render['label'] = $translate('Unsupported content.'); // @translate
                 $render = (object) $render;
                 $rendering[] = $render;
             }
@@ -957,7 +957,7 @@ class IiifManifest2 extends AbstractHelper
         $canvas = [];
         $canvas['@id'] = $serverUrl . $this->view->basePath('/iiif/ixif-message/canvas/c1');
         $canvas['@type'] = 'sc:Canvas';
-        $canvas['label'] = $translate('Placeholder image');
+        $canvas['label'] = $translate('Placeholder image'); // @translate
 
         $placeholder = 'img/thumbnails/placeholder-image.png';
         $canvas['thumbnail'] = $serverUrl . $this->view->assetUrl($placeholder, 'ImageServer');
