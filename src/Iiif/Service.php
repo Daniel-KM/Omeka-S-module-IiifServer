@@ -50,6 +50,7 @@ class Service extends AbstractType
     protected $officialServices = [
         'ImageService1',
         'ImageService2',
+        'ImageService3',
         'SearchService1',
         'AutoCompleteService1',
         'AuthCookieService1',

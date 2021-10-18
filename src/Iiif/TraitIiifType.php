@@ -156,16 +156,30 @@ trait TraitIiifType
         'tile' => 'Image',
     ];
 
+    protected $iiifImageServiceTypes = [
+        'ImageService1',
+        'ImageService2',
+        'ImageService3',
+    ];
+
     protected function initIiifType(): AbstractType
     {
         if ($this->resource->ingester() === 'iiif') {
             $mediaData = $this->resource->mediaData();
             if (isset($mediaData['type'])) {
+                if (in_array($mediaData['type'], $this->iiifImageServiceTypes)) {
+                    $this->type = 'Image';
+                    return $this;
+                }
                 $this->type = $mediaData['type'];
                 return $this;
             }
             if (isset($mediaData['@type'])) {
                 $this->type = $mediaData['@type'];
+                if (in_array($mediaData['@type'], $this->iiifImageServiceTypes)) {
+                    $this->type = 'Image';
+                    return $this;
+                }
                 return $this;
             }
             if (isset($mediaData['format'])) {
