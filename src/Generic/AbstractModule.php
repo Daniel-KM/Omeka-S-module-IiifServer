@@ -562,10 +562,10 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $stmt = $connection->executeQuery($sql, ['target_id' => $id]);
         } else {
             $sql = sprintf('SELECT id, value FROM %s', $settings->getTableName());
-            $stmt = $connection->query($sql);
+            $stmt = $connection->executeQuery($sql);
         }
 
-        $currentSettings = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $currentSettings = $stmt->fetchAllKeyValue();
         $defaultSettings = $config[$space][$settingsType];
         // Skip settings that are arrays, because the fields "multi-checkbox"
         // and "multi-select" are removed when no value are selected, so it's
