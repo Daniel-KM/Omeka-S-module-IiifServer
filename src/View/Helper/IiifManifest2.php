@@ -931,6 +931,7 @@ class IiifManifest2 extends AbstractHelper
                 $template = $media->resourceTemplate();
                 $label = false;
                 if ($template && $template->titleProperty()) {
+                    $labelProperty = $template->titleProperty()->term();
                     $label = $media->value($labelProperty, ['default' => false]);
                 }
                 if (!$label) {
