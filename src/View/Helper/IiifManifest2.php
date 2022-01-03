@@ -155,7 +155,9 @@ class IiifManifest2 extends AbstractHelper
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
 
+        // Don't use html in a title!
         $label = $this->view->escapeHtml($item->displayTitle('') ?: $manifest['@id']);
+        $label = html_entity_decode($label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
         $manifest['label'] = $label;
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
