@@ -289,7 +289,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         // See core commit #2689ce92f.
         $sqls = array_filter(array_map('trim', explode(";\n", $sql)));
         foreach ($sqls as $sql) {
-            $result = $connection->exec($sql);
+            $result = $connection->executeStatement($sql);
         }
 
         return $result;
