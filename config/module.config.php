@@ -439,12 +439,12 @@ return [
                     'media-bad' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/:version]/$prefix:id:.:format",
+                            'route' => "[/:version]/$prefixMedia:id:.:format",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
                                 'id' => '[^\/]+',
-                                'format' => '.+',
+                                'format' => '[^\/]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
