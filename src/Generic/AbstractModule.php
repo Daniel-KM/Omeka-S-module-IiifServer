@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 /*
- * Copyright Daniel Berthereau, 2018-2021
+ * Copyright Daniel Berthereau, 2018-2022
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -81,7 +81,14 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             );
             throw new ModuleCannotInstallException((string) $message);
         }
-        $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
+        $sqlFile = $this->modulePath() . '/data/install/schema.sql';
+        if (!$this->checklNewTablesFromFile($sqlFile)) {
+            $message = new Message(
+                $translator->translate('This module cannot install its tables, because they exist already. Try to remove them first.') // @translate
+            );
+            throw new ModuleCannotInstallException((string) $message);
+        }
+        $this->execSqlFromFile($sqlFile);
         $this
             ->installAllResources()
             ->manageConfig('install')
@@ -270,23 +277,83 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     }
 
     /**
+     * Check if new tables can be installed and remove empty existing tables.
+     *
+     * If a new table exists and is empty, it is removed, because it is probably
+     * related to a broken installation.
+     */
+    protected function checklNewTablesFromFile(string $filepath): bool
+    {
+        if (!file_exists($filepath) || !filesize($filepath) || !is_readable($filepath)) {
+            return null;
+        }
+
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $services = $this->getServiceLocator();
+        $connection = $services->get('Omeka\Connection');
+
+        // Get the list of all tables.
+        $tables = $connection->executeQuery('SHOW TABLES;')->fetchFirstColumn();
+
+        $dropTables = [];
+
+        // Use single statements for execution.
+        // See core commit #2689ce92f.
+        $sql = file_get_contents($filepath);
+        $sqls = array_filter(array_map('trim', explode(";\n", $sql)));
+        foreach ($sqls as $sql) {
+            if (mb_strtoupper(mb_substr($sql, 0, 13)) !== 'CREATE TABLE ') {
+                continue;
+            }
+            $table = trim(strtok(mb_substr($sql, 13), '('), "\"`' \n\r\t\v\0");
+            if (!in_array($table, $tables)) {
+                continue;
+            }
+            $result = $connection->executeQuery("SELECT * FROM `$table` LIMIT 1;")->fetchOne();
+            if ($result !== false) {
+                return false;
+            }
+            $dropTables[] = $table;
+        }
+
+        if (count($dropTables)) {
+            // No check: if a table cannot be removed, an exception will be
+            // thrown later.
+            foreach ($dropTables as $table) {
+                $connection->executeStatement("DROP TABLE `$table`;");
+            }
+
+            $translator = $services->get('MvcTranslator');
+            $message = new \Omeka\Stdlib\Message(
+                $translator->translate('The module removed tables "%s" from a previous broken install.'), // @translate
+                implode('", "', $dropTables)
+            );
+            $messenger = new \Omeka\Mvc\Controller\Plugin\Messenger();
+            $messenger->addWarning($message);
+        }
+
+        return true;
+    }
+
+    /**
      * Execute a sql from a file.
      *
      * @param string $filepath
      * @return int|null
      */
-    protected function execSqlFromFile($filepath)
+    protected function execSqlFromFile(string $filepath): ?int
     {
         if (!file_exists($filepath) || !filesize($filepath) || !is_readable($filepath)) {
             return null;
         }
-        $services = $this->getServiceLocator();
+
         /** @var \Doctrine\DBAL\Connection $connection */
+        $services = $this->getServiceLocator();
         $connection = $services->get('Omeka\Connection');
-        $sql = file_get_contents($filepath);
 
         // Use single statements for execution.
         // See core commit #2689ce92f.
+        $sql = file_get_contents($filepath);
         $sqls = array_filter(array_map('trim', explode(";\n", $sql)));
         foreach ($sqls as $sql) {
             $result = $connection->executeStatement($sql);
