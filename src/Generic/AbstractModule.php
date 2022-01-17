@@ -82,7 +82,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             throw new ModuleCannotInstallException((string) $message);
         }
         $sqlFile = $this->modulePath() . '/data/install/schema.sql';
-        if (!$this->checklNewTablesFromFile($sqlFile)) {
+        if (!$this->checkNewTablesFromFile($sqlFile)) {
             $message = new Message(
                 $translator->translate('This module cannot install its tables, because they exist already. Try to remove them first.') // @translate
             );
@@ -282,10 +282,10 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      * If a new table exists and is empty, it is removed, because it is probably
      * related to a broken installation.
      */
-    protected function checklNewTablesFromFile(string $filepath): bool
+    protected function checkNewTablesFromFile(string $filepath): bool
     {
         if (!file_exists($filepath) || !filesize($filepath) || !is_readable($filepath)) {
-            return null;
+            return true;
         }
 
         /** @var \Doctrine\DBAL\Connection $connection */
