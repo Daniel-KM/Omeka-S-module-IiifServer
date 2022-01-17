@@ -105,7 +105,8 @@ trait TraitRights
         }
 
         // Text is not allowed for presentation 3.
-        $isPresentation3 = $this->context() === 'http://iiif.io/api/presentation/3/context.json';
+        $isPresentation3 = method_exists($this, 'context')
+            && $this->context() === 'http://iiif.io/api/presentation/3/context.json';
         $orText = $orText && !$isPresentation3;
 
         if (!$url) {
