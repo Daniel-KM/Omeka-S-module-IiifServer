@@ -833,7 +833,9 @@ class IiifManifest2 extends AbstractHelper
 
         if ($service) {
             $imageUrlService = $this->view->iiifMediaUrl($media, 'imageserver/id', $service);
-            $imageResourceService = $this->_iiifImageService($imageUrlService, $service, $level);
+            $contextUri = $this->_iiifImageServiceUri($service);
+            $profileUri = $this->_iiifImageProfileUri($contextUri, $level);
+            $imageResourceService = $this->_iiifImageService($imageUrlService, $contextUri, $profileUri);
 
             $iiifTileInfo = $view->iiifTileInfo($media);
             if ($iiifTileInfo) {
@@ -1502,7 +1504,7 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Helper to create a IIIF URL for the thumbnail
+     * Helper to create a IIIF URL for the thumbnail.
      *
      * @param string $baseUri IIIF base URI of the image (URI up to the
      * identifier, w/o trailing slash)
@@ -1534,7 +1536,7 @@ class IiifManifest2 extends AbstractHelper
 
     /**
      * Helper to set the IIIF full size url of an image, depending on the
-     * version of the IIIF Image API supported by the server
+     * version of the IIIF Image API supported by the server.
      *
      * @param string $baseUri IIIF base URI of the image (including the
      * identifier slot)
@@ -1560,8 +1562,29 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
+     * Get the image service context uri, according to a service.
+     *
+     * @param string $service
+     * @return string Context uri of  the service.
+     */
+    protected function _iiifImageServiceUri($service): string
+    {
+        $serviceToUris = [
+            // TODO Check what is the real 0.
+            // '0' => 'http://library.stanford.edu/iiif/image-api/1.0/context.json',
+            '1' => 'http://library.stanford.edu/iiif/image-api/1.1/context.json',
+            '2' => 'http://iiif.io/api/image/2/context.json',
+            '3' => 'http://iiif.io/api/image/3/context.json',
+        ];
+        $first = substr($service, 0, 1);
+        return is_numeric($first) && isset($serviceToUris[$first])
+            ? $serviceToUris[$first]
+            : $service;
+    }
+
+    /**
      * Helper to set the compliance level to the IIIF Image API, based on the
-     * compliance level URI
+     * compliance level URI.
      *
      * @param array|string $profile Contents of the `profile` property from the
      * info.json
@@ -1576,7 +1599,7 @@ class IiifManifest2 extends AbstractHelper
             $profile = $profile[0];
         }
 
-        $profileToLlevels = [
+        $profileToLevels = [
             // Image API 1.0 profile.
             'http://library.stanford.edu/iiif/image-api/compliance.html' => 'level0',
             // Image API 1.1 profiles.
@@ -1594,11 +1617,53 @@ class IiifManifest2 extends AbstractHelper
             'level2' => 'level2',
         ];
 
-        return $profileToLlevels[$profile] ?? 'level0';
+        return $profileToLevels[$profile] ?? 'level0';
     }
 
     /**
-     * Helper to create the IIIF Image API service block
+     * Get the profile uri from the service and the compliance level.
+     *
+     * @param string $contextUri
+     * @param string $level
+     * @return string Image API profile uri.
+     */
+    protected function _iiifImageProfileUri($contextUri, $level)
+    {
+        $contextUriToLevels = [
+            'http://library.stanford.edu/iiif/image-api/1.0/context.json' => [
+                // No level for 1.0.
+                '0' => 'http://library.stanford.edu/iiif/image-api/compliance.html',
+                '1' => 'http://library.stanford.edu/iiif/image-api/compliance.html',
+                '2' => 'http://library.stanford.edu/iiif/image-api/compliance.html',
+            ],
+            'http://library.stanford.edu/iiif/image-api/1.1/context.json' => [
+                '0' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level0',
+                '1' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level1',
+                '2' => 'http://library.stanford.edu/iiif/image-api/1.1/compliance.html#level2',
+            ],
+            'http://iiif.io/api/image/2/context.json' => [
+                '0' => 'http://iiif.io/api/image/2/level0.json',
+                '1' => 'http://iiif.io/api/image/2/level1.json',
+                '2' => 'http://iiif.io/api/image/2/level2.json',
+            ],
+            'http://iiif.io/api/image/3/context.json' => [
+                '0' => 'level0',
+                '1' => 'level1',
+                '2' => 'level3',
+            ],
+        ];
+        if (!is_numeric($level)) {
+            $levels = ['level0' => '0', 'level1' => '1', 'level2' => '2'];
+            if (!isset($levels[$level])) {
+                return $level;
+            }
+            $level = $levels[$level];
+        }
+        return $contextUriToLevels[$contextUri][$level] ?? $level;
+    }
+
+    /**
+     * Helper to create the IIIF Image API service block.
      *
      * @param string $baseUri IIIF base URI of the image (including the
      * identifier slot)
