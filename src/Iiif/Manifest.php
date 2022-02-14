@@ -287,6 +287,7 @@ class Manifest extends AbstractResourceType
 
         // TODO Improve process to avoid recursive process (one loop and by-reference variables).
 
+        $buildStructure = null;
         $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants) use ($ranges, $canvases, $rangesChildren, &$buildStructure): void {
             foreach ($itemNames as $itemName) {
                 if (isset($canvases[$itemName])) {
