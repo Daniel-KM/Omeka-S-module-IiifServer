@@ -66,7 +66,7 @@ trait IiifServerControllerTrait
     public function badAction()
     {
         return $this->viewError(new Message(
-                'The Image server cannot fulfill the request: the arguments are incorrect.' // @translate
+                'The image server cannot fulfill the request: the arguments are incorrect.' // @translate
             ),
             \Laminas\Http\Response::STATUS_CODE_400
         );

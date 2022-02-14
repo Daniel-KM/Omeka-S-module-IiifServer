@@ -89,7 +89,7 @@ if (version_compare($oldVersion, '3.5.14', '<')) {
 
 if (version_compare($oldVersion, '3.6.0', '<')) {
     $message = new Message(
-        'The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that creates iiif manifest, and %2$sImage Server%3$s, that provides the tiled images. In that way, it is simpler to use an external Image server via core media "IIIF Image". The upgrade is automatic, but you need to install the two modules.', // @translate
+        'The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that creates iiif manifest, and %2$sImage Server%3$s, that provides the tiled images. In that way, it is simpler to use an external image server via core media "IIIF Image". The upgrade is automatic, but you need to install the two modules.', // @translate
         '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer" target="_blank">',
         '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer" target="_blank">',
         '</a>'

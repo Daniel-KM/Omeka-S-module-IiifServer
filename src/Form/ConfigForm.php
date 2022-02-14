@@ -455,7 +455,7 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_manifest_properties_media_blacklist',
                 'type' => PropertySelect::class,
                 'options' => [
-                    'label' => 'Skp properties for media in manifest', // @translate
+                    'label' => 'Skip properties for media in manifest', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
                 ],

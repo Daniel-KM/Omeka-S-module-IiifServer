@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-01-03 00:00+0000\n"
+"POT-Creation-Date: 2022-02-14 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,7 +57,18 @@ msgstr ""
 msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:725
+#: src/Generic/AbstractModule.php:87
+msgid ""
+"This module cannot install its tables, because they exist already. Try to "
+"remove them first."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:328
+#, php-format
+msgid "The module removed tables \"%s\" from a previous broken install."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:792
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -68,19 +79,19 @@ msgstr ""
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:339
+#: src/View/Helper/IiifManifest2.php:341
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:348
+#: src/View/Helper/IiifManifest2.php:350
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:961
+#: src/View/Helper/IiifManifest2.php:965
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1183
+#: src/View/Helper/IiifManifest2.php:1187
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -92,7 +103,7 @@ msgstr ""
 msgid ""
 "The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that "
 "creates iiif manifest, and %2$sImage Server%3$s, that provides the tiled "
-"images. In that way, it is simpler to use an external Image server via core "
+"images. In that way, it is simpler to use an external image server via core "
 "media \"IIIF Image\". The upgrade is automatic, but you need to install the "
 "two modules."
 msgstr ""
@@ -449,7 +460,7 @@ msgid "Skip properties for item in manifest"
 msgstr ""
 
 #: src/Form/ConfigForm.php:458
-msgid "Skp properties for media in manifest"
+msgid "Skip properties for media in manifest"
 msgstr ""
 
 #: src/Form/ConfigForm.php:474
@@ -661,7 +672,7 @@ msgstr ""
 
 #: src/Controller/IiifServerControllerTrait.php:69
 msgid ""
-"The Image server cannot fulfill the request: the arguments are incorrect."
+"The image server cannot fulfill the request: the arguments are incorrect."
 msgstr ""
 
 #: src/Controller/MediaController.php:79
@@ -676,7 +687,7 @@ msgid ""
 "fulfilling the request: the resulting file is not found."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:483
+#: src/View/Helper/IiifManifest2.php:485
 msgid "elements"
 msgstr ""
 
