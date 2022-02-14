@@ -708,7 +708,47 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     }
 
     /**
+     * Check the version of a module and return a boolean or throw an exception.
+     *
+     * @throws \Omeka\Module\Exception\ModuleCannotInstallException
+     */
+    protected function checkModuleAvailability(string $moduleName, ?string $version = null, bool $required = false, bool $exception = false): bool
+    {
+        $services = $this->getServiceLocator();
+        $module = $services->get('Omeka\ModuleManager')->getModule($moduleName);
+        if (!$module || !$this->isModuleActive($moduleName)) {
+            if (!$required) {
+                return true;
+            }
+            if (!$exception) {
+                return false;
+            }
+            // Else throw message below (required module with a version or not).
+        } elseif (!$version || version_compare($module->getIni('version') ?? '', $version, '>=')) {
+            return true;
+        } elseif (!$exception) {
+            return false;
+        }
+        $translator = $services->get('MvcTranslator');
+        if ($version) {
+            $message = new \Omeka\Stdlib\Message(
+                $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
+                $moduleName, $version
+            );
+        } else {
+            $message = new \Omeka\Stdlib\Message(
+                $translator->translate('This module requires the module "%s".'), // @translate
+                $moduleName
+            );
+        }
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+    }
+
+    /**
      * Check the version of a module.
+     *
+     * It is recommended to use checkModuleAvailability(), that manages the fact
+     * that the module may be required or not.
      */
     protected function isModuleVersionAtLeast(string $module, string $version): bool
     {
