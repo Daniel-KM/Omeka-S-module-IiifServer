@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2021 Daniel Berthereau
+ * Copyright 2015-2022 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -1446,7 +1446,9 @@ class IiifManifest2 extends AbstractHelper
     "thumb.gif", "thumbnail.gif", "screenshot.gif", "vignette.gif", "miniatura.gif",
     "thumb.webp", "thumbnail.webp", "screenshot.webp", "vignette.webp", "miniatura.webp"
 )',
-                        'source REGEXP "/(?:thumb|thumbnail|screenshot|vignette|miniatura)\.(?:jpg|jpeg|png|gif|webp)$"'
+                        // Take care of backslashes for regex.
+                        // Don't use (?:xxx|yyy) for compatibility with MySql 5.6.
+                        'source REGEXP "(thumb|thumbnail|screenshot|vignette|miniatura)\\.(jpg|jpeg|png|gif|webp)$"'
                     )
                 );
         }
