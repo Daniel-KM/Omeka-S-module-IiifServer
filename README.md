@@ -581,6 +581,8 @@ TODO / Bugs
 - [x] Fully support alphanumeric name for canvas id.
 - [ ] Support translation of structure (use the language of the value?).
 - [ ] Full support of named canvases.
+- [ ] Use a list of classes or templates to determine the 3D files.
+- [ ] Create a table to cache big iiif manifests (useless for image info.json).
 
 See module [Image Server].
 
