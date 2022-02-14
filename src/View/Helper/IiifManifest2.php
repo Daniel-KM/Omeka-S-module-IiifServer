@@ -1414,47 +1414,56 @@ class IiifManifest2 extends AbstractHelper
         // The primary media is not used, because it may not be an image.
         // The connection is used because the api does not allow to search
         // on field "has_thumbnails".
-        $conn = @$this->getView()->getHelperPluginManager()->getServiceLocator()
-            ->get('Omeka\Connection');
-        $qb = $conn->createQueryBuilder()
+        /** @var \Doctrine\DBAL\Connection $conn */
+        $conn = $resource->getServiceLocator()->get('Omeka\Connection');
+        $qb = $conn->createQueryBuilder();
+        $expr = $qb->expr();
+        $qb
             ->select('id')
             ->from('media', 'media')
-            ->where('item_id = :item_id')
-            ->setParameter(':item_id', $resource->id())
+            ->where($expr->eq('item_id', ':item_id'))
             ->andWhere('has_thumbnails = 1')
             ->orderBy('id', 'ASC')
             ->setMaxResults(1);
 
+        $bind = [
+            'item_id' => (int) $resource->id(),
+        ];
+        $types = [
+            'item_id' => \Doctrine\DBAL\ParameterType::INTEGER,
+        ];
+
         if ($is3dModel) {
+            // The thumbnail is always a real image, so it is possible to
+            // filter the request.
             $qb
-                // The thumbnail is always a real image, so it is possible to
-                // filter the request.
-                // IIIF format doesn't not support other images.
-                // Don't set pdf and jp2, because default Omeka thumbnaillers
-                // don't support them by default, and tiff is not managed by
-                // browsers.
-                // @link https://iiif.io/api/image/3.0/#45-format
-                ->andWhere('media_type IN ("image/jpeg", "image/png", "image/gif", "image/webp")')
-                ->andWhere(
-                    // TODO Check performance between simple IN + simple regex, or a complex regex, or multiple LIKE. Or check another way.
-                    $qb->expr()->orX(
-                        // 'source REGEXP "(?:^|[^\w\s_-])(?:thumb|thumbnail|screenshot|vignette|miniatura)\.(?:jpg|jpeg|png|gif|webp)$"'
-                        'source IN (
-    "thumb.jpg", "thumbnail.jpg", "screenshot.jpg", "vignette.jpg", "miniatura.jpg",
-    "thumb.jpeg", "thumbnail.jpeg", "screenshot.jpeg", "vignette.jpeg", "miniatura.jpeg",
-    "thumb.png", "thumbnail.png", "screenshot.png", "vignette.png", "miniatura.png",
-    "thumb.gif", "thumbnail.gif", "screenshot.gif", "vignette.gif", "miniatura.gif",
-    "thumb.webp", "thumbnail.webp", "screenshot.webp", "vignette.webp", "miniatura.webp"
-)',
-                        // Take care of backslashes for regex.
-                        // Don't use (?:xxx|yyy) for compatibility with MySql 5.6.
-                        'source REGEXP "(thumb|thumbnail|screenshot|vignette|miniatura)\\.(jpg|jpeg|png|gif|webp)$"'
-                    )
-                );
+                ->andWhere($expr->in('media_type', ':media_types'))
+                ->andWhere($expr->in('source', ':thumbnails'));
+            // IIIF format doesn't not support other images.
+            // Don't set pdf and jp2, because default Omeka thumbnaillers don't
+            // support them by default, and tiff is not managed by browsers.
+            // @link https://iiif.io/api/image/3.0/#45-format
+            $bind['media_types'] = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $types['media_types'] = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
+            // This is the list of translations of "thumbnail" in all the omeka
+            // languages, except non-ascii ones, with the browser extensions for
+            // images.
+            $bind['thumbnails'] = [
+                'thumb.jpg', 'thumb.jpeg', 'thumb.png', 'thumb.gif', 'thumb.webp',
+                'thumbnail.jpg', 'thumbnail.jpeg', 'thumbnail.png', 'thumbnail.gif', 'thumbnail.webp',
+                'screnshot.jpg', 'screnshot.jpeg', 'screnshot.png', 'screnshot.gif', 'screnshot.webp',
+                'esikatselukuva.jpg', 'esikatselukuva.jpeg', 'esikatselukuva.png', 'esikatselukuva.gif', 'esikatselukuva.webp',
+                'imagine.jpg', 'imagine.jpeg', 'imagine.png', 'imagine.gif', 'imagine.webp',
+                'miniatura.jpg', 'miniatura.jpeg', 'miniatura.png', 'miniatura.gif', 'miniatura.webp',
+                'miniatuur.jpg', 'miniatuur.jpeg', 'miniatuur.png', 'miniatuur.gif', 'miniatuur.webp',
+                'pisipilt.jpg', 'pisipilt.jpeg', 'pisipilt.png', 'pisipilt.gif', 'pisipilt.webp',
+                'vignette.jpg', 'vignette.jpeg', 'vignette.png', 'vignette.gif', 'vignette.webp',
+                'vorschaubild.jpg', 'vorschaubild.jpeg', 'vorschaubild.png', 'vorschaubild.gif', 'vorschaubild.webp',
+            ];
+            $types['thumbnails'] = \Doctrine\DBAL\Connection::PARAM_STR_ARRAY;
         }
 
-        $stmt = $conn->executeQuery($qb, $qb->getParameters());
-        $id = $stmt->fetch(\PDO::FETCH_COLUMN);
+        $id = $conn->executeQuery($qb, $bind, $types)->fetchOne();
         if ($id) {
             // Media may be private for the user, so use searchOne, not read.
             $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
