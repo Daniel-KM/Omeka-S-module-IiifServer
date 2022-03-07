@@ -654,7 +654,7 @@ format.
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
 [Diva]: https://gitlab.com/Daniel-KM/Omeka-S-module-Diva
-[Three JS Model viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-ThreeJs
+[Three JS Model viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-ModelViewer
 [Omeka Classic]: https://omeka.org
 [Iiif Search]: https://github.com/bubdxm/Omeka-S-module-IiifSearch
 [GD]: https://secure.php.net/manual/en/book.image.php
