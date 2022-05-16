@@ -1015,12 +1015,7 @@ class IiifManifest2 extends AbstractHelper
         // file.
         $mediaSequenceElement['label'] = $values['label'];
         $mediaSequenceElement['metadata'] = $values['metadata'];
-        if ($media->hasThumbnails()) {
-            $thumbnailUrl = $media->thumbnailUrl('medium');
-            if ($thumbnailUrl) {
-                $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
-            }
-        }
+        $mediaSequenceElement['thumbnail'] = $media->thumbnailUrl('medium');
         $mediaSequencesService = [];
         $mseUrl = $this->view->iiifMediaUrl($media, 'mediaserver/id', '2');
         $mediaSequencesService['@id'] = $mseUrl;
@@ -1052,18 +1047,7 @@ class IiifManifest2 extends AbstractHelper
         // one file.
         $mediaSequenceElement['label'] = $values['label'];
         $mediaSequenceElement['metadata'] = $values['metadata'];
-        if ($media->hasThumbnails()) {
-            $thumbnailUrl = $media->thumbnailUrl('medium');
-            if ($thumbnailUrl) {
-                $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
-            }
-        }
-        // A place holder is recommended for media.
-        if (empty($mediaSequenceElement['thumbnail'])) {
-            // $placeholder = 'img/placeholder-audio.jpg';
-            // $mediaSequenceElement['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
-            $mediaSequenceElement['thumbnail'] = '';
-        }
+        $mediaSequenceElement['thumbnail'] = $media->thumbnailUrl('medium');
 
         // Specific to media files.
         $mseRenderings = [];
@@ -1108,18 +1092,7 @@ class IiifManifest2 extends AbstractHelper
         // one file.
         $mediaSequenceElement['label'] = $values['label'];
         $mediaSequenceElement['metadata'] = $values['metadata'];
-        if ($media->hasThumbnails()) {
-            $thumbnailUrl = $media->thumbnailUrl('medium');
-            if ($thumbnailUrl) {
-                $mediaSequenceElement['thumbnail'] = $thumbnailUrl;
-            }
-        }
-        // A place holder is recommended for medias.
-        if (empty($mediaSequenceElement['thumbnail'])) {
-            // $placeholder = 'img/placeholder-video.jpg';
-            // $mediaSequenceElement['thumbnail'] = $this->view->assetUrl($placeholder, 'IiifServer');
-            $mediaSequenceElement['thumbnail'] = '';
-        }
+        $mediaSequenceElement['thumbnail'] = $media->thumbnailUrl('medium');
 
         // Specific to media files.
         $mseRenderings = [];
