@@ -479,6 +479,9 @@ return [
                                 'prefix' => $constraintPrefixMedia,
                                 'id' => '[^\/]+',
                                 'format' => 'pdf|mp3|ogg|mp4|webm|ogv',
+                                // To support a proprietary format that is not supported by many browsers/os:
+                                // Add it in src/Iiif/TraitMedia.php too.
+                                // 'format' => 'pdf|mp3|ogg|mp4|webm|wmv|ogv',
                                 // 'format' => '.+',
                             ],
                             'defaults' => [

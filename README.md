@@ -583,6 +583,7 @@ TODO / Bugs
 - [ ] Full support of named canvases.
 - [ ] Use a list of classes or templates to determine the 3D files.
 - [ ] Create a table to cache big iiif manifests (useless for image info.json).
+- [ ] Always return a thumbnail in iiif v3.
 
 See module [Image Server].
 

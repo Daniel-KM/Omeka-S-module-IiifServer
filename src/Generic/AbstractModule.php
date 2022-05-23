@@ -732,7 +732,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $translator = $services->get('MvcTranslator');
         if ($version) {
             $message = new \Omeka\Stdlib\Message(
-                $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
+                $translator->translate('This module requires the module "%1$s", version %2$s or above.'), // @translate
                 $moduleName, $version
             );
         } else {

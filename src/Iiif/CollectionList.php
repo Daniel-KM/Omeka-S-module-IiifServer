@@ -158,7 +158,7 @@ class CollectionList extends AbstractType
 
     public function setServiceLocator($services): AbstractType
     {
-        $this->serviceLocator = $services;
+        $this->services = $services;
         $viewHelpers = $services->get('ViewHelperManager');
         $this->api = $viewHelpers->get('api');
         $this->setting = $viewHelpers->get('setting');
