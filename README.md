@@ -91,6 +91,32 @@ The iiif authentication api is not yet integrated. Anyway, to access iiif
 resources when authenticated, the [fix #omeka/omeka-s/1714] can be patched or
 the module [Guest] can be used.
 
+### IIIF button in a theme
+
+To add the iiif button in a theme, adapt this code in your theme, generally in
+`view/omeka/site/item/show.phtml`:
+
+```php
+<?php
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$iiifUrl = $plugins->has('iiifUrl') ? $plugins->get('iiifUrl') : null;
+
+// The code for css and js is very short and can be copied directly in theme.
+$this->headLink()
+    ->appendStylesheet($assetUrl('css/iiif-server.css', 'IiifServer'));
+$this->headScript()
+    ->appendFile($assetUrl('js/iiif-server.js', 'IiifServer'), 'text/javascript', ['defer' => 'defer']);
+?>
+
+<?php if ($iiifUrl): ?>
+<button type="button" class="iiif-copy" title="<?= $escape($translate('Copy IIIF manifest url to be used in IIIF viewers')) ?>" data-iiif-url="<?= $escape($iiifUrl($resource)) ?>"></button>
+<?php endif; ?>
+```
+
+
 Image server
 ------------
 
@@ -141,6 +167,7 @@ Three params should be set:
 - add some rules in Apache config or in htaccess to redirect request to the
   image server. Normally, a regex starting with iiif/ and finishing with the
   supported file extensions is enough.
+
 
 Notes
 -----
