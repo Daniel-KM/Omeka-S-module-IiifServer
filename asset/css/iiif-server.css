@@ -1,0 +1,18 @@
+@charset "UTF-8";
+
+.iiif-copy {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: url(../img/iiif.png) no-repeat;
+    background-size: cover;
+    -webkit-filter: grayscale(1);
+    filter: grayscale(1);
+}
+
+.iiif-copy:hover {
+    -webkit-filter: grayscale(0);
+    filter: none;
+}
+
