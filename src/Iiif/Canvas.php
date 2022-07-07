@@ -38,6 +38,7 @@ class Canvas extends AbstractResourceType
 {
     use TraitBehavior;
     use TraitDescriptive;
+    use TraitThumbnail;
 
     protected $type = 'Canvas';
 
@@ -131,6 +132,8 @@ class Canvas extends AbstractResourceType
                 ? 'p' . $name
                 : $name;
         }
+
+        $this->initThumbnail();
     }
 
     public function id(): ?string
