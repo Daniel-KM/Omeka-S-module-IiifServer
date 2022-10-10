@@ -185,7 +185,7 @@ class Manifest extends AbstractResourceType
             return [];
         }
 
-        $stValues = $this->resource->value($stProperty, ['type' => 'literal', 'all' => true]);
+        $stValues = $this->resource->value($stProperty, ['all' => true]);
         if (!count($stValues)) {
             return [];
         }
@@ -197,7 +197,8 @@ class Manifest extends AbstractResourceType
 
         $structures = [];
         foreach ($stValues as $index => $literalStructure) {
-            $structure = @json_decode((string) $literalStructure, true);
+            $literalStructure = (string) $literalStructure;
+            $structure = @json_decode($literalStructure, true);
             if ($structure && is_array($structure)) {
                 $firstRange = reset($structure);
                 if (!is_array($firstRange)) {
@@ -208,7 +209,7 @@ class Manifest extends AbstractResourceType
                     // : $this->checkStructure($structure);
                     : $structure;
             } else {
-                $structure = $this->extractStructure((string) $literalStructure, ++$index);
+                $structure = $this->extractStructure($literalStructure, ++$index);
             }
             if (!empty($structure)) {
                 $structures[] = $structure;

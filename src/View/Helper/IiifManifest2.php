@@ -162,7 +162,7 @@ class IiifManifest2 extends AbstractHelper
 
         $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags((string) $item->value($descriptionProperty, ['type' => 'literal', 'default' => '']));
+            $description = strip_tags((string) $item->value($descriptionProperty, ['default' => '']));
         } else {
             $description = '';
         }
@@ -175,7 +175,7 @@ class IiifManifest2 extends AbstractHelper
 
         $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
-            $attribution = strip_tags((string) $item->value($attributionProperty, ['type' => 'literal', 'default' => '']));
+            $attribution = strip_tags((string) $item->value($attributionProperty, ['default' => '']));
         }
         if (empty($attribution)) {
             $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
@@ -520,7 +520,7 @@ class IiifManifest2 extends AbstractHelper
 
         $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
         if ($stProperty) {
-            $literalStructure = (string) $item->value($stProperty, ['type' => 'literal', 'default' => '']);
+            $literalStructure = (string) $item->value($stProperty, ['default' => '']);
             if ($literalStructure) {
                 $structures = $this->extractStructure($literalStructure, $canvases);
                 if (count($structures) > 0) {
