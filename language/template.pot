@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-14 00:00+0000\n"
+"POT-Creation-Date: 2022-10-10 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,32 +43,37 @@ msgid ""
 "data."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:66
+#: src/Generic/AbstractModule.php:80 src/Generic/AbstractModule.php:774
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:73
+#: src/Generic/AbstractModule.php:87
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:80
+#: src/Generic/AbstractModule.php:94
 msgid "This module has resources that cannot be installed."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:87
+#: src/Generic/AbstractModule.php:101
 msgid ""
 "This module cannot install its tables, because they exist already. Try to "
 "remove them first."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:328
+#: src/Generic/AbstractModule.php:362
 #, php-format
 msgid "The module removed tables \"%s\" from a previous broken install."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:792
+#: src/Generic/AbstractModule.php:769
+#, php-format
+msgid "This module requires the module \"%1$s\", version %2$s or above."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:866
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -79,19 +84,19 @@ msgstr ""
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:341
+#: src/View/Helper/IiifManifest2.php:347
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:350
+#: src/View/Helper/IiifManifest2.php:356
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:965
+#: src/View/Helper/IiifManifest2.php:971
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1187
+#: src/View/Helper/IiifManifest2.php:1166
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "content (e.g., audio, video) and is unfortunately incompatible with IIIF "
@@ -687,25 +692,44 @@ msgid ""
 "fulfilling the request: the resulting file is not found."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:485
+#: src/View/Helper/IiifManifest2.php:491
 msgid "elements"
 msgstr ""
 
-#: src/Iiif/AbstractType.php:144
+#: src/Iiif/AbstractType.php:161
 #, php-format
 msgid ""
-"Missing required keys for resource type \"%1$s\": \"%2$s\" (resource #%3$d)."
+"%1$s #%2$d: Exception when processing iiif resource type \"%3$s\":\n"
+"%4$s"
 msgstr ""
 
-#: src/Iiif/AbstractType.php:149
+#: src/Iiif/AbstractType.php:166
 #, php-format
-msgid "Missing required keys for resource type \"%1$s\": \"%2$s\"."
+msgid ""
+"Exception when processing iiif resource type \"%1$s\":\n"
+"%2$s"
 msgstr ""
 
-#: src/Iiif/TraitDescriptive.php:144
+#: src/Iiif/AbstractType.php:172
+#, php-format
+msgid ""
+"%1$s #%2$d: Missing required keys for iiif resource type \"%3$s\": \"%4$s\"."
+msgstr ""
+
+#: src/Iiif/AbstractType.php:177
+#, php-format
+msgid "Missing required keys for iiif resource type \"%1$s\": \"%2$s\"."
+msgstr ""
+
+#: src/Iiif/Rendering.php:59
+#, php-format
+msgid "Resource #%1$d: A media is required to build a canvas."
+msgstr ""
+
+#: src/Iiif/TraitDescriptive.php:153
 msgid "Attribution"
 msgstr ""
 
-#: config/module.config.php:517
+#: config/module.config.php:520
 msgid "Provided by Example Organization"
 msgstr ""
