@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2021 Daniel Berthereau
+ * Copyright 2020-2022 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -128,9 +128,9 @@ abstract class AbstractResourceType extends AbstractType
     protected $options;
 
     /**
-     * @var ArrayObject
+     * @var \Laminas\Log\Logger
      */
-    protected $manifest;
+    protected $logger;
 
     /**
      * @var \Omeka\View\Helper\Setting
@@ -157,15 +157,23 @@ abstract class AbstractResourceType extends AbstractType
      */
     protected $publicResourceUrl;
 
+    /**
+     * @var ArrayObject
+     */
+    protected $manifest;
+
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         $this->resource = $resource;
         $this->options = $options ?? [];
-        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
+
+        $serviceLocator = $resource->getServiceLocator();;
+        $this->logger = $serviceLocator->get('Omeka\Logger');
+        $viewHelpers = $serviceLocator->get('ViewHelperManager');
+        $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->setting = $viewHelpers->get('setting');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
-        $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 

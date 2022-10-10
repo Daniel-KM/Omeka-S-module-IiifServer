@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2021 Daniel Berthereau
+ * Copyright 2020-2022 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -47,6 +47,11 @@ abstract class AbstractType implements JsonSerializable
     const RECOMMENDED = 'recommended';
     const OPTIONAL = 'optional';
     const NOT_ALLOWED = 'not_allowed';
+
+    /**
+     * @var \Laminas\Log\Logger|null
+     */
+    protected $logger;
 
     /**
      * @var string
@@ -127,7 +132,9 @@ abstract class AbstractType implements JsonSerializable
         $e = null;
         if (count($requiredKeys) === count($intersect)) {
             // Second check for the children.
-            // Instead of a recursive method, use jsonSerialize.
+            // Instead of a recursive method, use jsonSerialize, that does the
+            // same de facto.
+            //  TODO Find a way to get only the upper exception with the path of classes.
             try {
                 json_encode($output);
                 return true;
@@ -135,21 +142,51 @@ abstract class AbstractType implements JsonSerializable
             }
         }
 
-        if ($throwException) {
-            $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
-            if ($e) {
-                $message = $e->getMessage();
-            } elseif (isset($this->resource)) {
+        if (!$throwException && !$this->logger) {
+            return false;
+        }
+
+        // Ideally should be in class AbstractResourceType.
+        $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
+        $hasResource = isset($this->resource);
+        $resourceName = $hasResource ? $this->resource->resourceName() : null;
+        $resourceNames = [
+            'items' => 'item',
+            'item_sets' => 'item set',
+            'media' => 'media',
+        ];
+        if ($e) {
+            if ($hasResource) {
                 $message = new Message(
-                    'Missing required keys for resource type "%1$s": "%2$s" (resource #%3$d).', // @translate
-                    $this->type(), implode('", "', $missingKeys), $this->resource->id()
+                    "%1\$s #%2\$d: Exception when processing iiif resource type \"%3\$s\":\n%4\$s", // @translate
+                    ucfirst($resourceNames[$resourceName]), $this->resource->id(), $this->type(), $e->getMessage()
                 );
             } else {
                 $message = new Message(
-                    'Missing required keys for resource type "%1$s": "%2$s".', // @translate
-                    $this->type(), implode('", "', $missingKeys)
+                    "Exception when processing iiif resource type \"%1\$s\":\n%2\$s", // @translate
+                    $this->type(), $e->getMessage()
                 );
             }
+        } elseif ($hasResource) {
+            $message = new Message(
+                '%1$s #%2$d: Missing required keys for iiif resource type "%3$s": "%4$s".', // @translate
+                ucfirst($resourceNames[$resourceName]), $this->resource->id(), $this->type(), implode('", "', $missingKeys)
+            );
+        } else {
+            $message = new Message(
+                'Missing required keys for iiif resource type "%1$s": "%2$s".', // @translate
+                $this->type(), implode('", "', $missingKeys)
+            );
+        }
+
+        // The exception is catched and passed to the upper level. Only the
+        // upper one is needed. The same for logger.
+        // The lower level does not know if it called for itself or not.
+        if ($this->logger) {
+            $this->logger->err($message);
+        }
+
+        if ($throwException) {
             throw new \IiifServer\Iiif\Exception\RuntimeException((string) $message);
         }
 

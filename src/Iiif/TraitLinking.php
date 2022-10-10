@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2021 Daniel Berthereau
+ * Copyright 2020-2022 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -253,6 +253,11 @@ trait TraitLinking
     protected function defaultSite(): ?SiteRepresentation
     {
         if (!array_key_exists('site', $this->_storage)) {
+            $this->_storage['site'] = null;
+            if (empty(!$this->resource)) {
+                return null;
+            }
+            /** @var \Omeka\Api\Manager $api */
             $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');
             $defaultSiteId = $this->setting->__invoke('default_site');
             if ($defaultSiteId) {
@@ -263,7 +268,7 @@ trait TraitLinking
                 }
             } else {
                 $sites = $api->search('sites', ['limit' => 1, 'sort_by' => 'id'])->getContent();
-                $this->_storage['site'] = reset($sites);
+                $this->_storage['site'] = reset($sites) ?: null;
             }
         }
         return $this->_storage['site'];

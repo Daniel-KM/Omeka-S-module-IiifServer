@@ -310,6 +310,14 @@ trait IiifServerControllerTrait
         return $this->requestedApiVersion;
     }
 
+    /**
+     * On error, the response body should be human-readable plain text or html,
+     * not json. This applies only to image api, not presentation.
+     *
+     * Nevertheless, some viewers may require json, without specifying format.
+     *
+     * @see https://iiif.io/api/image/3.0/#73-error-conditions
+     */
     protected function jsonError($exceptionOrMessage, $statusCode = 500): JsonModel
     {
         $this->getResponse()->setStatusCode($statusCode);
@@ -320,7 +328,8 @@ trait IiifServerControllerTrait
     }
 
     /**
-     * @see https://iiif.io/api/image/3.0/#73-error-conditions
+     * On error, the response body should be human-readable plain text or html,
+     * not json. This applies only to image api, not presentation.
      */
     protected function viewError($exceptionOrMessage, $statusCode = 500): ViewModel
     {

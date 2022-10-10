@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2021 Daniel Berthereau
+ * Copyright 2020-2022 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -29,8 +29,10 @@
 
 namespace IiifServer\Iiif;
 
+use IiifServer\Iiif\Exception\RuntimeException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\Stdlib\Message;
 
 /**
  *@link https://iiif.io/api/presentation/3.0/#rendering
@@ -50,13 +52,16 @@ class Rendering extends AbstractResourceType
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
-        if (!($resource instanceof MediaRepresentation)) {
-            throw new \RuntimeException(
-                'A media is required to build a canvas.'
-            );
-        }
-
         parent::__construct($resource, $options);
+
+        if (!($resource instanceof MediaRepresentation)) {
+            $message = new Message(
+                'Resource #%1$d: A media is required to build a canvas.', // @translate
+                $resource->id()
+            );
+            $this->logger->err($message);
+            throw new RuntimeException((string) $message);
+        }
 
         $this->initIiifType();
     }

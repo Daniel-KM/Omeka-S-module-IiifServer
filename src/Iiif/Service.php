@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2021 Daniel Berthereau
+ * Copyright 2020-2022 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -65,10 +65,7 @@ class Service extends AbstractType
      */
     protected $options;
 
-    /**
-     * @todo The resource is useless, but kept for Iiif Search.
-     */
-    public function __construct(?AbstractResourceEntityRepresentation $resource = null, array $options = [])
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = [])
     {
         if (isset($options['@id'])) {
             $options['id'] = $options['@id'];
