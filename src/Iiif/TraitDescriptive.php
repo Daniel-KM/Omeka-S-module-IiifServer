@@ -117,26 +117,35 @@ trait TraitDescriptive
     /**
      * @todo Normalize format of required statement.
      *
+     * Adapted according to https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/37
+     * in order to include the rights value when it is not a url, since it is
+     * skipped when it is not an url.
+     *
      * @return ValueLanguage[]
      */
     public function requiredStatement()
     {
-        $license = [];
-        $licenseProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
-        if ($licenseProperty) {
-            $license = $this->resource->value($licenseProperty, ['all' => true]);
+        $requiredStatement = [];
+        $requiredStatement = $this->setting->__invoke('iiifserver_manifest_attribution_property');
+        if ($requiredStatement) {
+            $requiredStatement = $this->resource->value($requiredStatement, ['all' => true]);
         }
 
-        if (empty($license)) {
-            $default = $this->setting->__invoke('iiifserver_manifest_attribution_default');
-            if ($default) {
-                $license = ['none' => [$default]];
+        if (empty($requiredStatement)) {
+            $license = $this->resource ? $this->rightsResource($this->resource, true) : null;
+            if ($license && !$this->checkAllowedLicense($license)) {
+                $requiredStatement = ['none' => [$license]];
             } else {
-                return null;
+                $default = $this->setting->__invoke('iiifserver_manifest_attribution_default');
+                if ($default) {
+                    $requiredStatement = ['none' => [$default]];
+                } else {
+                    return null;
+                }
             }
         }
 
-        $metadataValue = new ValueLanguage($license, true);
+        $metadataValue = new ValueLanguage($requiredStatement, true);
         if (!$metadataValue->count()) {
             return $metadataValue;
         }

@@ -67,8 +67,11 @@ trait TraitRights
      *
      * @todo Add a way to manage image server settings.
      * Note: in api 2, the value can be a list.
+     *
+     * @param bool $useForRequiredStatement When the value is not an url, it is
+     * recommended to use it as required statement.
      */
-    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null): ?string
+    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null, bool $useForRequiredStatement = false): ?string
     {
         $url = null;
         $orUrl = false;
@@ -110,24 +113,37 @@ trait TraitRights
         $orText = $orText && !$isPresentation3;
 
         if (!$url) {
-            if ($orUrl) {
+            if ($useForRequiredStatement) {
+                return $this->setting->__invoke('iiifserver_manifest_rights_url')
+                    ?: $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
+            } elseif ($orUrl) {
                 $url = $this->setting->__invoke('iiifserver_manifest_rights_url') ?: null;
             } elseif ($orText) {
                 $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
-            } else {
+            }
+            if (!$url) {
                 return null;
             }
         }
 
+        // Take the first allowed url.
         if ($isPresentation3 && $url) {
-            foreach ($this->rightUrls as $rightUrl) {
-                if (strpos($url, $rightUrl) === 0) {
-                    return $url;
-                }
+            if ($this->checkAllowedLicense($url)) {
+                return $url;
             }
             return null;
         }
 
         return $url;
+    }
+
+    protected function checkAllowedLicense($url): bool
+    {
+        foreach ($this->rightUrls as $rightUrl) {
+            if (strpos($url, $rightUrl) === 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

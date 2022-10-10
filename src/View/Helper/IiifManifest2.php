@@ -168,19 +168,25 @@ class IiifManifest2 extends AbstractHelper
         }
         $manifest['description'] = $description;
 
+        // A license url is not a requirement in v2.1, but a recommandation.
         $license = $this->rightsResource($item);
-        if ($license) {
-            $manifest['license'] = $license;
-        }
+        $isLicenseUrl = $license
+            && (substr($license, 0, 8) === 'https://' || substr($license, 0, 7) === 'http://');
 
         $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags((string) $item->value($attributionProperty, ['default' => '']));
         }
         if (empty($attribution)) {
-            $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
+            $attribution = $isLicenseUrl || empty($license)
+                ? $this->view->setting('iiifserver_manifest_attribution_default')
+                : $license;
         }
         $manifest['attribution'] = $attribution;
+
+        if ($license && $attribution !== $license) {
+            $manifest['license'] = $license;
+        }
 
         $logo = $this->view->setting('iiifserver_manifest_logo_default');
         if ($logo) {
