@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2021 Daniel Berthereau
+ * Copyright 2015-2022 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -213,7 +213,7 @@ class IiifInfo2 extends AbstractHelper
         $param = $helper($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
-                // if ($this->getContext() === 'http://iiif.io/api/presentation/3/context.json') {
+                // if ($this->context() === 'http://iiif.io/api/presentation/3/context.json') {
                 //     return null;
                 // }
                 $url = $helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iifserver_manifest_rights_text');
@@ -241,7 +241,7 @@ class IiifInfo2 extends AbstractHelper
         }
 
         // Text is not allowed for presentation 3.
-        // $isPresentation3 = $this->getContext() === 'http://iiif.io/api/presentation/3/context.json';
+        // $isPresentation3 = $this->context() === 'http://iiif.io/api/presentation/3/context.json';
         $isPresentation3 = false;
         $orText = $orText && !$isPresentation3;
 

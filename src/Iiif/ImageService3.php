@@ -116,7 +116,7 @@ class ImageService3 extends AbstractResourceType
      * @todo Manage extensions.
      *
      * {@inheritDoc}
-     * @see \IiifServer\Iiif\AbstractResourceType::getContext()
+     * @see \IiifServer\Iiif\AbstractResourceType::context()
      */
     public function context(): ?string
     {

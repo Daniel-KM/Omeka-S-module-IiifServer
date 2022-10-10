@@ -195,7 +195,7 @@ class IiifCollectionList2 extends AbstractHelper
     /**
      * Added in order to use trait TraitRights.
      */
-    protected function getContext()
+    protected function context()
     {
         return 'http://iiif.io/api/presentation/2/context.json';
     }
