@@ -105,7 +105,11 @@ class IiifInfo2 extends AbstractHelper
             $profile = [];
             $profile[] = 'http://iiif.io/api/image/2/level2.json';
             // Temporary fix. See https://github.com/UniversalViewer/universalviewer/issues/438.
-            $profile[] = [];
+            // This issue seems to be fixed in recent versions, but may still be
+            // loaded remotely on old external sites with old UniversalViewer.
+            // Anyway, it's no more supported.
+            // https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/38
+            // $profile[] = [];
             // According to specifications, the profile details should be omitted,
             // because only default formats, qualities and supports are supported
             // currently.
