@@ -44,7 +44,7 @@ trait TraitXml
      */
     protected $fixUtf8;
 
-    protected function initBasePath(): AbstractType
+    protected function initBasePath(): self
     {
         $services = $this->resource->getServiceLocator();
         $config = $services->get('Config');

@@ -48,6 +48,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
      * @todo Factorize with IiifManifest2 and AnnotationPage.
      *
      * @see \IiifServer\Iiif\AnnotationPage
+     * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
      *
      * @param MediaRepresentation $resource
      * @param int|string $index Used to set the standard name of the image.

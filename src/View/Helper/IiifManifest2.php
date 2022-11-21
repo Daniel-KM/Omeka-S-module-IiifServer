@@ -892,6 +892,11 @@ class IiifManifest2 extends AbstractHelper
             list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
             $canvas['width'] = $width;
             $canvas['height'] = $height;
+            $seeAlso = $this->seeAlso($media);
+            if ($seeAlso) {
+                $canvas['seeAlso'] = $seeAlso;
+                $canvas['otherContent'] = $this->otherContent($media);
+            }
         }
 
         $image = $this->_iiifImage($media, $index, $canvasUrl, $width, $height);
@@ -1693,5 +1698,86 @@ class IiifManifest2 extends AbstractHelper
             && $json['metadata']['generator'] === 'io_three';
         }
         return false;
+    }
+
+    /**
+     * @todo Factorize.
+     */
+    protected function seeAlso(MediaRepresentation $media): ?array
+    {
+        $relatedMedia = $this->relatedMediaOcr($media);
+        if (!$relatedMedia) {
+            return null;
+        }
+        return [
+            '@id' => $relatedMedia->originalUrl(),
+            'profile' => 'http://www.loc.gov/standards/alto/v3/alto.xsd',
+            'format' => 'application/alto+xml',
+            'label' => 'ALTO XML',
+        ];
+    }
+
+    /**
+     * @todo Factorize.
+     */
+    protected function otherContent(MediaRepresentation $media): ?array
+    {
+        $relatedMedia = $this->relatedMediaOcr($media);
+        if (!$relatedMedia) {
+            return null;
+        }
+        $id = $this->view->iiifUrl($relatedMedia->item(), 'iiifserver/uri', '2', [
+            'type' => 'annotation-page',
+            'name' => $media->id(),
+            'subtype' => 'line',
+        ]);
+        return [[
+            '@id' => $id,
+            '@type' => 'sc:AnnotationList',
+            'label' => 'Text of current page',
+        ]];
+    }
+
+    protected function relatedMediaOcr(MediaRepresentation $media): ?MediaRepresentation
+    {
+        static $relatedMedias = [];
+
+        $mediaId = $media->id();
+        if (isset($relatedMedias[$mediaId])) {
+            return $relatedMedias[$mediaId];
+        }
+
+        $callingResource = $media;
+        $callingResourceId = $callingResource->id();
+        $callingResourceBasename = pathinfo((string) $callingResource->source(), PATHINFO_FILENAME);
+        if (!$callingResourceBasename) {
+            return null;
+        }
+
+        // Get the ocr.
+        $media = null;
+        foreach ($callingResource->item()->media() as $media) {
+            if ($media->id() === $callingResourceId) {
+                continue;
+            }
+            $resourceBasename = pathinfo((string) $media->source(), PATHINFO_FILENAME);
+            if ($resourceBasename !== $callingResourceBasename) {
+                continue;
+            }
+            $mediaType = $media->mediaType();
+            if (!in_array($mediaType, [
+                'application/vnd.alto+xml',
+                'application/alto+xml',
+            ])) {
+                continue;
+            }
+            break;
+        }
+        if (!$media) {
+            return null;
+        }
+
+        $relatedMedias[$mediaId] = $media;
+        return $relatedMedias[$mediaId];
     }
 }
