@@ -1168,7 +1168,7 @@ class IiifManifest2 extends AbstractHelper
         $sequence = [];
         $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
         $sequence['@type'] = 'sc:Sequence';
-        $sequence['label'] = $this->view->translate('Unsupported extension. This manifest is being used as a wrapper for non-IIIF content (e.g., audio, video) and is unfortunately incompatible with IIIF viewers.');
+        $sequence['label'] = $this->view->translate('Unsupported extension. This manifest is being used as a wrapper for non-IIIF v2 content (e.g., audio, video) and is unfortunately incompatible with IIIF v2 viewers.');
         $sequence['compatibilityHint'] = 'displayIfContentUnsupported';
 
         $canvas = $this->_iiifCanvasPlaceholder();

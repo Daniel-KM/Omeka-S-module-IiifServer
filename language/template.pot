@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-10-10 00:00+0000\n"
+"POT-Creation-Date: 2022-11-21 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:60
+#: data/scripts/upgrade.php:61
 msgid ""
 "This version requires Archive Repertory 3.15.4 or greater (used for some 3D "
 "views)."
@@ -92,18 +92,18 @@ msgstr ""
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:971
+#: src/View/Helper/IiifManifest2.php:976
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1166
+#: src/View/Helper/IiifManifest2.php:1171
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
-"content (e.g., audio, video) and is unfortunately incompatible with IIIF "
-"viewers."
+"v2 content (e.g., audio, video) and is unfortunately incompatible with IIIF "
+"v2 viewers."
 msgstr ""
 
-#: data/scripts/upgrade.php:92
+#: data/scripts/upgrade.php:93
 #, php-format
 msgid ""
 "The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that "
@@ -113,22 +113,47 @@ msgid ""
 "two modules."
 msgstr ""
 
-#: data/scripts/upgrade.php:198
+#: data/scripts/upgrade.php:197
 msgid ""
 "The module IIIF Server is now totally independant from the module Image "
 "Server and any other external image server can be used."
 msgstr ""
 
-#: data/scripts/upgrade.php:202
+#: data/scripts/upgrade.php:201
 msgid ""
 "Check the config of the image server, if any, in the config of this module."
 msgstr ""
 
-#: data/scripts/upgrade.php:206
+#: data/scripts/upgrade.php:205
 #, php-format
 msgid ""
 "The module IIIF Server supports creation of structures through a table-of-"
 "contents-like value: see %sreadme%s."
+msgstr ""
+
+#: data/scripts/upgrade.php:215
+msgid ""
+"XML Alto is supported natively and it can be displayed as an overlay layer "
+"if your viewer supports it."
+msgstr ""
+
+#: data/scripts/upgrade.php:219
+msgid ""
+"The xml media-type should be a precise one: either \"application/alto+xml\", "
+"not \"text/xml\" or \"application/xml\"."
+msgstr ""
+
+#: data/scripts/upgrade.php:223
+msgid ""
+"New files are automatically managed, but you may need modules Bulk Edit or "
+"Easy Admin to fix old ones, if any."
+msgstr ""
+
+#: data/scripts/upgrade.php:227
+#, php-format
+msgid ""
+"Badly formatted xml files may be fixed dynamically, but it will affect "
+"performance. See %1$sreadme%2$s."
 msgstr ""
 
 #: src/Form/ConfigForm.php:28
@@ -670,7 +695,7 @@ msgstr ""
 msgid "The media server is unavailable for resource \"%s\"."
 msgstr ""
 
-#: src/Controller/PresentationController.php:125
+#: src/Controller/PresentationController.php:129
 #, php-format
 msgid "The type \"%s\" is currently only managed as uri, not url"
 msgstr ""
@@ -694,6 +719,10 @@ msgstr ""
 
 #: src/View/Helper/IiifManifest2.php:491
 msgid "elements"
+msgstr ""
+
+#: src/Iiif/AnnotationPage.php:206
+msgid "Text of the current page"
 msgstr ""
 
 #: src/Iiif/AbstractType.php:161
@@ -721,6 +750,16 @@ msgstr ""
 msgid "Missing required keys for iiif resource type \"%1$s\": \"%2$s\"."
 msgstr ""
 
+#: src/Iiif/TraitXml.php:73
+#, php-format
+msgid "Error: XML content seems empty for media #%d!"
+msgstr ""
+
+#: src/Iiif/TraitXml.php:91
+#, php-format
+msgid "Error: Cannot get XML content from media #%d!"
+msgstr ""
+
 #: src/Iiif/Rendering.php:59
 #, php-format
 msgid "Resource #%1$d: A media is required to build a canvas."
@@ -730,6 +769,12 @@ msgstr ""
 msgid "Attribution"
 msgstr ""
 
-#: config/module.config.php:520
+#: src/Mvc/Controller/Plugin/FixUtf8.php:74
+msgid ""
+"Warning: some files contain invalid unicode characters and cannot be "
+"processed quickly."
+msgstr ""
+
+#: config/module.config.php:524
 msgid "Provided by Example Organization"
 msgstr ""
