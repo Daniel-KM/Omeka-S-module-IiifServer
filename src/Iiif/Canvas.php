@@ -39,6 +39,7 @@ class Canvas extends AbstractResourceType
     use TraitBehavior;
     use TraitDescriptive;
     use TraitThumbnail;
+    // TODO Use TraitLinking for seeAlso.
 
     protected $type = 'Canvas';
 
@@ -229,6 +230,25 @@ class Canvas extends AbstractResourceType
             }
         }
         return $this->_storage['rendering'];
+    }
+
+    public function seeAlso(): array
+    {
+        if (!array_key_exists('seeAlso', $this->_storage)) {
+            $this->_storage['seeAlso'] = [];
+            if ($this->resource instanceof MediaRepresentation) {
+                $opts = $this->options;
+                $opts['callingResource'] = $this->resource;
+                $opts['callingMotivation'] = 'seeAlso';
+                foreach ($this->resource->item()->media() as $media) {
+                    $seeAlso = new SeeAlso($media, $opts);
+                    if ($seeAlso->id()) {
+                        $this->_storage['seeAlso'][] = $seeAlso;
+                    }
+                }
+            }
+        }
+        return $this->_storage['seeAlso'];
     }
 
     public function height(): ?int

@@ -162,7 +162,10 @@ class Manifest extends AbstractResourceType
         $index = 0;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['on'] === 'Canvas') {
+            if ($mediaInfo
+                && $mediaInfo['on'] === 'Canvas'
+                && ($mediaInfo['key'] ?? null) === 'annotation'
+            ) {
                 $items[] = new Canvas($media, [
                     'index' => ++$index,
                     'content' => $mediaInfo['content'],
@@ -382,6 +385,8 @@ class Manifest extends AbstractResourceType
 
     public function appendService(Service $service): AbstractType
     {
+        // Normally, default services are already prepared.
+        $this->services = $this->services ?? [];
         $this->services[] = $service;
         return $this;
     }
@@ -418,6 +423,7 @@ class Manifest extends AbstractResourceType
      *   3D model, to be downloaded.
      *
      * @todo Better manage mixed painting in canvas, for example an image that is part a video. In such a case, the manifest is generally build manually, so it's not the purpose of this module currently.
+     * @todo Manage media related to other (xml alto to its image).
      */
     protected function prepareMediaLists(): array
     {
@@ -429,6 +435,7 @@ class Manifest extends AbstractResourceType
         $canvasPaintings = [];
         $canvasSupplementings = [];
         $canvasRenderings = [];
+        $canvasSeeAlso = [];
         $manifestRenderings = [];
 
         // First loop to get the full list of types.
@@ -437,7 +444,7 @@ class Manifest extends AbstractResourceType
             'Image' => [],
             'Video' => [],
             'Sound' => [],
-            // Supplementing or Rendering (Universal Viewer only for now).
+            // Supplementing or Rendering or SeeAlso.
             'Text' => [],
             'Dataset' => [],
             'Model' => [],
@@ -509,6 +516,21 @@ class Manifest extends AbstractResourceType
         $manifestRenderings += array_replace($iiifTypes['Image'], $iiifTypes['Video'], $iiifTypes['Sound'],
             $iiifTypes['Text'], $iiifTypes['Dataset'], $iiifTypes['Model'], $iiifTypes['other']);
 
+        // TODO Manage dataset cleanerly.
+        foreach ($iiifTypes['other'] as $mediaId => $iiifType) {
+            $contentResource = $iiifType['content'];
+            if ($contentResource->type() === 'Dataset'
+                && in_array($contentResource->format(), [
+                    'application/alto+xml',
+                    'application/vnd.alto+xml',
+                ])
+            ) {
+                unset($iiifTypes['other'][$mediaId]);
+                unset($manifestRenderings[$mediaId]);
+                $canvasSeeAlso[$mediaId]['content'] = $contentResource;
+            }
+        }
+
         // Second loop to store the category.
         foreach (array_keys($result) as $mediaId) {
             if (isset($canvasPaintings[$mediaId])) {
@@ -525,6 +547,11 @@ class Manifest extends AbstractResourceType
                 $result[$mediaId] = $canvasRenderings[$mediaId];
                 $result[$mediaId]['on'] = 'Canvas';
                 $result[$mediaId]['key'] = 'rendering';
+                $result[$mediaId]['motivation'] = null;
+            } elseif (isset($canvasSeeAlso[$mediaId])) {
+                $result[$mediaId] = $canvasSeeAlso[$mediaId];
+                $result[$mediaId]['on'] = 'Canvas';
+                $result[$mediaId]['key'] = 'seeAlso';
                 $result[$mediaId]['motivation'] = null;
             } elseif (isset($manifestRenderings[$mediaId])) {
                 $result[$mediaId] = $manifestRenderings[$mediaId];

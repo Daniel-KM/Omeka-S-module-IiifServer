@@ -204,7 +204,7 @@ trait TraitLinking
     }
 
     /**
-     * @todo Normalize getSeeAlso().
+     * @todo Normalize seeAlso().
      *
      * @return \stdClass
      */
@@ -216,7 +216,7 @@ trait TraitLinking
         $property = $setting('iiifserver_manifest_seealso_property');
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
-        $values = $this->resource->value($property, ['all' => true]);
+        $values = $property ? $this->resource->value($property, ['all' => true]) : [];
         foreach ($values as $value) {
             $id = $value->uri() ?: $value->value();
             if (filter_var($id, FILTER_VALIDATE_URL)) {
