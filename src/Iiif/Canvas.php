@@ -199,7 +199,10 @@ class Canvas extends AbstractResourceType
             if (isset($this->options['key']) && $this->options['key'] === 'annotation'
                 && isset($this->options['motivation']) && $this->options['motivation'] === 'painting'
             ) {
-                $item = new AnnotationPage($this->resource, $this->options);
+                $opts = $this->options;
+                $opts['callingResource'] = $this->resource;
+                $opts['callingMotivation'] = 'painting';
+                $item = new AnnotationPage($this->resource, $opts);
                 $this->_storage['items'][] = $item;
             }
         }
@@ -210,11 +213,16 @@ class Canvas extends AbstractResourceType
     {
         if (!array_key_exists('annotations', $this->_storage)) {
             $this->_storage['annotations'] = [];
-            if (isset($this->options['key']) && $this->options['key'] === 'annotation'
-                && isset($this->options['motivation']) && $this->options['motivation'] !== 'painting'
-            ) {
-                $rendering = new AnnotationPage($this->resource, $this->options);
-                $this->_storage['annotations'][] = $rendering;
+            if ($this->resource instanceof MediaRepresentation) {
+                $opts = $this->options;
+                $opts['callingResource'] = $this->resource;
+                $opts['callingMotivation'] = 'annotation';
+                foreach ($this->resource->item()->media() as $media) {
+                    $annotation = new AnnotationPage($media, $opts);
+                    if ($annotation->id()) {
+                        $this->_storage['annotations'][] = $annotation;
+                    }
+                }
             }
         }
         return $this->_storage['annotations'];

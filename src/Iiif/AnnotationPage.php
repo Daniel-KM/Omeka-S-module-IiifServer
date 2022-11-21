@@ -29,6 +29,8 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+
 /**
  *@link https://iiif.io/api/presentation/3.0/#55-annotation-page
  */
@@ -90,12 +92,39 @@ class AnnotationPage extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
+    protected $callingResource;
+
+    protected $callingMotivation;
+
+    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    {
+        parent::__construct($resource, $options);
+        $this->callingResource = $options['callingResource'] ?? null;
+        $this->callingMotivation = $options['callingMotivation'] ?? null;
+        if ($this->callingResource && $this->callingMotivation === 'annotation') {
+            $this->initAnnotationPage();
+        }
+    }
+
     public function id(): ?string
     {
+        if ($this->callingMotivation !== 'painting') {
+            return $this->_storage['id'] ?? null;
+        }
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $this->resource->id(),
         ]);
+    }
+
+    public function label(): ?ValueLanguage
+    {
+        if ($this->callingMotivation === 'painting') {
+            return parent::label();
+        }
+        return isset($this->_storage['label'])
+            ? new ValueLanguage(['none' => [$this->_storage['label']]])
+            : null;
     }
 
     /**
@@ -103,10 +132,71 @@ class AnnotationPage extends AbstractResourceType
      *
      * The canvas can have multiple items, for example when a page is composed
      * of fragments.
+     *
+     * @todo Dereference AnnotationPage items, or not.
      */
     public function items(): array
     {
+        // Here, the annotations are dereferenced for now, so available via url.
+        if ($this->callingMotivation === 'annotation') {
+            return [];
+        }
+
         $item = new Annotation($this->resource, $this->options);
         return [$item];
+    }
+
+    /**
+     * Prepare annotation page.
+     *
+     * Only alto is managed for now to create AnnotationLine.
+     *
+     * Here, the canvas contains a supported image/audio/video to be displayed,
+     * no xml, pdf, etc. These other files can be attached to the displayable
+     * media.
+     *
+     * There are two ways to make a relation between two media: use a property
+     * with a linked media or use the same basename from the original source.
+     *
+     * @todo Merge with SeeAlso?
+     */
+    protected function initAnnotationPage(): AbstractType
+    {
+        if (empty($this->callingResource)) {
+            return $this;
+        }
+
+        $callingResourceId = $this->callingResource->id();
+        if ($this->resource->id() === $callingResourceId) {
+            return $this;
+        }
+
+        $callingResourceBasename = pathinfo((string) $this->callingResource->source(), PATHINFO_FILENAME);
+        if (!$callingResourceBasename) {
+            return $this;
+        }
+
+        $resourceBasename = pathinfo((string) $this->resource->source(), PATHINFO_FILENAME);
+        if ($resourceBasename !== $callingResourceBasename) {
+            return $this;
+        }
+
+        $mediaType = $this->resource->mediaType();
+        if (!in_array($mediaType, [
+            'application/vnd.alto+xml',
+            'application/alto+xml',
+        ])) {
+            return $this;
+        }
+
+        $this->_storage['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+            'type' => 'annotation-page',
+            'name' => $callingResourceId,
+            'subname' => 'line',
+        ]);
+        $this->_storage['type'] = $this->type;
+        $this->_storage['label'] = 'Text of the current page'; // @translate
+
+        return $this;
     }
 }

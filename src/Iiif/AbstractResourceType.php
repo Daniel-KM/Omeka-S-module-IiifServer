@@ -200,7 +200,7 @@ abstract class AbstractResourceType extends AbstractType
         } else {
             $values = $this->resource->value('dcterms:title', ['all' => true]);
         }
-        return new ValueLanguage($values, false, '[Untitled]');
+        return new ValueLanguage($values, false, '[Untitled]'); // @translate
     }
 
     /**
