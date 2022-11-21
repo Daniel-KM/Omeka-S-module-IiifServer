@@ -209,3 +209,25 @@ if (version_compare($oldVersion, '3.6.5.3', '<')) {
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
+
+if (version_compare($oldVersion, '3.6.8.3', '<')) {
+    $message = new Message(
+        'XML Alto is supported natively and it can be displayed as an overlay layer if your viewer supports it.' // @translate
+    );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'The xml media-type should be a precise one: either "application/alto+xml", not "text/xml" or "application/xml".', // @translate
+    );
+    $messenger->addWarning($message);
+    $message = new Message(
+        'New files are automatically managed, but you may need modules Bulk Edit or Easy Admin to fix old ones, if any.' // @translate
+    );
+    $messenger->addWarning($message);
+    $message = new Message(
+        'Badly formatted xml files may be fixed dynamically, but it will affect performance. See %1$sreadme%2$s.', // @translate
+        '<a href="https://github.com/symac/Omeka-S-module-IiifSearch">',
+        '</a>'
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addWarning($message);
+}
