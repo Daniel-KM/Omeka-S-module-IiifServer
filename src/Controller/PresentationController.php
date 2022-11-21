@@ -118,8 +118,12 @@ class PresentationController extends AbstractActionController
     public function genericAction()
     {
         $type = $this->params('type');
-        if ($type === 'canvas' && $this->params('name')) {
+        $name = $this->params('name');
+        if ($type === 'canvas' && $name) {
             return $this->canvasAction();
+        }
+        if ($type === 'annotation-page' && $name && $this->params('subtype')) {
+            return $this->annotationPageLineAction();
         }
         return $this->jsonError(new Message(
             'The type "%s" is currently only managed as uri, not url', // @translate
@@ -141,10 +145,7 @@ class PresentationController extends AbstractActionController
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
-        $version = $this->requestedVersion();
-
         // When the id is a clean url identifier, the id is already extracted.
-
         $id = $this->params('id');
         try {
             $item = $this->api()->read('items', ['id' => $id])->getContent();
@@ -152,13 +153,17 @@ class PresentationController extends AbstractActionController
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
+        $viewHelpers = $this->viewHelpers();
+
+        $version = $this->requestedVersion();
+
         // In the manifest, the position is not the one set by the item.
         // The simplest way to check it is to recreate the manifest.
         // Furthermore, it allows to manage alphanumeric canvas names.
 
         // Normally, the identifier is the same in version 2 and version 3, so
         // use the manifest version 3, that can output the original resource.
-        $viewHelpers = $this->viewHelpers();
+
         /** @var \IiifServer\Iiif\Manifest $manifest */
         try {
             $manifest = $viewHelpers->get('iiifManifest')->__invoke($item, '3');
@@ -188,6 +193,45 @@ class PresentationController extends AbstractActionController
         }
 
         return $this->iiifJsonLd($canvas, $version);
+    }
+
+    protected function annotationPageLineAction()
+    {
+        // Unlike canvas, the name is the main media id.
+
+        $name = $this->params('name');
+        if (!$name) {
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $api = $this->api();
+
+        // When the id is a clean url identifier, the id is already extracted.
+        $id = $this->params('id');
+        try {
+            $api->read('items', ['id' => $id])->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        try {
+            $media = $api->read('media', ['item' => $id, 'id' => $name])->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $viewHelpers = $this->viewHelpers();
+        $iiifAnnotationPageLine = $viewHelpers->get('iiifAnnotationPageLine');
+
+        $version = $this->requestedVersion();
+
+        try {
+            $annotationPageLine = $iiifAnnotationPageLine($media, null, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+        }
+
+        return $this->iiifJsonLd($annotationPageLine, $version);
     }
 
     /**

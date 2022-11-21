@@ -113,12 +113,20 @@ class IiifUrl extends AbstractHelper
     {
         $apiVersion = $version ?: $this->defaultVersion;
 
+        $urlOptions = ['force_canonical' => true];
+        if (isset($params['query'])) {
+            $urlOptions['query'] = $params['query'];
+        }
+        if (isset($params['fragment'])) {
+            $urlOptions['fragment'] = $params['fragment'];
+        }
+
         if (is_array($resource)) {
             $identifiers = $this->iiifCleanIdentifiers->__invoke($resource);
             $urlIiif = $this->url->__invoke(
                 'iiifserver/set',
                 ['version' => $apiVersion, 'id' => implode(',', $identifiers)],
-                ['force_canonical' => true]
+                $urlOptions
             );
             return $this->forceToIfRequired($urlIiif);
         }
@@ -159,7 +167,7 @@ class IiifUrl extends AbstractHelper
         $urlIiif = $this->url->__invoke(
             $route ?: $mapRouteNames[$resourceName],
             $params,
-            ['force_canonical' => true]
+            $urlOptions
         );
 
         return $this->forceToIfRequired($urlIiif);

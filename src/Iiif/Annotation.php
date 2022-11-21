@@ -94,6 +94,14 @@ class Annotation extends AbstractResourceType
 
     public function id(): ?string
     {
+        if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
+            return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+                'type' => 'annotation-page',
+                'name' => $this->options['callingResource']->id(),
+                'subtype' => 'line',
+                'subname' => 'l' . $this->options['index'],
+            ]);
+        }
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation',
             'name' => $this->resource->id(),
@@ -102,20 +110,34 @@ class Annotation extends AbstractResourceType
 
     public function motivation(): ?string
     {
-        return isset($this->options['motivation']) ? $this->options['motivation'] : null;
+        return $this->options['motivation'] ?? null;
     }
 
-    public function body(): Annotation\Body
+    public function body()
     {
+        if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
+            return new Annotation\TextualBody($this->resource, $this->options);
+        }
         return new Annotation\Body($this->resource, $this->options);
     }
 
     public function target(): ?string
     {
-        // TODO Annotation target may not be a canvas (but for now it's always the case).
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => $this->options['target_type'] ?? 'canvas',
             'name' => $this->options['target_name'] ?? $this->resource->id(),
+            'subtype' => $this->options['target_subtype'] ?? null,
+            'subname' => $this->options['target_subname'] ?? null,
+            'query' => $this->options['target_query'] ?? null,
+            'fragment' => $this->options['target_fragment'] ?? null,
         ]);
+    }
+
+    public function label(): ?ValueLanguage
+    {
+        if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
+            return null;
+        }
+        return parent::label();
     }
 }

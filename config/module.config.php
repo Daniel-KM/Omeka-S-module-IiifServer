@@ -82,6 +82,8 @@ return [
     ],
     'view_helpers' => [
         'invokables' => [
+            'iiifAnnotationPageLine' => View\Helper\IiifAnnotationPageLine::class,
+            'iiifAnnotationPageLine3' => View\Helper\IiifAnnotationPageLine3::class,
             'iiifCollection' => View\Helper\IiifCollection::class,
             'iiifCollection2' => View\Helper\IiifCollection2::class,
             'iiifCollection3' => View\Helper\IiifCollection3::class,
@@ -185,7 +187,7 @@ return [
                     'uri' => [
                         'type' => \Laminas\Router\Http\Segment::class,
                         'options' => [
-                            'route' => "[/:version]/$prefix:id/:type[/:name][/:subname]",
+                            'route' => "[/:version]/$prefix:id/:type[/:name][/:subtype][/:subname]",
                             'constraints' => [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,

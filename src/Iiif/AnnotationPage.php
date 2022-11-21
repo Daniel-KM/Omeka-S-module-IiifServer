@@ -36,6 +36,8 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class AnnotationPage extends AbstractResourceType
 {
+    use TraitXml;
+
     protected $type = 'AnnotationPage';
 
     protected $keys = [
@@ -96,11 +98,17 @@ class AnnotationPage extends AbstractResourceType
 
     protected $callingMotivation;
 
+    protected $dereferenced = false;
+
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
         $this->callingResource = $options['callingResource'] ?? null;
         $this->callingMotivation = $options['callingMotivation'] ?? null;
+        $this->dereferenced = !empty($options['dereferenced']);
+        if ($this->dereferenced) {
+            $this->keys['@context'] = self::REQUIRED;
+        }
         if ($this->callingResource && $this->callingMotivation === 'annotation') {
             $this->initAnnotationPage();
         }
@@ -132,14 +140,11 @@ class AnnotationPage extends AbstractResourceType
      *
      * The canvas can have multiple items, for example when a page is composed
      * of fragments.
-     *
-     * @todo Dereference AnnotationPage items, or not.
      */
-    public function items(): array
+    public function items(): ?array
     {
-        // Here, the annotations are dereferenced for now, so available via url.
         if ($this->callingMotivation === 'annotation') {
-            return [];
+            return $this->_storage['items'] ?? null;
         }
 
         $item = new Annotation($this->resource, $this->options);
@@ -167,6 +172,7 @@ class AnnotationPage extends AbstractResourceType
         }
 
         $callingResourceId = $this->callingResource->id();
+
         if ($this->resource->id() === $callingResourceId) {
             return $this;
         }
@@ -192,10 +198,67 @@ class AnnotationPage extends AbstractResourceType
         $this->_storage['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $callingResourceId,
-            'subname' => 'line',
+            'subtype' => 'line',
         ]);
         $this->_storage['type'] = $this->type;
         $this->_storage['label'] = 'Text of the current page'; // @translate
+        $this->_storage['items'] = [];
+        if ($this->dereferenced) {
+            $this->initAnnotationPageLines();
+        }
+
+        if (!count($this->_storage['items'])) {
+            $this->_storage = [];
+        }
+
+        return $this;
+    }
+
+    /**
+     * Extract lines of an ocr.
+     */
+    protected function initAnnotationPageLines(): AbstractType
+    {
+        $this->_storage['items'] = [];
+
+        $this->initBasePath();
+
+        $xml = $this->loadXml($this->resource);
+        if (!$xml) {
+            return $this;
+        }
+
+        $xml->registerXPathNamespace('alto', 'http://www.loc.gov/standards/alto/ns-v3#');
+
+        $opts = [];
+        $opts['callingResource'] = $this->callingResource;
+        $opts['motivation'] = 'supplementing';
+        $opts['body'] = 'TextualBody';
+        $opts['target_name'] = $this->callingResource->id();
+        $index = 0;
+        foreach ($xml->xpath('/alto:alto/alto:Layout//alto:TextLine') as $xmlTextLine) {
+            $attributes = $xmlTextLine->attributes();
+            $zone = [];
+            $zone['left'] = (int) @$attributes->HPOS;
+            $zone['top'] = (int) @$attributes->VPOS;
+            $zone['width'] = (int) @$attributes->WIDTH;
+            $zone['height'] = (int) @$attributes->HEIGHT;
+            $opts['target_fragment'] = 'xywh=' . implode(',', $zone);
+            $value = '';
+            /** @var \SimpleXMLElement $xmlString */
+            foreach ($xmlTextLine->children() as $xmlString) {
+                if ($xmlString->getName() === 'String') {
+                    $attributes = $xmlString->attributes();
+                    $value .= (string) $attributes->CONTENT . ' ';
+                }
+            }
+            $opts['value'] = trim($value);
+            if (!strlen($opts['value'])) {
+                continue;
+            }
+            $opts['index'] = ++$index;
+            $this->_storage['items'][] = new Annotation($this->resource, $opts);
+        }
 
         return $this;
     }
