@@ -24,6 +24,7 @@ $api = $services->get('Omeka\ApiManager');
 $config = require dirname(__DIR__, 2) . '/config/module.config.php';
 $defaultSettings = $config[strtolower(__NAMESPACE__)]['config'];
 $settings = $services->get('Omeka\Settings');
+$messenger = $services->get('ControllerPluginManager')->get('messenger');
 
 if (version_compare($oldVersion, '3.5.1', '<')) {
     $this->createTilesMainDir($serviceLocator);
@@ -95,7 +96,6 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
         '</a>'
     );
     $message->setEscapeHtml(false);
-    $messenger = new Messenger();
     $messenger->addWarning($message);
 
     $property = $settings->get('iiifserver_manifest_license_property');
@@ -193,7 +193,6 @@ if (version_compare($oldVersion, '3.6.5.3', '<')) {
     );
     $settings->delete('iiifserver_manifest_image_api_disabled');
 
-    $messenger = new Messenger();
     $message = new Message(
         'The module IIIF Server is now totally independant from the module Image Server and any other external image server can be used.' // @translate
     );
