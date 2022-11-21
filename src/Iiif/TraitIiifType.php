@@ -55,7 +55,7 @@ trait TraitIiifType
         'dctype:Model' => 'Model',
     ];
 
-    protected $mediaTypeTypes = [
+    protected $mainMediaTypes = [
         // 'application',
         'audio' => 'Sound',
         // 'example',
@@ -79,6 +79,7 @@ trait TraitIiifType
         'application/ogg' => 'Video',
         'application/pdf' => 'Text',
         'application/rtf' => 'Text',
+
         'application/vnd.ms-access' => 'Dataset',
         'application/vnd.ms-excel' => 'Dataset',
         'application/vnd.ms-powerpoint' => 'Text',
@@ -89,23 +90,58 @@ trait TraitIiifType
         'application/vnd.oasis.opendocument.formula' => 'Text',
         'application/vnd.oasis.opendocument.graphics' => 'Image',
         'application/vnd.oasis.opendocument.presentation' => 'Text',
+        'application/vnd.oasis.opendocument.presentation-flat-xml' => 'Text',
         'application/vnd.oasis.opendocument.spreadsheet' => 'Dataset',
+        'application/vnd.oasis.opendocument.spreadsheet-flat-xml' => 'Dataset',
         'application/vnd.oasis.opendocument.text' => 'Text',
+        'application/vnd.oasis.opendocument.text-flat-xml' => 'Text',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Text',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Text',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Dataset',
-        'application/vnd.threejs+json' => 'Model',
+
+        'application/xhtml+xml' => 'Text',
+        'application/xml' => 'Dataset',
+        'text/html' => 'Text',
+        'text/xml' => 'Dataset',
+
         'application/x-gzip' => null,
         'application/x-ms-wmp' => null,
         'application/x-msdownload' => null,
         'application/x-shockwave-flash' => null,
         'application/x-tar' => null,
         'application/zip' => null,
-        'application/xml' => 'Text',
-        // @see \Next\File\TempFile::xmlMediaTypes
-        'application/vnd.recordare.musicxml' => 'Text',
-        'application/vnd.mei+xml' => 'Text',
-        'application/vnd.pdf2xml+xml' => 'Text',
+
+        'image/svg+xml' => 'Image',
+
+        // Common in library and culture world.
+        'application/vnd.alto+xml' => 'Dataset', // Deprecated in 2017.
+        'application/alto+xml' => 'Dataset',
+        'application/vnd.bnf.refnum+xml' => 'Dataset',
+        'application/vnd.iccu.mag+xml' => 'Dataset',
+        'application/vnd.marc21+xml' => 'Dataset', // Deprecated in 2011.
+        'application/marcxml+xml' => 'Dataset',
+        'application/vnd.mets+xml' => 'Dataset', // Deprecated in 2011.
+        'application/mets+xml' => 'Dataset',
+        'application/vnd.mods+xml' => 'Dataset', // Deprecated in 2011.
+        'application/mods+xml' => 'Dataset',
+        'application/vnd.mei+xml' => 'Dataset',
+        'application/vnd.recordare.musicxml' => 'Dataset',
+        'application/vnd.recordare.musicxml+xml' => 'Dataset',
+        'application/vnd.openarchives.oai-pmh+xml' => 'Dataset',
+        'application/vnd.tei+xml' => 'Dataset', // Deprecated in 2011.
+        'application/tei+xml' => 'Dataset',
+
+        'application/vnd.threejs+json' => 'Model',
+        'model/vnd.collada+xml' => 'Model',
+
+        'application/atom+xml' => 'Dataset',
+        'application/rss+xml' => 'Dataset',
+
+        // Used in IiifSearch.
+        'application/vnd.pdf2xml+xml' => 'Dataset',
+
+        // Omeka should support itself.
+        'text/vnd.omeka+xml' => 'Dataset',
     ];
 
     /**
@@ -114,11 +150,11 @@ trait TraitIiifType
      * @var array
      */
     protected $mediaLabels = [
-        // @see \Omeka\Form\SettingForm::MEDIA_TYPE_WHITELIST
         'application/msword' => 'Document Word',
         'application/ogg' => 'Sound OGG',
         'application/pdf' => 'Document PDF',
         'application/rtf' => 'Document RTF',
+
         'application/vnd.ms-access' => 'Database Access',
         'application/vnd.ms-excel' => 'Spreadsheet Excel',
         'application/vnd.ms-powerpoint' => 'Presentation Powerpoint',
@@ -129,22 +165,55 @@ trait TraitIiifType
         'application/vnd.oasis.opendocument.formula' => 'Formula OpenDocument',
         'application/vnd.oasis.opendocument.graphics' => 'Graphics OpenDocument',
         'application/vnd.oasis.opendocument.presentation' => 'Presentation OpenDocument',
+        'application/vnd.oasis.opendocument.presentation-flat-xml' => 'Presentation OpenDocument',
         'application/vnd.oasis.opendocument.spreadsheet' => 'Spreadsheet OpenDocument',
+        'application/vnd.oasis.opendocument.spreadsheet-flat-xml' => 'Spreadsheet OpenDocument',
         'application/vnd.oasis.opendocument.text' => 'Document OpenDocument',
+        'application/vnd.oasis.opendocument.text-flat-xml' => 'Document OpenDocument',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Document Word',
         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Presentation Powerpoint',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Spreadsheet Excel',
+
+        'application/xhtml+xml' => 'Web page',
+        'application/xml' => 'XML',
+        'text/html' => 'Web page',
+        'text/xml' => 'XML',
+
         'application/x-gzip' => 'Achive Zip',
         'application/x-ms-wmp' => 'Video Windows',
         'application/x-msdownload' => 'File Windows',
         'application/x-shockwave-flash' => 'Flash',
         'application/x-tar' => 'Archive Tar',
         'application/zip' => 'Archive Zip',
-        'application/xml' => 'XML',
-        // @see \Next\File\TempFile::xmlMediaTypes
-        'application/vnd.recordare.musicxml' => 'MusicXML',
+
+        'image/svg+xml' => 'Image SVG',
+
+        'application/vnd.alto+xml' => 'ALTO XML', // Deprecated in 2017.
+        'application/alto+xml' => 'ALTO XML',
+        'application/vnd.bnf.refnum+xml' => 'BnF RefNum XML',
+        'application/vnd.iccu.mag+xml' => 'MAG XML',
+        'application/vnd.marc21+xml' => 'MARC21', // Deprecated in 2011.
+        'application/marcxml+xml' => 'MARC XML',
+        'application/vnd.mets+xml' => 'METS XML', // Deprecated in 2011.
+        'application/mets+xml' => 'METS XML',
+        'application/vnd.mods+xml' => 'MODS XML', // Deprecated in 2011.
+        'application/mods+xml' => 'MODS XML',
         'application/vnd.mei+xml' => 'Music MEI',
-        'application/vnd.pdf2xml+xml' => 'Document PDF',
+        'application/vnd.recordare.musicxml' => 'MusicXML',
+        'application/vnd.recordare.musicxml+xml' => 'MusicXML',
+        'application/vnd.openarchives.oai-pmh+xml' => 'OAI-PMH',
+        'application/vnd.tei+xml' => 'TEI XML', // Deprecated in 2011.
+        'application/tei+xml' => 'TEI XML',
+
+        'application/vnd.threejs+json' => 'Model ThreeJS',
+        'model/vnd.collada+xml' => 'Model Collada',
+
+        'application/atom+xml' => 'Atom feed',
+        'application/rss+xml' => 'RSS feed',
+
+        'application/vnd.pdf2xml+xml' => 'Document PDF/XML',
+
+        'text/vnd.omeka+xml' => 'Omeka Resource',
     ];
 
     protected $rendererTypes = [
