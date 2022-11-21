@@ -15,8 +15,8 @@ external one, like [Cantaloupe] or [IIP Image].
 
 The full specifications of the [International Image Interoperability Framework]
 standard are supported (service 2 or 3, level 2), so any widget that supports it
-can use it. Rotation, zoom, inside search, etc. may be managed too. Dynamic
-lists of records may be created, for example for browse pages.
+can use it. Rotation, zoom, inside search, text overlay, etc. may be managed
+too. Dynamic lists of records may be created, for example for browse pages.
 
 The IIIF manifests can be displayed with many viewers, the integrated [OpenSeadragon],
 the [Universal Viewer], the advanced [Mirador], or the lighter and themable [Diva],
@@ -191,6 +191,22 @@ display page will use that manifest URL to retrieve images and metadata for the
 viewer.
 
 ### Config options for manifest
+
+#### Text overlay
+
+For the overlay, only alto xml files are supported currently. They are
+automatically included in the manifest.
+
+To enable it, you may check config of the viewer, for example add plugin "overlay"
+in the site setting of Mirador.
+
+The alto xml files should be attached to the item as a media for now and it
+should have the same source filename than the image (except extension).
+
+A future version will allow to use a linked media or a uri via a property.
+
+A full example of iiif manifest with search, autocomplete and overlay can be
+found in the [Wellcome library](https://iiif.wellcomecollection.org/presentation/v2/b19956435).
 
 #### Input format of the property for structures (table of contents)
 
@@ -611,6 +627,8 @@ TODO / Bugs
 - [ ] Use a list of classes or templates to determine the 3D files.
 - [ ] Create a table to cache big iiif manifests (useless for image info.json).
 - [ ] Always return a thumbnail in iiif v3.
+- [ ] Include thumbnails in canvas to avoid fetching info.json (so cache whole manifest).
+- [ ] Include pdf as rendering.
 
 See module [Image Server].
 
