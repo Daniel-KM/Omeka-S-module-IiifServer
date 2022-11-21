@@ -233,6 +233,8 @@ trait TraitIiifType
 
     protected function initIiifType(): AbstractType
     {
+        $this->type = null;
+
         if ($this->resource->ingester() === 'iiif') {
             $mediaData = $this->resource->mediaData();
             if (isset($mediaData['type'])) {
@@ -249,6 +251,7 @@ trait TraitIiifType
                     $this->type = 'Image';
                     return $this;
                 }
+                $this->type = $mediaData['@type'];
                 return $this;
             }
             if (isset($mediaData['format'])) {
@@ -258,35 +261,38 @@ trait TraitIiifType
 
         if (empty($mediaType)) {
             $mediaType = $this->resource->mediaType();
-        }
-
-        if ($mediaType) {
-            // TODO Improve detection of type "Model".
-            if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
-                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
-                // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
-                if ($extension === 'json' || $extension === 'gltf') {
-                    $this->type = 'Model';
-                    return $this;
-                }
-            }
-            if ($mediaType === 'application/octet-stream') {
-                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
-                if ($extension === 'glb') {
-                    $this->type = 'Model';
-                    return $this;
-                }
-            }
-            $mediaTypeType = strtok($mediaType, '/');
-            if (isset($this->mediaTypeTypes[$mediaTypeType])) {
-                $this->type = $this->mediaTypeTypes[$mediaTypeType];
+            if (empty($mediaType)) {
                 return $this;
             }
         }
 
-        // Managed some other common media types.
+        // Managed some common media types.
         if (isset($this->mediaTypes[$mediaType])) {
             $this->type = $this->mediaTypes[$mediaType];
+            return $this;
+        }
+
+        // TODO Improve detection of type "Model".
+        if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
+            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
+            if ($extension === 'json' || $extension === 'gltf') {
+                $this->type = 'Model';
+                return $this;
+            }
+        }
+
+        if ($mediaType === 'application/octet-stream') {
+            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            if ($extension === 'glb') {
+                $this->type = 'Model';
+                return $this;
+            }
+        }
+
+        $mainMediaType = strtok($mediaType, '/');
+        if (isset($this->mainMediaTypes[$mainMediaType])) {
+            $this->type = $this->mainMediaTypes[$mainMediaType];
             return $this;
         }
 
