@@ -83,6 +83,7 @@ return [
     'view_helpers' => [
         'invokables' => [
             'iiifAnnotationPageLine' => View\Helper\IiifAnnotationPageLine::class,
+            'iiifAnnotationPageLine2' => View\Helper\IiifAnnotationPageLine2::class,
             'iiifAnnotationPageLine3' => View\Helper\IiifAnnotationPageLine3::class,
             'iiifCollection' => View\Helper\IiifCollection::class,
             'iiifCollection2' => View\Helper\IiifCollection2::class,

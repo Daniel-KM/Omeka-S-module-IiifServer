@@ -216,6 +216,8 @@ class AnnotationPage extends AbstractResourceType
 
     /**
      * Extract lines of an ocr.
+     *
+     * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
      */
     protected function initAnnotationPageLines(): AbstractType
     {
