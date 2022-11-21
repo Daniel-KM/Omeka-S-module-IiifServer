@@ -119,7 +119,9 @@ class IiifAnnotationPageLine2 extends AbstractHelper
         $annotationPage['@type'] = 'sc:AnnotationList';
         $annotationPage['resources'] = [];
 
-        $xml->registerXPathNamespace('alto', 'http://www.loc.gov/standards/alto/ns-v3#');
+        $namespaces = $xml->getDocNamespaces();
+        $altoNamespace = $namespaces['alto'] ?? $namespaces[''] ?? 'http://www.loc.gov/standards/alto/ns-v4#';
+        $xml->registerXPathNamespace('alto', $altoNamespace);
 
         $index = 0;
         foreach ($xml->xpath('/alto:alto/alto:Layout//alto:TextLine') as $xmlTextLine) {

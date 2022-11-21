@@ -136,7 +136,9 @@ class AnnotationPage extends AbstractResourceType
     }
 
     /**
-     * As the process converts Omeka resource, there is only one file by canvas.
+     * @todo Canvas multiple items.
+     *
+     * There is only one file by canvas for now: one item = one document.
      *
      * The canvas can have multiple items, for example when a page is composed
      * of fragments.
@@ -230,7 +232,9 @@ class AnnotationPage extends AbstractResourceType
             return $this;
         }
 
-        $xml->registerXPathNamespace('alto', 'http://www.loc.gov/standards/alto/ns-v3#');
+        $namespaces = $xml->getDocNamespaces();
+        $altoNamespace = $namespaces['alto'] ?? $namespaces[''] ?? 'http://www.loc.gov/standards/alto/ns-v4#';
+        $xml->registerXPathNamespace('alto', $altoNamespace);
 
         $opts = [];
         $opts['callingResource'] = $this->callingResource;
