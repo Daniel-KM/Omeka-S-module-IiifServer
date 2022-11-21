@@ -131,6 +131,7 @@ return [
     ],
     'controller_plugins' => [
         'invokables' => [
+            'fixUtf8' => Mvc\Controller\Plugin\FixUtf8::class,
             'iiifImageJsonLd' => Mvc\Controller\Plugin\IiifImageJsonLd::class,
             'iiifJsonLd' => Mvc\Controller\Plugin\IiifJsonLd::class,
             'rangeToArray' => Mvc\Controller\Plugin\RangeToArray::class,
