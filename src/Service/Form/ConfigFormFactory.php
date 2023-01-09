@@ -15,10 +15,9 @@ class ConfigFormFactory implements FactoryInterface
         $hasCleanUrl = $module
             && $module->getState() === \Omeka\Module\Manager::STATE_ACTIVE;
 
-        $form = new ConfigForm(null, $options);
-        $form
-            ->setHasCleanUrl($hasCleanUrl)
-            ->setEventManager($services->get('EventManager'));
-        return $form;
+        $form = new ConfigForm(null, $options ?? []);
+        $form->setEventManager($services->get('EventManager'));
+        return $form
+            ->setHasCleanUrl($hasCleanUrl);
     }
 }

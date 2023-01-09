@@ -1362,7 +1362,7 @@ class IiifManifest2 extends AbstractHelper
         $ascendants = [];
         $buildStructure($rangesToBuild, $structure, $ascendants);
 
-        $structure = reset($structure);
+        $structure = reset($structure) ?: [];
 
         return $structure;
     }
