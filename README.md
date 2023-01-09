@@ -210,6 +210,8 @@ found in the [Wellcome library](https://iiif.wellcomecollection.org/presentation
 
 #### Input format of the property for structures (table of contents)
 
+IIIF allows to display [structures] of documents.
+
 The default structure is the simple sequential list of iiif medias.
 
 To build structures for a complex document with a table of contents, you can use
@@ -224,27 +226,28 @@ Example:
 
 ```
 cover, Front Cover, 1
-r1, Introduction, 2; 3; 4; 5
+r2, Introduction, 2; 3; 4; 5
 backCover, Back Cover, 6
 ```
 
 The range id (first part of a row) is the name of the range, that will be used
-to create the uri. To avoid collision with other indexes, it should not be a
+to create the uri. To avoid collision with other indexes, it must not be a
 numeric value. It should be a simple alphanumeric name, without space, diacritic
-or any other special character (so stable among all coding standards). It must
-not contain a "/". Anyway, this name is url-encoded in the final uri.
+or any other special character, so it will be stable among all coding standards.
+It must not contain characters `:/?&#%=<>;,`. Ideally, the url-encoded id should be
+the same than the id. Anyway, this name is url-encoded in the final uri.
 
 Furthermore, the range ids must be unique in all the item.
 
 It can be skipped, so the line number will be used. In that case, keep the first
-comma to indicate that there is no specific range name. For example if `r1` was
-not provided above, the range id will be `r2`, so `r` for range and `2` for
-second line. Nevertheless, this possibility is not recommended because the uri
-will change when a new line will be inserted.
+comma to indicate that there is no specific range name. For example if `r2` was
+not provided above, the internal range id will be `r2` anyway, so `r` for range
+and `2` for second line. Nevertheless, this possibility is not recommended
+because the uri will change when a new line will be inserted.
 
-The second part of the row is the label of the range, for example a chapter. If
-empty, it will be used for the structure, but not displayed in the table of the
-viewer.
+The second part of the row is the label of the range, for example the title of
+the chapter. If empty, it will be used for the structure, but not displayed in
+the table of the viewer.
 
 The last part of the row is the list of the top canvases or top ranges that the
 current range contains, so generally a list of images and sub-sections.
@@ -257,11 +260,21 @@ will be managed as range indexes if they are in the list of the range ids (first
 part of the row). If not, it will be a canvas alphanumeric name.
 
 The first range id of the first line is  the root of the tree. There can be only
-one root. If there are multiple roots (see below), a main range is added with
-all the roots as branches.
+one root in iiif v3, but multiple structures. So if there are multiple roots
+(see below), a main range is added with all the roots as main branches.
 
-So it's possible to build complex hierarchical table of contents from this
-literal value, with such an incomplete and incorrect example:
+If you use a xml value with module [DataType Rdf], the structure above will be
+composed of canvases (element `c` here):
+
+```xml
+<c id="cover" label="Front Cover" range="1"/>
+<c id="r2" label="Introduction" range="2; 3; 4; 5"/>
+<c id="backcover" label="Back Cover" range="6"/>
+```
+
+So it is possible to build complex hierarchical table of contents from this
+literal value, even with such an incomplete example, that is automatically
+completed with pages that are not sections:
 
 ```
 toc, Table of Contents, cover; intro; r1; r2; backcover
@@ -275,6 +288,41 @@ toc, Table of Contents, cover; intro; r1; r2; backcover
     backcover, Back cover, "backcover"
 illustration1, First illustration non paginated, illus1
 illustration3, Third illustration non paginated, illus3
+```
+
+equivalent of this nested xml:
+
+```xml
+<c id="toc" label="Table of Contents">
+    <c id="cover" label="Front cover"/>
+    <c id="intro" label="Introduction" range="2-5"/>
+    <c id="r1" label="First chapter" range="6; r1-1; r1-2; 12">
+        <c id="r1-1" label="First section" range="r1-1-1; r1-1-2; illustration1; illus2">
+            <c id="r1-1-1" label="First sub-section" range="8-9"/>
+            <c id="r1-1-2" label="Second sub-section" range="9-10"/>
+            <c id="illustration1" label="First illustration non paginated" range="illus1"/>
+        </c>
+    </c>
+    <c id="r2" label="Second chapter" range="13"/>
+    <c id="backcover" label="Back cover"/>
+</c>
+<c id="illustration3" label="Third illustration non paginated" range="illus3"/>
+```
+
+equivalent of this flat indented xml (not recommended):
+
+```xml
+<c id="toc" label="Table of Contents" range="cover; intro; r1; r2; backcover"/>
+    <c id="cover" label="Front cover" range="cover"/>
+    <c id="intro" label="Introduction" range="2-5"/>
+    <c id="r1" label="First chapter" range="6; r1-1; r1-2; 12"/>
+        <c id="r1-1" label="First section" range="r1-1-1; r1-1-2; illustration1; illus2"/>
+            <c id="r1-1-1" label="First sub-section" range="8-9"/>
+            <c id="r1-1-2" label="Second sub-section" range="9-10"/>
+    <c id="r2" label="Second chapter" range="13"/>
+    <c id="backcover" label="Back cover" range="backcover"/>
+<c id="illustration1" label="First illustration non paginated" range="illus1"/>
+<c id="illustration3" label="Third illustration non paginated" range="illus3"/>
 ```
 
 to this json output (iiif v2):
@@ -629,6 +677,7 @@ TODO / Bugs
 - [ ] Always return a thumbnail in iiif v3.
 - [ ] Include thumbnails in canvas to avoid fetching info.json (so cache whole manifest).
 - [ ] Include pdf as rendering.
+- [ ] Check if multiple roots is working for structures in iiif v3.
 
 See module [Image Server].
 
@@ -707,6 +756,8 @@ format.
 [Imagick]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
 [IiifServer.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
+[structures]: https://iiif.io/api/presentation/3.0/#54-range
+[DataType Rdf]: https://gitlab.com/Daniel-KM/Omeka-S-module-DataTypeRdf
 [fix #omeka/omeka-s/1714]: https://github.com/omeka/omeka-s/pull/1714
 [Guest]: https://gitlab.com/Daniel-KM/Omeka-S-module-Guest
 [it doesn't allow the url encoded `/`]: https://stackoverflow.com/questions/13834007/url-with-encoded-slashes-goes-to-404/13839424#13839424
