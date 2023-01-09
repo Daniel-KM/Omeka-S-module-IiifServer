@@ -141,7 +141,7 @@ class IiifManifest2 extends AbstractHelper
         $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
 
         // Required for TraitRights.
-        $helpers = $this->getView()->getHelperPluginManager();
+        $helpers = $this->view->getHelperPluginManager();
         $this->setting = $helpers->get('setting');
 
         // The base url for some other ids to quick process.
@@ -710,7 +710,7 @@ class IiifManifest2 extends AbstractHelper
 
         if ($media->hasThumbnails()) {
             $imageUrl = $media->thumbnailUrl('medium');
-            $size = $this->getView()->imageSize($media, 'medium');
+            $size = $this->view->imageSize($media, 'medium');
             if ($size) {
                 $thumbnail = [
                     '@id' => $imageUrl,
@@ -757,7 +757,7 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifThumbnailAsset(AssetRepresentation $asset)
     {
-        $size = $this->getView()->imageSize($asset);
+        $size = $this->view->imageSize($asset);
         if ($size) {
             $thumbnail = [
                 '@id' => $asset->assetUrl(),
@@ -899,7 +899,7 @@ class IiifManifest2 extends AbstractHelper
         } else {
             // Size of canvas should be the double of small images (< 1200 px),
             // but only when more than one image is used by a canvas.
-            $imageSize = $this->getView()->imageSize($media, 'original');
+            $imageSize = $this->view->imageSize($media, 'original');
             list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
             $canvas['width'] = $width;
             $canvas['height'] = $height;
@@ -1248,7 +1248,7 @@ class IiifManifest2 extends AbstractHelper
         $rangesChildren = [];
         $canvases = [];
 
-        $rangeToArray = $this->getView()->plugin('rangeToArray');
+        $rangeToArray = $this->view->plugin('rangeToArray');
 
         $isInteger = function ($value): bool {
             return (string) (int) $value === (string) $value;

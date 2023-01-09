@@ -54,7 +54,7 @@ class IiifCollection3 extends AbstractHelper
         $format = 'collection';
         $type = 'collection';
         $params = compact('format', 'collection', 'resource', 'type');
-        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
+        $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $collection->isValid(true);
         return $collection;
     }

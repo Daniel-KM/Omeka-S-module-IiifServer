@@ -52,7 +52,7 @@ class IiifCanvas3 extends AbstractHelper
         $format = 'canvas';
         $type = 'media';
         $params = compact('format', 'canvas', 'resource', 'type');
-        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
+        $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $canvas->isValid(true);
         return $canvas;
     }

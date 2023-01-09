@@ -69,7 +69,7 @@ class IiifManifest3 extends AbstractHelper
             return $this->buildManifestItem($resource);
         }
         if ($resourceName == 'item_sets') {
-            return $this->getView()->iiifCollection3($resource);
+            return $this->view->iiifCollection3($resource);
         }
     }
 
@@ -88,7 +88,7 @@ class IiifManifest3 extends AbstractHelper
         $format = 'manifest';
         $type = 'item';
         $params = compact('format', 'manifest', 'resource', 'type');
-        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
+        $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $manifest->isValid(true);
         return $manifest;
     }

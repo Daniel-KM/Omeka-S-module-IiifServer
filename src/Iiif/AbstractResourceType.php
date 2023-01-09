@@ -167,9 +167,9 @@ abstract class AbstractResourceType extends AbstractType
         $this->resource = $resource;
         $this->options = $options ?? [];
 
-        $serviceLocator = $resource->getServiceLocator();
-        $this->logger = $serviceLocator->get('Omeka\Logger');
-        $viewHelpers = $serviceLocator->get('ViewHelperManager');
+        $services = $resource->getServiceLocator();
+        $this->logger = $services->get('Omeka\Logger');
+        $viewHelpers = $services->get('ViewHelperManager');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->setting = $viewHelpers->get('setting');
         $this->urlHelper = $viewHelpers->get('url');

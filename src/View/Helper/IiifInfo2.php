@@ -209,7 +209,7 @@ class IiifInfo2 extends AbstractHelper
      */
     protected function rightsResource(MediaRepresentation $resource = null): ?string
     {
-        $setting = $this->getView()->getHelperPluginManager()->get('setting');
+        $setting = $this->view->getHelperPluginManager()->get('setting');
         $url = null;
         $orUrl = false;
         $orText = false;

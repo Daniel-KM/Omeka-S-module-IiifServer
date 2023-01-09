@@ -67,7 +67,7 @@ class IiifAnnotationPageLine3 extends AbstractHelper
         $format = 'annotationPage';
         $type = 'media';
         $params = compact('format', 'annotationPage', 'resource', 'type');
-        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
+        $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $annotationPage->isValid(true);
         return $annotationPage;
     }

@@ -87,7 +87,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        $this->setting = $this->getView()->getHelperPluginManager()->get('setting');
+        $this->setting = $this->view->getHelperPluginManager()->get('setting');
         $license = $this->rightsResource();
         if ($license) {
             $manifest['license'] = $license;

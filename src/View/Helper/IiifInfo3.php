@@ -73,7 +73,7 @@ class IiifInfo3 extends AbstractHelper
         $format = 'info';
         $type = 'image';
         $params = compact('format', 'info', 'resource', 'type');
-        $this->getView()->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
+        $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $info->isValid(true);
         return $info;
     }
