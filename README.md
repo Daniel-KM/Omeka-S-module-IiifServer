@@ -724,7 +724,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2022 (see [Daniel-KM])
+* Copyright Daniel Berthereau, 2015-2023 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
 * Copyright Régis Robineau, 2019 (see [regisrob])
 * Copyright Satoru Nakamura, 2021 (see [nakamura196])
