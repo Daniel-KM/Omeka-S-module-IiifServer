@@ -104,7 +104,7 @@ abstract class AbstractType implements JsonSerializable
         return $this->content;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         // The validity check updates the content.
         $this->isValid(true);
