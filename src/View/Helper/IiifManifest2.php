@@ -524,13 +524,25 @@ class IiifManifest2 extends AbstractHelper
             $manifest['sequences'] = $sequences;
         }
 
-        $stProperty = $this->view->setting('iiifserver_manifest_structures_property');
-        if ($stProperty) {
-            $literalStructure = (string) $item->value($stProperty, ['default' => '']);
+        $structureProperty = $this->view->setting('iiifserver_manifest_structures_property');
+        if ($structureProperty) {
+            $literalStructure = (string) $item->value($structureProperty, ['default' => '']);
             if ($literalStructure) {
-                $structures = $this->extractStructure($literalStructure, $canvases);
-                if (count($structures) > 0) {
-                    $manifest['structures'] = $structures;
+                $structure = @json_decode($literalStructure, true);
+                if ($structure && is_array($structure)) {
+                    $firstRange = reset($structure);
+                    if (is_array($firstRange)) {
+                        $structure = isset($firstRange['type'])
+                            ? $this->convertToStructure2($structure)
+                            : $this->checkStructure($structure);
+                    } else {
+                        $structure = [];
+                    }
+                } else {
+                    $structure = $this->extractStructure($literalStructure, $canvases);
+                }
+                if (count($structure) > 0) {
+                    $manifest['structures'] = $structure;
                 }
             }
         }
@@ -1185,7 +1197,7 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Convert a literal structure into a range.
+     * Prepare to convert a json, literal or xml structure into a range.
      *
      * Iiif v2 supports only one structure, but managed differently. Ranges can
      * have either:
@@ -1197,20 +1209,40 @@ class IiifManifest2 extends AbstractHelper
      *
      * @see https://iiif.io/api/presentation/2.1/#range
      * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     *
+     * @see \IiifServer\Iiif\Manifest::extractStructure()
      */
     protected function extractStructure(string $literalStructure, array $sequenceCanvases): array
     {
-        $structure = @json_decode($literalStructure, true);
-        if ($structure && is_array($structure)) {
-            $firstRange = reset($structure);
-            if (!is_array($firstRange)) {
-                return [];
-            }
-            return isset($firstRange['type'])
-                ? $this->convertToStructure2($structure)
-                : $structure;
+        if (mb_substr(trim($literalStructure), 0, 1) !== '<') {
+            return $this->extractStructureProcess($literalStructure, $sequenceCanvases);
         }
 
+        // Flat xml.
+        // Nested xml.
+        // TODO Manage nested xml toc with SimpleXml.
+        // $isFlat = mb_strpos($literalStructure, '"/>') < mb_strpos($literalStructure, '<c ', 1);
+        $matches = [];
+        $lines = explode("\n", $literalStructure);
+        foreach ($lines as &$line) {
+            $line = trim($line);
+            if ($line && $line !== '</c>') {
+                preg_match('~\s*(<c\s*id="(?<id>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:range="(?<range>[^"]*)"\s*/>)?~', $line, $matches);
+                $line = $matches['id'] . ', ' . $matches['label'] . ', ' . $matches['range'];
+            }
+        }
+        unset($line);
+        return $this->extractStructureProcess(implode("\n", $lines), $sequenceCanvases);
+    }
+
+    /**
+     * Convert a literal structure into a range.
+     *
+     * @see https://iiif.io/api/presentation/2.1/#range
+     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     */
+    protected function extractStructureProcess(string $literalStructure, array $sequenceCanvases): array
+    {
         $structure = [];
         $ranges = [];
         $rangesChildren = [];
@@ -1319,6 +1351,7 @@ class IiifManifest2 extends AbstractHelper
             }
         };
 
+        $buildStructure = null;
         $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants) use ($ranges, $canvases, $rangesChildren, $isInteger, $appendItem, &$buildStructure): void {
             // Determine the type of range items.
             $childrenAsKeys = array_flip($itemNames);
@@ -1364,6 +1397,14 @@ class IiifManifest2 extends AbstractHelper
 
         $structure = reset($structure) ?: [];
 
+        return $structure;
+    }
+
+    /**
+     * @todo Check a json structure for iiif v3.
+     */
+    protected function checkStructure(array $structure): array
+    {
         return $structure;
     }
 

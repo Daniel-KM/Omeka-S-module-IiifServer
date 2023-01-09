@@ -183,17 +183,17 @@ class Manifest extends AbstractResourceType
     public function structures(): array
     {
         $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
-        $stProperty = $settings()->get('iiifserver_manifest_structures_property');
-        if (!$stProperty) {
+        $structureProperty = $settings()->get('iiifserver_manifest_structures_property');
+        if (!$structureProperty) {
             return [];
         }
 
-        $stValues = $this->resource->value($stProperty, ['all' => true]);
+        $stValues = $this->resource->value($structureProperty, ['all' => true]);
         if (!count($stValues)) {
             return [];
         }
 
-        // TODO A structure requires a media for now to build reference to canvas..
+        // TODO A structure requires a media for now to build reference to canvas.
         if (!$this->resource->primaryMedia()) {
             return [];
         }
@@ -209,8 +209,7 @@ class Manifest extends AbstractResourceType
                 }
                 $structure = isset($firstRange['@type'])
                     ? $this->convertToStructure3($structure)
-                    // : $this->checkStructure($structure);
-                    : $structure;
+                    : $this->checkStructure($structure);
             } else {
                 $structure = $this->extractStructure($literalStructure, ++$index);
             }
@@ -223,12 +222,43 @@ class Manifest extends AbstractResourceType
     }
 
     /**
+     * Prepare to convert a json, literal or xml structure into a range.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#54-range
+     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     *
+     * @see \IiifServer\View\Helper\IiifManifest2::extractStructure()
+     */
+    protected function extractStructure(string $literalStructure, int $indexStructure): ?Range
+    {
+        if (mb_substr(trim($literalStructure), 0, 1) !== '<') {
+            return $this->extractStructureProcess($literalStructure, $indexStructure);
+        }
+
+        // Flat xml.
+        // Nested xml.
+        // TODO Manage nested xml toc with SimpleXml.
+        // $isFlat = mb_strpos($literalStructure, '"/>') < mb_strpos($literalStructure, '<c ', 1);
+        $matches = [];
+        $lines = explode("\n", $literalStructure);
+        foreach ($lines as &$line) {
+            $line = trim($line);
+            if ($line && $line !== '</c>') {
+                preg_match('~\s*(<c\s*id="(?<id>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:range="(?<range>[^"]*)"\s*/>)?~', $line, $matches);
+                $line = $matches['id'] . ', ' . $matches['label'] . ', ' . $matches['range'];
+            }
+        }
+        unset($line);
+        return $this->extractStructureProcess(implode("\n", $lines), $indexStructure);
+    }
+
+    /**
      * Convert a literal structure into a range.
      *
      * @see https://iiif.io/api/presentation/3.0/#54-range
      * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
      */
-    protected function extractStructure(string $literalStructure, int $indexStructure): ?Range
+    protected function extractStructureProcess(string $literalStructure, int $indexStructure): ?Range
     {
         $structure = [];
         $ranges = [];
@@ -569,7 +599,7 @@ class Manifest extends AbstractResourceType
      */
     protected function checkStructure(array $structure): ?Range
     {
-        return null;
+        return $structure;
     }
 
     /**

@@ -281,6 +281,23 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_structures_property',
+                'type' => PropertySelect::class,
+                'options' => [
+                    'label' => 'Property for structures', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                    'info' => 'Refer to the following URL for the input format.', // @translate
+                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents',
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_structures_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_viewing_direction_property',
                 'type' => PropertySelect::class,
                 'options' => [
@@ -531,23 +548,6 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_structures_property',
-                'type' => PropertySelect::class,
-                'options' => [
-                    'label' => 'Property for structures', // @translate
-                    'empty_option' => '',
-                    'term_as_value' => true,
-                    'info' => 'Please refer to the following URL for the input format.',  // @translate
-                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents',
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_manifest_structures_property',
-                    'class' => 'chosen-select',
-                    'data-placeholder' => 'Select a property…', // @translate
-                ],
-            ])
-
-            ->add([
                 'name' => 'fieldset_urls',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [
@@ -791,6 +791,10 @@ class ConfigForm extends Form
                 'required' => false,
             ])
             ->add([
+                'name' => 'iiifserver_manifest_structures_property',
+                'required' => false,
+            ])
+            ->add([
                 'name' => 'iiifserver_manifest_viewing_direction_property',
                 'required' => false,
             ])
@@ -840,10 +844,6 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media_blacklist',
-                'required' => false,
-            ])
-            ->add([
-                'name' => 'iiifserver_manifest_structures_property',
                 'required' => false,
             ])
             ->add([
