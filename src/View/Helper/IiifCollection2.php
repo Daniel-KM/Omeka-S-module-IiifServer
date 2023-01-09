@@ -178,7 +178,7 @@ class IiifCollection2 extends AbstractHelper
             $manifest['manifests'] = [];
         }
 
-        return (object) $manifest;
+        return $manifest;
     }
 
     /**
@@ -328,7 +328,7 @@ class IiifCollection2 extends AbstractHelper
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }
@@ -355,7 +355,7 @@ class IiifCollection2 extends AbstractHelper
                 return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }

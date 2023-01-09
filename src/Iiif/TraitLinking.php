@@ -76,7 +76,7 @@ trait TraitLinking
                     $id = $this->urlHelper->__invoke('top', [], ['force_canonical' => true]);
                     $label = new ValueLanguage([$language => [$setting('installation_title')]]);
                 }
-                $output[] = (object) [
+                $output[] = [
                     'id' => $id,
                     'type' => 'Text',
                     'label' => $label,
@@ -108,7 +108,7 @@ trait TraitLinking
                         $fallback = 'Source';
                     }
                     $label = new ValueLanguage([], false, $fallback);
-                    $output[] = (object) [
+                    $output[] = [
                         'id' => $id,
                         'type' => 'Text',
                         'label' => $label,
@@ -142,7 +142,7 @@ trait TraitLinking
                     $values = $this->resource->value('dcterms:title', ['all' => true]);
                 }
                 $label = new ValueLanguage($values, false, 'Source');
-                $output[] = (object) [
+                $output[] = [
                     'id' => $id,
                     'type' => 'Text',
                     'label' => $label,
@@ -199,7 +199,7 @@ trait TraitLinking
             'width' => $size['width'],
         ];
         return [
-            (object) $output,
+            $output,
         ];
     }
 
@@ -234,12 +234,12 @@ trait TraitLinking
                     // $seeAlso['format'] = $value->value();
                     // $seeAlso['profile'] = $value->value();
                 }
-                $output[] = (object) $seeAlso;
+                $output[] = $seeAlso;
             }
         }
 
         // Added the link to the json-ld representation.
-        $output[] = (object) [
+        $output[] = [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
             'label' => ['none' => ['application/ld+json']],

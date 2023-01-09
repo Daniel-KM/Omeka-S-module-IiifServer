@@ -156,13 +156,13 @@ class IiifAnnotationPageLine2 extends AbstractHelper
                 'on' => $baseCanvasUrl . '#xywh=' . implode(',', $zone),
             ];
 
-            $annotationPage['resources'][] = (object) $annotation;
+            $annotationPage['resources'][] = $annotation;
         }
 
         if (!count($annotationPage['resources'])) {
             return null;
         }
 
-        return (object) $annotationPage;
+        return $annotationPage;
     }
 }

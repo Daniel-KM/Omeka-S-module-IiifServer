@@ -38,7 +38,7 @@ use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
 
 /**
- * @todo Remove casting with "(object)", that was used because the json encoding converts array into object or array.
+ * The casting to (object) that was used because the json encoding converts array into object or array, was removed.
  */
 class IiifManifest2 extends AbstractHelper
 {
@@ -190,7 +190,7 @@ class IiifManifest2 extends AbstractHelper
 
         $logo = $this->view->setting('iiifserver_manifest_logo_default');
         if ($logo) {
-            $manifest['logo'] = (object) ['@id' => $logo];
+            $manifest['logo'] = ['@id' => $logo];
         }
 
         /*
@@ -310,9 +310,7 @@ class IiifManifest2 extends AbstractHelper
                 // TODO Add other content.
                 /*
                 $otherContent = [];
-                $otherContent = (object) $otherContent;
-
-                $canvas->otherContent = $otherContent;
+                $canvas['otherContent'] = $otherContent;
                 */
 
                 $canvases[] = $canvas;
@@ -345,7 +343,6 @@ class IiifManifest2 extends AbstractHelper
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
                         $render['label'] = $translate('Download as PDF'); // @translate
-                        $render = (object) $render;
                         $rendering[] = $render;
                         break;
 
@@ -354,7 +351,6 @@ class IiifManifest2 extends AbstractHelper
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
                         $render['label'] = $translate('Download as XML'); // @translate
-                        $render = (object) $render;
                         $rendering[] = $render;
                         break;
                 }
@@ -440,7 +436,6 @@ class IiifManifest2 extends AbstractHelper
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
             $mediaSequence['elements'] = $mediaSequencesElements;
-            $mediaSequence = (object) $mediaSequence;
             $mediaSequences[] = $mediaSequence;
         }
         // When there are images.
@@ -477,8 +472,6 @@ class IiifManifest2 extends AbstractHelper
                 $sequence['rendering'] = $rendering;
             }
             $sequence['canvases'] = $canvases;
-            $sequence = (object) $sequence;
-
             $sequences[] = $sequence;
         }
 
@@ -489,7 +482,6 @@ class IiifManifest2 extends AbstractHelper
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
             $mediaSequence['elements'] = $mediaSequencesElements;
-            $mediaSequence = (object) $mediaSequence;
             $mediaSequences[] = $mediaSequence;
 
             // Add a sequence in case of the media cannot be read.
@@ -507,7 +499,6 @@ class IiifManifest2 extends AbstractHelper
                 $render['@id'] = $this->view->assetUrl($placeholder, 'IiifServer');
                 $render['format'] = 'image/jpeg';
                 $render['label'] = $translate('Unsupported content.'); // @translate
-                $render = (object) $render;
                 $rendering[] = $render;
             }
             */
@@ -578,7 +569,7 @@ class IiifManifest2 extends AbstractHelper
         // Remove all empty values (there is no "0" or "null" at first level).
         $manifest = array_filter($manifest);
 
-        return (object) $manifest;
+        return $manifest;
     }
 
     /**
@@ -662,7 +653,7 @@ class IiifManifest2 extends AbstractHelper
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }
@@ -689,7 +680,7 @@ class IiifManifest2 extends AbstractHelper
                 return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }
@@ -719,7 +710,7 @@ class IiifManifest2 extends AbstractHelper
                     'width' => $size['width'],
                     'height' => $size['height'],
                 ];
-                return (object) $thumbnail;
+                return $thumbnail;
             }
         }
 
@@ -743,7 +734,7 @@ class IiifManifest2 extends AbstractHelper
                 'height' => $this->defaultHeight,
                 'service' => $service,
             ];
-            return (object) $thumbnail;
+            return $thumbnail;
         }
 
         return null;
@@ -766,7 +757,7 @@ class IiifManifest2 extends AbstractHelper
                 'width' => $size['width'],
                 'height' => $size['height'],
             ];
-            return (object) $thumbnail;
+            return $thumbnail;
         }
     }
 
@@ -815,11 +806,10 @@ class IiifManifest2 extends AbstractHelper
 
             $imageResourceService = $this->_iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
             $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
 
             $image['resource'] = $imageResource;
             $image['on'] = $canvasUrl;
-            return (object) $image;
+            return $image;
         }
 
         // In api v2, only one service can be set.
@@ -856,18 +846,16 @@ class IiifManifest2 extends AbstractHelper
             $imageResourceService = $this->_iiifImageService($imageUrlService, $contextUri, $profileUri);
             $iiifTileInfo = $view->iiifTileInfo($media);
             if ($iiifTileInfo) {
-                $imageResourceService->tiles = [$iiifTileInfo];
-                $imageResourceService->width = $width;
-                $imageResourceService->height = $height;
+                $imageResourceService['tiles'] = [$iiifTileInfo];
+                $imageResourceService['width'] = $width;
+                $imageResourceService['height'] = $height;
             }
-
             $imageResource['service'] = $imageResourceService;
-            $imageResource = (object) $imageResource;
         }
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;
-        return (object) $image;
+        return $image;
     }
 
     /**
@@ -921,7 +909,7 @@ class IiifManifest2 extends AbstractHelper
             $canvas['metadata'] = $metadata;
         }
 
-        return (object) $canvas;
+        return $canvas;
     }
 
     /**
@@ -1004,16 +992,13 @@ class IiifManifest2 extends AbstractHelper
         $imageResource['@type'] = 'dctypes:Image';
         $imageResource['width'] = $imageSize['width'];
         $imageResource['height'] = $imageSize['height'];
-        $imageResource = (object) $imageResource;
+        $imageResource = $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $serverUrl . $this->view->basePath('/iiif/ixif-message/canvas/c1');
-        $image = (object) $image;
         $images = [$image];
 
         $canvas['images'] = $images;
-
-        $canvas = (object) $canvas;
 
         return $canvas;
     }
@@ -1043,9 +1028,7 @@ class IiifManifest2 extends AbstractHelper
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
-        $mediaSequencesService = (object) $mediaSequencesService;
         $mediaSequenceElement['service'] = $mediaSequencesService;
-        $mediaSequenceElement = (object) $mediaSequenceElement;
         return $mediaSequenceElement;
     }
 
@@ -1079,7 +1062,6 @@ class IiifManifest2 extends AbstractHelper
         $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();
-        $mseRendering = (object) $mseRendering;
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
@@ -1088,9 +1070,7 @@ class IiifManifest2 extends AbstractHelper
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
-        $mediaSequencesService = (object) $mediaSequencesService;
         $mediaSequenceElement['service'] = $mediaSequencesService;
-        $mediaSequenceElement = (object) $mediaSequenceElement;
         return $mediaSequenceElement;
     }
 
@@ -1124,7 +1104,6 @@ class IiifManifest2 extends AbstractHelper
         $mseRendering = [];
         $mseRendering['@id'] = $media->originalUrl();
         $mseRendering['format'] = $media->mediaType();
-        $mseRendering = (object) $mseRendering;
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
@@ -1133,13 +1112,11 @@ class IiifManifest2 extends AbstractHelper
         $mediaSequencesService['@id'] = $mseUrl;
         // See MediaController::contextAction()
         $mediaSequencesService['profile'] = 'http://wellcomelibrary.org/ld/ixif/0/alpha.json';
-        $mediaSequencesService = (object) $mediaSequencesService;
         $mediaSequenceElement['service'] = $mediaSequencesService;
         // TODO Get the true video width and height, even if it
         // is automatically managed.
         $mediaSequenceElement['width'] = 0;
         $mediaSequenceElement['height'] = 0;
-        $mediaSequenceElement = (object) $mediaSequenceElement;
         return $mediaSequenceElement;
     }
 
@@ -1164,7 +1141,6 @@ class IiifManifest2 extends AbstractHelper
         // Use the thumbnail of the item for the media too.
         $mediaSequenceElement['thumbnail'] = $values['thumbnail'];
         // No media sequence service and no sequences.
-        $mediaSequenceElement = (object) $mediaSequenceElement;
         return $mediaSequenceElement;
     }
 
@@ -1191,7 +1167,6 @@ class IiifManifest2 extends AbstractHelper
             $sequence['rendering'] = $rendering;
         }
         $sequence['canvases'] = $canvases;
-        $sequence = (object) $sequence;
 
         return $sequence;
     }
@@ -1314,11 +1289,11 @@ class IiifManifest2 extends AbstractHelper
                 $canvasIdIsInteger = $isInteger($cleanItemName);
                 $canvasIdCheck = $canvasIdIsInteger ? 'p' . $cleanItemName : $cleanItemName;
                 foreach ($sequenceCanvases as $sequenceCanvas) {
-                    if ($canvasIdCheck === basename($sequenceCanvas->{'@id'})
-                        || $canvasIdCheck === $sequenceCanvas->label
+                    if ($canvasIdCheck === basename($sequenceCanvas['@id'])
+                        || $canvasIdCheck === $sequenceCanvas['label']
                     ) {
-                        $canvasId = $sequenceCanvas->{'@id'};
-                        $canvasLabel = $sequenceCanvas->label;
+                        $canvasId = $sequenceCanvas['@id'];
+                        $canvasLabel = $sequenceCanvas['label'];
                         break;
                     }
                 }
@@ -1715,7 +1690,7 @@ class IiifManifest2 extends AbstractHelper
         $service['@context'] = $contextUri;
         $service['@id'] = $baseUri;
         $service['profile'] = $complianceLevelUri;
-        return (object) $service;
+        return $service;
     }
 
     /**

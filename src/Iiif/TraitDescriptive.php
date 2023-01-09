@@ -96,7 +96,7 @@ trait TraitDescriptive
             }
             $metadataLabel = new ValueLanguage($labels);
 
-            $metadata[] = (object) [
+            $metadata[] = [
                 'label' => $metadataLabel,
                 'value' => $metadataValue,
             ];
@@ -158,7 +158,7 @@ trait TraitDescriptive
         }
         $metadataLabel = new ValueLanguage($labels);
 
-        return (object) [
+        return [
             'label' => $metadataLabel,
             'value' => $metadataValue,
         ];

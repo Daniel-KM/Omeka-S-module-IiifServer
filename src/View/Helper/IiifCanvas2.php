@@ -92,7 +92,7 @@ class IiifCanvas2 extends AbstractHelper
             $canvas['metadata'] = $metadata;
         }
 
-        return (object) $canvas;
+        return $canvas;
     }
 
     /**
@@ -169,7 +169,7 @@ class IiifCanvas2 extends AbstractHelper
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }
@@ -196,7 +196,7 @@ class IiifCanvas2 extends AbstractHelper
                 return $v->asHtml();
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
-            $metadata[] = (object) $valueMetadata;
+            $metadata[] = $valueMetadata;
         }
         return $metadata;
     }
@@ -233,10 +233,10 @@ class IiifCanvas2 extends AbstractHelper
         $thumbnailServiceUrl = $view->iiifMediaUrl($media, 'imageserver/id', '2');
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-        $thumbnailService = (object) $thumbnailService;
+        $thumbnailService = $thumbnailService;
 
         $thumbnail['service'] = $thumbnailService;
-        $thumbnail = (object) $thumbnail;
+        $thumbnail = $thumbnail;
 
         return $thumbnail;
     }
@@ -304,13 +304,13 @@ class IiifCanvas2 extends AbstractHelper
             $imageResourceService['height'] = $height;
         }
 
-        $imageResourceService = (object) $imageResourceService;
+        $imageResourceService = $imageResourceService;
         $imageResource['service'] = $imageResourceService;
-        $imageResource = (object) $imageResource;
+        $imageResource = $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;
 
-        return (object) $image;
+        return $image;
     }
 }

@@ -81,7 +81,7 @@ class IiifInfo2 extends AbstractHelper
             $sizes = [];
             $availableTypes = ['medium', 'large', 'original'];
             foreach ($availableTypes as $imageType) {
-                $sizes[] = (object) $view->imageSize($media, $imageType);
+                $sizes[] = $view->imageSize($media, $imageType);
             }
 
             $imageType = 'original';
@@ -118,7 +118,7 @@ class IiifInfo2 extends AbstractHelper
             $profileDetails['format'] = ['image/jpeg'];
             $profileDetails['qualities'] = ['default'];
             $profileDetails['supports'] = ['sizeByWhListed'];
-            $profileDetails = (object) $profileDetails;
+            $profileDetails = $profileDetails;
             $profile[] = $profileDetails;
             */
 
@@ -129,7 +129,6 @@ class IiifInfo2 extends AbstractHelper
             $service['profile'] = 'http://iiif.io/api/annex/service/physdim';
             $service['physicalScale'] = 0.0025;
             $service['physicalUnits'] = 'in';
-            $service = (object) $service;
             */
 
             $info = [];
@@ -170,13 +169,13 @@ class IiifInfo2 extends AbstractHelper
         // Give possibility to customize the info.json.
         // TODO Manifest (info) should be a true object, with many sub-objects.
         $manifest = &$info;
-        $format = 'info';
+        // $format = 'info';
         $resource = $media;
         $type = 'file';
         $params = compact('manifest', 'info', 'resource', 'type');
         $params = $helpers->get('trigger')->__invoke('iiifserver.manifest', $params, true);
         $info = $params['manifest'];
-        return (object) $info;
+        return $info;
     }
 
     /**

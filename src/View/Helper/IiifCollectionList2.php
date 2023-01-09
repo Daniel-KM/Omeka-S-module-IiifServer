@@ -163,7 +163,7 @@ class IiifCollectionList2 extends AbstractHelper
             $manifest['manifests'] = [];
         }
 
-        return (object) $manifest;
+        return $manifest;
     }
 
     /**

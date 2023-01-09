@@ -72,7 +72,9 @@ trait TraitThumbnail
                     'width' => $size['width'],
                     'height' => $size['height'],
                 ];
-                return [(object) $thumbnail];
+                return [
+                    $thumbnail,
+                ];
             }
         }
 
@@ -92,7 +94,9 @@ trait TraitThumbnail
                     'width' => $size['width'],
                     'height' => $size['height'],
                 ];
-                return [(object) $thumbnail];
+                return [
+                    $thumbnail,
+                ];
             }
         }
 
@@ -116,7 +120,9 @@ trait TraitThumbnail
                 'height' => $this->defaultHeight,
                 'service' => $thumbnailService,
             ];
-            return [(object) $thumbnail];
+            return [
+                $thumbnail,
+            ];
         }
 
         return null;
@@ -211,6 +217,6 @@ trait TraitThumbnail
         $service['@context'] = $contextUri;
         $service['id'] = $baseUri;
         $service['profile'] = $complianceLevelUri;
-        return (object) $service;
+        return $service;
     }
 }

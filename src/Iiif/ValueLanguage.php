@@ -111,10 +111,10 @@ class ValueLanguage implements JsonSerializable
         return $this->output->count();
     }
 
-    public function jsonSerialize(): array
+    public function jsonSerialize(): ?array
     {
         return $this->output->count()
-            ? (object) $this->output
+            ? $this->output->getArrayCopy()
             : null;
     }
 
