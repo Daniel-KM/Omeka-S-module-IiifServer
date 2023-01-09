@@ -86,7 +86,9 @@ trait TraitRights
                 $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
                 break;
             case 'url':
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_url') ?: null;
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_uri')
+                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
+                    ?: null);
                 break;
             case 'property_or_text':
                 $orText = !empty($this->setting->__invoke('iiifserver_manifest_rights_text'));
@@ -114,10 +116,14 @@ trait TraitRights
 
         if (!$url) {
             if ($useForRequiredStatement) {
-                return $this->setting->__invoke('iiifserver_manifest_rights_url')
-                    ?: $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
+                return $this->setting->__invoke('iiifserver_manifest_rights_uri')
+                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
+                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_text')
+                    ?: null));
             } elseif ($orUrl) {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_url') ?: null;
+                $url = $this->setting->__invoke('iiifserver_manifest_rights_uri')
+                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
+                    ?: null);
             } elseif ($orText) {
                 $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
             }

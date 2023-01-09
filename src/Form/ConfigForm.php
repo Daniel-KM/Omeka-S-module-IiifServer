@@ -144,11 +144,74 @@ class ConfigForm extends Form
                 'use_hidden_element' => true,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_rights_url',
-                'type' => Element\Url::class,
+                'name' => 'iiifserver_manifest_rights_uri',
+                'type' => Element\Select::class,
                 'options' => [
-                    'label' => 'Url of the license', // @translate
-                    'info' => 'The license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
+                    'label' => 'Uri of the license or rights', // @translate
+                    'value_options' => [
+                        '' => 'Uri below', // @translate
+                        // CreativeCommons.
+                        'creative-commons-0' => [
+                            'label' => 'Creative Commons 0', // @translate
+                            'options' => [
+                                'https://creativecommons.org/publicdomain/zero/1.0/' => 'Creative Commons CC0 Universal Public Domain Dedication', // @translate
+                            ],
+                        ],
+                        // v3 international
+                        'creative-commons-3' => [
+                            'label' => 'Creative Commons 3.0 International', // @translate
+                            'options' => [
+                                'https://creativecommons.org/licenses/by/3.0/' => 'Creative Commons Attribution 3.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-sa/3.0/' => 'Creative Commons Attribution-ShareAlike 3.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc/3.0' => 'Creative Commons Attribution-NonCommercial 3.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc-sa/3.0' => 'Creative Commons Attribution-NonCommercial-ShareAlike 3.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc-nd/3.0' => 'Creative Commons Attribution-NonCommercial-NoDerivatives 3.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nd/3.0' => 'Creative Commons Attribution-NoDerivatives 3.0 International', // @translate
+                            ],
+                        ],
+                        // v4 international
+                        'creative-commons-4' => [
+                            'label' => 'Creative Commons 4.0 International', // @translate
+                            'options' => [
+                                'https://creativecommons.org/licenses/by/4.0/' => 'Creative Commons Attribution 4.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-sa/4.0/' => 'Creative Commons Attribution-ShareAlike 4.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc/4.0' => 'Creative Commons Attribution-NonCommercial 4.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc-sa/4.0' => 'Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nc-nd/4.0' => 'Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International', // @translate
+                                'https://creativecommons.org/licenses/by-nd/4.0' => 'Creative Commons Attribution-NoDerivatives 4.0 International', // @translate
+                            ],
+                        ],
+                        // RigthsStatements.
+                        'rigths-statements' => [
+                            'label' => 'Rigths Statements', // @translate
+                            'options' => [
+                                'https://rightsstatements.org/vocab/InC/1.0/' => 'In Copyright', // @translate
+                                'https://rightsstatements.org/vocab/InC-RUU/1.0/' => 'In Copyright - Rights-holder(s) Unlocatable or Unidentifiable', // @translate
+                                'https://rightsstatements.org/vocab/InC-NC/1.0/' => 'In Copyright - Non-Commercial Use Permitted', // @translate
+                                'https://rightsstatements.org/vocab/InC-EDU/1.0/' => 'In Copyright - Educational Use Permitted', // @translate
+                                'https://rightsstatements.org/vocab/InC-OW-EU/1.0/' => 'In Copyright - EU Orphan Work', // @translate
+                                'https://rightsstatements.org/vocab/NoC-OKLR/1.0/' => 'No Copyright - Other Known Legal Restrictions', // @translate
+                                'https://rightsstatements.org/vocab/NoC-CR/1.0/' => 'No Copyright - Contractual Restrictions', // @translate
+                                'https://rightsstatements.org/vocab/NoC-NC/1.0/' => 'No Copyright - Non-Commercial Use Only', // @translate
+                                'https://rightsstatements.org/vocab/NoC-US/1.0/' => 'No Copyright - United States', // @translate
+                                'https://rightsstatements.org/vocab/NKC/1.0/' => 'No Known Copyright', // @translate
+                                'https://rightsstatements.org/vocab/UND/1.0/' => 'Copyright Undetermined', // @translate
+                                'https://rightsstatements.org/vocab/CNE/1.0/' => 'Copyright Not Evaluated', // @translate
+                            ],
+                        ],
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_rights_uri',
+                    'class' => 'chosen-select',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_rights_url',
+                'type' => OptionalUrl::class,
+                'options' => [
+                    'label' => 'Uri of the rights/license when unselected above', // @translate
+                    'info' => 'For IIIF v3, the license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_rights_url',
@@ -705,6 +768,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_rights_uri',
                 'required' => false,
             ])
             ->add([

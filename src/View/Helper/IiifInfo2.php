@@ -209,24 +209,28 @@ class IiifInfo2 extends AbstractHelper
      */
     protected function rightsResource(MediaRepresentation $resource = null): ?string
     {
-        $helper = $this->getView()->getHelperPluginManager()->get('setting');
+        $setting = $this->getView()->getHelperPluginManager()->get('setting');
         $url = null;
         $orUrl = false;
         $orText = false;
 
-        $param = $helper($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
+        $param = $setting($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
                 // if ($this->context() === 'http://iiif.io/api/presentation/3/context.json') {
                 //     return null;
                 // }
-                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iifserver_manifest_rights_text');
+                $url = $setting($this->hasImageServer ? 'imageserver_info_rights_text' : 'iifserver_manifest_rights_text');
                 break;
             case 'url':
-                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
+                if ($this->hasImageServer) {
+                    $url = $setting('imageserver_info_rights_uri') ?: $setting('imageserver_info_rights_url');
+                } else {
+                    $url = $setting('iiifserver_manifest_rights_uri') ?: $setting('iiifserver_manifest_rights_url');
+                }
                 break;
             case 'property_or_text':
-                $orText = !empty($helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text'));
+                $orText = !empty($setting($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text'));
                 // no break.
             case 'property_or_url':
                 if ($param === 'property_or_url') {
@@ -235,7 +239,7 @@ class IiifInfo2 extends AbstractHelper
                 // no break.
             case 'property':
                 if ($resource) {
-                    $property = $helper($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
+                    $property = $setting($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
                     $url = (string) $resource->value($property);
                 }
                 break;
@@ -251,9 +255,13 @@ class IiifInfo2 extends AbstractHelper
 
         if (!$url) {
             if ($orUrl) {
-                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_url' : 'iiifserver_manifest_rights_url');
+                if ($this->hasImageServer) {
+                    $url = $setting('imageserver_info_rights_uri') ?: $setting('imageserver_info_rights_url');
+                } else {
+                    $url = $setting('iiifserver_manifest_rights_uri') ?: $setting('iiifserver_manifest_rights_url');
+                }
             } elseif ($orText) {
-                $url = $helper($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text');
+                $url = $setting($this->hasImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text');
             } else {
                 return null;
             }

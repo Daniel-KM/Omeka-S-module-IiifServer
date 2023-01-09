@@ -524,7 +524,8 @@ return [
             'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
             'iiifserver_manifest_rights' => 'property_or_url',
             'iiifserver_manifest_rights_property' => 'dcterms:license',
-            'iiifserver_manifest_rights_url' => 'http://rightsstatements.org/vocab/CNE/1.0/',
+            'iiifserver_manifest_rights_uri' => 'https://rightsstatements.org/vocab/CNE/1.0/',
+            'iiifserver_manifest_rights_url' => '',
             'iiifserver_manifest_rights_text' => '',
             'iiifserver_manifest_homepage' => 'resource',
             'iiifserver_manifest_homepage_property' => '',
