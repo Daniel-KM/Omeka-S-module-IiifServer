@@ -540,9 +540,21 @@ return [
             'iiifserver_manifest_properties_collection_whitelist' => [],
             'iiifserver_manifest_properties_item_whitelist' => [],
             'iiifserver_manifest_properties_media_whitelist' => [],
-            'iiifserver_manifest_properties_collection_blacklist' => [],
-            'iiifserver_manifest_properties_item_blacklist' => [],
-            'iiifserver_manifest_properties_media_blacklist' => [],
+            'iiifserver_manifest_properties_collection_blacklist' => [
+                'dcterms:tableOfContents',
+                'bibo:content',
+                'extracttext:extracted_text',
+            ],
+            'iiifserver_manifest_properties_item_blacklist' => [
+                'dcterms:tableOfContents',
+                'bibo:content',
+                'extracttext:extracted_text',
+            ],
+            'iiifserver_manifest_properties_media_blacklist' => [
+                'dcterms:tableOfContents',
+                'bibo:content',
+                'extracttext:extracted_text',
+            ],
             'iiifserver_manifest_structures_property' => '',
             // Urls.
             'iiifserver_url_version_add' => false,
