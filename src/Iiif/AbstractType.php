@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use ArrayObject;
 use Doctrine\Inflector\InflectorFactory;
 use JsonSerializable;
 use Omeka\Stdlib\Message;
@@ -67,10 +66,8 @@ abstract class AbstractType implements JsonSerializable
 
     /**
      * Store the current object for output.
-     *
-     * @var ArrayObject
      */
-    protected $content;
+    protected $content = [];
 
     /**
      * In some cases, it is useful to have an internal storage for temp values.
@@ -85,10 +82,10 @@ abstract class AbstractType implements JsonSerializable
         return (string) $this->type;
     }
 
-    public function getContent(): ArrayObject
+    public function getContent(): array
     {
         // Always refresh the content.
-        $this->content = new ArrayObject;
+        $this->content = [];
 
         $allowedKeys = array_filter($this->keys, function ($v) {
             return $v !== self::NOT_ALLOWED;
@@ -109,7 +106,7 @@ abstract class AbstractType implements JsonSerializable
         // The validity check updates the content.
         $this->isValid(true);
         // TODO Remove useless context from sub-objects. And other copied data (homepage, etc.).
-        return $this->content->getArrayCopy();
+        return $this->content;
     }
 
     /**
@@ -202,8 +199,12 @@ abstract class AbstractType implements JsonSerializable
      */
     protected function getCleanContent(): array
     {
-        return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v) {
-            if ($v instanceof ArrayObject) {
+        return $this->content = array_filter($this->getContent(), function ($v) {
+            if (is_array($v) || is_scalar($v) || is_null($v) || is_bool($v)) {
+                return !empty($v);
+            }
+            // Normally, there is no object anymore.
+            if ($v instanceof \ArrayObject) {
                 return (bool) $v->count();
             }
             if ($v instanceof JsonSerializable) {

@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use ArrayObject;
 use JsonSerializable;
 use Omeka\Api\Representation\ValueRepresentation;
 
@@ -56,7 +55,7 @@ class ValueLanguage implements JsonSerializable
     protected $multipleValues;
 
     /**
-     * @var ArrayObject
+     * @var array
      */
     protected $output;
 
@@ -93,7 +92,7 @@ class ValueLanguage implements JsonSerializable
     /**
      * Get all the data as array.
      */
-    public function data(): ArrayObject
+    public function data(): array
     {
         return $this->output;
     }
@@ -103,24 +102,24 @@ class ValueLanguage implements JsonSerializable
      */
     public function langs(): array
     {
-        return array_keys($this->output->getArrayCopy());
+        return array_keys($this->output);
     }
 
     public function count(): int
     {
-        return $this->output->count();
+        return count($this->output);
     }
 
     public function jsonSerialize(): ?array
     {
-        return $this->output->count()
-            ? $this->output->getArrayCopy()
+        return count($this->output)
+            ? $this->output
             : null;
     }
 
-    protected function prepareOutput(): ArrayObject
+    protected function prepareOutput(): array
     {
-        $this->output = new ArrayObject;
+        $this->output = [];
 
         if (count($this->values)) {
             $first = reset($this->values);
@@ -161,7 +160,7 @@ class ValueLanguage implements JsonSerializable
                     }
                     unset($v);
                 }
-                $this->output->exchangeArray($this->values);
+                $this->output = $this->values;
             }
 
             // Keep none at last.

@@ -212,10 +212,14 @@ class CollectionList extends AbstractType
 
     protected function getCleanContent(): array
     {
-        return $this->content = array_filter($this->getContent()->getArrayCopy(), function ($v, $k) {
+        return $this->content = array_filter($this->getContent(), function ($v, $k) {
             if ($k === 'items') {
                 return true;
             }
+            if (is_array($v) || is_scalar($v) || is_null($v) || is_bool($v)) {
+                return !empty($v);
+            }
+            // Normally, there is no object anymore.
             if ($v instanceof \ArrayObject) {
                 return (bool) $v->count();
             }

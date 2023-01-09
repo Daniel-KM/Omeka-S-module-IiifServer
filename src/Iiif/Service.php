@@ -78,9 +78,9 @@ class Service extends AbstractType
         $this->options = array_filter($options);
     }
 
-    public function getContent(): \ArrayObject
+    public function getContent(): array
     {
-        return new \ArrayObject($this->options);
+        return $this->options;
     }
 
     public function id(): ?string

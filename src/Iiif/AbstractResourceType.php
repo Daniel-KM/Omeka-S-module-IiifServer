@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use ArrayObject;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
@@ -158,7 +157,7 @@ abstract class AbstractResourceType extends AbstractType
     protected $publicResourceUrl;
 
     /**
-     * @var ArrayObject
+     * @var array
      */
     protected $manifest;
 

@@ -47,12 +47,10 @@ trait TraitLinking
 
     /**
      * @todo Normalize getHomepage().
-     *
-     * @return \stdClass
      */
-    public function homepage()
+    public function homepage(): array
     {
-        $output = new \ArrayObject;
+        $output = [];
 
         $setting = $this->setting;
         $site = $this->defaultSite();
@@ -154,7 +152,7 @@ trait TraitLinking
                 break;
         }
 
-        return $output->getArrayCopy();
+        return $output;
     }
 
     /**
@@ -205,12 +203,10 @@ trait TraitLinking
 
     /**
      * @todo Normalize seeAlso().
-     *
-     * @return \stdClass
      */
-    public function seeAlso()
+    public function seeAlso(): array
     {
-        $output = new \ArrayObject;
+        $output = [];
 
         $setting = $this->setting;
         $property = $setting('iiifserver_manifest_seealso_property');
@@ -247,7 +243,7 @@ trait TraitLinking
             'profile' => $this->urlHelper->__invoke('api-context', [], ['force_canonical' => true]),
         ];
 
-        return $output->getArrayCopy();
+        return $output;
     }
 
     protected function defaultSite(): ?SiteRepresentation
