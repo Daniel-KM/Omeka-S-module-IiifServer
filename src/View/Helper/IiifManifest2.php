@@ -842,7 +842,6 @@ class IiifManifest2 extends AbstractHelper
             $contextUri = $this->_iiifImageServiceUri($service);
             $profileUri = $this->_iiifImageProfileUri($contextUri, $level);
             $imageResourceService = $this->_iiifImageService($imageUrlService, $contextUri, $profileUri);
-
             $iiifTileInfo = $view->iiifTileInfo($media);
             if ($iiifTileInfo) {
                 $imageResourceService->tiles = [$iiifTileInfo];
