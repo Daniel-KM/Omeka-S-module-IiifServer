@@ -831,8 +831,7 @@ class IiifManifest2 extends AbstractHelper
 
         if ($service) {
             $imageUrlService = $this->view->iiifMediaUrl($media, 'imageserver/id', $service);
-            $imageResourceService = $this->_iiifImageService($imageUrlService, $service, $level);
-
+            $imageResourceService = $this->_iiifImageService($imageUrlService, 'http://iiif.io/api/image/2/context.json', 'http://iiif.io/api/image/2/profiles/level2.json');
             $iiifTileInfo = $view->iiifTileInfo($media);
             if ($iiifTileInfo) {
                 $imageResourceService->tiles = [$iiifTileInfo];
