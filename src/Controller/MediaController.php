@@ -30,6 +30,7 @@
 
 namespace IiifServer\Controller;
 
+use AccessResource\Mvc\Controller\Plugin\IsForbiddenFile;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\File\Store\StoreInterface;
 use Omeka\Stdlib\Message;
@@ -43,6 +44,11 @@ class MediaController extends AbstractActionController
 {
     use IiifServerControllerTrait;
 
+    /**
+     * @var \AccessResource\Mvc\Controller\Plugin\IsForbiddenFile
+     */
+    protected $isForbiddenFile;
+
     protected $routeInfo = 'mediaserver/info';
 
     /**
@@ -50,10 +56,14 @@ class MediaController extends AbstractActionController
      */
     protected $store;
 
-    public function __construct($store, $basePath)
-    {
+    public function __construct(
+        StoreInterface $store,
+        ?string $basePath,
+        ?IsForbiddenFile $isForbiddenFile
+    ) {
         $this->store = $store;
         $this->basePath = $basePath;
+        $this->isForbiddenFile = $isForbiddenFile;
     }
 
     /**
@@ -78,6 +88,49 @@ class MediaController extends AbstractActionController
             return $this->viewError(new Message(
                 'The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the requested format is not supported.' // @translate
             ), \Laminas\Http\Response::STATUS_CODE_500);
+        }
+
+        // Compatibility with module AccessResource: rights should be checked
+        // for the file, not only for the media
+        if ($this->isForbiddenFile
+            && $this->isForbiddenFile->__invoke($media)
+        ) {
+            // Manage custom asset file from the theme.
+            $mediaType = $media ? $media->mediaType() : 'image/png';
+            $mediaTypeMain = strtok($mediaType, '/');
+            switch ($mediaType) {
+                case $mediaTypeMain === 'image':
+                    $mediaType = 'image/png';
+                    $file = 'img/locked-file.png';
+                    break;
+                case 'application/pdf':
+                    $file = 'img/locked-file.pdf';
+                    break;
+                case $mediaTypeMain === 'audio':
+                case $mediaTypeMain === 'video':
+                    $mediaType = 'video/mp4';
+                    $file = 'img/locked-file.mp4';
+                    break;
+                case 'application/vnd.oasis.opendocument.text':
+                    $file = 'img/locked-file.odt';
+                    break;
+                default:
+                    $mediaType = 'image/png';
+                    $file = 'img/locked-file.png';
+                    break;
+            }
+
+            $viewHelpers = $this->viewHelpers();
+            $assetUrl = $viewHelpers->get('assetUrl');
+            $fileUrl = $assetUrl($file, 'AccessResource', true, true, true);
+
+            $response->getHeaders()
+                ->addHeaderLine('Content-Transfer-Encoding: binary')
+                // ->addHeaderLine(sprintf('Content-Length: %s', $filesize))
+                ->addHeaderLine('Content-Type', $mediaType);
+
+            // Redirect (302/307) to the url of the file.
+            return $this->redirect()->toUrl($fileUrl);
         }
 
         // A check is added if the file is local: the source can be a local file
