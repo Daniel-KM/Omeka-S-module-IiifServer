@@ -557,6 +557,7 @@ return [
                 'extracttext:extracted_text',
             ],
             'iiifserver_manifest_structures_property' => '',
+            'iiifserver_access_resource_skip' => false,
             // Urls.
             'iiifserver_url_version_add' => false,
             'iiifserver_identifier_clean' => true,

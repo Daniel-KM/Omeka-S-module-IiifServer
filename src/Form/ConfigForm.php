@@ -546,6 +546,17 @@ class ConfigForm extends Form
                     'data-placeholder' => 'Select one or more properties…', // @translate
                 ],
             ])
+            ->add([
+                'name' => 'iiifserver_access_resource_skip',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Skip check of access rights to files for module Access Resource', // @translate
+                    'info' => 'If set, all public and restricted files will be displayed.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_access_resource_skip',
+                ],
+            ])
 
             ->add([
                 'name' => 'fieldset_urls',

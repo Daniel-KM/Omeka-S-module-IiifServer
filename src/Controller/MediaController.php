@@ -93,6 +93,7 @@ class MediaController extends AbstractActionController
         // Compatibility with module AccessResource: rights should be checked
         // for the file, not only for the media
         if ($this->isForbiddenFile
+            && !$this->settings()->get('iiifserver_access_resource_skip')
             && $this->isForbiddenFile->__invoke($media)
         ) {
             // Manage custom asset file from the theme.
