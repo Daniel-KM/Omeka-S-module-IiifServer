@@ -43,6 +43,16 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     protected $_baseUrl;
 
     /**
+     * @var \Laminas\Log\Logger
+     */
+    protected $logger;
+
+    /**
+     * @var \Omeka\Api\Representation\MediaRepresentation
+     */
+    protected $resource;
+
+    /**
      * Get the IIIF canvas for the specified resource.
      *
      * @todo Factorize with IiifManifest2 and AnnotationPage.
