@@ -41,6 +41,7 @@ trait TraitBehavior
             $behaviors = $this->setting->__invoke('iiifserver_manifest_behavior_default', []);
         }
         foreach ($behaviors as $key => $behavior) {
+            $behavior = (string) $behavior;
             if (!isset($this->behaviors[$behavior]) || $this->behaviors[$behavior] === self::NOT_ALLOWED) {
                 unset($behaviors[$key]);
             }
