@@ -192,6 +192,17 @@ viewer.
 
 ### Config options for manifest
 
+#### Incompatible data
+
+Some extracted texts produce invalid unicode / utf-8 data, so it is recommended
+to exclude the ocr data from the manifest. Anyway, it should not be included to
+follow the iiif specifications: the metadata are only used to display basic data
+about the document.
+
+On new install, these properties are not included: `dcterms:tableOfContents`,
+`bibo:content` and `extracttext:extracted_text`. You may have to add them to
+avoid future issues.
+
 #### Text overlay
 
 For the overlay, only alto xml files are supported currently. They are
