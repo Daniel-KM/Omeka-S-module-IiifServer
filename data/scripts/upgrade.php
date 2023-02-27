@@ -231,3 +231,11 @@ if (version_compare($oldVersion, '3.6.8.3', '<')) {
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
 }
+
+if (version_compare($oldVersion, '3.6.10', '<')) {
+    $settings->set('iiifserver_access_resource_skip', false);
+    $message = new Message(
+        'An option allows to skip the rights managed by module Access Resource.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
