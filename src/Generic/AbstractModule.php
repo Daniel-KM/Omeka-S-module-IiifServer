@@ -125,11 +125,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $this->preUninstall();
         $this->execSqlFromFile($this->modulePath() . '/data/install/uninstall.sql');
         $this
-            ->manageConfig('uninstall')
-            ->manageMainSettings('uninstall')
-            ->manageSiteSettings('uninstall')
             // Don't uninstall user settings, they don't belong to admin.
             // ->manageUserSettings('uninstall')
+            ->manageSiteSettings('uninstall')
+            ->manageMainSettings('uninstall')
+            ->manageConfig('uninstall')
+            // ->uninstallAllResources()
             ->postUninstall();
     }
 
@@ -183,6 +184,22 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             return $this;
         }
         $installResources->createAllResources(static::NAMESPACE);
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function uninstallAllResources(): AbstractModule
+    {
+        $installResources = $this->getInstallResources();
+        if (!$installResources
+            || !method_exists($installResources, 'deleteAllResources')
+        ) {
+            // Nothing to install.
+            return $this;
+        }
+        $installResources->deleteAllResources(static::NAMESPACE);
         return $this;
     }
 
@@ -307,6 +324,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     protected function postInstall(): void
     {
+        $services = $this->getServiceLocator();
+        $filepath = $this->modulePath() . '/data/scripts/install.php';
+        if (file_exists($filepath) && filesize($filepath) && is_readable($filepath)) {
+            $this->setServiceLocator($services);
+            require_once $filepath;
+        }
     }
 
     protected function preUninstall(): void
@@ -315,6 +338,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     protected function postUninstall(): void
     {
+        $services = $this->getServiceLocator();
+        $filepath = $this->modulePath() . '/data/scripts/uninstall.php';
+        if (file_exists($filepath) && filesize($filepath) && is_readable($filepath)) {
+            $this->setServiceLocator($services);
+            require_once $filepath;
+        }
     }
 
     /**
