@@ -199,9 +199,12 @@ class Manifest extends AbstractResourceType
         }
 
         $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
+        $appendFlatStructure = !$settings()->get('iiifserver_manifest_structures_skip_flat');
+
+        $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
         $structureProperty = $settings()->get('iiifserver_manifest_structures_property');
         if (!$structureProperty) {
-            if ($total > 1) {
+            if ($appendFlatStructure && $total > 1) {
                 $structure = $this->defaultStructure();
                 return $structure ? [$structure] : [];
             }
@@ -210,7 +213,7 @@ class Manifest extends AbstractResourceType
 
         $stValues = $this->resource->value($structureProperty, ['all' => true]);
         if (!count($stValues)) {
-            if ($total > 1) {
+            if ($appendFlatStructure && $total > 1) {
                 $structure = $this->defaultStructure();
                 return $structure ? [$structure] : [];
             }
@@ -219,7 +222,7 @@ class Manifest extends AbstractResourceType
 
         // TODO A structure requires a media for now to build reference to canvas.
         if (!$this->resource->primaryMedia()) {
-            if ($total > 1) {
+            if ($appendFlatStructure && $total > 1) {
                 $structure = $this->defaultStructure();
                 return $structure ? [$structure] : [];
             }

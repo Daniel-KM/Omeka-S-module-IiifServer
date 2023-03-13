@@ -299,6 +299,18 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_structures_skip_flat',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Skip the flat structure appended when no structure is set', // @translate
+                    'info' => 'This flat structure can fix some issues on old versions of viewers.',  // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_structures_skip_flat',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_viewing_direction_property',
                 'type' => PropertySelect::class,
                 'options' => [
