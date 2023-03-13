@@ -109,6 +109,43 @@ class Module extends AbstractModule
         }
 
         $this->normalizeMediaApiSettings($params);
+
+        if (empty($params['fieldset_dimensions']['process_dimensions'])) {
+            return true;
+        }
+
+        $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+
+        $params = ['query' => $params['fieldset_dimensions']['query'] ?: null];
+        $job = $dispatcher->dispatch(\IiifServer\Job\MediaDimensions::class, $params);
+        if ($this->isModuleActive('Log')) {
+            $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
+            $message = new \Log\Stdlib\PsrMessage(
+                $message,
+                [
+                    'link' => sprintf('<a href="%s">',
+                        htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                    ),
+                    'job_id' => $job->getId(),
+                    'link_end' => '</a>',
+                    'link_log' => sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])),
+                ]
+            );
+        } else {
+            $message = 'Storing dimensions of images, audio and video (%1$sjob #%2$d%3$s, %4$slogs%3$s)'; // @translate
+            $message = new \Omeka\Stdlib\Message(
+                $message,
+                sprintf('<a href="%s">',
+                    htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                ),
+                $job->getId(),
+                '</a>',
+                sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+            );
+        }
+        $message->setEscapeHtml(false);
+        $controller->messenger()->addSuccess($message);
+        return true;
     }
 
     /**

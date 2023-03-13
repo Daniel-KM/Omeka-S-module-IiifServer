@@ -6,6 +6,7 @@ use IiifServer\Form\Element\OptionalUrl;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
+use Laminas\Form\Fieldset;
 use Laminas\Form\Form;
 use Omeka\Form\Element\PropertySelect;
 
@@ -752,6 +753,42 @@ class ConfigForm extends Form
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_support_non_image',
+                ],
+            ])
+        ;
+
+        // Available in module Derivative Media.
+        $this
+            ->add([
+                'name' => 'fieldset_dimensions',
+                'type' => Fieldset::class,
+                'options' => [
+                    'label' => 'Store dimensions', // @translate
+                ],
+            ]);
+        $fieldset = $this->get('fieldset_dimensions');
+        $fieldset
+            ->add([
+                'name' => 'query',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Query to filter items to process', // @translate
+                    'info' => 'This query will be used to select all items whose attached images, audio and video files will be prepared in the background.', // @translate
+                    'documentation' => 'https://omeka.org/s/docs/user-manual/sites/site_pages/#browse-preview',
+                ],
+                'attributes' => [
+                    'id' => 'query',
+                ],
+            ])
+            ->add([
+                'name' => 'process_dimensions',
+                'type' => Element\Submit::class,
+                'options' => [
+                    'label' => 'Prepare dimensions for images, audio and videos attached to items selected above in background', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'process_dimensions',
+                    'value' => 'Process', // @translate
                 ],
             ])
         ;
