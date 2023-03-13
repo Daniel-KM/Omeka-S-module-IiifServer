@@ -178,23 +178,51 @@ class Manifest extends AbstractResourceType
     }
 
     /**
+     * In order to make old version of the plugin "download" of Mirador working,
+     * a flat structure is created by default when none is set and when there
+     * are more than one media.
+     *
      * @return Range[]
      */
     public function structures(): array
     {
+        if (!array_key_exists('media_info', $this->_storage)) {
+            $this->_storage['media_info'] = $this->prepareMediaLists();
+        }
+
+        // Count number of available medias.
+        $total = 0;
+        foreach ($this->_storage['media_info'] as $mediaInfo) {
+            if ($mediaInfo['motivation'] === 'painting') {
+                ++$total;
+            }
+        }
+
         $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
         $structureProperty = $settings()->get('iiifserver_manifest_structures_property');
         if (!$structureProperty) {
+            if ($total > 1) {
+                $structure = $this->defaultStructure();
+                return $structure ? [$structure] : [];
+            }
             return [];
         }
 
         $stValues = $this->resource->value($structureProperty, ['all' => true]);
         if (!count($stValues)) {
+            if ($total > 1) {
+                $structure = $this->defaultStructure();
+                return $structure ? [$structure] : [];
+            }
             return [];
         }
 
         // TODO A structure requires a media for now to build reference to canvas.
         if (!$this->resource->primaryMedia()) {
+            if ($total > 1) {
+                $structure = $this->defaultStructure();
+                return $structure ? [$structure] : [];
+            }
             return [];
         }
 
@@ -219,6 +247,24 @@ class Manifest extends AbstractResourceType
         }
 
         return $structures;
+    }
+
+    protected function defaultStructure(): ?Range
+    {
+        // Take iiif media in the order they are.
+        $canvases = [];
+        foreach ($this->_storage['media_info'] as $mediaInfo) {
+            if ($mediaInfo['motivation'] === 'painting') {
+                $canvases[] = new ReferencedCanvas($mediaInfo['content']->resource());
+            }
+        }
+
+        return new Range($this->resource, [
+            'index' => 'rstructure1',
+            'label' => 'Content',
+            'items' => $canvases,
+            'skip' => ['@context' => true],
+        ]);
     }
 
     /**
