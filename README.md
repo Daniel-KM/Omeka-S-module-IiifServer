@@ -689,6 +689,7 @@ TODO / Bugs
 - [ ] Include thumbnails in canvas to avoid fetching info.json (so cache whole manifest).
 - [ ] Include pdf as rendering.
 - [ ] Check if multiple roots is working for structures in iiif v3.
+- [ ] Store dimensions on item/media save.
 
 See module [Image Server].
 
