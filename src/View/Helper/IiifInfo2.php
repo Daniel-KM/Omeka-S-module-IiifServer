@@ -88,7 +88,6 @@ class IiifInfo2 extends AbstractHelper
             $imageSize = $view->imageSize($media, $imageType);
             $width = $imageSize['width'];
             $height = $imageSize['height'];
-            $imageUrl = $this->view->iiifMediaUrl($media, 'imageserver/id', '2');
 
             // Check if Image Server is available.
             $tiles = [];
@@ -101,6 +100,10 @@ class IiifInfo2 extends AbstractHelper
                     }
                 }
             }
+
+            $routeImage = $this->view->setting('imageserver_identifier_infojson')
+                ? 'imageserver/info'
+                : 'imageserver/id';
 
             $profile = [];
             $profile[] = 'http://iiif.io/api/image/2/level2.json';
@@ -133,7 +136,7 @@ class IiifInfo2 extends AbstractHelper
 
             $info = [];
             $info['@context'] = 'http://iiif.io/api/image/2/context.json';
-            $info['@id'] = $imageUrl;
+            $info['@id'] = $this->view->iiifMediaUrl($media, $routeImage, '2');
             $info['protocol'] = 'http://iiif.io/api/image';
             $info['width'] = $width;
             $info['height'] = $height;

@@ -757,6 +757,18 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_media_api_identifier_infojson',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Append "info.json" to the image iiif identifier', // @translate
+                    'info' => 'May be required with an external image server that doesn’t manage the url rewriting to /info.json (iiif specification requires a redirection with http 303).', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_media_api_identifier_infojson',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_media_api_support_non_image',
                 'type' => Element\Checkbox::class,
                 'options' => [
