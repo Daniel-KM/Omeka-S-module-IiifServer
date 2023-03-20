@@ -77,7 +77,7 @@ class IiifCanvas2 extends AbstractHelper
         // Size of canvas should be the double of small images (< 1200 px), but
         // only when more than one image is used by a canvas.
         $imageSize = $view->imageSize($resource, 'original');
-        list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
+        [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
         $canvas['width'] = $width;
         $canvas['height'] = $height;
 
@@ -215,7 +215,7 @@ class IiifCanvas2 extends AbstractHelper
         if (empty($imageSize)) {
             return;
         }
-        list($width, $height) = array_values($imageSize);
+        [$width, $height] = array_values($imageSize);
 
         $thumbnail = [];
 
@@ -259,7 +259,7 @@ class IiifCanvas2 extends AbstractHelper
 
         if (empty($width) || empty($height)) {
             $imageSize = $view->imageSize($media, 'original');
-            list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
         }
 
         $image = [];
@@ -274,7 +274,7 @@ class IiifCanvas2 extends AbstractHelper
         // "the URL may be the complete URL to a particular size of the image
         // content", so the large one here, and it's always a jpeg.
         $imageSize = $view->imageSize($media, 'large');
-        list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
+        [$widthLarge, $heightLarge] = $imageSize ? array_values($imageSize) : [null, null];
         $imageUrl = $view->iiifMediaUrl($media, 'imageserver/media', '2', [
             'region' => 'full',
             'size' => $widthLarge . ',' . $heightLarge,

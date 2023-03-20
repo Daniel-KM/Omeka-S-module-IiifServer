@@ -96,7 +96,7 @@ class IiifCleanIdentifiers extends AbstractHelper
             } else {
                 $output = function ($v) {
                     return str_replace('%3A', ':', rawurlencode(strpos($v, $this->prefix) === 0
-                        ?mb_substr($v, mb_strlen($this->prefix))
+                        ? mb_substr($v, mb_strlen($this->prefix))
                         : $v));
                 };
             }

@@ -96,4 +96,4 @@ trait TraitXml
 
         return $xmlContent;
     }
- }
+}

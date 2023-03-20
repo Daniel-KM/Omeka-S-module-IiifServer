@@ -187,7 +187,7 @@ class MediaDimension extends AbstractPlugin
         if ($mainMediaType === 'image') {
             $result = getimagesize($filepath);
             if ($result) {
-                list($width, $height) = $result;
+                [$width, $height] = $result;
                 return [
                     'width' => (int) $width,
                     'height' => (int) $height,

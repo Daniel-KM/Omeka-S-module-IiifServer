@@ -776,7 +776,7 @@ class IiifManifest2 extends AbstractHelper
         $view = $this->getView();
         if (empty($width) || empty($height)) {
             $imageSize = $view->imageSize($media, 'original');
-            list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
         }
 
         $image = [];
@@ -822,7 +822,7 @@ class IiifManifest2 extends AbstractHelper
         // content", so the large one here, and it's always a jpeg.
         // It's not needed to use the full original size.
         $imageSize = $view->imageSize($media, 'large');
-        list($widthLarge, $heightLarge) = $imageSize ? array_values($imageSize) : [null, null];
+        [$widthLarge, $heightLarge] = $imageSize ? array_values($imageSize) : [null, null];
         $imageUrl = $this->view->iiifMediaUrl($media, 'imageserver/media', $service ?: '2', [
             'region' => 'full',
             'size' => $imageSize
@@ -888,7 +888,7 @@ class IiifManifest2 extends AbstractHelper
             // Size of canvas should be the double of small images (< 1200 px),
             // but only when more than one image is used by a canvas.
             $imageSize = $this->view->imageSize($media, 'original');
-            list($width, $height) = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
             $canvas['width'] = $width;
             $canvas['height'] = $height;
             $seeAlso = $this->seeAlso($media);
@@ -936,7 +936,7 @@ class IiifManifest2 extends AbstractHelper
                 }
                 // no break;
             case 'source':
-                return (string)$media->displayTitle($fallback);
+                return (string) $media->displayTitle($fallback);
 
             case 'template_or_source':
                 $fallback = (string) $media->displayTitle($fallback);
@@ -1311,7 +1311,7 @@ class IiifManifest2 extends AbstractHelper
 
         // TODO Improve process to avoid recursive process (one loop and by-reference variables).
 
-        $appendItem = function (&$range, $itemsType, $itemName, $ranges, $canvases) {
+        $appendItem = function (&$range, $itemsType, $itemName, $ranges, $canvases): void {
             switch ($itemsType) {
                 case 'canvases':
                     $range['canvases'][] = $canvases[$itemName]['@id'];
@@ -1490,7 +1490,7 @@ class IiifManifest2 extends AbstractHelper
             if ($result !== false) {
                 $result = getimagesize($tempPath);
                 if ($result) {
-                    list($width, $height) = $result;
+                    [$width, $height] = $result;
                 }
             }
             unlink($tempPath);
@@ -1499,7 +1499,7 @@ class IiifManifest2 extends AbstractHelper
         elseif (file_exists($filepath)) {
             $result = getimagesize($filepath);
             if ($result) {
-                list($width, $height) = $result;
+                [$width, $height] = $result;
             }
         }
 

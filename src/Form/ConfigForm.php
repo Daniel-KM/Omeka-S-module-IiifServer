@@ -752,7 +752,7 @@ class ConfigForm extends Form
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_identifier',
-                    'required' =>  true,
+                    'required' => true,
                 ],
             ])
 

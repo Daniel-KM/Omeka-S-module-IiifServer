@@ -165,7 +165,7 @@ class ImageSize extends AbstractPlugin
         if (!$result) {
             return $this->emptySize;
         }
-        list($width, $height) = $result;
+        [$width, $height] = $result;
         return [
             'width' => $width,
             'height' => $height,
@@ -190,7 +190,7 @@ class ImageSize extends AbstractPlugin
             if ($result) {
                 $result = getimagesize($tempPath);
                 if ($result) {
-                    list($width, $height) = $result;
+                    [$width, $height] = $result;
                 }
             }
             unlink($tempPath);

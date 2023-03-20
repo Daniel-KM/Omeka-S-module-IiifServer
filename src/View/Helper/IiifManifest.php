@@ -57,7 +57,7 @@ class IiifManifest extends AbstractHelper
         if ($resourceName == 'items') {
             return $version === '2'
                 ? $view->iiifManifest2($resource)
-                :  $view->iiifManifest3($resource);
+                : $view->iiifManifest3($resource);
         }
 
         if ($resourceName == 'item_sets') {
