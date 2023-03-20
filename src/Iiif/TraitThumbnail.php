@@ -57,7 +57,7 @@ trait TraitThumbnail
     /**
      * @todo Normalize and factorize as a standard image.
      */
-    public function thumbnail()
+    public function thumbnail(): ?array
     {
         /** @var \Omeka\Api\Representation\AssetRepresentation $thumbnailAsset */
         $thumbnailAsset = $this->resource->thumbnail();
@@ -211,7 +211,7 @@ trait TraitThumbnail
      *
      * @todo Normalize iiif image service as Service.
      */
-    protected function _iiifImageService($baseUri, $contextUri, $complianceLevelUri)
+    protected function _iiifImageService($baseUri, $contextUri, $complianceLevelUri): array
     {
         $service = [];
         $service['@context'] = $contextUri;

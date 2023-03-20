@@ -146,7 +146,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
             foreach ($xmlTextLine->children() as $xmlString) {
                 if ($xmlString->getName() === 'String') {
                     $attributes = $xmlString->attributes();
-                    $value .= (string) $attributes->CONTENT . ' ';
+                    $value .= (string) @$attributes->CONTENT . ' ';
                 }
             }
             $value = trim($value);

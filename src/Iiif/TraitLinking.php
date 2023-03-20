@@ -48,7 +48,7 @@ trait TraitLinking
     /**
      * @todo Normalize getHomepage().
      */
-    public function homepage(): array
+    public function homepage(): ?array
     {
         $output = [];
 
@@ -156,11 +156,9 @@ trait TraitLinking
     }
 
     /**
-     * @todo Normalize getLogo().
-     *
-     * @return \stdClass
+     * @todo Normalize logo().
      */
-    public function logo()
+    public function logo(): ?array
     {
         $setting = $this->setting;
         $url = $setting('iiifserver_manifest_logo_default');
@@ -204,7 +202,7 @@ trait TraitLinking
     /**
      * @todo Normalize seeAlso().
      */
-    public function seeAlso(): array
+    public function seeAlso(): ?array
     {
         $output = [];
 

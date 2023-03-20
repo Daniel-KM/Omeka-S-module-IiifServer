@@ -121,7 +121,7 @@ trait TraitDescriptive
      * in order to include the rights value when it is not a url, since it is
      * skipped when it is not an url.
      *
-     * @return ValueLanguage[]
+     * @return ValueLanguage|array|null
      */
     public function requiredStatement()
     {
