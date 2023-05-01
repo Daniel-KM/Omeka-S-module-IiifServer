@@ -690,6 +690,7 @@ TODO / Bugs
 - [ ] Include pdf as rendering.
 - [ ] Check if multiple roots is working for structures in iiif v3.
 - [ ] Store dimensions on item/media save.
+- [ ] Create a plugin MediaData that will merge MediaDimension, ImageSize, and allows to get media type.
 
 See module [Image Server].
 
