@@ -532,6 +532,7 @@ return [
             'iiifserver_manifest_homepage_property' => '',
             'iiifserver_manifest_seealso_property' => '',
             'iiifserver_manifest_start_property' => '',
+            'iiifserver_manifest_start_primary_media' => false,
             'iiifserver_manifest_viewing_direction_property' => '',
             'iiifserver_manifest_viewing_direction_default' => 'left-to-right',
             'iiifserver_manifest_behavior_property' => '',

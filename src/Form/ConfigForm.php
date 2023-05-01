@@ -297,6 +297,17 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_start_primary_media',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Use the primary media as start page, except when property above is filled', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_start_primary_media',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_structures_property',
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [

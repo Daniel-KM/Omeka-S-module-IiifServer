@@ -254,9 +254,9 @@ trait TraitLinking
             return null;
         }
 
-        $setting = $this->setting;
-        $property = $setting('iiifserver_manifest_start_property');
-        if (!$property) {
+        $property = $this->setting->__invoke('iiifserver_manifest_start_property');
+        $usePrimaryMedia = (bool) $this->setting->__invoke('iiifserver_manifest_start_primary_media');
+        if (!$property && !$usePrimaryMedia) {
             return null;
         }
 
@@ -309,6 +309,17 @@ trait TraitLinking
                         ],
                     ];
                 }
+            }
+        }
+
+        if (!$usePrimaryMedia) {
+            $media = $this->resource->primaryMedia();
+            $id = $canvasId($media);
+            if ($id) {
+                return [
+                    'id' => $id,
+                    'type' => 'Canvas',
+                ];
             }
         }
 
