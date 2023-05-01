@@ -216,7 +216,7 @@ if (version_compare($oldVersion, '3.6.8.3', '<')) {
     );
     $messenger->addSuccess($message);
     $message = new Message(
-        'The xml media-type should be a precise one: either "application/alto+xml", not "text/xml" or "application/xml".', // @translate
+        'The xml media-type should be a precise one: "application/alto+xml", not "text/xml" or "application/xml".', // @translate
     );
     $messenger->addWarning($message);
     $message = new Message(

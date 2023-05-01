@@ -196,10 +196,7 @@ trait TraitMediaInfo
         foreach ($iiifTypes['other'] as $mediaId => $iiifType) {
             $contentResource = $iiifType['content'];
             if ($contentResource->type() === 'Dataset'
-                && in_array($contentResource->format(), [
-                    'application/alto+xml',
-                    'application/vnd.alto+xml',
-                ])
+                && $contentResource->format() === 'application/alto+xml'
             ) {
                 unset($iiifTypes['other'][$mediaId]);
                 unset($manifestRenderings[$mediaId]);

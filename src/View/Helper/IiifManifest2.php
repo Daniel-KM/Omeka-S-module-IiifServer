@@ -1776,11 +1776,8 @@ class IiifManifest2 extends AbstractHelper
             if ($resourceBasename !== $callingResourceBasename) {
                 continue;
             }
-            $mediaType = $media->mediaType();
-            if (!in_array($mediaType, [
-                'application/vnd.alto+xml',
-                'application/alto+xml',
-            ])) {
+            $mediaType = $rMedia->mediaType();
+            if ($mediaType !== 'application/alto+xml') {
                 continue;
             }
             break;

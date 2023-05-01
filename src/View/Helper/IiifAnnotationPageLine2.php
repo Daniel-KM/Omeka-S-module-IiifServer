@@ -86,10 +86,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
                 continue;
             }
             $mediaType = $media->mediaType();
-            if (!in_array($mediaType, [
-                'application/vnd.alto+xml',
-                'application/alto+xml',
-            ])) {
+            if ($mediaType !== 'application/alto+xml') {
                 continue;
             }
             break;
