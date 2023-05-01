@@ -29,6 +29,7 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\SiteRepresentation;
 
 trait TraitLinking
@@ -241,6 +242,77 @@ trait TraitLinking
         ];
 
         return $output;
+    }
+
+    /**
+     * @see https://iiif.io/api/presentation/3.0/#start
+     */
+    public function start(): ?array
+    {
+        // TODO Start is currently only available for Manifest, not Range.
+        if ($this->type !== 'Manifest') {
+            return null;
+        }
+
+        $setting = $this->setting;
+        $property = $setting('iiifserver_manifest_start_property');
+        if (!$property) {
+            return null;
+        }
+
+        // Get the index of the media as Canvas (see manifest->items()).
+        $canvasId = function (?MediaRepresentation $media): ?string {
+            $mediaInfo = $this->mediaInfo($media);
+            if ($mediaInfo && !empty($mediaInfo['index'])) {
+                // See construction of the url in Canvas->id().
+                $name = $mediaInfo['index'];
+                $targetName = (string) (int) $name === (string) $name
+                    ? 'p' . $name
+                    : $name;
+                return $this->iiifUrl->__invoke($this->resource, 'iiifserver/uri', '3', [
+                    'type' => 'canvas',
+                    'name' => $targetName,
+                ]);
+            }
+            return null;
+        };
+
+        /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+        $values = $property ? $this->resource->value($property, ['all' => true]) : [];
+        foreach ($values as $value) {
+            $vr = $value->resource();
+            if ($vr) {
+                if ($vr instanceof  MediaRepresentation) {
+                    $id = $canvasId($vr);
+                    if ($id) {
+                        return [
+                            'id' => $id,
+                            'type' => 'Canvas',
+                        ];
+                    }
+                }
+            } elseif (!$value->uri()) {
+                // There is no check on the value for start.
+                $id = $canvasId($this->resource->primaryMedia());
+                if ($id) {
+                    // TODO Create a class for SpecificResource.
+                    return [
+                        // TODO Check if the canvas id (uri, not url) with subtype /segment/ is better than /canvas-segment/.
+                        'id' => $id . '/segment/1',
+                        'type' => 'SpecificResource',
+                        // Here, we are in manifest. So the value is used for
+                        // audio/video, so the first media, so index #1.
+                        'source' =>$id,
+                        'selector' => [
+                            'type' => 'PointSelector',
+                            't' => $value->value(),
+                        ],
+                    ];
+                }
+            }
+        }
+
+        return null;
     }
 
     protected function defaultSite(): ?SiteRepresentation

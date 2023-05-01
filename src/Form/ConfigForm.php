@@ -282,6 +282,21 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_start_property',
+                'type' => OmekaElement\PropertySelect::class,
+                'options' => [
+                    'label' => 'Property to set the start page (may be an index, a media or a time)', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_start_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_structures_property',
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
@@ -860,6 +875,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_start_property',
                 'required' => false,
             ])
             ->add([

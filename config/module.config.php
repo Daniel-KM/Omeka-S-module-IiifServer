@@ -196,7 +196,8 @@ return [
                                 'id' => '[^\/]+',
                                 // Note: content resources should use the original media url, so it is just an alias.
                                 // TODO Make a redirection from content resource to original url. Or the inverse so all iiif urls will be standard?
-                                'type' => 'annotation-page|annotation-collection|annotation-list|annotation|canvas|collection|content-resource|manifest|range',
+                                // "canvas-segment" may be used as id (uri, not a real url) for start: https://iiif.io/api/presentation/3.0/#start. Nevertheless, it is not used for now (use subtype).
+                                'type' => 'annotation-page|annotation-collection|annotation-list|annotation|canvas-segment|canvas|collection|content-resource|manifest|range',
                             ],
                             'defaults' => [
                                 'version' => $version,
@@ -530,6 +531,7 @@ return [
             'iiifserver_manifest_homepage' => 'resource',
             'iiifserver_manifest_homepage_property' => '',
             'iiifserver_manifest_seealso_property' => '',
+            'iiifserver_manifest_start_property' => '',
             'iiifserver_manifest_viewing_direction_property' => '',
             'iiifserver_manifest_viewing_direction_default' => 'left-to-right',
             'iiifserver_manifest_behavior_property' => '',

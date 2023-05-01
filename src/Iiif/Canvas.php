@@ -143,6 +143,7 @@ class Canvas extends AbstractResourceType
     public function id(): ?string
     {
         // TODO Use a specific value if any in the resource.
+        // TODO Factorize with TraitLinking->start().
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',
             'name' => $this->options['target_name'],

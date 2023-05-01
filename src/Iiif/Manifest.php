@@ -159,15 +159,11 @@ class Manifest extends AbstractResourceType
     public function items(): array
     {
         $items = [];
-        $index = 0;
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo
-                && $mediaInfo['on'] === 'Canvas'
-                && ($mediaInfo['key'] ?? null) === 'annotation'
-            ) {
+            if ($mediaInfo && !empty($mediaInfo['index'])) {
                 $items[] = new Canvas($media, [
-                    'index' => ++$index,
+                    'index' => $mediaInfo['index'],
                     'content' => $mediaInfo['content'],
                     'key' => $mediaInfo['key'] ?? null,
                     'motivation' => $mediaInfo['motivation'] ?? null,
@@ -478,8 +474,11 @@ class Manifest extends AbstractResourceType
      * can be a canvas motivation painting or supplementing, or a canvas
      * rendering, or a manifest rendering.
      */
-    protected function mediaInfo(MediaRepresentation $media): ?array
+    protected function mediaInfo(?MediaRepresentation $media): ?array
     {
+        if ($media === null) {
+            return null;
+        }
         if (!array_key_exists('media_info', $this->_storage)) {
             $this->_storage['media_info'] = $this->prepareMediaLists();
         }
@@ -503,6 +502,7 @@ class Manifest extends AbstractResourceType
      *
      * @todo Better manage mixed painting in canvas, for example an image that is part a video. In such a case, the manifest is generally build manually, so it's not the purpose of this module currently.
      * @todo Manage media related to other (xml alto to its image).
+     * @todo Better management of this list of medias, that should be available anywhere.
      */
     protected function prepareMediaLists(): array
     {
@@ -531,9 +531,11 @@ class Manifest extends AbstractResourceType
             'invalid' => [],
         ];
 
+        $mediaIds = [];
         $medias = $this->resource->media();
         foreach ($medias as $media) {
             $mediaId = $media->id();
+            $mediaIds[] = $mediaId;
             $result[$mediaId] = null;
             $contentResource = new ContentResource($media);
             if ($contentResource->hasIdAndType()) {
@@ -637,6 +639,18 @@ class Manifest extends AbstractResourceType
                 $result[$mediaId]['on'] = 'Manifest';
                 $result[$mediaId]['key'] = 'rendering';
                 $result[$mediaId]['motivation'] = null;
+            }
+        }
+
+        // Prepare mapping between media and canvas index one time and store it.
+        $index = 0;
+        foreach ($mediaIds as $mediaId) {
+            $mediaInfo = $result[$mediaId] ?? null;
+            if ($mediaInfo
+                && $mediaInfo['on'] === 'Canvas'
+                && ($mediaInfo['key'] ?? null) === 'annotation'
+            ) {
+                $result[$mediaId]['index'] = ++$index;
             }
         }
 
