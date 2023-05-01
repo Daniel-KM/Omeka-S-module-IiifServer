@@ -134,12 +134,12 @@ return [
     ],
     'controller_plugins' => [
         'invokables' => [
-            'fixUtf8' => Mvc\Controller\Plugin\FixUtf8::class,
             'iiifImageJsonLd' => Mvc\Controller\Plugin\IiifImageJsonLd::class,
             'iiifJsonLd' => Mvc\Controller\Plugin\IiifJsonLd::class,
             'rangeToArray' => Mvc\Controller\Plugin\RangeToArray::class,
         ],
         'factories' => [
+            'fixUtf8' => Service\ControllerPlugin\FixUtf8Factory::class,
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
             'mediaDimension' => Service\ControllerPlugin\MediaDimensionFactory::class,
         ],
@@ -563,6 +563,7 @@ return [
             ],
             'iiifserver_manifest_structures_property' => '',
             'iiifserver_manifest_structures_skip_flat' => false,
+            'iiifserver_xml_fix_mode' => 'no',
             'iiifserver_access_resource_skip' => false,
             // Urls.
             'iiifserver_url_version_add' => false,

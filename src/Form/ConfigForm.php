@@ -613,6 +613,34 @@ class ConfigForm extends Form
                     'data-placeholder' => 'Select one or more properties…', // @translate
                 ],
             ])
+
+            ->add([
+                'name' => 'fieldset_more',
+                'type' => \Laminas\Form\Fieldset::class,
+                'options' => [
+                    'label' => 'Other options', // @translate
+                ],
+            ])
+
+            // The option is the same in module IIIF Search.
+            ->add([
+                'name' => 'iiifserver_xml_fix_mode',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Fix bad xml and invalid utf-8 characters', // @translate
+                    'value_options' => [
+                        'no' => 'No', // @translate
+                        'dom' => 'Via DOM (quick)', // @translate
+                        'regex' => 'Via regex (slow)', // @translate
+                        'all' => 'All', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_xml_fix_mode',
+                    'value' => 'no',
+                ],
+            ])
+
             ->add([
                 'name' => 'iiifserver_access_resource_skip',
                 'type' => Element\Checkbox::class,
@@ -982,6 +1010,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media_blacklist',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_fix_xml_mode',
                 'required' => false,
             ])
             ->add([
