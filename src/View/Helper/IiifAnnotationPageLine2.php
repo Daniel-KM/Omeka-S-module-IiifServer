@@ -32,9 +32,11 @@ namespace IiifServer\View\Helper;
 use IiifServer\Iiif\TraitXml;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
+use IiifServer\Iiif\TraitMediaRelated;
 
 class IiifAnnotationPageLine2 extends AbstractHelper
 {
+    use TraitMediaRelated;
     use TraitXml;
 
     /**
@@ -55,10 +57,13 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     /**
      * Get the IIIF canvas for the specified resource.
      *
-     * @todo Factorize with IiifManifest2 and AnnotationPage.
+     * @todo Factorize IiifAnnotationPageLine2, IiifManifest2 and AnnotationPage.
      *
-     * @see \IiifServer\Iiif\AnnotationPage
+     * @see \IiifServer\Iiif\AnnotationPage::initAnnotationPage()
+     * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
+     * @see \IiifServer\View\Helper\IiifAnnotationPageLine3
      * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
+     * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
      *
      * @param MediaRepresentation $resource
      * @param int|string $index Used to set the standard name of the image.
@@ -66,45 +71,25 @@ class IiifAnnotationPageLine2 extends AbstractHelper
      */
     public function __invoke(MediaRepresentation $resource, $index)
     {
-        $view = $this->getView();
+        $view = $this->view;
+        $plugins = $view->getHelperPluginManager();
+        $this->logger = $plugins->get('logger')();
 
-        $callingResource = $resource;
-        $callingResourceId = $callingResource->id();
-        $callingResourceBasename = pathinfo((string) $callingResource->source(), PATHINFO_FILENAME);
-        if (!$callingResourceBasename) {
+        $relatedMedia = $this->relatedMediaOcr($resource, $index);
+        if (!$relatedMedia) {
             return null;
         }
 
-        // Get the ocr.
-        $media = null;
-        foreach ($callingResource->item()->media() as $media) {
-            if ($media->id() === $callingResourceId) {
-                continue;
-            }
-            $resourceBasename = pathinfo((string) $media->source(), PATHINFO_FILENAME);
-            if ($resourceBasename !== $callingResourceBasename) {
-                continue;
-            }
-            $mediaType = $media->mediaType();
-            if ($mediaType !== 'application/alto+xml') {
-                continue;
-            }
-            break;
-        }
-        if (!$media) {
-            return null;
-        }
-
-        $this->logger = $view->plugin('logger')();
-
-        $this->resource = $media;
-
+        $this->resource = $resource;
         $this->initTraitXml();
 
-        $xml = $this->loadXml($media);
+        $xml = $this->loadXml($relatedMedia);
         if (!$xml) {
             return null;
         }
+
+        $callingResource = $resource;
+        $callingResourceId = $callingResource->id();
 
         $item = $callingResource->item();
 
@@ -132,7 +117,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
         $altoNamespace = $namespaces['alto'] ?? $namespaces[''] ?? 'http://www.loc.gov/standards/alto/ns-v4#';
         $xml->registerXPathNamespace('alto', $altoNamespace);
 
-        $index = 0;
+        $indexAnnotationLine = 0;
         foreach ($xml->xpath('/alto:alto/alto:Layout//alto:TextLine') as $xmlTextLine) {
             $attributes = $xmlTextLine->attributes();
             $zone = [];
@@ -154,7 +139,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
             }
 
             $annotation = [
-                '@id' => $baseAnnotationUrl . '/l' . ++$index,
+                '@id' => $baseAnnotationUrl . '/l' . ++$indexAnnotationLine,
                 '@type' => 'oa:Annotation',
                 'motivation' => 'sc:painting',
                 'resource' => [

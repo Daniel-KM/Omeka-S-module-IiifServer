@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\TraitMediaRelated;
 use IiifServer\Iiif\TraitRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -43,6 +44,7 @@ use Omeka\File\TempFileFactory;
  */
 class IiifManifest2 extends AbstractHelper
 {
+    use TraitMediaRelated;
     use TraitRights;
 
     /**
@@ -356,11 +358,28 @@ class IiifManifest2 extends AbstractHelper
                         $rendering[] = $render;
                         break;
 
+                    case 'application/xml':
                     case 'text/xml':
                         $render = [];
                         $render['@id'] = $media->originalUrl();
                         $render['format'] = $mediaType;
                         $render['label'] = $translate('Download as XML'); // @translate
+                        $rendering[] = $render;
+                        break;
+
+                    case 'application/alto+xml':
+                        $render = [];
+                        $render['@id'] = $media->originalUrl();
+                        $render['format'] = $mediaType;
+                        $render['label'] = $translate('Download as ALTO XML'); // @translate
+                        $rendering[] = $render;
+                        break;
+
+                    case 'text/plain':
+                        $render = [];
+                        $render['@id'] = $media->originalUrl();
+                        $render['format'] = $mediaType;
+                        $render['label'] = $translate('Download as text'); // @translate
                         $rendering[] = $render;
                         break;
                 }
@@ -898,10 +917,10 @@ class IiifManifest2 extends AbstractHelper
             [$width, $height] = array_values($this->getView()->imageSize($media, 'original'));
             $canvas['width'] = $width;
             $canvas['height'] = $height;
-            $seeAlso = $this->seeAlso($media);
+            $seeAlso = $this->seeAlso($media, $index);
             if ($seeAlso) {
                 $canvas['seeAlso'] = $seeAlso;
-                $canvas['otherContent'] = $this->otherContent($media);
+                $canvas['otherContent'] = $this->otherContent($media, $index);
             }
         }
 
@@ -1725,9 +1744,9 @@ class IiifManifest2 extends AbstractHelper
     /**
      * @todo Factorize.
      */
-    protected function seeAlso(MediaRepresentation $media): ?array
+    protected function seeAlso(MediaRepresentation $media, int $indexOne): ?array
     {
-        $relatedMedia = $this->relatedMediaOcr($media);
+        $relatedMedia = $this->relatedMediaOcr($media, $indexOne);
         if (!$relatedMedia) {
             return null;
         }
@@ -1742,9 +1761,9 @@ class IiifManifest2 extends AbstractHelper
     /**
      * @todo Factorize.
      */
-    protected function otherContent(MediaRepresentation $media): ?array
+    protected function otherContent(MediaRepresentation $media, int $indexOne): ?array
     {
-        $relatedMedia = $this->relatedMediaOcr($media);
+        $relatedMedia = $this->relatedMediaOcr($media, $indexOne);
         if (!$relatedMedia) {
             return null;
         }
@@ -1758,45 +1777,5 @@ class IiifManifest2 extends AbstractHelper
             '@type' => 'sc:AnnotationList',
             'label' => 'Text of current page',
         ]];
-    }
-
-    protected function relatedMediaOcr(MediaRepresentation $media): ?MediaRepresentation
-    {
-        static $relatedMedias = [];
-
-        $mediaId = $media->id();
-        if (isset($relatedMedias[$mediaId])) {
-            return $relatedMedias[$mediaId];
-        }
-
-        $callingResource = $media;
-        $callingResourceId = $callingResource->id();
-        $callingResourceBasename = pathinfo((string) $callingResource->source(), PATHINFO_FILENAME);
-        if (!$callingResourceBasename) {
-            return null;
-        }
-
-        // Get the ocr.
-        $media = null;
-        foreach ($callingResource->item()->media() as $media) {
-            if ($media->id() === $callingResourceId) {
-                continue;
-            }
-            $resourceBasename = pathinfo((string) $media->source(), PATHINFO_FILENAME);
-            if ($resourceBasename !== $callingResourceBasename) {
-                continue;
-            }
-            $mediaType = $rMedia->mediaType();
-            if ($mediaType !== 'application/alto+xml') {
-                continue;
-            }
-            break;
-        }
-        if (!$media) {
-            return null;
-        }
-
-        $relatedMedias[$mediaId] = $media;
-        return $relatedMedias[$mediaId];
     }
 }

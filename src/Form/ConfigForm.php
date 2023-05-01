@@ -623,6 +623,24 @@ class ConfigForm extends Form
             ])
 
             // The option is the same in module IIIF Search.
+            // TODO Make option to match image and xml an option to set in a property of the item.
+            ->add([
+                'name' => 'iiifserver_xml_image_match',
+                'type' => Element\Radio::class,
+                'options' => [
+                    'label' => 'Match images and xmls when they are multiple', // @translate
+                    'value_options' => [
+                        'order' => 'Media order (page_001.jpg, alto_001.xml, page_002.jpg, alto_002.xml, …)', // @translate
+                        'basename' => 'Media source base filename (page_001.jpg, page_002.jpg, page_002.xml, page_001.xml…)', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_xml_image_match',
+                    'value' => 'order',
+                ],
+            ])
+
+            // The option is the same in module IIIF Search.
             ->add([
                 'name' => 'iiifserver_xml_fix_mode',
                 'type' => Element\Radio::class,

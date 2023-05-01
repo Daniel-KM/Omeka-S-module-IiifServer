@@ -93,6 +93,8 @@ trait TraitMediaInfo
      * @todo Better manage mixed painting in canvas, for example an image that is part a video. In such a case, the manifest is generally build manually, so it's not the purpose of this module currently.
      * @todo Manage media related to other (xml alto to its image).
      * @todo Better management of this list of medias, that should be available anywhere.
+     *
+     * @todo Merge with TraitMediaRelated.
      */
     private function prepareMediaInfoList(): self
     {

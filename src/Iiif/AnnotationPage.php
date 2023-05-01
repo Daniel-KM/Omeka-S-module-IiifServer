@@ -30,12 +30,14 @@
 namespace IiifServer\Iiif;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\MediaRepresentation;
 
 /**
  *@link https://iiif.io/api/presentation/3.0/#55-annotation-page
  */
 class AnnotationPage extends AbstractResourceType
 {
+    use TraitMediaRelated;
     use TraitXml;
 
     protected $type = 'AnnotationPage';
@@ -109,7 +111,8 @@ class AnnotationPage extends AbstractResourceType
         if ($this->dereferenced) {
             $this->keys['@context'] = self::REQUIRED;
         }
-        if ($this->callingResource && $this->callingMotivation === 'annotation') {
+        // Xml is used only for annotation.
+        if ($this->callingMotivation === 'annotation') {
             $this->initAnnotationPage();
         }
     }
@@ -166,6 +169,14 @@ class AnnotationPage extends AbstractResourceType
      * with a linked media or use the same basename from the original source.
      *
      * @todo Merge with SeeAlso?
+     *
+     * @todo Factorize IiifAnnotationPageLine2, IiifManifest2 and AnnotationPage.
+     *
+     * @see \IiifServer\Iiif\AnnotationPage::initAnnotationPage()
+     * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
+     * @see \IiifServer\View\Helper\IiifAnnotationPageLine3
+     * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
+     * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
      */
     protected function initAnnotationPage(): AbstractType
     {
@@ -173,26 +184,12 @@ class AnnotationPage extends AbstractResourceType
             return $this;
         }
 
+        $relatedMedia = $this->relatedMediaOcr($this->callingResource, null);
+        if (!$relatedMedia) {
+            return $this;
+        }
+
         $callingResourceId = $this->callingResource->id();
-
-        if ($this->resource->id() === $callingResourceId) {
-            return $this;
-        }
-
-        $callingResourceBasename = pathinfo((string) $this->callingResource->source(), PATHINFO_FILENAME);
-        if (!$callingResourceBasename) {
-            return $this;
-        }
-
-        $resourceBasename = pathinfo((string) $this->resource->source(), PATHINFO_FILENAME);
-        if ($resourceBasename !== $callingResourceBasename) {
-            return $this;
-        }
-
-        $mediaType = $this->resource->mediaType();
-        if ($mediaType !== 'application/alto+xml') {
-            return $this;
-        }
 
         $this->_storage['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',

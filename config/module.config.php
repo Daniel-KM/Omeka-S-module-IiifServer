@@ -563,6 +563,7 @@ return [
             ],
             'iiifserver_manifest_structures_property' => '',
             'iiifserver_manifest_structures_skip_flat' => false,
+            'iiifserver_xml_image_match' => 'order',
             'iiifserver_xml_fix_mode' => 'no',
             'iiifserver_access_resource_skip' => false,
             // Urls.
