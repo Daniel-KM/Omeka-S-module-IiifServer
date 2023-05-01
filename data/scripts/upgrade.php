@@ -239,3 +239,15 @@ if (version_compare($oldVersion, '3.6.10', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare($oldVersion, '3.6.13', '<')) {
+    $enableUtf8Fix = ($services->get('Config')['iiifserver']['config']['iiifserver_enable_utf8_fix'] ?? false) === true
+        ? 'regex'
+        : 'no';
+    $settings->delete('iiifserver_enable_utf8_fix');
+    $settings->set('iiifserver_xml_fix_mode', $enableUtf8Fix);
+    $message = new Message(
+        'A new option allows to fix bad xml and invalid utf-8 characters.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
