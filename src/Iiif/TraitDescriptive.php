@@ -120,6 +120,11 @@ trait TraitDescriptive
             return null;
         }
 
+        $defaultPlaceholder = $this->setting->__invoke('iiifserver_manifest_placeholder_canvas_default');
+        if ($defaultPlaceholder && !filter_var($defaultPlaceholder, FILTER_VALIDATE_URL)) {
+            $defaultPlaceholder = null;
+        }
+
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
         $values = $property ? $this->resource->value($property, ['all' => true]) : [];
         foreach ($values as $value) {
@@ -141,50 +146,11 @@ trait TraitDescriptive
                 $val = (string) $value->value();
                 $url = $uri ?: $val;
                 if (filter_var($url, FILTER_VALIDATE_URL)) {
-                    // Dimensions are required for a canvas.
-                    $dimensions = array_filter($this->mediaDimension->__invoke($url));
-                    if (!$dimensions) {
-                        continue;
-                    }
-
-                    // TODO Set format of the image.
-                    if (isset($dimensions['duration'])) {
-                        $iiifType = isset($dimensions['width']) ? 'Video' : 'Sound';
-                    } else {
-                        $iiifType = 'Image';
-                    }
-
-                    // Create canvas manually.
-                    $element = [
-                        'id' => $url . '/placeholder',
-                        'type' => 'Canvas',
-                    ];
-                    if ($value->type() === 'uri' && mb_strlen($val)) {
-                        // TODO Use ValueLanguage.
-                        $element['label'] = ['none' => [$val]];
-                    }
-                    $element += $dimensions;
-                    // TODO Use Annotation / AnnotationPage to build the placeholderCanvas (and canvas?).
-                    $body = [
-                        'id' => $url,
-                        'type' => $iiifType,
-                        // TODO Get media type of a file.
-                        // 'format' => 'image/png',
-                    ] + $dimensions;
-                    $element['items'][] = [
-                        'id' => $url . '/placeholder/1',
-                        'type' => 'AnnotationPage',
-                        'items' => [
-                            [
-                                'id' => $url . '/placeholder/1-image',
-                                'type' => 'Annotation',
-                                'motivation' => 'painting',
-                                'body' => $body,
-                                'target' => $url . '/placeholder',
-                            ],
-                        ],
-                    ];
-                    return $element;
+                    return $this->placeholder($url, $val === $url ? null : $val);
+                }
+                // Presence of a value means to use the default placeholder.
+                elseif ($defaultPlaceholder) {
+                    return $this->canvasFromUrl($defaultPlaceholder);
                 }
             }
         }
@@ -250,5 +216,58 @@ trait TraitDescriptive
             'label' => $metadataLabel,
             'value' => $metadataValue,
         ];
+    }
+
+    protected function canvasFromUrl(string $url, ?string $label): ?array
+    {
+        // Dimensions are required for a canvas.
+        $dimensions = array_filter($this->mediaDimension->__invoke($url));
+        if (!$dimensions || !array_filter($dimensions)) {
+            return null;
+        }
+
+        // TODO Set format of the image.
+        if (isset($dimensions['duration'])) {
+            $iiifType = isset($dimensions['width']) ? 'Video' : 'Sound';
+        } else {
+            $iiifType = 'Image';
+        }
+
+        // Create canvas manually.
+        $element = [
+            'id' => $url . '/placeholder',
+            'type' => 'Canvas',
+        ];
+
+        if (mb_strlen($label)) {
+            // TODO Use ValueLanguage.
+            $element['label'] = ['none' => [$label]];
+        }
+
+        $element += $dimensions;
+
+        // TODO Use Annotation / AnnotationPage to build the placeholderCanvas (and canvas?).
+        $body = [
+            'id' => $url,
+            'type' => $iiifType,
+            // TODO Get media type of a file.
+            // 'format' => 'image/png',
+        ] + $dimensions;
+
+        $element['items'][] = [
+            'id' => $url . '/placeholder/1',
+            'type' => 'AnnotationPage',
+            'items' => [
+                [
+                    'id' => $url . '/placeholder/1-image',
+                    'type' => 'Annotation',
+                    'motivation' => 'painting',
+                    'body' => $body,
+                    'target' => $url . '/placeholder',
+                ],
+            ],
+        ];
+
+        return $element;
     }
 }

@@ -376,7 +376,7 @@ class ConfigForm extends Form
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use in item or media to set a placeholder canvas for waiting or warning', // @translate
-                    'info' => 'May be a list of media or a url to a file.', // @translate
+                    'info' => 'May be a list of media, a url to a file or a boolean value, in which case the default placeholder canvas is used.', // @translate
                     'documentation' => 'https://iiif.io/api/presentation/3.0/#placeholdercanvas',
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -385,6 +385,17 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_manifest_placeholder_canvas_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_placeholder_canvas_default',
+                'type' => Element\Url::class,
+                'options' => [
+                    'label' => 'Url to use as a default placeholder canvas', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_placeholder_canvas_default',
                 ],
             ])
 
@@ -923,6 +934,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_placeholder_canvas_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_placeholder_canvas_default',
                 'required' => false,
             ])
             ->add([
