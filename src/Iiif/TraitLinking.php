@@ -53,17 +53,16 @@ trait TraitLinking
     {
         $output = [];
 
-        $setting = $this->setting;
         $site = $this->defaultSite();
         if ($site) {
             $siteSettings = $this->resource->getServiceLocator()->get('Omeka\Settings\Site');
             $siteSettings->setTargetId($site->id());
-            $language = $siteSettings->get('locale') ?: ($setting('locale') ?: 'none');
+            $language = $siteSettings->get('locale') ?: ($this->settings->get('locale') ?: 'none');
         } else {
-            $language = $setting('locale') ?: 'none';
+            $language = $this->settings->get('locale') ?: 'none';
         }
 
-        $homePage = $setting('iiifserver_manifest_homepage', 'resource');
+        $homePage = $this->settings->get('iiifserver_manifest_homepage', 'resource');
         switch ($homePage) {
             case 'none':
                 return null;
@@ -73,7 +72,7 @@ trait TraitLinking
                     $label = new ValueLanguage([$language => [$site->title()]]);
                 } else {
                     $id = $this->urlHelper->__invoke('top', [], ['force_canonical' => true]);
-                    $label = new ValueLanguage([$language => [$setting('installation_title')]]);
+                    $label = new ValueLanguage([$language => [$this->settings->get('installation_title')]]);
                 }
                 $output[] = [
                     'id' => $id,
@@ -88,7 +87,7 @@ trait TraitLinking
             case 'property':
             case 'property_or_resource':
             case 'property_and_resource':
-                $property = $setting('iiifserver_manifest_homepage_property');
+                $property = $this->settings->get('iiifserver_manifest_homepage_property');
                 /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
                 $values = $this->resource->value($property, ['all' => true]);
                 if ($values) {
@@ -161,7 +160,7 @@ trait TraitLinking
      */
     public function logo(): ?array
     {
-        $url = $this->setting->__invoke('iiifserver_manifest_logo_default');
+        $url = $this->settings->get('iiifserver_manifest_logo_default');
         if (!$url) {
             return null;
         }
@@ -206,7 +205,7 @@ trait TraitLinking
     {
         $output = [];
 
-        $property = $this->setting->__invoke('iiifserver_manifest_seealso_property');
+        $property = $this->settings->get('iiifserver_manifest_seealso_property');
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
         $values = $property ? $this->resource->value($property, ['all' => true]) : [];
@@ -254,8 +253,8 @@ trait TraitLinking
             return null;
         }
 
-        $property = $this->setting->__invoke('iiifserver_manifest_start_property');
-        $usePrimaryMedia = (bool) $this->setting->__invoke('iiifserver_manifest_start_primary_media');
+        $property = $this->settings->get('iiifserver_manifest_start_property');
+        $usePrimaryMedia = (bool) $this->settings->get('iiifserver_manifest_start_primary_media');
         if (!$property && !$usePrimaryMedia) {
             return null;
         }
@@ -336,7 +335,7 @@ trait TraitLinking
             }
             /** @var \Omeka\Api\Manager $api */
             $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');
-            $defaultSiteId = $this->setting->__invoke('default_site');
+            $defaultSiteId = $this->settings->get('default_site');
             if ($defaultSiteId) {
                 try {
                     $this->_storage['site'] = $api->read('sites', ['id' => $defaultSiteId])->getContent();

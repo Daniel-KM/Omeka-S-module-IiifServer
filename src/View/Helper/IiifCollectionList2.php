@@ -29,6 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\TraitRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -37,7 +38,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class IiifCollectionList2 extends AbstractHelper
 {
-    use \IiifServer\Iiif\TraitRights;
+    use TraitRights;
 
     /**
      * Get the IIIF Collection manifest for the specified list of resources or url.
@@ -82,12 +83,17 @@ class IiifCollectionList2 extends AbstractHelper
 
         $manifest['@id'] = $url ?: $this->view->iiifUrl($resourcesOrUrls, 'iiifserver/set', '2');
 
-        $label = $translate('Dynamic list');
+        $label = $translate('Dynamic list'); // @translate
         $manifest['label'] = $label;
 
         // TODO The dynamic list has no metadata. Use the query?
 
         $this->setting = $this->view->getHelperPluginManager()->get('setting');
+
+        // To init TraitRights requires services or a resource, so use vocabulary.
+        // $this->initTraitRights();
+        $this->settings = $this->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
+
         $license = $this->rightsResource();
         if ($license) {
             $manifest['license'] = $license;

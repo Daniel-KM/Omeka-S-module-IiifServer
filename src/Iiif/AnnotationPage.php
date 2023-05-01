@@ -222,7 +222,7 @@ class AnnotationPage extends AbstractResourceType
     {
         $this->_storage['items'] = [];
 
-        $this->initBasePath();
+        $this->initTraitXml();
 
         $xml = $this->loadXml($this->resource);
         if (!$xml) {

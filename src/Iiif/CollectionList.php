@@ -126,9 +126,9 @@ class CollectionList extends AbstractType
     protected $api;
 
     /**
-     * @var \Omeka\View\Helper\Setting
+     * @var \Omeka\Settings\Settings
      */
-    protected $setting;
+    protected $settings;
 
     /**
      * @var \Laminas\View\Helper\Url
@@ -161,7 +161,7 @@ class CollectionList extends AbstractType
         $this->services = $services;
         $viewHelpers = $services->get('ViewHelperManager');
         $this->api = $viewHelpers->get('api');
-        $this->setting = $viewHelpers->get('setting');
+        $this->settings = $services->get('Omeka\Settings');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');

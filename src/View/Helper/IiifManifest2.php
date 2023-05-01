@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\TraitRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\AssetRepresentation;
@@ -42,7 +43,7 @@ use Omeka\File\TempFileFactory;
  */
 class IiifManifest2 extends AbstractHelper
 {
-    use \IiifServer\Iiif\TraitRights;
+    use TraitRights;
 
     /**
      * @var int
@@ -76,6 +77,11 @@ class IiifManifest2 extends AbstractHelper
      */
     protected $_baseUrlImageServer;
 
+    /**
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation
+     */
+    protected $resource;
+
     public function __construct(TempFileFactory $tempFileFactory, $basePath)
     {
         $this->tempFileFactory = $tempFileFactory;
@@ -90,6 +96,10 @@ class IiifManifest2 extends AbstractHelper
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
+        $this->resource = $resource;
+
+        $this->initTraitRights();
+
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
             return $this->buildManifestItem($resource);

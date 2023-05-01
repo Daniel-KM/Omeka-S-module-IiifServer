@@ -33,12 +33,12 @@ trait TraitBehavior
 {
     public function behavior(): ?array
     {
-        $behaviorProperty = $this->setting->__invoke('iiifserver_manifest_behavior_property', []);
+        $behaviorProperty = $this->settings->get('iiifserver_manifest_behavior_property', []);
         if ($behaviorProperty) {
             $behaviors = $this->resource->value($behaviorProperty, ['all' => true]);
         }
         if (empty($behaviors)) {
-            $behaviors = $this->setting->__invoke('iiifserver_manifest_behavior_default', []);
+            $behaviors = $this->settings->get('iiifserver_manifest_behavior_default', []);
         }
         foreach ($behaviors as $key => $behavior) {
             $behavior = (string) $behavior;

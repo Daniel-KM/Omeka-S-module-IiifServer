@@ -115,9 +115,8 @@ class Body extends AbstractResourceType
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
 
-        $setting = $this->setting;
-        $this->imageApiVersion = $setting('iiifserver_media_api_default_version', '2');
-        $this->imageApiSupportedVersions = (array) $setting('iiifserver_media_api_supported_versions', ['2/2', '3/2']);
+        $this->imageApiVersion = $this->settings->get('iiifserver_media_api_default_version', '2');
+        $this->imageApiSupportedVersions = (array) $this->settings->get('iiifserver_media_api_supported_versions', ['2/2', '3/2']);
     }
 
     public function id(): ?string

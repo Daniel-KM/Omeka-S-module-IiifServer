@@ -40,12 +40,12 @@ trait TraitViewing
 
     public function viewingDirection(): ?string
     {
-        $viewingDirectionProperty = $this->setting->__invoke('iiifserver_manifest_viewing_direction_property');
+        $viewingDirectionProperty = $this->settings->get('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {
             $viewingDirection = strip_tags((string) $this->resource->value($viewingDirectionProperty));
         }
         if (empty($viewingDirection)) {
-            $viewingDirection = $this->setting->__invoke('iiifserver_manifest_viewing_direction_default');
+            $viewingDirection = $this->settings->get('iiifserver_manifest_viewing_direction_default');
         }
         return in_array($viewingDirection, $this->viewingDirections) ? $viewingDirection : null;
     }

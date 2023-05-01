@@ -149,7 +149,7 @@ class Collection extends AbstractResourceType
      */
     protected function externalManifestsOfResource(): array
     {
-        $manifestProperty = $this->setting->__invoke('iiifserver_manifest_external_property');
+        $manifestProperty = $this->settings->get('iiifserver_manifest_external_property');
         if (empty($manifestProperty)) {
             return [];
         }

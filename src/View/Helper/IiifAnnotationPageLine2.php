@@ -96,8 +96,10 @@ class IiifAnnotationPageLine2 extends AbstractHelper
         }
 
         $this->logger = $view->plugin('logger')();
+
         $this->resource = $media;
-        $this->initBasePath();
+
+        $this->initTraitXml();
 
         $xml = $this->loadXml($media);
         if (!$xml) {

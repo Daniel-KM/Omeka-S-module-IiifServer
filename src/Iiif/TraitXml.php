@@ -50,7 +50,7 @@ trait TraitXml
      */
     protected $xmlFixMode;
 
-    protected function initBasePath(): self
+    protected function initTraitXml(): self
     {
         $services = $this->resource->getServiceLocator();
         $config = $services->get('Config');

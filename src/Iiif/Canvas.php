@@ -158,17 +158,16 @@ class Canvas extends AbstractResourceType
 
     public function label(): ?ValueLanguage
     {
-        $setting = $this->setting;
-        $labelOption = $setting('iiifserver_manifest_canvas_label');
+        $labelOption = $this->settings->get('iiifserver_manifest_canvas_label');
         $values = [];
         $fallback = (string) $this->options['index'];
         switch ($labelOption) {
             case 'property':
-                $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
+                $labelProperty = $this->settings->get('iiifserver_manifest_canvas_label_property');
                 $values = $this->resource->value($labelProperty, ['all' => true, 'default' => $fallback]);
                 break;
             case 'property_or_source':
-                $labelProperty = $setting('iiifserver_manifest_canvas_label_property');
+                $labelProperty = $this->settings->get('iiifserver_manifest_canvas_label_property');
                 $values = $this->resource->value($labelProperty, ['all' => true]);
                 if (count($values)) {
                     break;

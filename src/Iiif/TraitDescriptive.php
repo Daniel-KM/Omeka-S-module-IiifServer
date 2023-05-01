@@ -67,7 +67,7 @@ trait TraitDescriptive
             return [];
         }
 
-        $whitelist = $this->setting->__invoke($map[$jsonLdType]['whitelist'], []);
+        $whitelist = $this->settings->get($map[$jsonLdType]['whitelist'], []);
         if ($whitelist === ['none']) {
             return [];
         }
@@ -76,7 +76,7 @@ trait TraitDescriptive
             ? array_intersect_key($this->resource->values(), array_flip($whitelist))
             : $this->resource->values();
 
-        $blacklist = $this->setting->__invoke($map[$jsonLdType]['blacklist'], []);
+        $blacklist = $this->settings->get($map[$jsonLdType]['blacklist'], []);
         if ($blacklist) {
             $values = array_diff_key($values, array_flip($blacklist));
         }
@@ -115,12 +115,12 @@ trait TraitDescriptive
      */
     public function placeholderCanvas(): ?array
     {
-        $property = $this->setting->__invoke('iiifserver_manifest_placeholder_canvas_property');
+        $property = $this->settings->get('iiifserver_manifest_placeholder_canvas_property');
         if (!$property) {
             return null;
         }
 
-        $defaultPlaceholder = $this->setting->__invoke('iiifserver_manifest_placeholder_canvas_default');
+        $defaultPlaceholder = $this->settings->get('iiifserver_manifest_placeholder_canvas_default');
         if ($defaultPlaceholder && !filter_var($defaultPlaceholder, FILTER_VALIDATE_URL)) {
             $defaultPlaceholder = null;
         }
@@ -160,7 +160,7 @@ trait TraitDescriptive
 
     public function summary(): ValueLanguage
     {
-        $summaryProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
+        $summaryProperty = $this->settings->get('iiifserver_manifest_description_property');
         $values = [];
         if ($summaryProperty) {
             $values = $this->resource->value($summaryProperty, ['all' => true]);
@@ -180,7 +180,7 @@ trait TraitDescriptive
     public function requiredStatement()
     {
         $requiredStatement = [];
-        $requiredStatement = $this->setting->__invoke('iiifserver_manifest_attribution_property');
+        $requiredStatement = $this->settings->get('iiifserver_manifest_attribution_property');
         if ($requiredStatement) {
             $requiredStatement = $this->resource->value($requiredStatement, ['all' => true]);
         }
@@ -190,7 +190,7 @@ trait TraitDescriptive
             if ($license && !$this->checkAllowedLicense($license)) {
                 $requiredStatement = ['none' => [$license]];
             } else {
-                $default = $this->setting->__invoke('iiifserver_manifest_attribution_default');
+                $default = $this->settings->get('iiifserver_manifest_attribution_default');
                 if ($default) {
                     $requiredStatement = ['none' => [$default]];
                 } else {

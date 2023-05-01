@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\TraitRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -39,7 +40,12 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class IiifCollection2 extends AbstractHelper
 {
-    use \IiifServer\Iiif\TraitRights;
+    use TraitRights;
+
+    /**
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation
+     */
+    protected $resource;
 
     /**
      * Get the IIIF Collection manifest for the specified item set or item.
@@ -80,7 +86,10 @@ class IiifCollection2 extends AbstractHelper
         ];
 
         $view = $this->getView();
-        $this->setting = $view->getHelperPluginManager()->get('setting');
+        $this->setting = $view->plugin('setting');
+
+        $this->resource = $resource;
+        $this->initTraitRights();
 
         $isItemSet = $resource->resourceName() === 'item_sets';
 
@@ -220,7 +229,7 @@ class IiifCollection2 extends AbstractHelper
 
     protected function externalManifestsOfResource(AbstractResourceEntityRepresentation $resource): array
     {
-        $manifestProperty = $this->setting->__invoke('iiifserver_manifest_external_property');
+        $manifestProperty = $this->settings->get('iiifserver_manifest_external_property');
         if (empty($manifestProperty)) {
             return [];
         }
@@ -283,9 +292,7 @@ class IiifCollection2 extends AbstractHelper
             return [];
         }
 
-        $settingHelper = $this->view->getHelperPluginManager()->get('setting');
-
-        $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
+        $whitelist = $this->settings->get($map[$jsonLdType]['whitelist'], []);
         if ($whitelist === ['none']) {
             return [];
         }
@@ -294,7 +301,7 @@ class IiifCollection2 extends AbstractHelper
             ? array_intersect_key($resource->values(), array_flip($whitelist))
             : $resource->values();
 
-        $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
+        $blacklist = $this->settings->get($map[$jsonLdType]['blacklist'], []);
         if ($blacklist) {
             $values = array_diff_key($values, array_flip($blacklist));
         }
@@ -304,7 +311,7 @@ class IiifCollection2 extends AbstractHelper
 
         // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
 
-        return $this->setting->__invoke('iiifserver_manifest_html_descriptive')
+        return $this->settings->get('iiifserver_manifest_html_descriptive')
             ? $this->valuesAsHtml($values)
             : $this->valuesAsPlainText($values);
     }

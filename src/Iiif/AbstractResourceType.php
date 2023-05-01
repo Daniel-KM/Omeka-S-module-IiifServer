@@ -132,9 +132,9 @@ abstract class AbstractResourceType extends AbstractType
     protected $logger;
 
     /**
-     * @var \Omeka\View\Helper\Setting
+     * @var \Omeka\Settings\Settings
      */
-    protected $setting;
+    protected $settings;
 
     /**
      * @var \Laminas\View\Helper\Url
@@ -170,7 +170,7 @@ abstract class AbstractResourceType extends AbstractType
         $this->logger = $services->get('Omeka\Logger');
         $viewHelpers = $services->get('ViewHelperManager');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
-        $this->setting = $viewHelpers->get('setting');
+        $this->settings = $services->get('Omeka\Settings');
         $this->urlHelper = $viewHelpers->get('url');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');

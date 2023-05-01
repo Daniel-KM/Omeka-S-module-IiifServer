@@ -131,7 +131,7 @@ class ImageService3 extends AbstractResourceType
 
     public function id(): ?string
     {
-        $routeImage = $this->setting->__invoke('iiifserver_media_api_identifier_infojson')
+        $routeImage = $this->settings->get('iiifserver_media_api_identifier_infojson')
             ? 'imageserver/info'
             : 'imageserver/id';
         return $this->iiifMediaUrl->__invoke($this->resource, $routeImage, '3');
@@ -220,20 +220,20 @@ class ImageService3 extends AbstractResourceType
         $url = null;
         $orUrl = false;
 
-        $param = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
+        $param = $this->settings->get($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'url':
                 if ($this->hasImageServer) {
-                    $url = $this->setting->__invoke('imageserver_info_rights_uri') ?: $this->setting->__invoke('imageserver_info_rights_url');
+                    $url = $this->settings->get('imageserver_info_rights_uri') ?: $this->settings->get('imageserver_info_rights_url');
                 } else {
-                    $url = $this->setting->__invoke('iiifserver_manifest_rights_uri') ?: $this->setting->__invoke('iiifserver_manifest_rights_url');
+                    $url = $this->settings->get('iiifserver_manifest_rights_uri') ?: $this->settings->get('iiifserver_manifest_rights_url');
                 }
                 break;
             case 'property_or_url':
                 $orUrl = true;
                 // no break.
             case 'property':
-                $property = $this->setting->__invoke($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
+                $property = $this->settings->get($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
                 $url = (string) $this->resource->value($property);
                 break;
             case 'item_or_url':
@@ -255,9 +255,9 @@ class ImageService3 extends AbstractResourceType
 
         if (!$url && $orUrl) {
             if ($this->hasImageServer) {
-                $url = $this->setting->__invoke('imageserver_info_rights_uri') ?: $this->setting->__invoke('imageserver_info_rights_url');
+                $url = $this->settings->get('imageserver_info_rights_uri') ?: $this->settings->get('imageserver_info_rights_url');
             } else {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_uri') ?: $this->setting->__invoke('iiifserver_manifest_rights_url');
+                $url = $this->settings->get('iiifserver_manifest_rights_uri') ?: $this->settings->get('iiifserver_manifest_rights_url');
             }
         }
 

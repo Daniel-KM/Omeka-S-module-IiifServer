@@ -51,6 +51,17 @@ trait TraitRights
     ];
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    protected function initTraitRights(): self
+    {
+        $this->settings ??= $this->resource->getServiceLocator()->get('Omeka\Settings');
+        return $this;
+    }
+
+    /**
      * Get the license of the resource.
      *
      * Warning: the option for Iiif Server (manifest) and Image Server (info.json)
@@ -71,27 +82,27 @@ trait TraitRights
      * @param bool $useForRequiredStatement When the value is not an url, it is
      * recommended to use it as required statement.
      */
-    protected function rightsResource(AbstractResourceEntityRepresentation $resource = null, bool $useForRequiredStatement = false): ?string
+    protected function rightsResource(?AbstractResourceEntityRepresentation $resource = null, bool $useForRequiredStatement = false): ?string
     {
         $url = null;
         $orUrl = false;
         $orText = false;
 
-        $param = $this->setting->__invoke('iiifserver_manifest_rights');
+        $param = $this->settings->get('iiifserver_manifest_rights');
         switch ($param) {
             case 'text':
                 if ($this->context() === 'http://iiif.io/api/presentation/3/context.json') {
                     return null;
                 }
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
+                $url = $this->settings->get('iiifserver_manifest_rights_text') ?: null;
                 break;
             case 'url':
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_uri')
-                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
+                $url = $this->settings->get('iiifserver_manifest_rights_uri')
+                    ?: ($this->settings->get('iiifserver_manifest_rights_url')
                     ?: null);
                 break;
             case 'property_or_text':
-                $orText = !empty($this->setting->__invoke('iiifserver_manifest_rights_text'));
+                $orText = !empty($this->settings->get('iiifserver_manifest_rights_text'));
                 // no break.
             case 'property_or_url':
                 if ($param === 'property_or_url') {
@@ -100,7 +111,7 @@ trait TraitRights
                 // no break.
             case 'property':
                 if ($resource) {
-                    $property = $this->setting->__invoke('iiifserver_manifest_rights_property');
+                    $property = $this->settings->get('iiifserver_manifest_rights_property');
                     $url = ((string) $resource->value($property)) ?: null;
                 }
                 break;
@@ -116,16 +127,16 @@ trait TraitRights
 
         if (!$url) {
             if ($useForRequiredStatement) {
-                return $this->setting->__invoke('iiifserver_manifest_rights_uri')
-                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
-                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_text')
+                return $this->settings->get('iiifserver_manifest_rights_uri')
+                    ?: ($this->settings->get('iiifserver_manifest_rights_url')
+                    ?: ($this->settings->get('iiifserver_manifest_rights_text')
                     ?: null));
             } elseif ($orUrl) {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_uri')
-                    ?: ($this->setting->__invoke('iiifserver_manifest_rights_url')
+                $url = $this->settings->get('iiifserver_manifest_rights_uri')
+                    ?: ($this->settings->get('iiifserver_manifest_rights_url')
                     ?: null);
             } elseif ($orText) {
-                $url = $this->setting->__invoke('iiifserver_manifest_rights_text') ?: null;
+                $url = $this->settings->get('iiifserver_manifest_rights_text') ?: null;
             }
             if (!$url) {
                 return null;

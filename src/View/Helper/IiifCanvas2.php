@@ -123,7 +123,7 @@ class IiifCanvas2 extends AbstractHelper
             return [];
         }
 
-        $settingHelper = $this->view->getHelperPluginManager()->get('setting');
+        $settingHelper = $this->view->plugin('setting');
 
         $whitelist = $settingHelper($map[$jsonLdType]['whitelist'], []);
         if ($whitelist === ['none']) {
