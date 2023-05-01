@@ -130,11 +130,17 @@ class Canvas extends AbstractResourceType
         // The option should contain an index, that is the position from 1 in
         // the list of canvases (available in storage too).
         $this->options['target_type'] = 'canvas';
+
         if (empty($this->options['target_name'])) {
-            $name = $this->options['index'] ?? (string) $resource->id();
-            $this->options['target_name'] = (string) (int) $name === (string) $name
-                ? 'p' . $name
-                : $name;
+            // Don't mix index and resource id.
+            if (empty($this->options['index'])) {
+                $this->options['target_name'] = 'c' . $this->resource->id();
+            } else {
+                $name = $this->options['index'];
+                $this->options['target_name'] = (string) (int) $name === (string) $name
+                    ? 'p' . $name
+                    : $name;
+            }
         }
 
         $this->initThumbnail();
