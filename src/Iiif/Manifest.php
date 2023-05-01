@@ -30,7 +30,6 @@
 namespace IiifServer\Iiif;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Omeka\Api\Representation\MediaRepresentation;
 
 /**
  * @link https://iiif.io/api/presentation/3.0/#52-manifest
@@ -40,6 +39,7 @@ class Manifest extends AbstractResourceType
     use TraitBehavior;
     use TraitDescriptive;
     use TraitLinking;
+    use TraitMediaInfo;
     use TraitThumbnail;
     use TraitViewing;
 
@@ -136,6 +136,7 @@ class Manifest extends AbstractResourceType
 
         $this->initLinking();
         $this->initThumbnail();
+        $this->prepareMediaInfoList();
     }
 
     public function id(): string
@@ -159,14 +160,15 @@ class Manifest extends AbstractResourceType
     public function items(): array
     {
         $items = [];
+        // Don't loop media info directly.
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && !empty($mediaInfo['index'])) {
                 $items[] = new Canvas($media, [
-                    'index' => $mediaInfo['index'],
+                    'index' => $mediaInfo['index'] ?? null,
                     'content' => $mediaInfo['content'],
-                    'key' => $mediaInfo['key'] ?? null,
-                    'motivation' => $mediaInfo['motivation'] ?? null,
+                    'key' => $mediaInfo['key'],
+                    'motivation' => $mediaInfo['motivation'],
                 ]);
             }
         }
@@ -182,14 +184,13 @@ class Manifest extends AbstractResourceType
      */
     public function structures(): array
     {
-        if (!array_key_exists('media_info', $this->_storage)) {
-            $this->_storage['media_info'] = $this->prepareMediaLists();
-        }
-
         // Count number of available medias.
         $total = 0;
-        foreach ($this->_storage['media_info'] as $mediaInfo) {
-            if ($mediaInfo['motivation'] === 'painting') {
+
+        // Don't loop on media_info directly.
+        foreach ($this->resource->media() as $media) {
+            $mediaInfo = $this->mediaInfo($media);
+            if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
                 ++$total;
             }
         }
@@ -252,8 +253,11 @@ class Manifest extends AbstractResourceType
     {
         // Take iiif media in the order they are.
         $canvases = [];
-        foreach ($this->_storage['media_info'] as $mediaInfo) {
-            if ($mediaInfo['motivation'] === 'painting') {
+
+        // Don't loop on media_info directly.
+        foreach ($this->resource->media() as $media) {
+            $mediaInfo = $this->mediaInfo($media);
+            if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
                 $canvases[] = new ReferencedCanvas($mediaInfo['content']->resource());
             }
         }
@@ -464,197 +468,6 @@ class Manifest extends AbstractResourceType
         $this->services = $this->services ?? [];
         $this->services[] = $service;
         return $this;
-    }
-
-    /**
-     * Get the iiif type according to the type of the media.
-     *
-     * @param MediaRepresentation $media
-     * @return array|null An array containing media infos and the category, that
-     * can be a canvas motivation painting or supplementing, or a canvas
-     * rendering, or a manifest rendering.
-     */
-    protected function mediaInfo(?MediaRepresentation $media): ?array
-    {
-        if ($media === null) {
-            return null;
-        }
-        if (!array_key_exists('media_info', $this->_storage)) {
-            $this->_storage['media_info'] = $this->prepareMediaLists();
-        }
-        return $this->_storage['media_info'][$media->id()] ?? null;
-    }
-
-    /**
-     * Categorize media, so they will be include only once in manifest.
-     *
-     * For example if there is only one media and if it is a pdf, it will be set
-     * as Canvas Supplementing, else if there is an image too, it will be set as
-     * Rendering. Images are nearly always Canvas Painting.
-     * - Canvas annotation painting: main media to display: image, video, audio.
-     * - Canvas annotation supplementing: related to main media, like a
-     *   transcription or a tei. Any other motivation can be used, except
-     *   painting.
-     * - Canvas renderings: non-iiif alternative designed to be rendered in the
-     *   viewer, like pdf, ebook, slide deck, 3D model, to be rendered.
-     * - Manifest rendering: non-iiif alternative, like pdf, ebook, slide deck,
-     *   3D model, to be downloaded.
-     *
-     * @todo Better manage mixed painting in canvas, for example an image that is part a video. In such a case, the manifest is generally build manually, so it's not the purpose of this module currently.
-     * @todo Manage media related to other (xml alto to its image).
-     * @todo Better management of this list of medias, that should be available anywhere.
-     */
-    protected function prepareMediaLists(): array
-    {
-        // TODO Use ContentResources.
-        // Note: hasThumbnails() is not only for images.
-
-        $result = [];
-
-        $canvasPaintings = [];
-        $canvasSupplementings = [];
-        $canvasRenderings = [];
-        $canvasSeeAlso = [];
-        $manifestRenderings = [];
-
-        // First loop to get the full list of types.
-        $iiifTypes = [
-            // Painting.
-            'Image' => [],
-            'Video' => [],
-            'Sound' => [],
-            // Supplementing or Rendering or SeeAlso.
-            'Text' => [],
-            'Dataset' => [],
-            'Model' => [],
-            'other' => [],
-            'invalid' => [],
-        ];
-
-        $mediaIds = [];
-        $medias = $this->resource->media();
-        foreach ($medias as $media) {
-            $mediaId = $media->id();
-            $mediaIds[] = $mediaId;
-            $result[$mediaId] = null;
-            $contentResource = new ContentResource($media);
-            if ($contentResource->hasIdAndType()) {
-                $iiifType = $contentResource->type();
-                if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
-                    $iiifTypes[$iiifType][$mediaId] = [
-                        'content' => $contentResource,
-                    ];
-                } else {
-                    $iiifTypes['other'][$mediaId] = [
-                        'content' => $contentResource,
-                    ];
-                }
-            } else {
-                $iiifTypes['invalid'][$mediaId] = [
-                    'content' => $contentResource,
-                ];
-            }
-        }
-        unset($medias);
-
-        // TODO Manage distinction between supplementing and rendering, mainly for text (transcription and/or pdf? Via linked properties?
-        // TODO Manage 3D that may uses multiple files.
-        // TODO Manage pdf, that are a Text, but not displayable as iiif.
-
-        // Canvas manages only image, audio and video: it requires size and/or
-        // duration.
-        // Priorities are Model, Image, then Video, Sound, and Text.
-        // Model has prioritary because when an item is a model, there are
-        // multiple files, including texture images, not to be displayed.
-        if ($iiifTypes['Model']) {
-            // TODO Same issue for Model than for Text?
-            // $canvasRenderings = $iiifTypes['Model'];
-            $canvasPaintings = $iiifTypes['Model'];
-            $iiifTypes['Model'] = [];
-            // When an item is a model, images are skipped.
-            $iiifTypes['Image'] = [];
-        } elseif ($iiifTypes['Image']) {
-            $canvasPaintings = $iiifTypes['Image'];
-            $iiifTypes['Image'] = [];
-        } elseif ($iiifTypes['Video']) {
-            $canvasPaintings = $iiifTypes['Video'];
-            $iiifTypes['Video'] = [];
-        } elseif ($iiifTypes['Sound']) {
-            $canvasPaintings = $iiifTypes['Sound'];
-            $iiifTypes['Sound'] = [];
-        } elseif ($iiifTypes['Text']) {
-            // For pdf and other texts, Iiif says no painting, but manifest
-            // rendering, but UV doesn't display it. Mirador doesn't manage them
-            // anyway.
-            // TODO The solution is to manage pdf as a list of images via the image server! And to make it type Image? And to add textual content.
-            $canvasPaintings = $iiifTypes['Text'];
-            // $canvasRenderings = $iiifTypes['Text'];
-            // $manifestRendering = $iiifTypes['Text'];
-            $iiifTypes['Text'] = [];
-        }
-
-        // All other files are downloadable.
-        $manifestRenderings += array_replace($iiifTypes['Image'], $iiifTypes['Video'], $iiifTypes['Sound'],
-            $iiifTypes['Text'], $iiifTypes['Dataset'], $iiifTypes['Model'], $iiifTypes['other']);
-
-        // TODO Manage dataset cleanerly.
-        foreach ($iiifTypes['other'] as $mediaId => $iiifType) {
-            $contentResource = $iiifType['content'];
-            if ($contentResource->type() === 'Dataset'
-                && in_array($contentResource->format(), [
-                    'application/alto+xml',
-                    'application/vnd.alto+xml',
-                ])
-            ) {
-                unset($iiifTypes['other'][$mediaId]);
-                unset($manifestRenderings[$mediaId]);
-                $canvasSeeAlso[$mediaId]['content'] = $contentResource;
-            }
-        }
-
-        // Second loop to store the category.
-        foreach (array_keys($result) as $mediaId) {
-            if (isset($canvasPaintings[$mediaId])) {
-                $result[$mediaId] = $canvasPaintings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'annotation';
-                $result[$mediaId]['motivation'] = 'painting';
-            } elseif (isset($canvasSupplementings[$mediaId])) {
-                $result[$mediaId] = $canvasSupplementings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'annotation';
-                $result[$mediaId]['motivation'] = 'supplementing';
-            } elseif (isset($canvasRenderings[$mediaId])) {
-                $result[$mediaId] = $canvasRenderings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'rendering';
-                $result[$mediaId]['motivation'] = null;
-            } elseif (isset($canvasSeeAlso[$mediaId])) {
-                $result[$mediaId] = $canvasSeeAlso[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'seeAlso';
-                $result[$mediaId]['motivation'] = null;
-            } elseif (isset($manifestRenderings[$mediaId])) {
-                $result[$mediaId] = $manifestRenderings[$mediaId];
-                $result[$mediaId]['on'] = 'Manifest';
-                $result[$mediaId]['key'] = 'rendering';
-                $result[$mediaId]['motivation'] = null;
-            }
-        }
-
-        // Prepare mapping between media and canvas index one time and store it.
-        $index = 0;
-        foreach ($mediaIds as $mediaId) {
-            $mediaInfo = $result[$mediaId] ?? null;
-            if ($mediaInfo
-                && $mediaInfo['on'] === 'Canvas'
-                && ($mediaInfo['key'] ?? null) === 'annotation'
-            ) {
-                $result[$mediaId]['index'] = ++$index;
-            }
-        }
-
-        return $result;
     }
 
     /**
