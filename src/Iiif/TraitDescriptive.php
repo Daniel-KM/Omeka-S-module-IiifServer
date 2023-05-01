@@ -29,8 +29,12 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\MediaRepresentation;
+
 trait TraitDescriptive
 {
+    use TraitMedia;
+    use TraitMediaInfo;
     use TraitRights;
 
     /**
@@ -102,6 +106,90 @@ trait TraitDescriptive
             ];
         }
         return $metadata;
+    }
+
+    /**
+     * The placeholder canvas can be set in item or media values.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#placeholdercanvas
+     */
+    public function placeholderCanvas(): ?array
+    {
+        $property = $this->setting->__invoke('iiifserver_manifest_placeholder_canvas_property');
+        if (!$property) {
+            return null;
+        }
+
+        /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+        $values = $property ? $this->resource->value($property, ['all' => true]) : [];
+        foreach ($values as $value) {
+            $vr = $value->resource();
+            if ($vr) {
+                if ($vr instanceof MediaRepresentation) {
+                    $mediaInfo = $this->mediaInfoSingle($vr);
+                    if ($mediaInfo) {
+                        return new Canvas($vr, [
+                            'index' => null,
+                            'content' => $mediaInfo['content'],
+                            'key' => $mediaInfo['key'],
+                            'motivation' => $mediaInfo['motivation'],
+                        ]);
+                    }
+                }
+            } else {
+                $uri = $value->uri();
+                $val = (string) $value->value();
+                $url = $uri ?: $val;
+                if (filter_var($url, FILTER_VALIDATE_URL)) {
+                    // Dimensions are required for a canvas.
+                    $dimensions = array_filter($this->mediaDimension->__invoke($url));
+                    if (!$dimensions) {
+                        continue;
+                    }
+
+                    // TODO Set format of the image.
+                    if (isset($dimensions['duration'])) {
+                        $iiifType = isset($dimensions['width']) ? 'Video' : 'Sound';
+                    } else {
+                        $iiifType = 'Image';
+                    }
+
+                    // Create canvas manually.
+                    $element = [
+                        'id' => $url . '/placeholder',
+                        'type' => 'Canvas',
+                    ];
+                    if ($value->type() === 'uri' && mb_strlen($val)) {
+                        // TODO Use ValueLanguage.
+                        $element['label'] = ['none' => [$val]];
+                    }
+                    $element += $dimensions;
+                    // TODO Use Annotation / AnnotationPage to build the placeholderCanvas (and canvas?).
+                    $body = [
+                        'id' => $url,
+                        'type' => $iiifType,
+                        // TODO Get media type of a file.
+                        // 'format' => 'image/png',
+                    ] + $dimensions;
+                    $element['items'][] = [
+                        'id' => $url . '/placeholder/1',
+                        'type' => 'AnnotationPage',
+                        'items' => [
+                            [
+                                'id' => $url . '/placeholder/1-image',
+                                'type' => 'Annotation',
+                                'motivation' => 'painting',
+                                'body' => $body,
+                                'target' => $url . '/placeholder',
+                            ],
+                        ],
+                    ];
+                    return $element;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function summary(): ValueLanguage

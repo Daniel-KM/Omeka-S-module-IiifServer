@@ -260,6 +260,7 @@ trait TraitLinking
             return null;
         }
 
+        // TODO Factorize with TraitDescriptive::placeholderCanvas().
         // Get the index of the media as Canvas (see manifest->items()).
         $canvasId = function (?MediaRepresentation $media): ?string {
             $mediaInfo = $this->mediaInfo($media);

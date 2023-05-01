@@ -59,6 +59,23 @@ trait TraitMediaInfo
     }
 
     /**
+     * Get the iiif type according to the type of the media.
+     *
+     * This method is used for media outside manifest, for example a placeholderCanvas.
+     */
+    protected function mediaInfoSingle(?MediaRepresentation $media): ?array
+    {
+        if ($media === null) {
+            return null;
+        }
+        $mediaId = $media->id();
+        if (!array_key_exists($mediaId, $this->_storage['media_info_single'])) {
+            $this->prepareMediaInfoSingle($media);
+        }
+        return $this->_storage['media_info_single'][$mediaId];
+    }
+
+    /**
      * Categorize media to prepare and include them only once in manifest.
      *
      * For example if there is only one media and if it is a pdf, it will be set
