@@ -25,6 +25,10 @@ class FixUtf8 extends AbstractPlugin
      * generallly free (libre).
      *
      * @see https://stackoverflow.com/questions/1401317/remove-non-utf8-characters-from-string#1401716
+     *
+     * Helper available in:
+     * @see \IiifServer\Mvc\Controller\Plugin\FixUtf8
+     * @see \IiifSearch\View\Helper\FixUtf8
      */
     public function __invoke($string): string
     {

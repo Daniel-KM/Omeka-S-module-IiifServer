@@ -26,7 +26,7 @@ class MediaDimensions extends AbstractJob
     protected $mediaDimension;
 
     /**
-     * @var \Doctrine\ORM\EntityManager $entityManager
+     * @var \Doctrine\ORM\EntityManager
      */
     protected $entityManager;
 

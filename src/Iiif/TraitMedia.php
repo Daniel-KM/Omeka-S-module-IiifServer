@@ -31,15 +31,22 @@ namespace IiifServer\Iiif;
 
 trait TraitMedia
 {
+    // TODO Use TraitImage and TraitAudioVideo in TraitMedia?
+
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
+     * @var \IiifServer\View\Helper\IiifMediaUrl
      */
-    protected $mediaDimension;
+    protected $iiifMediaUrl;
 
     /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
+
+    /**
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
+     */
+    protected $mediaDimension;
 
     /**
      * @var bool
@@ -100,6 +107,7 @@ trait TraitMedia
         $controllerPlugins = $services->get('ControllerPluginManager');
         $this->mediaDimension = $controllerPlugins->get('mediaDimension');
         $this->imageSize = $controllerPlugins->get('imageSize');
+        $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
         return $this;
     }
 

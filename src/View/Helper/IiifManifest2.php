@@ -701,8 +701,8 @@ class IiifManifest2 extends AbstractHelper
 
         if ($media->hasThumbnails()) {
             $imageUrl = $media->thumbnailUrl('medium');
-            $size = $this->view->imageSize($media, 'medium');
-            if ($size) {
+            $size = $this->getView()->imageSize($media, 'medium');
+            if ($size['width']) {
                 $thumbnail = [
                     '@id' => $imageUrl,
                     '@type' => 'dctypes:Image',
@@ -749,7 +749,7 @@ class IiifManifest2 extends AbstractHelper
     protected function _iiifThumbnailAsset(AssetRepresentation $asset)
     {
         $size = $this->view->imageSize($asset);
-        if ($size) {
+        if ($size['width']) {
             $thumbnail = [
                 '@id' => $asset->assetUrl(),
                 '@type' => 'dctypes:Image',
@@ -775,8 +775,7 @@ class IiifManifest2 extends AbstractHelper
     {
         $view = $this->getView();
         if (empty($width) || empty($height)) {
-            $imageSize = $view->imageSize($media, 'original');
-            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = array_values($view->imageSize($media, 'original'));
         }
 
         $image = [];
@@ -821,11 +820,10 @@ class IiifManifest2 extends AbstractHelper
         // "the URL may be the complete URL to a particular size of the image
         // content", so the large one here, and it's always a jpeg.
         // It's not needed to use the full original size.
-        $imageSize = $view->imageSize($media, 'large');
-        [$widthLarge, $heightLarge] = $imageSize ? array_values($imageSize) : [null, null];
+        [$widthLarge, $heightLarge] = array_values($view->imageSize($media, 'large'));
         $imageUrl = $this->view->iiifMediaUrl($media, 'imageserver/media', $service ?: '2', [
             'region' => 'full',
-            'size' => $imageSize
+            'size' => $widthLarge && $heightLarge
                 ? ($widthLarge . ',' . $heightLarge)
                 : ($service === '3' ? 'max' : 'full'),
             'rotation' => 0,
@@ -887,8 +885,7 @@ class IiifManifest2 extends AbstractHelper
         } else {
             // Size of canvas should be the double of small images (< 1200 px),
             // but only when more than one image is used by a canvas.
-            $imageSize = $this->view->imageSize($media, 'original');
-            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = array_values($this->getView()->imageSize($media, 'original'));
             $canvas['width'] = $width;
             $canvas['height'] = $height;
             $seeAlso = $this->seeAlso($media);

@@ -85,6 +85,10 @@ class Module extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
+        /**
+         * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
+         * @var \IiifServer\Form\ConfigForm $configForm
+         */
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
         $form = $services->get('FormElementManager')->get(ConfigForm::class);

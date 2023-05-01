@@ -2,13 +2,13 @@
 
 namespace IiifServer\Form;
 
-use IiifServer\Form\Element\OptionalUrl;
+use IiifServer\Form\Element as IiifServerElement;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Fieldset;
 use Laminas\Form\Form;
-use Omeka\Form\Element\PropertySelect;
+use Omeka\Form\Element as OmekaElement;
 
 class ConfigForm extends Form
 {
@@ -40,7 +40,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_external_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property supplying an external manifest', // @translate
                     'info' => 'External or static manifests can be more customized and may be quicker to be loaded. Usually, the property is "dcterms:hasFormat" or "dcterms:isFormatOf".', // @translate
@@ -65,7 +65,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_description_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for Description', // @translate
                     'info' => 'If any, the first metadata of the record will be added in all manifests and viewers for main description. It’s recommended to use "Dublin Core:Bibliographic Citation".', // @translate
@@ -82,7 +82,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_attribution_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for Attribution', // @translate
                     'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.', // @translate
@@ -131,7 +131,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for rights', // @translate
                     'empty_option' => '',
@@ -209,7 +209,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_url',
-                'type' => OptionalUrl::class,
+                'type' => IiifServerElement\OptionalUrl::class,
                 'options' => [
                     'label' => 'Uri of the rights/license when unselected above', // @translate
                     'info' => 'For IIIF v3, the license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
@@ -252,7 +252,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_homepage_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property for resource link', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
@@ -268,7 +268,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property for machine-readable "See also" links', // @translate
                     'empty_option' => '',
@@ -283,7 +283,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_structures_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property for structures', // @translate
                     'empty_option' => '',
@@ -312,7 +312,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_viewing_direction_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for viewing direction', // @translate
                     'info' => 'If any, the first value will be added to indicate the viewing direction of the manifest.', // @translate
@@ -347,7 +347,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_behavior_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for behavior (viewing hint)', // @translate
                     'info' => 'If any, the first value will be added to indicate the viewing hint of the manifest and the canvas.', // @translate
@@ -419,7 +419,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_canvas_label_property',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property for files label', // @translate
                     'empty_option' => '',
@@ -458,7 +458,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_properties_collection_whitelist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for collection in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
@@ -477,7 +477,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_item_whitelist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for item in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
@@ -496,7 +496,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media_whitelist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Limit properties for media in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
@@ -516,7 +516,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_properties_collection_blacklist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Skip properties for collection in manifest', // @translate
                     'empty_option' => '',
@@ -531,7 +531,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_item_blacklist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Skip properties for item in manifest', // @translate
                     'empty_option' => '',
@@ -546,7 +546,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_properties_media_blacklist',
-                'type' => PropertySelect::class,
+                'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Skip properties for media in manifest', // @translate
                     'empty_option' => '',
@@ -660,7 +660,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_media_api_url',
-                'type' => OptionalUrl::class,
+                'type' => IiifServerElement\OptionalUrl::class,
                 'options' => [
                     'label' => 'External image server base url', // @translate
                     'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate

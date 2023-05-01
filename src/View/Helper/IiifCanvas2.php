@@ -76,8 +76,7 @@ class IiifCanvas2 extends AbstractHelper
 
         // Size of canvas should be the double of small images (< 1200 px), but
         // only when more than one image is used by a canvas.
-        $imageSize = $view->imageSize($resource, 'original');
-        [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
+        [$width, $height] = array_values($view->imageSize($resource, 'original'));
         $canvas['width'] = $width;
         $canvas['height'] = $height;
 
@@ -211,11 +210,10 @@ class IiifCanvas2 extends AbstractHelper
     {
         $view = $this->getView();
 
-        $imageSize = $view->imageSize($media, 'square');
-        if (empty($imageSize)) {
-            return;
+        [$width, $height] = array_values($view->imageSize($media, 'square'));
+        if (empty($width) || empty($height)) {
+            return null;
         }
-        [$width, $height] = array_values($imageSize);
 
         $thumbnail = [];
 
@@ -258,8 +256,7 @@ class IiifCanvas2 extends AbstractHelper
         $view = $this->getView();
 
         if (empty($width) || empty($height)) {
-            $imageSize = $view->imageSize($media, 'original');
-            [$width, $height] = $imageSize ? array_values($imageSize) : [null, null];
+            [$width, $height] = array_values($view->imageSize($media, 'original'));
         }
 
         $image = [];
@@ -273,8 +270,7 @@ class IiifCanvas2 extends AbstractHelper
         // According to https://iiif.io/api/presentation/2.1/#image-resources,
         // "the URL may be the complete URL to a particular size of the image
         // content", so the large one here, and it's always a jpeg.
-        $imageSize = $view->imageSize($media, 'large');
-        [$widthLarge, $heightLarge] = $imageSize ? array_values($imageSize) : [null, null];
+        [$widthLarge, $heightLarge] = array_values($view->imageSize($media, 'large'));
         $imageUrl = $view->iiifMediaUrl($media, 'imageserver/media', '2', [
             'region' => 'full',
             'size' => $widthLarge . ',' . $heightLarge,

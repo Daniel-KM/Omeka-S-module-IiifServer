@@ -160,8 +160,7 @@ trait TraitLinking
      */
     public function logo(): ?array
     {
-        $setting = $this->setting;
-        $url = $setting('iiifserver_manifest_logo_default');
+        $url = $this->setting->__invoke('iiifserver_manifest_logo_default');
         if (!$url) {
             return null;
         }
@@ -206,29 +205,29 @@ trait TraitLinking
     {
         $output = [];
 
-        $setting = $this->setting;
-        $property = $setting('iiifserver_manifest_seealso_property');
+        $property = $this->setting->__invoke('iiifserver_manifest_seealso_property');
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
         $values = $property ? $this->resource->value($property, ['all' => true]) : [];
         foreach ($values as $value) {
-            $id = $value->uri() ?: $value->value();
+            $uri = $value->uri();
+            $val = (string) $value->value();
+            $id = $uri ?: $val;
             if (filter_var($id, FILTER_VALIDATE_URL)) {
-                $seeAlso = [
+                $element = [
                     'id' => $id,
                     'type' => 'Dataset',
                 ];
                 if ($value->type() === 'uri') {
-                    $vvalue = $value->value();
-                    if ($vvalue) {
+                    if (mb_strlen($val)) {
                         // TODO Use ValueLanguage.
-                        $seeAlso['label'] = ['none' => [$value->value()]];
+                        $element['label'] = ['none' => [$val]];
                     }
                     // TODO Add format and profile of the seealso (require a fetch?).
-                    // $seeAlso['format'] = $value->value();
-                    // $seeAlso['profile'] = $value->value();
+                    // $element['format'] = $value->value();
+                    // $element['profile'] = $value->value();
                 }
-                $output[] = $seeAlso;
+                $output[] = $element;
             }
         }
 

@@ -38,6 +38,8 @@ class Canvas extends AbstractResourceType
 {
     use TraitBehavior;
     use TraitDescriptive;
+    // TODO Use TraitMedia in Canvas?
+    // use TraitMedia;
     use TraitThumbnail;
     // TODO Use TraitLinking for seeAlso.
 
@@ -64,7 +66,8 @@ class Canvas extends AbstractResourceType
         'language' => self::NOT_ALLOWED,
         'provider' => self::OPTIONAL,
         'thumbnail' => self::OPTIONAL,
-        // Except for a placeholder or an accompaying canvas.
+        // Forbidden when current canvas is a placeholder canvas or an
+        // accompaying canvas.
         'placeholderCanvas' => self::OPTIONAL,
         'accompanyingCanvas' => self::OPTIONAL,
 
