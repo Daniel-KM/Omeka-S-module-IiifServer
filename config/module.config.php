@@ -124,6 +124,11 @@ return [
             Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
     ],
+    'resource_page_block_layouts' => [
+        'invokables' => [
+            'iiifManifestLink' => Site\ResourcePageBlockLayout\IiifManifestLink::class,
+        ],
+    ],
     'controllers' => [
         'invokables' => [
             Controller\NoopServerController::class => Controller\NoopServerController::class,
