@@ -56,6 +56,18 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_pretty_json',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Output pretty indented json', // @translate
+                    'info' => 'Recommended only if your server zip json automatically.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_pretty_json',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_cache_derivativemedia',
                 'type' => Element\Checkbox::class,
                 'options' => [

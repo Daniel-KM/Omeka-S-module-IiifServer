@@ -71,7 +71,10 @@ class IiifJsonLd extends AbstractPlugin
         $headers->addHeaderLine('Access-Control-Allow-Origin', '*');
 
         //$response->clearBody();
-        $body = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $prettyJson = (bool) $controller->settings()->get('iiifserver_manifest_pretty_json', false);
+        $body = $prettyJson
+            ? json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT)
+            : json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         return $response
             ->setContent($body);
     }
