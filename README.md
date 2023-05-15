@@ -85,6 +85,13 @@ config of the module :
 - disable the advanced option "Use the identifiers from Clean Url";
 - set the "Prefix to use for identifier".
 
+### Cache via module [Derivative Media]
+
+When your documents are big (more than 100 to 1000 pages, depending on your
+server, your network and your public), you may want to cache manifests in order
+to delivrate them instantly. It is possible with module [Derivative Media]. In
+that case, check the option in the config or each module.
+
 ### Local access to iiif source
 
 The iiif authentication api is not yet integrated. Anyway, to access iiif
@@ -93,27 +100,11 @@ the module [Guest] can be used.
 
 ### IIIF button in a theme
 
-To add the iiif button in a theme, adapt this code in your theme, generally in
-`view/omeka/site/item/show.phtml`:
+A resource page block is available in the theme settings. Else, you can add the
+view helper in your theme:
 
 ```php
-<?php
-$plugins = $this->getHelperPluginManager();
-$escape = $plugins->get('escapeHtml');
-$assetUrl = $plugins->get('assetUrl');
-$translate = $plugins->get('translate');
-$iiifUrl = $plugins->has('iiifUrl') ? $plugins->get('iiifUrl') : null;
-
-// The code for css and js is very short and can be copied directly in theme.
-$this->headLink()
-    ->appendStylesheet($assetUrl('css/iiif-server.css', 'IiifServer'));
-$this->headScript()
-    ->appendFile($assetUrl('js/iiif-server.js', 'IiifServer'), 'text/javascript', ['defer' => 'defer']);
-?>
-
-<?php if ($iiifUrl): ?>
-<button type="button" class="iiif-copy" title="<?= $escape($translate('Copy IIIF manifest url to be used in IIIF viewers')) ?>" data-iiif-url="<?= $escape($iiifUrl($resource)) ?>"></button>
-<?php endif; ?>
+<?= $this->iiifManifestLink($item) ?>
 ```
 
 
@@ -167,6 +158,11 @@ Three params should be set:
 - add some rules in Apache config or in htaccess to redirect request to the
   image server. Normally, a regex starting with iiif/ and finishing with the
   supported file extensions is enough.
+
+#### Note for Cantaloupe
+
+In some cases or if not configured, Image Api v3 does not work and images are
+not displayed, so keep Image Api v2 in that case.
 
 
 Notes
@@ -778,6 +774,7 @@ format.
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Derivative Media]: https://gitlab.com/Daniel-KM/Omeka-S-module-DerivativeMedia
 [IIIF presentation 2.1]: https://iiif.io/api/presentation/2.1/#range
 [IIIF presentation 3.0]: https://iiif.io/api/presentation/3.0/#54-range
 [Ark]: https://gitlab.com/Daniel-KM/omeka-s-module-Ark
