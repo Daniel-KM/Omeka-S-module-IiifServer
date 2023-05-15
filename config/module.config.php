@@ -97,6 +97,7 @@ return [
             'iiifInfo' => View\Helper\IiifInfo::class,
             'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifManifestExternal' => View\Helper\IiifManifestExternal::class,
+            'iiifManifestLink' => View\Helper\IiifManifestLink::class,
         ],
         'factories' => [
             'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,
