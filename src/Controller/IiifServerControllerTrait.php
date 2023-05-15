@@ -168,9 +168,6 @@ trait IiifServerControllerTrait
         return substr((string) $media->mediaType(), 0, 6) === 'image/';
     }
 
-    /**
-     * Similar to \IiifServer\Controller\PresentationController::fetchResource().
-     */
     protected function fetchResource(string $resourceType = 'resources'): ?AbstractResourceEntityRepresentation
     {
         $resource = $this->params()->fromRoute('resource');
