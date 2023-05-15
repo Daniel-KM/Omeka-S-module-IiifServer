@@ -13,4 +13,4 @@ $escapeAttr = $plugins->get('escapeHtmlAttr');
 
 ?>
 
-<button type="button" class="iiif-copy" title="<?= $escapeAttr($translate('Copy IIIF manifest url in clipboard to use in any IIIF viewer.')) ?>" data-iiif-url="<?= $iiifUrl($resource, '', $version) ?>" data-text-copied="<?= $escapeAttr($translate('IIIF manifest url copied in clipboard!')) ?>"></button>
+<button type="button" class="iiif-copy" title="<?= $escapeAttr($translate('Copy IIIF manifest url in clipboard to use in any IIIF viewer.')) ?>" data-iiif-url="<?= $iiifUrl($resource, '', $version) ?>" data-text-copied="<?= $escapeAttr($translate('IIIF manifest url copied in clipboard!')) ?>" data-text-failed="<?= $translate('Unable to copy url in clipboard!') ?>"></button>
