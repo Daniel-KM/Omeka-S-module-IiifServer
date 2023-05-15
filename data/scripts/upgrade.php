@@ -251,3 +251,14 @@ if (version_compare($oldVersion, '3.6.13', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare($oldVersion, '3.6.14', '<')) {
+    $message = new Message(
+        'A new option allows to cache manifests in order to delivrate them instantly.' // @translate
+    );
+    $messenger->addSuccess($message);
+    $message = new Message(
+        'A new resource block allows to display the iiif manifest link to copy in clipboard.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
