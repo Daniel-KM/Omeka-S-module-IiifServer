@@ -95,21 +95,54 @@ class PresentationController extends AbstractActionController
             return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
+        $viewHelpers = $this->viewHelpers();
+
         $internal = (bool) $this->params()->fromQuery('internal');
         if (!$internal) {
-            $externalManifest = $this->viewHelpers()->get('iiifManifestExternal')->__invoke($resource, true);
+            $externalManifest = $viewHelpers->get('iiifManifestExternal')->__invoke($resource, true);
             if ($externalManifest) {
                 return $this->redirect()->toUrl($externalManifest);
             }
         }
 
+        // Version may be 2 or 3.
         $version = $this->requestedVersion();
+
+        $manifest = null;
+        $toCache = false;
+
+        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache_derivativemedia', false);
+        if ($useCache && $viewHelpers->has('hasDerivative')) {
+            $type = 'iiif-' . (int) $version;
+            $derivative = $viewHelpers->get('hasDerivative')->__invoke($resource, $type);
+            if ($derivative) {
+                $config = $resource->getServiceLocator()->get('Config');
+                $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+                $filepath = $basePath . '/' . $derivative[$type]['file'];
+                if ($derivative[$type]['ready']) {
+                    $manifest = file_get_contents($filepath);
+                    return $this->iiifJsonLd($manifest, $version);
+                }
+                if (!$derivative[$type]['in_progress']) {
+                    $toCache = true;
+                }
+            }
+            // Else derivative is not enabled in module DerivativeMedia.
+        }
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
         try {
             $manifest = $iiifManifest($resource, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+        }
+
+        if ($toCache) {
+            // Ensure dirpath. Don't keep issue, it's only cache.
+            if (!file_exists(dirname($filepath))) {
+                @mkdir(dirname($filepath), 0775, true);
+            }
+            @file_put_contents($filepath, json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         }
 
         return $this->iiifJsonLd($manifest, $version);

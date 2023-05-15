@@ -56,6 +56,18 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_cache_derivativemedia',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Cache manifests for instant access (require module Derivative Media)', // @translate
+                    'info' => 'A cache may be required when there are more than 100 to 1000 media, depending on server, or when there are many visitors.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_cache_derivativemedia',
+                ],
+            ])
+
+            ->add([
                 'name' => 'fieldset_content',
                 'type' => \Laminas\Form\Fieldset::class,
                 'options' => [

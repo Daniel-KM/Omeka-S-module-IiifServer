@@ -519,6 +519,7 @@ return [
         'config' => [
             'iiifserver_manifest_default_version' => '2',
             'iiifserver_manifest_external_property' => 'dcterms:hasFormat',
+            'iiifserver_manifest_cache_derivativemedia' => false,
             // Content of the manifest.
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
@@ -563,6 +564,7 @@ return [
             ],
             'iiifserver_manifest_structures_property' => '',
             'iiifserver_manifest_structures_skip_flat' => false,
+            // Various.
             'iiifserver_xml_image_match' => 'order',
             'iiifserver_xml_fix_mode' => 'no',
             'iiifserver_access_resource_skip' => false,
