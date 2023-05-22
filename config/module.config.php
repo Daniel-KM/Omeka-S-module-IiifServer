@@ -117,9 +117,6 @@ return [
         ],
     ],
     'form_elements' => [
-        'invokables' => [
-            Form\Element\OptionalUrl::class => Form\Element\OptionalUrl::class,
-        ],
         'factories' => [
             Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],

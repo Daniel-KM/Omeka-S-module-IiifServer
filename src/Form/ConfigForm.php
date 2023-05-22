@@ -2,7 +2,6 @@
 
 namespace IiifServer\Form;
 
-use IiifServer\Form\Element as IiifServerElement;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
@@ -233,7 +232,7 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_rights_url',
-                'type' => IiifServerElement\OptionalUrl::class,
+                'type' => Element\Url::class,
                 'options' => [
                     'label' => 'Uri of the rights/license when unselected above', // @translate
                     'info' => 'For IIIF v3, the license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
@@ -784,7 +783,7 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_media_api_url',
-                'type' => IiifServerElement\OptionalUrl::class,
+                'type' => Element\Url::class,
                 'options' => [
                     'label' => 'External image server base url', // @translate
                     'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate
@@ -1056,6 +1055,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_fix_xml_mode',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_media_api_url',
                 'required' => false,
             ])
             ->add([
