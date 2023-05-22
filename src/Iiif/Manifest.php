@@ -134,9 +134,12 @@ class Manifest extends AbstractResourceType
         $services = $this->resource->getServiceLocator();
         $this->rangeToArray = $services->get('ControllerPluginManager')->get('rangeToArray');
 
-        $this->initLinking();
-        $this->initThumbnail();
-        $this->prepareMediaInfoList();
+        $this
+            ->initMedia()
+            ->initLinking()
+            ->initThumbnail()
+            ->initTraitRights()
+            ->prepareMediaInfoList();
     }
 
     public function id(): string

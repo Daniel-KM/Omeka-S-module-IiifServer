@@ -126,6 +126,12 @@ class Canvas extends AbstractResourceType
     public function __construct(MediaRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
+
+        $this
+            ->initMedia()
+            ->initThumbnail()
+            ->initTraitRights();
+
         // TODO Add linking properties when not in manifest.
         // The option should contain an index, that is the position from 1 in
         // the list of canvases (available in storage too).

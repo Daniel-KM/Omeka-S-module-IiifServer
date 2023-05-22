@@ -51,7 +51,7 @@ trait TraitMediaInfo
             return null;
         }
         $mediaId = $media->id();
-        if (!array_key_exists($mediaId, $this->_storage['media_info'])) {
+        if (!array_key_exists($mediaId, $this->_storage['media_info'] ?? [])) {
             $this->prepareMediaInfoSingle($media);
             return $this->_storage['media_info_single'][$mediaId];
         }
@@ -69,7 +69,7 @@ trait TraitMediaInfo
             return null;
         }
         $mediaId = $media->id();
-        if (!array_key_exists($mediaId, $this->_storage['media_info_single'])) {
+        if (!array_key_exists($mediaId, $this->_storage['media_info_single'] ?? [])) {
             $this->prepareMediaInfoSingle($media);
         }
         return $this->_storage['media_info_single'][$mediaId];

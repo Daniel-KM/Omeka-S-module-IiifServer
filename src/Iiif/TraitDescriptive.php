@@ -112,6 +112,8 @@ trait TraitDescriptive
      * The placeholder canvas can be set in item or media values.
      *
      * @see https://iiif.io/api/presentation/3.0/#placeholdercanvas
+     *
+     * @todo Return a canvas instead of an array.
      */
     public function placeholderCanvas(): ?array
     {
@@ -128,17 +130,22 @@ trait TraitDescriptive
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
         $values = $property ? $this->resource->value($property, ['all' => true]) : [];
         foreach ($values as $value) {
-            $vr = $value->resource();
+            $vr = $value->valueResource();
             if ($vr) {
                 if ($vr instanceof MediaRepresentation) {
                     $mediaInfo = $this->mediaInfoSingle($vr);
                     if ($mediaInfo) {
+                        /*
                         return new Canvas($vr, [
                             'index' => null,
                             'content' => $mediaInfo['content'],
                             'key' => $mediaInfo['key'],
                             'motivation' => $mediaInfo['motivation'],
                         ]);
+                        */
+                        if ($vr->hasOriginal()) {
+                            return $this->canvasFromUrl($vr->originalUrl(), $vr->displayTitle());
+                        }
                     }
                 }
             } else {
@@ -146,11 +153,11 @@ trait TraitDescriptive
                 $val = (string) $value->value();
                 $url = $uri ?: $val;
                 if (filter_var($url, FILTER_VALIDATE_URL)) {
-                    return $this->placeholder($url, $val === $url ? null : $val);
+                    return $this->canvasFromUrl($url, $val === $url ? null : $val);
                 }
                 // Presence of a value means to use the default placeholder.
                 elseif ($defaultPlaceholder) {
-                    return $this->canvasFromUrl($defaultPlaceholder);
+                    return $this->canvasFromUrl($defaultPlaceholder, null);
                 }
             }
         }
@@ -218,6 +225,9 @@ trait TraitDescriptive
         ];
     }
 
+    /**
+     * @todo Return a real canvas instead of an url.
+     */
     protected function canvasFromUrl(string $url, ?string $label): ?array
     {
         // Dimensions are required for a canvas.
@@ -239,7 +249,7 @@ trait TraitDescriptive
             'type' => 'Canvas',
         ];
 
-        if (mb_strlen($label)) {
+        if (mb_strlen((string) $label)) {
             // TODO Use ValueLanguage.
             $element['label'] = ['none' => [$label]];
         }
