@@ -87,7 +87,7 @@ class NoopServerController extends AbstractActionController
 
         // Header for CORS, required for access.
         $response->getHeaders()
-            ->addHeaderLine('access-control-allow-origin', '*')
+            ->addHeaderLine('Access-Control-Allow-Origin', '*')
             ->addHeaderLine('Content-Type', 'image/png');
 
         // TODO This is a local file (normal server): use 200.

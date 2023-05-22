@@ -151,7 +151,7 @@ class MediaController extends AbstractActionController
 
         // Header for CORS, required for access of IXIF.
         $response->getHeaders()
-            ->addHeaderLine('access-control-allow-origin', '*')
+            ->addHeaderLine('Access-Control-Allow-Origin', '*')
             ->addHeaderLine('Content-Type', $media->mediaType());
 
         // TODO This is a local file (normal server): use 200.
