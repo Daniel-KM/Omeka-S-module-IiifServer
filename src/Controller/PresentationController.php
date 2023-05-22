@@ -121,6 +121,7 @@ class PresentationController extends AbstractActionController
                 $filepath = $basePath . '/' . $derivative[$type]['file'];
                 if ($derivative[$type]['ready']) {
                     $manifest = file_get_contents($filepath);
+                    $manifest = json_decode($manifest, true);
                     return $this->iiifJsonLd($manifest, $version);
                 }
                 if (!$derivative[$type]['in_progress']) {
