@@ -920,8 +920,19 @@ class IiifManifest2 extends AbstractHelper
             $seeAlso = $this->seeAlso($media, $index);
             if ($seeAlso) {
                 $canvas['seeAlso'] = $seeAlso;
-                $canvas['otherContent'] = $this->otherContent($media, $index);
+                $otherContent = $this->otherContents($media, $index);
+                if ($otherContent) {
+                    $canvas['otherContent'] = $otherContent;
+                }
             }
+        }
+
+        // Append annotations from module Annotate.
+        $annotations = $this->otherContentAnnotationList($media, $index);
+        if ($annotations) {
+            empty($canvas['otherContent'])
+                ? $canvas['otherContent'] = $annotations
+                : $canvas['otherContent'] = array_merge($annotations, $canvas['otherContent']);
         }
 
         $image = $this->_iiifImage($media, $index, $canvasUrl, $width, $height);
@@ -1760,8 +1771,11 @@ class IiifManifest2 extends AbstractHelper
 
     /**
      * @todo Factorize.
+     *
+     * Note: multiple other content may be returned, so it's an array of arrays,
+     * even if there is only one currently.
      */
-    protected function otherContent(MediaRepresentation $media, int $indexOne): ?array
+    protected function otherContents(MediaRepresentation $media, int $indexOne): ?array
     {
         $relatedMedia = $this->relatedMediaOcr($media, $indexOne);
         if (!$relatedMedia) {
@@ -1775,7 +1789,59 @@ class IiifManifest2 extends AbstractHelper
         return [[
             '@id' => $id,
             '@type' => 'sc:AnnotationList',
-            'label' => 'Text of current page',
+            'label' => $this->view->translate('Text of current page'), // @ŧranslate
         ]];
+    }
+
+    /**
+     * The annotation list is a reference to the list of the annotations of the
+     * module Annotate. There is only one list, so don't return an array of
+     * arrays.
+     */
+    protected  function otherContentAnnotationList(MediaRepresentation $media, int $indexOne): ?array
+    {
+        static $api;
+        static $oaHasSelector;
+
+        if ($api === null) {
+            $plugins = $this->view->getHelperPluginManager();
+            $api = $plugins->has('annotations') ? $plugins->get('api') : false;
+            if (!$api) {
+                return null;
+            }
+            $oaHasSelector = $api->searchOne('properties', ['term' => 'oa:hasSelector'])->getContent();
+            if (!$oaHasSelector) {
+                $api = false;
+                return null;
+            }
+            $oaHasSelector = $oaHasSelector->id();
+        } elseif (!$api) {
+            return null;
+        }
+
+        // Check if media has at least one annotation via oa:hasSelector to set
+        // the reference to the list.
+        $has = $api->search('annotations', [
+            'property' => [[
+                'property' => $oaHasSelector,
+                'type' => 'res',
+                'text' => (string) $media->id(),
+            ]],
+            'limit' => 0,
+        ], ['initialize' => false, 'finalize' => false])->getTotalResults();
+
+        if (!$has) {
+            return null;
+        }
+
+        $id = $this->view->iiifUrl($media->item(), 'iiifserver/uri', '2', [
+            'type' => 'annotation-list',
+            'name' => $media->id(),
+        ]);
+        return [
+            '@id' => $id,
+            '@type' => 'sc:AnnotationList',
+            'label' => $this->view->translate('Annotations'), // @ŧranslate
+        ];
     }
 }
