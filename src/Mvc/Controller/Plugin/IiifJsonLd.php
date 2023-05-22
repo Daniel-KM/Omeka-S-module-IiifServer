@@ -41,10 +41,10 @@ class IiifJsonLd extends AbstractPlugin
         /**
          * @var \Laminas\Http\PhpEnvironment\Request $request
          * @var \Laminas\Http\PhpEnvironment\Response $response
+         * @var \Laminas\Http\Headers $headers
          */
         $request = $controller->getRequest();
         $response = $controller->getResponse();
-
         $headers = $response->getHeaders();
 
         if (version_compare((string) $version, '3', '>=')) {
@@ -68,7 +68,10 @@ class IiifJsonLd extends AbstractPlugin
         }
 
         // Header for CORS, required for access of IIIF.
-        $headers->addHeaderLine('Access-Control-Allow-Origin', '*');
+        if ($controller->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $headers
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
 
         //$response->clearBody();
         $prettyJson = (bool) $controller->settings()->get('iiifserver_manifest_pretty_json', false);

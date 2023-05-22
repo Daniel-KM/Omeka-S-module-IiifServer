@@ -80,6 +80,7 @@ class MediaController extends AbstractActionController
         }
 
         $response = $this->getResponse();
+        $headers = $response->getHeaders();
 
         // Because there is no conversion currently, the format should be
         // checked.
@@ -125,7 +126,7 @@ class MediaController extends AbstractActionController
             $assetUrl = $viewHelpers->get('assetUrl');
             $fileUrl = $assetUrl($file, 'AccessResource', true, true, true);
 
-            $response->getHeaders()
+            $headers
                 ->addHeaderLine('Content-Transfer-Encoding: binary')
                 // ->addHeaderLine(sprintf('Content-Length: %s', $filesize))
                 ->addHeaderLine('Content-Type', $mediaType);
@@ -150,8 +151,12 @@ class MediaController extends AbstractActionController
         // TODO Check if the external url is not empty.
 
         // Header for CORS, required for access of IXIF.
-        $response->getHeaders()
-            ->addHeaderLine('Access-Control-Allow-Origin', '*')
+        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $headers
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
+
+        $headers
             ->addHeaderLine('Content-Type', $media->mediaType());
 
         // TODO This is a local file (normal server): use 200.

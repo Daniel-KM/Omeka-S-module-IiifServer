@@ -55,6 +55,19 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_append_cors_headers',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Append CORS headers to web server response', // @translate
+                    'info' => 'CORS ("Cross Origin Resource Sharing") headers are required to share manifests and media. They are generally managed by the web server, but, if not, they can be added here.', // @translate
+                    'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#CORS-Cross-Origin-Resource-Sharing)', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_append_cors_headers',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_pretty_json',
                 'type' => Element\Checkbox::class,
                 'options' => [

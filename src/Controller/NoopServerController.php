@@ -85,9 +85,15 @@ class NoopServerController extends AbstractActionController
         // TODO Manage other placeholders or use a setting.
         $placeholder = 'thumbnails/default.png';
 
+        $headers = $response->getHeaders();
+
         // Header for CORS, required for access.
-        $response->getHeaders()
-            ->addHeaderLine('Access-Control-Allow-Origin', '*')
+        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $headers
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
+
+        $headers
             ->addHeaderLine('Content-Type', 'image/png');
 
         // TODO This is a local file (normal server): use 200.
