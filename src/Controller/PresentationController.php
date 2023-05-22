@@ -155,9 +155,10 @@ class PresentationController extends AbstractActionController
         $name = $this->params('name');
         if ($type === 'canvas' && $name) {
             return $this->canvasAction();
-        }
-        if ($type === 'annotation-page' && $name && $this->params('subtype')) {
+        } elseif ($type === 'annotation-page' && $name && $this->params('subtype')) {
             return $this->annotationPageLineAction();
+        } elseif ($type === 'annotation-list' && $name) {
+            return $this->annotationListAction();
         }
         return $this->jsonError(new Message(
             'The type "%s" is currently only managed as uri, not url', // @translate
@@ -261,6 +262,50 @@ class PresentationController extends AbstractActionController
 
         try {
             $annotationPageLine = $iiifAnnotationPageLine($media, null, $version);
+        } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
+        }
+
+        return $this->iiifJsonLd($annotationPageLine, $version);
+    }
+
+    /**
+     * Get the annotations list from module Annotate/Cartography for a media.
+     *
+     * @todo Use url like /item-id/canvas/canvas-id/annotation-list ?
+     */
+    protected function annotationListAction()
+    {
+        // Unlike canvas, the name is the main media id.
+
+        $name = $this->params('name');
+        if (!$name) {
+            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $api = $this->api();
+
+        // When the id is a clean url identifier, the id is already extracted.
+        $id = $this->params('id');
+        try {
+            $api->read('items', ['id' => $id])->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        try {
+            $media = $api->read('media', ['item' => $id, 'id' => $name])->getContent();
+        } catch (\Omeka\Api\Exception\NotFoundException $e) {
+            return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_404);
+        }
+
+        $viewHelpers = $this->viewHelpers();
+        $iiifAnnotationList = $viewHelpers->get('iiifAnnotationList');
+
+        $version = $this->requestedVersion();
+
+        try {
+            $annotationPageLine = $iiifAnnotationList($media, null, $version);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }

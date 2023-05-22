@@ -55,14 +55,14 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     protected $resource;
 
     /**
-     * Get the IIIF canvas for the specified resource.
+     * Get the IIIF annotation page with lines for the specified resource.
      *
      * @todo Factorize IiifAnnotationPageLine2, IiifManifest2 and AnnotationPage.
      *
      * @see \IiifServer\Iiif\AnnotationPage::initAnnotationPage()
      * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
      * @see \IiifServer\View\Helper\IiifAnnotationPageLine3
-     * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
+     * @see \IiifServer\View\Helper\IiifManifest2::otherContents()
      * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
      *
      * @param MediaRepresentation $resource

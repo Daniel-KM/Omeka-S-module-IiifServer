@@ -82,6 +82,9 @@ return [
     ],
     'view_helpers' => [
         'invokables' => [
+            'iiifAnnotationList' => View\Helper\IiifAnnotationList::class,
+            'iiifAnnotationList2' => View\Helper\IiifAnnotationList2::class,
+            'iiifAnnotationList3' => View\Helper\IiifAnnotationList3::class,
             'iiifAnnotationPageLine' => View\Helper\IiifAnnotationPageLine::class,
             'iiifAnnotationPageLine2' => View\Helper\IiifAnnotationPageLine2::class,
             'iiifAnnotationPageLine3' => View\Helper\IiifAnnotationPageLine3::class,
