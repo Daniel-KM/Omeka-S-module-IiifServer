@@ -545,6 +545,7 @@ return [
             'iiifserver_manifest_viewing_direction_property' => '',
             'iiifserver_manifest_viewing_direction_default' => 'left-to-right',
             'iiifserver_manifest_placeholder_canvas_property' => '',
+            'iiifserver_manifest_placeholder_canvas_value' => 'Informed public',
             'iiifserver_manifest_placeholder_canvas_default' => '',
             'iiifserver_manifest_behavior_property' => '',
             'iiifserver_manifest_behavior_default' => ['none'],

@@ -127,36 +127,41 @@ trait TraitDescriptive
             $defaultPlaceholder = null;
         }
 
+        $matchValue = mb_strtolower($this->settings->get('iiifserver_manifest_placeholder_canvas_value', ''));
+
+        $isCanvas = $this->type === 'Canvas';
+
+        // For canvas, check if tthe parent items contains a list media to protect.
+        if ($isCanvas && $defaultPlaceholder && $this->resource instanceof MediaRepresentation) {
+            /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+            $resourceId = (int) $this->resource->id();
+            $values = $this->resource->item()->value($property, ['all' => true]);
+            foreach ($values as $value) {
+                $vr = $value->valueResource();
+                if ($vr && (int) $vr->id() === $resourceId) {
+                    return $this->canvasFromUrl($defaultPlaceholder, null);
+                }
+            }
+        }
+
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
-        $values = $property ? $this->resource->value($property, ['all' => true]) : [];
+        $values = $this->resource->value($property, ['all' => true]);
         foreach ($values as $value) {
-            $vr = $value->valueResource();
-            if ($vr) {
-                if ($vr instanceof MediaRepresentation) {
-                    $mediaInfo = $this->mediaInfoSingle($vr);
-                    if ($mediaInfo) {
-                        /*
-                        return new Canvas($vr, [
-                            'index' => null,
-                            'content' => $mediaInfo['content'],
-                            'key' => $mediaInfo['key'],
-                            'motivation' => $mediaInfo['motivation'],
-                        ]);
-                        */
-                        if ($vr->hasOriginal()) {
-                            return $this->canvasFromUrl($vr->originalUrl(), $vr->displayTitle());
-                        }
-                    }
-                }
-            } else {
-                $uri = $value->uri();
-                $val = (string) $value->value();
-                $url = $uri ?: $val;
-                if (filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
-                    return $this->canvasFromUrl($url, $val === $url ? null : $val);
-                }
-                // Presence of a value means to use the default placeholder.
-                elseif ($defaultPlaceholder) {
+            if ($value->valueResource()) {
+                continue;
+            }
+            $uri = $value->uri();
+            $val = (string) $value->value();
+            $url = $uri ?: $val;
+            if (filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
+                return $this->canvasFromUrl($url, $val === $url ? null : $val);
+            } elseif ($defaultPlaceholder) {
+                $dataType = $value->type();
+                if (($dataType === 'boolean' && $value->value())
+                    || ($matchValue && mb_strtolower($val) === $matchValue)
+                    // Presence of a value means to use the default placeholder.
+                    || (!$matchValue && $dataType !== 'boolean')
+                ) {
                     return $this->canvasFromUrl($defaultPlaceholder, null);
                 }
             }

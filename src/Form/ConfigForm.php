@@ -412,7 +412,7 @@ class ConfigForm extends Form
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use in item or media to set a placeholder canvas for waiting or warning', // @translate
-                    'info' => 'May be a list of media, a url to a file or a boolean value, in which case the default placeholder canvas is used.', // @translate
+                    'info' => 'May be a url to a placeholder file, a list of media to protect, a string with the value below, or a boolean value, in which case the default placeholder canvas is used.', // @translate
                     'documentation' => 'https://iiif.io/api/presentation/3.0/#placeholdercanvas',
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -421,6 +421,18 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_manifest_placeholder_canvas_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_placeholder_canvas_value',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Value to match to display the placeholder canvas', // @translate
+                    'info' => 'This option is used only when the property above is a string, for example "Informed public". The warning with the url below will be displayed when the property has this value.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_placeholder_canvas_value',
                 ],
             ])
 
