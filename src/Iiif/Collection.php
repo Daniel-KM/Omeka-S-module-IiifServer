@@ -167,7 +167,7 @@ class Collection extends AbstractResourceType
                 ];
             } else {
                 $urlManifest = (string) $value;
-                if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
+                if (filter_var($urlManifest, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
                     $result[] = [
                         'id' => $urlManifest,
                         'type' => 'Manifest',

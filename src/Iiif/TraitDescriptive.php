@@ -123,7 +123,7 @@ trait TraitDescriptive
         }
 
         $defaultPlaceholder = $this->settings->get('iiifserver_manifest_placeholder_canvas_default');
-        if ($defaultPlaceholder && !filter_var($defaultPlaceholder, FILTER_VALIDATE_URL)) {
+        if ($defaultPlaceholder && !filter_var($defaultPlaceholder, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
             $defaultPlaceholder = null;
         }
 
@@ -152,7 +152,7 @@ trait TraitDescriptive
                 $uri = $value->uri();
                 $val = (string) $value->value();
                 $url = $uri ?: $val;
-                if (filter_var($url, FILTER_VALIDATE_URL)) {
+                if (filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
                     return $this->canvasFromUrl($url, $val === $url ? null : $val);
                 }
                 // Presence of a value means to use the default placeholder.

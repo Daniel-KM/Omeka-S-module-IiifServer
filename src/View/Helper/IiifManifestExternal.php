@@ -32,7 +32,7 @@ class IiifManifestExternal extends AbstractHelper
                 continue;
             }
             $urlManifest = (string) $value;
-            if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
+            if (filter_var($urlManifest, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
                 $urls[] = $urlManifest;
             }
         }

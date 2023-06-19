@@ -251,7 +251,7 @@ class IiifCollection2 extends AbstractHelper
                 $result[] = $val;
             } else {
                 $urlManifest = (string) $value;
-                if (filter_var($urlManifest, FILTER_VALIDATE_URL)) {
+                if (filter_var($urlManifest, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
                     $result[] = [
                         '@id' => $urlManifest,
                         '@type' => 'sc:Manifest',
