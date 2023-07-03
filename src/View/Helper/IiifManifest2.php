@@ -123,31 +123,47 @@ class IiifManifest2 extends AbstractHelper
      *
      * @param ItemRepresentation $item
      * @return Object|null. The object corresponding to the manifest.
+     *
+     * @see https://iiif.io/api/presentation/2.1/
      */
     protected function buildManifestItem(ItemRepresentation $item)
     {
         // Prepare values needed for the manifest. Empty values will be removed.
         // Some are required.
         $manifest = [
+            // Metadata about this manifest file.
             '@context' => '',
             '@id' => '',
             '@type' => 'sc:Manifest',
+
+            // Descriptive metadata about the object/work.
             'label' => '',
+            'metadata' => [],
             'description' => '',
             'thumbnail' => '',
+
+            // Presentation information.
+            'viewingDirection' => '',
+            'viewingHint' =>'',
+
+            // Rights Information.
             'license' => '',
             'attribution' => '',
             // A logo to add at the end of the information panel.
             'logo' => '',
-            'service' => [],
+
+            // Links.
             // For example the web page of the item.
-            'related' => '',
+            'related' => [],
+            'service' => [],
             // Other formats of the same data.
-            'seeAlso' => '',
+            'seeAlso' => [],
+            'rendering' => [],
             'within' => '',
-            'metadata' => [],
-            'mediaSequences' => [],
+
+            // List of sequences.
             'sequences' => [],
+            'mediaSequences' => [],
         ];
 
         $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
@@ -313,6 +329,36 @@ class IiifManifest2 extends AbstractHelper
         // Thumbnail of the whole work.
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $is3dModel);
 
+        // The viewing direction and hint can be set in manifest and sequence.
+        $viewingDirectionProperty = $this->view->setting('iiifserver_manifest_viewing_direction_property');
+        if ($viewingDirectionProperty) {
+            $viewingDirection = strip_tags((string) $item->value($viewingDirectionProperty));
+        }
+        if (empty($viewingDirection)) {
+            $viewingDirection = $this->view->setting('iiifserver_manifest_viewing_direction_default');
+        }
+        if (in_array($viewingDirection, ['left-to-right', 'right-to-left', 'top-to-bottom', 'bottom-to-top'])) {
+            $manifest['viewingDirection'] = $viewingDirection;
+        }
+
+        $allowedViewingHintManifest = ['individuals', 'paged', 'continuous'];
+        $viewingHintProperty = $this->view->setting('iiifserver_manifest_behavior_property');
+        if ($viewingHintProperty) {
+            $viewingHint = strip_tags((string) $item->value($viewingHintProperty));
+        }
+        if (empty($viewingHint)) {
+            $viewingHint = $this->view->setting('iiifserver_manifest_behavior_default', []);
+            if (in_array('none', $viewingHint)) {
+                $viewingHint = 'none';
+            } else {
+                $viewingHint = array_intersect($viewingHint, $allowedViewingHintManifest);
+                $viewingHint = reset($viewingHint) ?: 'none';
+            }
+        }
+        if (in_array($viewingHint, $allowedViewingHintManifest)) {
+            $manifest['viewingHint'] = $viewingHint;
+        }
+
         // Process images, except if they belong to a 3D model.
         if (!$is3dModel) {
             $imageNumber = 0;
@@ -474,27 +520,14 @@ class IiifManifest2 extends AbstractHelper
             $sequence['@type'] = 'sc:Sequence';
             $sequence['label'] = 'Current Page Order';
 
-            $viewingDirectionProperty = $this->view->setting('iiifserver_manifest_viewing_direction_property');
-            if ($viewingDirectionProperty) {
-                $viewingDirection = strip_tags((string) $item->value($viewingDirectionProperty));
-            }
-            if (empty($viewingDirection)) {
-                $viewingDirection = $this->view->setting('iiifserver_manifest_viewing_direction_default');
-            }
-            if (in_array($viewingDirection, ['left-to-right', 'right-to-left', 'top-to-bottom', 'bottom-to-top'])) {
+            // The viewing direction and hint can be set in manifest and sequence.
+            // Manifest and sequence follow the same rules, so just copy it,
+            // even if it is useless when they are the same.
+            if (!empty($manifest['viewingDirection'])) {
                 $sequence['viewingDirection'] = $viewingDirection;
             }
-
-            $viewingHintProperty = $this->view->setting('iiifserver_manifest_behavior_property');
-            if ($viewingHintProperty) {
-                $viewingHint = strip_tags((string) $item->value($viewingHintProperty));
-            }
-            if (empty($viewingHint)) {
-                $viewingHint = $this->view->setting('iiifserver_manifest_behavior_default', []);
-                $viewingHint = in_array('none', $viewingHint) ? 'none' : reset($viewingHint);
-            }
-            if ($viewingHint !== 'none') {
-                $sequence['viewingHint'] = $totalImages > 1 ? $viewingHint : 'non-paged';
+            if (!empty($manifest['viewingHint'])) {
+                $sequence['viewingHint'] = $viewingHint;
             }
 
             if ($rendering) {
