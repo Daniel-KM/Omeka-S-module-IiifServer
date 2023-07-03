@@ -43,6 +43,11 @@ class ContentResource extends AbstractResourceType
     use TraitThumbnail;
 
     /**
+     * @var string
+     */
+    protected $id = null;
+
+    /**
      * This is not the real type and must be set more precisely.
      *
      * @var string
