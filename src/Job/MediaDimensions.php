@@ -131,7 +131,12 @@ class MediaDimensions extends AbstractJob
                 /** @var \Omeka\Api\Representation\MediaRepresentation $media */
                 foreach ($item->media() as $media) {
                     $mainMediaType = strtok((string) $media->mediaType(), '/');
-                    if (in_array($mainMediaType, ['image', 'audio', 'video'])) {
+                    if (in_array($mainMediaType, ['image', 'audio', 'video'])
+                        // For ingester bulk_upload, wait that the process is
+                        // finished, else the thumbnails won't be available and
+                        // the size of derivative will be the fallback ones.
+                        && $media->ingester() !== 'bulk_upload'
+                    ) {
                         ++$this->totalMedias;
                         $this->prepareSize($media);
                     }
