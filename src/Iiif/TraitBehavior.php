@@ -42,7 +42,9 @@ trait TraitBehavior
         }
         foreach ($behaviors as $key => $behavior) {
             $behavior = (string) $behavior;
-            if (!isset($this->behaviors[$behavior]) || $this->behaviors[$behavior] === self::NOT_ALLOWED) {
+            if (!isset($this->behaviors[$behavior])
+                || $this->behaviors[$behavior] === self::NOT_ALLOWED
+            ) {
                 unset($behaviors[$key]);
             }
         }

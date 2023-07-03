@@ -86,22 +86,27 @@ class Range extends AbstractResourceType
     ];
 
     protected $behaviors = [
+        // Temporal behaviors.
         'auto-advance' => self::OPTIONAL,
-        'continuous' => self::OPTIONAL,
-        'facing-pages' => self::NOT_ALLOWED,
-        'individuals' => self::OPTIONAL,
-        'multi-part' => self::NOT_ALLOWED,
         'no-auto-advance' => self::OPTIONAL,
-        'no-nav' => self::OPTIONAL,
-        'no-repeat' => self::NOT_ALLOWED,
-        'non-paged' => self::NOT_ALLOWED,
-        'hidden' => self::NOT_ALLOWED,
-        'paged' => self::OPTIONAL,
         'repeat' => self::NOT_ALLOWED,
+        'no-repeat' => self::NOT_ALLOWED,
+        // Layout behaviors.
+        'unordered' => self::OPTIONAL,
+        'individuals' => self::OPTIONAL,
+        'continuous' => self::OPTIONAL,
+        'paged' => self::OPTIONAL,
+        'facing-pages' => self::NOT_ALLOWED,
+        'non-paged' => self::NOT_ALLOWED,
+        // Collection behaviors.
+        'multi-part' => self::NOT_ALLOWED,
+        'together' => self::NOT_ALLOWED,
+        // Range behaviors.
         'sequence' => self::OPTIONAL,
         'thumbnail-nav' => self::OPTIONAL,
-        'together' => self::NOT_ALLOWED,
-        'unordered' => self::OPTIONAL,
+        'no-nav' => self::OPTIONAL,
+        // Miscellaneous behaviors.
+        'hidden' => self::NOT_ALLOWED,
     ];
 
     /**

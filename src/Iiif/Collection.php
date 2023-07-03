@@ -92,22 +92,27 @@ class Collection extends AbstractResourceType
     ];
 
     protected $behaviors = [
+        // Temporal behaviors.
         'auto-advance' => self::OPTIONAL,
-        'continuous' => self::OPTIONAL,
-        'facing-pages' => self::NOT_ALLOWED,
-        'individuals' => self::OPTIONAL,
-        'multi-part' => self::OPTIONAL,
         'no-auto-advance' => self::OPTIONAL,
-        'no-nav' => self::NOT_ALLOWED,
-        'no-repeat' => self::OPTIONAL,
-        'non-paged' => self::NOT_ALLOWED,
-        'hidden' => self::NOT_ALLOWED,
-        'paged' => self::OPTIONAL,
         'repeat' => self::OPTIONAL,
+        'no-repeat' => self::OPTIONAL,
+        // Layout behaviors.
+        'unordered' => self::OPTIONAL,
+        'individuals' => self::OPTIONAL,
+        'continuous' => self::OPTIONAL,
+        'paged' => self::OPTIONAL,
+        'facing-pages' => self::NOT_ALLOWED,
+        'non-paged' => self::NOT_ALLOWED,
+        // Collection behaviors.
+        'multi-part' => self::OPTIONAL,
+        'together' => self::OPTIONAL,
+        // Range behaviors.
         'sequence' => self::NOT_ALLOWED,
         'thumbnail-nav' => self::NOT_ALLOWED,
-        'together' => self::OPTIONAL,
-        'unordered' => self::OPTIONAL,
+        'no-nav' => self::NOT_ALLOWED,
+        // Miscellaneous behaviors.
+        'hidden' => self::NOT_ALLOWED,
     ];
 
     /**

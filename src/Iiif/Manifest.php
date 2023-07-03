@@ -99,22 +99,27 @@ class Manifest extends AbstractResourceType
     ];
 
     protected $behaviors = [
+        // Temporal behaviors.
         'auto-advance' => self::OPTIONAL,
-        'continuous' => self::OPTIONAL,
-        'facing-pages' => self::NOT_ALLOWED,
-        'individuals' => self::OPTIONAL,
-        'multi-part' => self::NOT_ALLOWED,
         'no-auto-advance' => self::OPTIONAL,
-        'no-nav' => self::NOT_ALLOWED,
-        'no-repeat' => self::OPTIONAL,
-        'non-paged' => self::NOT_ALLOWED,
-        'hidden' => self::NOT_ALLOWED,
-        'paged' => self::OPTIONAL,
         'repeat' => self::OPTIONAL,
+        'no-repeat' => self::OPTIONAL,
+        // Layout behaviors.
+        'unordered' => self::OPTIONAL,
+        'individuals' => self::OPTIONAL,
+        'continuous' => self::OPTIONAL,
+        'paged' => self::OPTIONAL,
+        'facing-pages' => self::NOT_ALLOWED,
+        'non-paged' => self::NOT_ALLOWED,
+        // Collection behaviors.
+        'multi-part' => self::NOT_ALLOWED,
+        'together' => self::OPTIONAL,
+        // Range behaviors.
         'sequence' => self::NOT_ALLOWED,
         'thumbnail-nav' => self::NOT_ALLOWED,
-        'together' => self::OPTIONAL,
-        'unordered' => self::OPTIONAL,
+        'no-nav' => self::NOT_ALLOWED,
+        // Miscellaneous behaviors.
+        'hidden' => self::NOT_ALLOWED,
     ];
 
     /**
@@ -250,6 +255,44 @@ class Manifest extends AbstractResourceType
         }
 
         return $structures;
+    }
+
+    /**
+     * In manifest, the rendering is used for media to be downloaded.
+     */
+    public function rendering(): array
+    {
+        $renderings = [];
+        $site = $this->defaultSite();
+        $siteSlug = $site ? $site->slug() : null;
+        foreach ($this->resource->media() as $media) {
+            $mediaInfo = $this->mediaInfo($media);
+            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
+                $rendering = new Rendering($media, [
+                    'index' => $media->id(),
+                    'siteSlug' => $siteSlug,
+                    'content' => $mediaInfo['content'],
+                    'on' => 'Manifest',
+                ]);
+                if ($rendering->id() && $rendering->type()) {
+                    $renderings[] = $rendering;
+                }
+            }
+        }
+        return $renderings;
+    }
+
+    public function services(): ?array
+    {
+        return $this->services;
+    }
+
+    public function appendService(Service $service): AbstractType
+    {
+        // Normally, default services are already prepared.
+        $this->services = $this->services ?? [];
+        $this->services[] = $service;
+        return $this;
     }
 
     protected function defaultStructure(): ?Range
@@ -433,44 +476,6 @@ class Manifest extends AbstractResourceType
         }
 
         return $structure;
-    }
-
-    /**
-     * In manifest, the rendering is used for media to be downloaded.
-     */
-    public function rendering(): array
-    {
-        $renderings = [];
-        $site = $this->defaultSite();
-        $siteSlug = $site ? $site->slug() : null;
-        foreach ($this->resource->media() as $media) {
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
-                $rendering = new Rendering($media, [
-                    'index' => $media->id(),
-                    'siteSlug' => $siteSlug,
-                    'content' => $mediaInfo['content'],
-                    'on' => 'Manifest',
-                ]);
-                if ($rendering->id() && $rendering->type()) {
-                    $renderings[] = $rendering;
-                }
-            }
-        }
-        return $renderings;
-    }
-
-    public function services(): ?array
-    {
-        return $this->services;
-    }
-
-    public function appendService(Service $service): AbstractType
-    {
-        // Normally, default services are already prepared.
-        $this->services = $this->services ?? [];
-        $this->services[] = $service;
-        return $this;
     }
 
     /**

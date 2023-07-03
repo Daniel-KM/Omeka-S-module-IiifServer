@@ -473,22 +473,27 @@ class ConfigForm extends Form
                         // Commented values are not allowed for manifest, neither canvas.
                         // @link https://iiif.io/api/presentation/3.0/#a-summary-of-property-requirements
                         'none' => 'None', // @translate
+                        // Temporal behaviors.
                         'auto-advance' => 'Auto-advance', // @translate
-                        'continuous' => 'Continuous', // @translate
-                        'facing-pages' => 'Facing pages', // @translate
-                        'individuals' => 'Individuals', // @translate
-                        // 'multi-part' => 'Multi-part', // @translate
                         'no-auto-advance' => 'No auto-advance', // @translate
-                        // 'no-nav' => 'No nav', // @translate
-                        'no-repeat' => 'No repeat', // @translate
-                        'non-paged' => 'Non-paged', // @translate
-                        // 'hidden' => 'Hidden', // @translate
-                        'paged' => 'Paged', // @translate
                         'repeat' => 'Repeat', // @translate
-                        // 'sequence' => 'Sequence', // @translate
-                        // 'thumbnail-nav' => 'Thumbnail nav', // @translate
-                        // 'together' => 'Together', // @translate
+                        'no-repeat' => 'No repeat', // @translate
+                        // Layout behaviors.
                         'unordered' => 'Unordered', // @translate
+                        'individuals' => 'Individuals', // @translate
+                        'continuous' => 'Continuous', // @translate
+                        'paged' => 'Paged', // @translate
+                        'facing-pages' => 'Facing pages', // @translate
+                        'non-paged' => 'Non-paged', // @translate
+                        // Collection behaviors.
+                        // 'multi-part' => 'Collection: Multi-part', // @translate
+                        // 'together' => 'Collection: Together', // @translate
+                        // Range behaviors.
+                        // 'sequence' => 'Range: Sequence', // @translate
+                        // 'thumbnail-nav' => 'Range: Thumbnail nav', // @translate
+                        // 'no-nav' => 'Range: No nav', // @translate
+                        // Miscellaneous behaviors.
+                        // 'hidden' => 'Hidden', // @translate
                     ],
                 ],
                 'attributes' => [

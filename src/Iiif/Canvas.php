@@ -102,22 +102,27 @@ class Canvas extends AbstractResourceType
     ];
 
     protected $behaviors = [
+        // Temporal behaviors.
         'auto-advance' => self::OPTIONAL,
-        'continuous' => self::NOT_ALLOWED,
-        'facing-pages' => self::OPTIONAL,
-        'individuals' => self::NOT_ALLOWED,
-        'multi-part' => self::NOT_ALLOWED,
         'no-auto-advance' => self::OPTIONAL,
-        'no-nav' => self::NOT_ALLOWED,
-        'no-repeat' => self::NOT_ALLOWED,
-        'non-paged' => self::OPTIONAL,
-        'hidden' => self::NOT_ALLOWED,
-        'paged' => self::NOT_ALLOWED,
         'repeat' => self::NOT_ALLOWED,
+        'no-repeat' => self::NOT_ALLOWED,
+        // Layout behaviors.
+        'unordered' => self::NOT_ALLOWED,
+        'individuals' => self::NOT_ALLOWED,
+        'continuous' => self::NOT_ALLOWED,
+        'paged' => self::NOT_ALLOWED,
+        'facing-pages' => self::OPTIONAL,
+        'non-paged' => self::OPTIONAL,
+        // Collection behaviors.
+        'multi-part' => self::NOT_ALLOWED,
+        'together' => self::NOT_ALLOWED,
+        // Range behaviors.
         'sequence' => self::NOT_ALLOWED,
         'thumbnail-nav' => self::NOT_ALLOWED,
-        'together' => self::NOT_ALLOWED,
-        'unordered' => self::NOT_ALLOWED,
+        'no-nav' => self::NOT_ALLOWED,
+        // Miscellaneous behaviors.
+        'hidden' => self::NOT_ALLOWED,
     ];
 
     /**
