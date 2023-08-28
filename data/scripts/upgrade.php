@@ -91,8 +91,8 @@ if (version_compare($oldVersion, '3.5.14', '<')) {
 if (version_compare($oldVersion, '3.6.0', '<')) {
     $message = new Message(
         'The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that creates iiif manifest, and %2$sImage Server%3$s, that provides the tiled images. In that way, it is simpler to use an external image server via core media "IIIF Image". The upgrade is automatic, but you need to install the two modules.', // @translate
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer" target="_blank">',
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer" target="_blank">',
+        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer" target="_blank" rel="noopener">',
+        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer" target="_blank" rel="noopener">',
         '</a>'
     );
     $message->setEscapeHtml(false);
@@ -203,7 +203,7 @@ if (version_compare($oldVersion, '3.6.5.3', '<')) {
     $messenger->addWarning($message);
     $message = new Message(
         'The module IIIF Server supports creation of structures through a table-of-contents-like value: see %sreadme%s.', // @translate
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents" target="_blank">',
+        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents" target="_blank" rel="noopener">',
         '</a>'
     );
     $message->setEscapeHtml(false);
