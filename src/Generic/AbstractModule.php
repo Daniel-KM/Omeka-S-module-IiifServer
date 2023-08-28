@@ -44,7 +44,7 @@ use Omeka\Stdlib\Message;
  * The logic is "config over code": so all settings have just to be set in the
  * main `config/module.config.php` file, inside a key with the lowercase module
  * name,  with sub-keys `config`, `settings`, `site_settings`, `user_settings`
- * and `block_settings`. All the forms have just to be standard Zend form.
+ * and `block_settings`. All the forms have just to be standard Laminas form.
  * Eventual install and uninstall sql can be set in `data/install/` and upgrade
  * code in `data/scripts`.
  *
@@ -390,7 +390,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             // No check: if a table cannot be removed, an exception will be
             // thrown later.
             foreach ($dropTables as $table) {
-                $connection->executeStatement("DROP TABLE `$table`;");
+                $connection->executeStatement("SET FOREIGN_KEY_CHECKS=0; DROP TABLE `$table`;");
             }
 
             $translator = $services->get('MvcTranslator');
