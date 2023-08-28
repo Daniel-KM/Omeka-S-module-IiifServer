@@ -16,7 +16,7 @@ class MediaControllerFactory implements FactoryInterface
         return new MediaController(
             $services->get('Omeka\File\Store'),
             $basePath,
-            $plugins->has('isForbiddenFile') ? $plugins->get('isForbiddenFile') : null
+            $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null
         );
     }
 }

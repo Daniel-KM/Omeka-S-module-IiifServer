@@ -30,7 +30,7 @@
 
 namespace IiifServer\Controller;
 
-use AccessResource\Mvc\Controller\Plugin\IsForbiddenFile;
+use Access\Mvc\Controller\Plugin\IsAllowedMediaContent;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\File\Store\StoreInterface;
 use Omeka\Stdlib\Message;
@@ -45,9 +45,9 @@ class MediaController extends AbstractActionController
     use IiifServerControllerTrait;
 
     /**
-     * @var \AccessResource\Mvc\Controller\Plugin\IsForbiddenFile
+     * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
      */
-    protected $isForbiddenFile;
+    protected $isAllowedMediaContent;
 
     protected $routeInfo = 'mediaserver/info';
 
@@ -59,11 +59,11 @@ class MediaController extends AbstractActionController
     public function __construct(
         StoreInterface $store,
         ?string $basePath,
-        ?IsForbiddenFile $isForbiddenFile
+        ?IsAllowedMediaContent $isAllowedMediaContent
     ) {
         $this->store = $store;
         $this->basePath = $basePath;
-        $this->isForbiddenFile = $isForbiddenFile;
+        $this->isAllowedMediaContent = $isAllowedMediaContent;
     }
 
     /**
@@ -91,11 +91,11 @@ class MediaController extends AbstractActionController
             ), \Laminas\Http\Response::STATUS_CODE_500);
         }
 
-        // Compatibility with module AccessResource: rights should be checked
-        // for the file, not only for the media
-        if ($this->isForbiddenFile
+        // Compatibility with module Access: rights should be checked for the
+        // file, not only for the media.
+        if ($this->isAllowedMediaContent
             && !$this->settings()->get('iiifserver_access_resource_skip')
-            && $this->isForbiddenFile->__invoke($media)
+            && !$this->isAllowedMediaContent->__invoke($media)
         ) {
             // Manage custom asset file from the theme.
             $mediaType = $media ? $media->mediaType() : 'image/png';
@@ -124,7 +124,7 @@ class MediaController extends AbstractActionController
 
             $viewHelpers = $this->viewHelpers();
             $assetUrl = $viewHelpers->get('assetUrl');
-            $fileUrl = $assetUrl($file, 'AccessResource', true, true, true);
+            $fileUrl = $assetUrl($file, 'Access', true, true, true);
 
             $headers
                 ->addHeaderLine('Content-Transfer-Encoding: binary')
