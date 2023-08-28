@@ -53,7 +53,12 @@ class IiifManifest2 extends AbstractHelper
     protected $defaultHeight = 400;
 
     /**
-     * @var TempFileFactory
+     * @var \Omeka\View\Helper\Setting
+     */
+    protected $setting;
+
+    /**
+     * @var \Omeka\File\TempFileFactory
      */
     protected $tempFileFactory;
 
@@ -65,27 +70,24 @@ class IiifManifest2 extends AbstractHelper
     protected $basePath;
 
     /**
-     * @var \Omeka\View\Helper\Setting
+     * @var string
      */
-    protected $setting;
+    protected $baseUrlFiles;
 
     /**
      * @var string
      */
-    protected $_baseUrl;
-
-    /**
-     * @var string
-     */
-    protected $_baseUrlImageServer;
+    protected $baseUrlIiif;
 
     /**
      * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation
      */
     protected $resource;
 
-    public function __construct(TempFileFactory $tempFileFactory, $basePath)
-    {
+    public function __construct(
+        TempFileFactory $tempFileFactory,
+        ?string $basePath
+    ) {
         $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
     }
@@ -168,17 +170,16 @@ class IiifManifest2 extends AbstractHelper
 
         $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
 
-        // Required for TraitRights.
+        // Required for TraitRights and to avoid to load setting each time.
         $helpers = $this->view->getHelperPluginManager();
         $this->setting = $helpers->get('setting');
 
         // The base url for some other ids to quick process.
-        $this->_baseUrl = $this->view->iiifUrl($item, 'iiifserver/uri', '2', [
+        $this->baseUrlIiif = $this->view->iiifUrl($item, 'iiifserver/uri', '2', [
             'type' => 'annotation-page',
             'name' => '',
         ]);
-        $this->_baseUrl = mb_substr($this->_baseUrl, 0, (int) mb_strpos($this->_baseUrl, '/annotation-page'));
-        $this->_baseUrlImageServer = rtrim($this->view->setting('iiifserver_media_api_url'), '/ ') ?: $this->_baseUrl;
+        $this->baseUrlIiif = mb_substr($this->baseUrlIiif, 0, (int) mb_strpos($this->baseUrlIiif, '/annotation-page'));
 
         $metadata = $this->iiifMetadata($item);
         $manifest['metadata'] = $metadata;
@@ -188,7 +189,7 @@ class IiifManifest2 extends AbstractHelper
         $label = html_entity_decode($label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
         $manifest['label'] = $label;
 
-        $descriptionProperty = $this->view->setting('iiifserver_manifest_description_property');
+        $descriptionProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags((string) $item->value($descriptionProperty, ['default' => '']));
         } else {
@@ -201,13 +202,13 @@ class IiifManifest2 extends AbstractHelper
         $isLicenseUrl = $license
             && (substr($license, 0, 8) === 'https://' || substr($license, 0, 7) === 'http://');
 
-        $attributionProperty = $this->view->setting('iiifserver_manifest_attribution_property');
+        $attributionProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags((string) $item->value($attributionProperty, ['default' => '']));
         }
         if (empty($attribution)) {
             $attribution = $isLicenseUrl || empty($license)
-                ? $this->view->setting('iiifserver_manifest_attribution_default')
+                ? $this->setting->__invoke('iiifserver_manifest_attribution_default')
                 : $license;
         }
         $manifest['attribution'] = $attribution;
@@ -216,7 +217,7 @@ class IiifManifest2 extends AbstractHelper
             $manifest['license'] = $license;
         }
 
-        $logo = $this->view->setting('iiifserver_manifest_logo_default');
+        $logo = $this->setting->__invoke('iiifserver_manifest_logo_default');
         if ($logo) {
             $manifest['logo'] = ['@id' => $logo];
         }
@@ -330,24 +331,24 @@ class IiifManifest2 extends AbstractHelper
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $is3dModel);
 
         // The viewing direction and hint can be set in manifest and sequence.
-        $viewingDirectionProperty = $this->view->setting('iiifserver_manifest_viewing_direction_property');
+        $viewingDirectionProperty = $this->setting->__invoke('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {
             $viewingDirection = strip_tags((string) $item->value($viewingDirectionProperty));
         }
         if (empty($viewingDirection)) {
-            $viewingDirection = $this->view->setting('iiifserver_manifest_viewing_direction_default');
+            $viewingDirection = $this->setting->__invoke('iiifserver_manifest_viewing_direction_default');
         }
         if (in_array($viewingDirection, ['left-to-right', 'right-to-left', 'top-to-bottom', 'bottom-to-top'])) {
             $manifest['viewingDirection'] = $viewingDirection;
         }
 
         $allowedViewingHintManifest = ['individuals', 'paged', 'continuous'];
-        $viewingHintProperty = $this->view->setting('iiifserver_manifest_behavior_property');
+        $viewingHintProperty = $this->setting->__invoke('iiifserver_manifest_behavior_property');
         if ($viewingHintProperty) {
             $viewingHint = strip_tags((string) $item->value($viewingHintProperty));
         }
         if (empty($viewingHint)) {
-            $viewingHint = $this->view->setting('iiifserver_manifest_behavior_default', []);
+            $viewingHint = $this->setting->__invoke('iiifserver_manifest_behavior_default', []);
             if (in_array('none', $viewingHint)) {
                 $viewingHint = 'none';
             } else {
@@ -507,7 +508,7 @@ class IiifManifest2 extends AbstractHelper
         // Manage the exception: the media sequence with threejs 3D model.
         if ($is3dModel && $mediaSequencesElements) {
             $mediaSequence = [];
-            $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
+            $mediaSequence['@id'] = $this->baseUrlIiif . '/sequence/s0';
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
             $mediaSequence['elements'] = $mediaSequencesElements;
@@ -516,7 +517,7 @@ class IiifManifest2 extends AbstractHelper
         // When there are images.
         elseif ($totalImages) {
             $sequence = [];
-            $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
+            $sequence['@id'] = $this->baseUrlIiif . '/sequence/normal';
             $sequence['@type'] = 'sc:Sequence';
             $sequence['label'] = 'Current Page Order';
 
@@ -540,7 +541,7 @@ class IiifManifest2 extends AbstractHelper
         // Sequences when there is no image (special content).
         elseif ($mediaSequencesElements) {
             $mediaSequence = [];
-            $mediaSequence['@id'] = $this->_baseUrl . '/sequence/s0';
+            $mediaSequence['@id'] = $this->baseUrlIiif . '/sequence/s0';
             $mediaSequence['@type'] = 'ixif:MediaSequence';
             $mediaSequence['label'] = 'XSequence 0';
             $mediaSequence['elements'] = $mediaSequencesElements;
@@ -577,7 +578,7 @@ class IiifManifest2 extends AbstractHelper
             $manifest['sequences'] = $sequences;
         }
 
-        $structureProperty = $this->view->setting('iiifserver_manifest_structures_property');
+        $structureProperty = $this->setting->__invoke('iiifserver_manifest_structures_property');
         if ($structureProperty) {
             $literalStructure = (string) $item->value($structureProperty, ['default' => '']);
             if ($literalStructure) {
@@ -676,8 +677,8 @@ class IiifManifest2 extends AbstractHelper
 
         $blacklist = $settingHelper($map[$jsonLdType]['blacklist'], []);
 
-        if ($this->view->setting('iiifserver_manifest_structures_property')) {
-            $blacklist[] = $this->view->setting('iiifserver_manifest_structures_property');
+        if ($settingHelper('iiifserver_manifest_structures_property')) {
+            $blacklist[] = $settingHelper('iiifserver_manifest_structures_property');
         }
 
         if ($blacklist) {
@@ -690,7 +691,7 @@ class IiifManifest2 extends AbstractHelper
 
         // TODO Remove automatically special properties, and only for values that are used (check complex conditions…).
 
-        return $this->view->setting('iiifserver_manifest_html_descriptive')
+        return $settingHelper('iiifserver_manifest_html_descriptive')
             ? $this->valuesAsHtml($values)
             : $this->valuesAsPlainText($values);
     }
@@ -841,7 +842,7 @@ class IiifManifest2 extends AbstractHelper
         }
 
         $image = [];
-        $image['@id'] = $this->_baseUrl . '/annotation/p' . sprintf('%04d', $index) . '-image';
+        $image['@id'] = $this->baseUrlIiif . '/annotation/p' . sprintf('%04d', $index) . '-image';
         $image['@type'] = 'oa:Annotation';
         $image['motivation'] = "sc:painting";
 
@@ -874,7 +875,7 @@ class IiifManifest2 extends AbstractHelper
         }
 
         // In api v2, only one service can be set.
-        $supportedVersion = $this->view->setting('iiifserver_media_api_default_supported_version', ['service' => '0', 'level' => '0']);
+        $supportedVersion = $this->setting->__invoke('iiifserver_media_api_default_supported_version', ['service' => '0', 'level' => '0']);
         $service = $supportedVersion['service'];
         $level = $supportedVersion['level'];
 
@@ -930,7 +931,7 @@ class IiifManifest2 extends AbstractHelper
         $canvas = [];
 
         $prefixIndex = (string) (int) $index === (string) $index ? 'p' : '';
-        $canvasUrl = $this->_baseUrl . '/canvas/' . $prefixIndex . $index;
+        $canvasUrl = $this->baseUrlIiif . '/canvas/' . $prefixIndex . $index;
 
         $canvas['@id'] = $canvasUrl;
         $canvas['@type'] = 'sc:Canvas';
@@ -991,15 +992,15 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifCanvasImageLabel(MediaRepresentation $media, $index)
     {
-        $labelOption = $this->view->setting('iiifserver_manifest_canvas_label');
+        $labelOption = $this->setting->__invoke('iiifserver_manifest_canvas_label');
         $fallback = (string) $index;
         switch ($labelOption) {
             case 'property':
-                $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
+                $labelProperty = $this->setting->__invoke('iiifserver_manifest_canvas_label_property');
                 return (string) $media->value($labelProperty, ['default' => $fallback]);
 
             case 'property_or_source':
-                $labelProperty = $this->view->setting('iiifserver_manifest_canvas_label_property');
+                $labelProperty = $this->setting->__invoke('iiifserver_manifest_canvas_label_property');
                 $label = (string) $media->value($labelProperty, ['default' => '']);
                 if (strlen($label)) {
                     return $label;
@@ -1104,12 +1105,8 @@ class IiifManifest2 extends AbstractHelper
 
     /**
      * Create an IIIF media sequence object for an audio.
-     *
-     * @param MediaRepresentation $media
-     * @param array $values
-     * @return \stdClass|null
      */
-    protected function _iiifMediaSequenceAudio(MediaRepresentation $media, $values)
+    protected function _iiifMediaSequenceAudio(MediaRepresentation $media, $values): array
     {
         $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
@@ -1146,12 +1143,8 @@ class IiifManifest2 extends AbstractHelper
 
     /**
      * Create an IIIF media sequence object for a video.
-     *
-     * @param MediaRepresentation $media
-     * @param array $values
-     * @return \stdClass|null
      */
-    protected function _iiifMediaSequenceVideo(MediaRepresentation $media, $values)
+    protected function _iiifMediaSequenceVideo(MediaRepresentation $media, $values): array
     {
         $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
@@ -1223,7 +1216,7 @@ class IiifManifest2 extends AbstractHelper
     protected function _iiifSequenceUnsupported($rendering = [])
     {
         $sequence = [];
-        $sequence['@id'] = $this->_baseUrl . '/sequence/normal';
+        $sequence['@id'] = $this->baseUrlIiif . '/sequence/normal';
         $sequence['@type'] = 'sc:Sequence';
         $sequence['label'] = $this->view->translate('Unsupported extension. This manifest is being used as a wrapper for non-IIIF v2 content (e.g., audio, video) and is unfortunately incompatible with IIIF v2 viewers.');
         $sequence['compatibilityHint'] = 'displayIfContentUnsupported';
@@ -1317,7 +1310,7 @@ class IiifManifest2 extends AbstractHelper
                 continue;
             }
 
-            $rangeId = $this->_baseUrl . '/range/' . ($isInteger($name) ? 'r' . $name : rawurldecode($name));
+            $rangeId = $this->baseUrlIiif . '/range/' . ($isInteger($name) ? 'r' . $name : rawurldecode($name));
 
             // A line is always a range to display.
             $ranges[$name] = [
@@ -1368,7 +1361,7 @@ class IiifManifest2 extends AbstractHelper
                     }
                 }
                 if (!$canvasId) {
-                    $canvasId = $this->_baseUrl . '/canvas/' . ($canvasIdIsInteger ? 'p' . $cleanItemName : rawurldecode($cleanItemName));
+                    $canvasId = $this->baseUrlIiif . '/canvas/' . ($canvasIdIsInteger ? 'p' . $cleanItemName : rawurldecode($cleanItemName));
                     $canvasLabel = $canvasIdIsInteger ? '[' . $cleanItemName . ']' : $cleanItemName;
                 }
                 $canvases[$itemName] = [
@@ -1419,7 +1412,7 @@ class IiifManifest2 extends AbstractHelper
                 // TODO In that case, the type of items may be wrong, and the items too…
                 if (in_array($itemName, $ascendants)) {
                     $canvases[$itemName] = [
-                        '@id' => $this->_baseUrl . '/canvas/' . ($isInteger($itemName) ? 'p' . $itemName : rawurlencode($itemName)),
+                        '@id' => $this->baseUrlIiif . '/canvas/' . ($isInteger($itemName) ? 'p' . $itemName : rawurlencode($itemName)),
                         '@type' => 'sc:Canvas',
                         'label' => $ranges[$itemName],
                     ];
