@@ -174,6 +174,9 @@ class IiifManifest2 extends AbstractHelper
         $helpers = $this->view->getHelperPluginManager();
         $this->setting = $helpers->get('setting');
 
+        // The base url of files is used for derivative files.
+        $this->baseUrlFiles = $this->view->serverUrl($this->view->basePath('/files'));
+
         // The base url for some other ids to quick process.
         $this->baseUrlIiif = $this->view->iiifUrl($item, 'iiifserver/uri', '2', [
             'type' => 'annotation-page',
@@ -1108,6 +1111,8 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifMediaSequenceAudio(MediaRepresentation $media, $values): array
     {
+        [$derivativeUrl, $derivativeMediaType] = $this->derivativeFile($media, 'audio');
+
         $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:Sound';
@@ -1127,8 +1132,8 @@ class IiifManifest2 extends AbstractHelper
         // may be converted to multiple format: high and low
         // resolution, webm…
         $mseRendering = [];
-        $mseRendering['@id'] = $media->originalUrl();
-        $mseRendering['format'] = $media->mediaType();
+        $mseRendering['@id'] = $derivativeUrl ?? $media->originalUrl();
+        $mseRendering['format'] = $derivativeMediaType ?? $media->mediaType();
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
@@ -1146,6 +1151,8 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifMediaSequenceVideo(MediaRepresentation $media, $values): array
     {
+        [$derivativeUrl, $derivativeMediaType] = $this->derivativeFile($media, 'video');
+
         $mediaSequenceElement = [];
         $mediaSequenceElement['@id'] = $media->originalUrl() . '/element/e0';
         $mediaSequenceElement['@type'] = 'dctypes:MovingImage';
@@ -1161,12 +1168,9 @@ class IiifManifest2 extends AbstractHelper
 
         // Specific to media files.
         $mseRenderings = [];
-        // Only one rendering currently: the file itself, but it
-        // may be converted to multiple format: high and low
-        // resolution, webm…
         $mseRendering = [];
-        $mseRendering['@id'] = $media->originalUrl();
-        $mseRendering['format'] = $media->mediaType();
+        $mseRendering['@id'] = $derivativeUrl ?? $media->originalUrl();
+        $mseRendering['format'] = $derivativeMediaType ?? $media->mediaType();
         $mseRenderings[] = $mseRendering;
         $mediaSequenceElement['rendering'] = $mseRenderings;
 
@@ -1869,5 +1873,49 @@ class IiifManifest2 extends AbstractHelper
             '@type' => 'sc:AnnotationList',
             'label' => $this->view->translate('Annotations'), // @ŧranslate
         ];
+    }
+
+    /**
+     * Use derivative files for non-standard files (wmv, asf,  apple, etc.).
+     *
+     *  Requires the files available in media data, that are done through module
+     *  Derivative Media.
+     *
+     * @return array Array with derivative url and derivative media type.
+     */
+    protected function derivativeFile(MediaRepresentation $media, string $type): array
+    {
+        $derivatives = [
+            'audio' => [
+                'mp3' => 'audio/mpeg',
+                'ogg' => 'audio/ogg',
+            ],
+            'video' => [
+                'mp4' => 'video/mp4',
+                'webm' => 'video/webm',
+            ],
+        ];
+
+        $data = $media->mediaData();
+        $hasDerivative = isset($data['derivative']) && count($data['derivative']);
+        if (!$hasDerivative || !isset($derivatives[$type])) {
+            return [null, null];
+        }
+
+        $enabled = $this->setting->__invoke('derivativemedia_enable', []);
+        if (!in_array($type, $enabled)) {
+            return [null, null];
+        }
+
+        foreach ($derivatives[$type] as $folder => $mediaType) {
+            if (isset($data['derivative'][$folder])) {
+                $derivative = $data['derivative'][$folder];
+                $derivativeUrl = $this->baseUrlFiles . '/' . $folder . '/' . $derivative['filename'];
+                $derivativeMediaType = empty($derivative['type']) ? $mediaType : $derivative['type'];
+                return [$derivativeUrl, $derivativeMediaType];
+            }
+        }
+
+        return [null, null];
     }
 }
