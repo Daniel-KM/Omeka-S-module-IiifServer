@@ -577,6 +577,7 @@ return [
             'iiifserver_xml_image_match' => 'order',
             'iiifserver_xml_fix_mode' => 'no',
             'iiifserver_access_resource_skip' => false,
+            'iiifserver_access_ocr_skip' => false,
             // Urls.
             'iiifserver_url_version_add' => false,
             'iiifserver_identifier_clean' => true,

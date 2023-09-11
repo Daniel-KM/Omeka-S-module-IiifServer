@@ -51,6 +51,8 @@ trait TraitMediaRelated
     {
         static $relatedMedias = [];
         static $matchXmlImage;
+        /** @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent $isAllowedMediaContent */
+        static $isAllowedMediaContent;
 
         $mediaId = $media->id();
         if (array_key_exists($mediaId, $relatedMedias)) {
@@ -58,7 +60,19 @@ trait TraitMediaRelated
         }
 
         if ($matchXmlImage === null) {
-            $matchXmlImage = $media->getServiceLocator()->get('Omeka\Settings')->get('iiifserver_xml_image_match', 'order');
+            $services = $media->getServiceLocator();
+            $settings = $services->get('Omeka\Settings');
+            $matchXmlImage = $settings->get('iiifserver_xml_image_match', 'order');
+            $skipReservedXml = (bool) $settings->get('iiifserver_access_ocr_skip');
+            if ($skipReservedXml) {
+                $plugins = $services->get('ControllerPluginManager');
+                $isAllowedMediaContent = $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null;
+            }
+        }
+
+        if ($isAllowedMediaContent && !$isAllowedMediaContent($media)) {
+            $relatedMedias[$mediaId] = null;
+            return;
         }
 
         if ($matchXmlImage === 'basename') {
