@@ -72,7 +72,7 @@ trait TraitMediaRelated
 
         if ($isAllowedMediaContent && !$isAllowedMediaContent($media)) {
             $relatedMedias[$mediaId] = null;
-            return;
+            return null;
         }
 
         if ($matchXmlImage === 'basename') {
