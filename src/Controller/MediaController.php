@@ -88,7 +88,7 @@ class MediaController extends AbstractActionController
         $format = strtolower((string) $this->params('format'));
         if (pathinfo($media->filename(), PATHINFO_EXTENSION) != $format) {
             return $this->viewError(new Message(
-                'The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the requested format is not supported.' // @translate
+                'The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the requested format is not supported.' // @translate
             ), \Laminas\Http\Response::STATUS_CODE_500);
         }
 
@@ -144,23 +144,26 @@ class MediaController extends AbstractActionController
                     . DIRECTORY_SEPARATOR . $this->getStoragePath('original', $media->filename());
                 if (!file_exists($filepath) || filesize($filepath) == 0) {
                     return $this->viewError(new Message(
-                        'The IXIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.' // @translate
+                        'The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.' // @translate
                     ), \Laminas\Http\Response::STATUS_CODE_500);
                 }
                 break;
         }
         // TODO Check if the external url is not empty.
 
-        // Header for CORS, required for access of IXIF.
+        // Header for CORS, required for access of IIIF.
         if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
             $headers
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }
 
-        $headers
-            ->addHeaderLine('Content-Type', $media->mediaType());
-
         // TODO This is a local file (normal server): use 200.
+        // Partial content range (206) is managed by the server itself.
+
+        $headers
+            ->addHeaderLine('Content-Type', $media->mediaType())
+            // In most of the cases, the server support partial ranges.
+            ->addHeaderLine('Accept-Ranges: bytes');
 
         // Redirect (302/307) to the url of the file.
         $fileUrl = $media->originalUrl();
