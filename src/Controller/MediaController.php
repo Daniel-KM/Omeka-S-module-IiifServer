@@ -82,6 +82,7 @@ class MediaController extends AbstractActionController
         $response = $this->getResponse();
         $headers = $response->getHeaders();
 
+        // TODO Upgrade message for iiif v3: audio and video are allowed, not pdf.
         // Because there is no conversion currently, the format should be
         // checked.
         $format = strtolower((string) $this->params('format'));

@@ -85,6 +85,36 @@ config of the module :
 - disable the advanced option "Use the identifiers from Clean Url";
 - set the "Prefix to use for identifier".
 
+### CORS (Cross-Origin Resource Sharing)
+
+To be able to share manifests and contents with other IIIF servers, the server
+should allow CORS. The header is automatically set for manifests, but you may
+have to allow access for files via the config of the server.
+
+On Apache 2.4, the module "headers" should be enabled:
+
+```sh
+a2enmod headers
+systemctl restart apache2
+```
+
+Then, you have to add the following rules, adapted to your needs, to the file
+`.htaccess` at the root of Omeka S or in the main config of the server:
+
+```
+# CORS access for some files.
+<IfModule mod_headers.c>
+    Header setIfEmpty Access-Control-Allow-Origin "*"
+    Header setIfEmpty Access-Control-Allow-Headers "origin, x-requested-with, content-type"
+    Header setIfEmpty Access-Control-Allow-Methods "GET, POST"
+</IfModule>
+```
+
+It is recommended to use the main config of the server, for example  with the
+directive `<Directory>`.
+
+To fix Amazon cors issues, see the [aws documentation].
+
 ### Cache via module [Derivative Media]
 
 When your documents are big (more than 100 to 1000 pages, depending on your
