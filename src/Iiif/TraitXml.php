@@ -80,6 +80,9 @@ trait TraitXml
         return $this->loadXmlFromFilepath($filepath, $isPdf2Xml, $media->id());
     }
 
+    /**
+     * @see \IiifSearch\View\Helper\IiifSearch::loadXmlFromFilepath()
+     */
     protected function loadXmlFromFilepath(string $filepath, bool $isPdf2Xml = false, ?int $mediaId = null): ?SimpleXMLElement
     {
         $xmlContent = file_get_contents($filepath);
@@ -89,7 +92,7 @@ trait TraitXml
                 if ($isPdf2Xml) {
                     $xmlContent = $this->fixXmlPdf2Xml($xmlContent);
                 }
-                $xmlContent = $this->fixXmlDom($xmlContent);
+                $currentXml = $this->fixXmlDom($xmlContent);
             } elseif ($this->xmlFixMode === 'regex') {
                 $xmlContent = $this->fixUtf8->__invoke($xmlContent);
                 if ($isPdf2Xml) {
@@ -127,6 +130,9 @@ trait TraitXml
         return $currentXml;
     }
 
+    /**
+     * @see \IiifSearch\View\Helper\IiifSearch::fixXmlDom()
+     */
     protected function fixXmlDom(string $xmlContent): ?SimpleXMLElement
     {
         libxml_use_internal_errors(true);
@@ -141,11 +147,21 @@ trait TraitXml
         return $currentXml;
     }
 
+    /**
+     * @see \IiifSearch\View\Helper\IiifSearch::fixXmlPdf2Xml()
+     */
     protected function fixXmlPdf2Xml(string $xmlContent): string
     {
-        $xmlContent = preg_replace('/\s{2,}/ui', ' ', $xmlContent);
-        $xmlContent = preg_replace('/<\/?b>/ui', '', $xmlContent);
-        $xmlContent = preg_replace('/<\/?i>/ui', '', $xmlContent);
+        // When the content is not a valid unicode text, a null is output.
+        // Replace all series of spaces by a single space.
+        $xmlContent = preg_replace('~\s{2,}~S', ' ', $xmlContent) ?? $xmlContent;
+        // Remove bold and italic.
+        $xmlContent = preg_replace('~</?[bi]>~S', '', $xmlContent) ?? $xmlContent;
+        // Remove fontspecs, useless for search and sometime incorrect with old
+        // versions of pdftohtml. Exemple with pdftohtml 0.71 (debian 10):
+        // <fontspec id="^C
+        // <fontspec id=" " size="^P" family="PBPMTB+ArialUnicodeMS" color="#000000"/>
+        $xmlContent = preg_replace('~<fontspec id=".*\n~S', '', $xmlContent) ?? $xmlContent;
         $xmlContent = str_replace('<!doctype pdf2xml system "pdf2xml.dtd">', '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">', $xmlContent);
         return $xmlContent;
     }
