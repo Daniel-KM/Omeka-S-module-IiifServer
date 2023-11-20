@@ -29,6 +29,7 @@
 
 namespace IiifServer\Iiif;
 
+use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\ItemSetRepresentation;
 
@@ -111,19 +112,24 @@ class CollectionList extends AbstractType
     ];
 
     /**
-     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
-     */
-    protected $resources;
-
-    /**
-     * @var array
-     */
-    protected $options;
-
-    /**
      * @var \Omeka\View\Helper\Api
      */
     protected $api;
+
+    /**
+     * @var \IiifServer\View\Helper\IiifCleanIdentifiers
+     */
+    protected $iiifCleanIdentifiers;
+
+    /**
+     * @var \IiifServer\View\Helper\IiifUrl
+     */
+    protected $iiifUrl;
+
+    /**
+     * @var \IiifServer\View\Helper\PublicResourceUrl
+     */
+    protected $publicResourceUrl;
 
     /**
      * @var \Omeka\Settings\Settings
@@ -136,19 +142,14 @@ class CollectionList extends AbstractType
     protected $urlHelper;
 
     /**
-     * @var \IiifServer\View\Helper\IiifCleanIdentifiers
+     * @var array
      */
-    protected $IiifCleanIdentifiers;
+    protected $options;
 
     /**
-     * @var \IiifServer\View\Helper\IiifUrl
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
      */
-    protected $IiifUrl;
-
-    /**
-     * @var \IiifServer\View\Helper\PublicResourceUrl
-     */
-    protected $publicResourceUrl;
+    protected $resources;
 
     public function __construct(array $resources = null, array $options = null)
     {
@@ -156,9 +157,8 @@ class CollectionList extends AbstractType
         $this->options = $options;
     }
 
-    public function setServiceLocator($services): AbstractType
+    public function setServiceLocator(ServiceLocatorInterface $services): AbstractType
     {
-        $this->services = $services;
         $viewHelpers = $services->get('ViewHelperManager');
         $this->api = $viewHelpers->get('api');
         $this->settings = $services->get('Omeka\Settings');

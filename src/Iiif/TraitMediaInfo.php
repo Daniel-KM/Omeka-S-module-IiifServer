@@ -128,6 +128,7 @@ trait TraitMediaInfo
             'invalid' => [],
         ];
 
+        $result = [];
         $mediaIds = [];
         $medias = $this->resource->media();
         foreach ($medias as $media) {
