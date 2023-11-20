@@ -88,8 +88,6 @@ class IiifCollectionList2 extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        $this->setting = $this->view->getHelperPluginManager()->get('setting');
-
         // To init TraitRights requires services or a resource, so use vocabulary.
         // $this->initTraitRights();
         $this->settings = $this->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
@@ -99,10 +97,10 @@ class IiifCollectionList2 extends AbstractHelper
             $manifest['license'] = $license;
         }
 
-        $attribution = $this->view->setting('iiifserver_manifest_attribution_default');
+        $attribution = $this->settings->get('iiifserver_manifest_attribution_default');
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->view->setting('iiifserver_manifest_logo_default');
+        $manifest['logo'] = $this->settings->get('iiifserver_manifest_logo_default');
 
         /*
         // Omeka api is a service, but not referenced in https://iiif.io/api/annex/services.

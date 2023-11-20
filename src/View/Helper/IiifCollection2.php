@@ -86,7 +86,6 @@ class IiifCollection2 extends AbstractHelper
         ];
 
         $view = $this->getView();
-        $this->setting = $view->plugin('setting');
 
         $this->resource = $resource;
         $this->initTraitRights();
@@ -98,9 +97,9 @@ class IiifCollection2 extends AbstractHelper
         } else {
             // Use an item with multiple external manifests as a collection.
             $manifest['@id'] = $view->url('iiifserver/collection', ['id' => $resource->id(), 'version' => '2'], ['force_canonical' => true], true);
-            $forceUrlFrom = $this->setting->__invoke('iiifserver_url_force_from');
+            $forceUrlFrom = $this->settings->get('iiifserver_url_force_from');
             if ($forceUrlFrom && (strpos($manifest['@id'], $forceUrlFrom) === 0)) {
-                $forceUrlTo = $this->setting->__invoke('iiifserver_url_force_to');
+                $forceUrlTo = $this->settings->get('iiifserver_url_force_to');
                 $manifest['@id'] = substr_replace($manifest['@id'], $forceUrlTo, 0, strlen($forceUrlFrom));
             }
             $manifest['@type'] = 'sc:Collection';
@@ -110,7 +109,7 @@ class IiifCollection2 extends AbstractHelper
         $metadata = $this->iiifMetadata($resource);
         $manifest['metadata'] = $metadata;
 
-        $descriptionProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
+        $descriptionProperty = $this->settings->get('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
             $description = strip_tags((string) $resource->value($descriptionProperty, ['default' => '']));
         }
@@ -121,16 +120,16 @@ class IiifCollection2 extends AbstractHelper
             $manifest['license'] = $license;
         }
 
-        $attributionProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
+        $attributionProperty = $this->settings->get('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags((string) $resource->value($attributionProperty, ['default' => '']));
         }
         if (empty($attribution)) {
-            $attribution = $this->setting->__invoke('iiifserver_manifest_attribution_default');
+            $attribution = $this->settings->get('iiifserver_manifest_attribution_default');
         }
         $manifest['attribution'] = $attribution;
 
-        $manifest['logo'] = $this->setting->__invoke('iiifserver_manifest_logo_default');
+        $manifest['logo'] = $this->settings->get('iiifserver_manifest_logo_default');
 
         // TODO Use resource thumbnail (> Omeka 1.3).
         // $manifest['thumbnail'] = $thumbnail;
