@@ -231,6 +231,19 @@ trait TraitIiifType
         'ImageService3',
     ];
 
+    /**
+     * Contains protocols and profiles.
+     *
+     * @var array
+     */
+    protected $iiifProfileToTypes = [
+        'http://iiif.io/api/image' => 'Image',
+        // The context does not exsit for 1, but improve compatibility.
+        'http://iiif.io/api/image/1/context.json' => 'Image',
+        'http://iiif.io/api/image/2/context.json' => 'Image',
+        'http://iiif.io/api/image/3/context.json' => 'Image',
+    ];
+
     protected function initIiifType(): AbstractType
     {
         $this->type = null;
@@ -253,6 +266,22 @@ trait TraitIiifType
                 }
                 $this->type = $mediaData['@type'];
                 return $this;
+            }
+            if (isset($mediaData['protocol']) && isset($this->iiifProfileToTypes[$mediaData['protocol']])) {
+                $this->type = $this->iiifProfileToTypes[$mediaData['protocol']];
+                return $this;
+            }
+            if (isset($mediaData['@context'])) {
+                if (is_array($mediaData['@context'])) {
+                    $intersect = array_intersect_key($this->iiifProfileToTypes, array_flip($mediaData['@context']));
+                    if ($intersect) {
+                        $this->type = reset($intersect);
+                        return $this;
+                    }
+                } elseif (isset($this->iiifProfileToTypes[$mediaData['@context']])) {
+                    $this->type = $this->iiifProfileToTypes[$mediaData['@context']];
+                    return $this;
+                }
             }
             if (isset($mediaData['format'])) {
                 $mediaType = $mediaData['format'];
