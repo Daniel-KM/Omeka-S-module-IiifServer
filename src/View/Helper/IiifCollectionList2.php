@@ -90,7 +90,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         // To init TraitRights requires services or a resource, so use vocabulary.
         // $this->initTraitRights();
-        $this->settings = $this->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
+        $this->settings = $this->view->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
 
         $license = $this->rightsResource();
         if ($license) {
