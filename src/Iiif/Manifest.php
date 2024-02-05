@@ -125,7 +125,7 @@ class Manifest extends AbstractResourceType
     /**
      * @var array
      */
-    protected $services = [];
+    protected $service = [];
 
     /**
      * @var \IiifServer\Mvc\Controller\Plugin\RangeToArray
@@ -282,16 +282,45 @@ class Manifest extends AbstractResourceType
         return $renderings;
     }
 
+    /**
+     * Unlike "services", "service" lists the services that applies only to the
+     * current resource. The spec examples are limited to image service and to
+     * an extension service. Search and autocompletion is used too by libraries.
+     * Authentication services are used only as sub-servivces.
+     *
+     * The default list of services is:
+     * ImageService1: Image API version 1
+     * ImageService2: Image API version 2
+     * SearchService1: Search API version 1
+     * AutoCompleteService1: Search API version 1
+     * AuthCookieService1: Authentication API version 1
+     * AuthTokenService1: Authentication API version 1
+     * AuthLogoutService1: Authentication API version 1
+     *
+     * @see https://iiif.io/api/presentation/3.0/#service
+     */
+    public function service(): ?array
+    {
+        return $this->service;
+    }
+
+    /**
+     * Unlike "service", "services" is a shortcut to avoid to repeat the same
+     * list of services to all subsequent resources. The spec examples are
+     * limited to auth and token. The key does not exist in api v2.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#services
+     */
     public function services(): ?array
     {
-        return $this->services;
+        return null;
     }
 
     public function appendService(Service $service): AbstractType
     {
         // Normally, default services are already prepared.
-        $this->services = $this->services ?? [];
-        $this->services[] = $service;
+        $this->service ??= [];
+        $this->service[] = $service;
         return $this;
     }
 
