@@ -154,7 +154,7 @@ class ConfigForm extends Form
                         'none' => 'No mention', // @translate
                         'text' => 'Specified text below (only for iiif 2.0)', // @translate
                         'url' => 'Specified license below', // @translate
-                        'property' => 'Specified property below', // @translate
+                        'property' => 'Property specified below', // @translate
                         'property_or_text' => 'Property if any, else specified license text (only for iiif 2.0)', // @translate
                         'property_or_url' => 'Property if any, else specified license', // @translate
                     ],
@@ -185,6 +185,9 @@ class ConfigForm extends Form
                 'type' => Element\Select::class,
                 'options' => [
                     'label' => 'Uri of the license or rights', // @translate
+                    // TODO See https://iiif.io/api/presentation/3.0/#rights: uri are http but rendered as https.
+                    // It should be http:// rendered as https by clients, but
+                    // there is an example with https:// in https://iiif.io/api/presentation/3.0/#b-example-manifest-response.
                     'value_options' => [
                         '' => 'Uri below', // @translate
                         // CreativeCommons.
@@ -267,23 +270,21 @@ class ConfigForm extends Form
 
             ->add([
                 'name' => 'iiifserver_manifest_homepage',
-                'type' => Element\Select::class,
+                'type' => Element\MultiCheckbox::class,
                 'options' => [
-                    'label' => 'Resource link', // @translate
+                    'label' => 'Resource page', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
-                    'empty_option' => '',
                     'value_options' => [
                         'none' => 'No link', // @translate
-                        'site' => 'Homepage', // @translate
+                        'property' => 'Property specified below', // @translate
                         'resource' => 'Resource page', // @translate
-                        'property' => 'Specified property below', // @translate
                         'property_or_resource' => 'Property if any, else resource page', // @translate
-                        'property_and_resource' => 'Property if any, and resource page', // @translate
+                        'site' => 'Site home page (not recommended)', // @translate
+                        'api' => 'Api (not recommended)', // @translate
                     ],
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_homepage',
-                    'class' => 'chosen-select',
                 ],
             ])
             ->add([
