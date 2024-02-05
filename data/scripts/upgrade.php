@@ -262,3 +262,15 @@ if (version_compare($oldVersion, '3.6.14', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare($oldVersion, '3.6.17', '<')) {
+    $homepage = $settings->get('iiifserver_manifest_homepage', $defaultSettings['iiifserver_manifest_homepage']);
+    $settings->set('iiifserver_manifest_homepage', [$homepage]);
+
+    $settings->set('iiifserver_manifest_provider', $defaultSettings['iiifserver_manifest_provider']);
+
+    $message = new Message(
+        'A new option allows to set the provider.' // @translate
+    );
+    $messenger->addSuccess($message);
+}
