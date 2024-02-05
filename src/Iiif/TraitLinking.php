@@ -174,6 +174,20 @@ trait TraitLinking
         return array_values($output);
     }
 
+    public function provider(): ?array
+    {
+        $provider = $this->settings->get('iiifserver_manifest_provider_agent');
+        if (empty($provider)) {
+            return null;
+        }
+        $provider = json_decode($provider, true);
+        if (!$provider || !is_array($provider)) {
+            return null;
+        }
+        $providers = is_numeric(key($provider)) ? $provider : [$provider];
+        return $providers;
+    }
+
     /**
      * @todo Normalize logo().
      */

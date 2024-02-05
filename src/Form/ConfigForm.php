@@ -304,6 +304,19 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_provider_agent',
+                'type' => Element\Textarea::class,
+                'options' => [
+                    'label' => 'Provider (as json)', // @translate
+                    'info' => 'An organization or person that contributed to providing the content of the resource.', // @translate
+                    'documentation' => 'https://iiif.io/api/presentation/3.0/#provider',
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_provider_agent',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
@@ -513,7 +526,7 @@ class ConfigForm extends Form
                     'value_options' => [
                         'position' => 'Position in sequence', // @translate
                         'template' => 'Template title', // @translate
-                        'property' => 'Specified property below', // @translate
+                        'property' => 'Property specified below', // @translate
                         'source' => 'File name', // @translate
                         'template_or_source' => 'Template title, else file name', // @translate
                         'property_or_source' => 'Property if any, else file name', // @translate

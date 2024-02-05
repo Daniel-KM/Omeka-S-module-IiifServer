@@ -541,6 +541,7 @@ return [
                 'property_or_resource',
             ],
             'iiifserver_manifest_homepage_property' => '',
+            'iiifserver_manifest_provider_agent' => '',
             'iiifserver_manifest_seealso_property' => '',
             'iiifserver_manifest_start_property' => '',
             'iiifserver_manifest_start_primary_media' => false,
