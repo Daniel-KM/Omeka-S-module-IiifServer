@@ -176,16 +176,69 @@ trait TraitLinking
 
     public function provider(): ?array
     {
-        $provider = $this->settings->get('iiifserver_manifest_provider_agent');
-        if (empty($provider)) {
+        $providers = $this->settings->get('iiifserver_manifest_provider', []);
+        if (empty($providers) || in_array('none', $providers)) {
             return null;
         }
-        $provider = json_decode($provider, true);
-        if (!$provider || !is_array($provider)) {
-            return null;
+
+        $providersAll = array_fill_keys($providers, true);
+
+        $onlyPropertyOrAgent = isset($providersAll['property_or_agent']);
+        if ($onlyPropertyOrAgent) {
+            $providersAll['property'] ??= false;
+            $providersAll['agent'] ??= false;
+            unset($providersAll['property_or_agent']);
         }
-        $providers = is_numeric(key($provider)) ? $provider : [$provider];
-        return $providers;
+
+        $output = [];
+        foreach (array_keys($providersAll) as $provider) {
+            $agent = null;
+            switch ($provider) {
+                default:
+                    continue 2;
+                case 'none':
+                    return null;
+                case 'property':
+                    $property = $this->settings->get('iiifserver_manifest_provider_property');
+                    if (!$property) {
+                        continue 2;
+                    }
+                    /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+                    $values = $this->resource->value($property, ['all' => true]);
+                    if ($values) {
+                        foreach ($values as $value) {
+                            if (!$value->uri() && !$value->valueResource()) {
+                                $agent = $value->value();
+                                break;
+                            }
+                        }
+                    }
+                    if ($agent) {
+                        $provider = json_decode($agent, true);
+                        if ($provider && is_array($provider)) {
+                            $output['property'] = $provider;
+                        }
+                    }
+                    break;
+                case 'agent':
+                    $provider = $this->settings->get('iiifserver_manifest_provider_agent');
+                    if ($provider) {
+                        $provider = json_decode($provider, true);
+                        if ($provider && is_array($provider)) {
+                            $output['agent'] = $provider;
+                        }
+                    }
+                    break;
+            }
+        }
+
+        if ($onlyPropertyOrAgent
+            && (!empty($output['property']) && !empty($output['agent']) && !$providersAll['agent'])
+        ) {
+            unset($output['agent']);
+        }
+
+        return array_values($output);
     }
 
     /**

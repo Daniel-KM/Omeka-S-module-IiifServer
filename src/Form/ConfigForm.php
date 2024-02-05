@@ -304,12 +304,43 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_provider',
+                'type' => Element\MultiCheckbox::class,
+                'options' => [
+                    'label' => 'Provider', // @translate
+                    'info' => 'An organization or person that contributed to providing the content of the resource. The address, web site, logo, etc. can be appended.', // @translate
+                    'documentation' => 'https://iiif.io/api/presentation/3.0/#provider',
+                    'value_options' => [
+                        'none' => 'None', // @translate
+                        'property' => 'Property specified below', // @translate
+                        'agent' => 'Agent specified below', // @translate
+                        'property_or_agent' => 'Property if any, else agent', // @translate
+                        // TODO Add a resource (and a value resource).
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_provider',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_provider_property',
+                'type' => OmekaElement\PropertySelect::class,
+                'options' => [
+                    'label' => 'Property for provider', // @translate
+                    'empty_option' => '',
+                    'term_as_value' => true,
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_provider_property',
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+            ->add([
                 'name' => 'iiifserver_manifest_provider_agent',
                 'type' => Element\Textarea::class,
                 'options' => [
                     'label' => 'Provider (as json)', // @translate
-                    'info' => 'An organization or person that contributed to providing the content of the resource.', // @translate
-                    'documentation' => 'https://iiif.io/api/presentation/3.0/#provider',
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_provider_agent',
@@ -1034,6 +1065,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_homepage_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_provider',
                 'required' => false,
             ])
             ->add([
