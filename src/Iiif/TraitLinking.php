@@ -235,7 +235,7 @@ trait TraitLinking
         $output[] = [
             'id' => $this->resource->apiUrl(),
             'type' => 'Dataset',
-            'label' => ['none' => ['application/ld+json']],
+            'label' => ['none' => ['Api rest json-ld']],
             'format' => 'application/ld+json',
             'profile' => $this->urlHelper->__invoke('api-context', [], ['force_canonical' => true]),
         ];
