@@ -112,9 +112,9 @@ class PresentationController extends AbstractActionController
         $toCache = false;
 
         $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache_derivativemedia', false);
-        if ($useCache && $viewHelpers->has('hasDerivative')) {
+        if ($useCache && $viewHelpers->has('derivativeList')) {
             $type = 'iiif-' . (int) $version;
-            $derivative = $viewHelpers->get('hasDerivative')->__invoke($resource, $type);
+            $derivative = $viewHelpers->get('derivativeList')->__invoke($resource, ['type' => $type]);
             if ($derivative) {
                 $config = $resource->getServiceLocator()->get('Config');
                 $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');

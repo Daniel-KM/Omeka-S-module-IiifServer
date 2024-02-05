@@ -1885,6 +1885,8 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function derivativeFile(MediaRepresentation $media, string $type): array
     {
+        // TODO Use view helper DerivativeList.
+
         $derivatives = [
             'audio' => [
                 'mp3' => 'audio/mpeg',
