@@ -542,6 +542,7 @@ return [
             ],
             'iiifserver_manifest_homepage_property' => '',
             'iiifserver_manifest_provider' => [
+                'simple',
             ],
             'iiifserver_manifest_provider_property' => '',
             'iiifserver_manifest_provider_agent' => '',

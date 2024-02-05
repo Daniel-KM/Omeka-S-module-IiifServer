@@ -314,7 +314,9 @@ class ConfigForm extends Form
                         'none' => 'None', // @translate
                         'property' => 'Property specified below', // @translate
                         'agent' => 'Agent specified below', // @translate
+                        'simple' => 'Simple data from main parameters', // @translate
                         'property_or_agent' => 'Property if any, else agent', // @translate
+                        'property_or_simple' => 'Property if any, else simple', // @translate
                         // TODO Add a resource (and a value resource).
                     ],
                 ],

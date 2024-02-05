@@ -190,6 +190,13 @@ trait TraitLinking
             unset($providersAll['property_or_agent']);
         }
 
+        $onlyPropertyOrSimple = isset($providersAll['property_or_simple']);
+        if ($onlyPropertyOrAgent) {
+            $providersAll['property'] ??= false;
+            $providersAll['simple'] ??= false;
+            unset($providersAll['property_or_simple']);
+        }
+
         $output = [];
         foreach (array_keys($providersAll) as $provider) {
             $agent = null;
@@ -229,6 +236,17 @@ trait TraitLinking
                         }
                     }
                     break;
+                case 'simple':
+                    $output['simple'] = [
+                        'id' => $this->urlHelper->__invoke('top', [], ['force_canonical' => true]),
+                        'type' => 'Agent',
+                        'label' => new ValueLanguage([], false, $this->settings->get('installation_title')),
+                    ];
+                    $logo = $this->logo();
+                    if ($logo) {
+                        $output['simple']['logo'] = $logo;
+                    }
+                    break;
             }
         }
 
@@ -236,6 +254,12 @@ trait TraitLinking
             && (!empty($output['property']) && !empty($output['agent']) && !$providersAll['agent'])
         ) {
             unset($output['agent']);
+        }
+
+        if ($onlyPropertyOrSimple
+            && (!empty($output['property']) && !empty($output['simple']) && !$providersAll['simple'])
+        ) {
+            unset($output['simple']);
         }
 
         return array_values($output);
