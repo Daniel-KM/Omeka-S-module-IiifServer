@@ -88,7 +88,7 @@ config of the module :
 ### CORS (Cross-Origin Resource Sharing)
 
 To be able to share manifests and contents with other IIIF servers, the server
-should allow CORS. The header is automatically set for manifests, but you may
+should allow [CORS]. The header is automatically set for manifests, but you may
 have to allow access for files via the config of the server.
 
 On Apache 2.4, the module "headers" should be enabled:
@@ -801,6 +801,8 @@ format.
 [Guest]: https://gitlab.com/Daniel-KM/Omeka-S-module-Guest
 [it doesn't allow the url encoded `/`]: https://stackoverflow.com/questions/13834007/url-with-encoded-slashes-goes-to-404/13839424#13839424
 [url encoded slashes]: https://iiif.io/api/image/3.0/#9-uri-encoding-and-decoding
+[CORS]: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+[aws documentation]: https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
