@@ -57,19 +57,6 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         return include $this->modulePath() . '/config/module.config.php';
     }
 
-    public function onBootstrap(MvcEvent $event): void
-    {
-        parent::onBootstrap($event);
-
-        // Check last version of modules.
-        $sharedEventManager = $this->getServiceLocator()->get('SharedEventManager');
-        $sharedEventManager->attach(
-            'Omeka\Controller\Admin\Module',
-            'view.browse.after',
-            [$this, 'checkAddonVersions']
-        );
-    }
-
     public function install(ServiceLocatorInterface $services): void
     {
         $this->setServiceLocator($services);
@@ -201,26 +188,6 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         }
         $installResources->deleteAllResources(static::NAMESPACE);
         return $this;
-    }
-
-    public function checkAddonVersions(Event $event): void
-    {
-        global $globalCheckAddonVersions;
-
-        if ($globalCheckAddonVersions) {
-            return;
-        }
-        $globalCheckAddonVersions = true;
-
-        $view = $event->getTarget();
-        $hasGenericAsset = basename(dirname(__DIR__)) === 'modules' || file_exists(dirname(__DIR__, 3) . '/Generic/asset/js/check-versions.js');
-        $asset = $hasGenericAsset
-            ? $view->assetUrl('../../Generic/asset/js/check-versions.js', static::NAMESPACE)
-            // Use a cdn to avoid issues with different versions in modules.
-            // Of course, it's simpler to have an up-to-date Generic module.
-            : 'https://cdn.jsdelivr.net/gh/Daniel-KM/Omeka-S-module-Generic@3.3.35/asset/js/check-versions.js';
-        $view->headScript()
-            ->appendFile($asset, 'text/javascript', ['defer' => 'defer']);
     }
 
     public function getConfigForm(PhpRenderer $renderer)
