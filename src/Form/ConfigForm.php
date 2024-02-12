@@ -1074,6 +1074,10 @@ class ConfigForm extends Form
                 'required' => false,
             ])
             ->add([
+                'name' => 'iiifserver_manifest_provider_property',
+                'required' => false,
+            ])
+            ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
                 'required' => false,
             ])
