@@ -37,6 +37,7 @@ if (!class_exists(\Common\TraitModule::class)) {
 use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
 use IiifServer\Form\ConfigForm;
+use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
@@ -88,6 +89,15 @@ class Module extends AbstractModule
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
+        // Check the optional module Derivative Media for incompatibility.
+        if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Derivative Media', '3.4.10'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
@@ -124,6 +134,7 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
+        // TODO Update manifests on media update.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
@@ -184,15 +195,28 @@ class Module extends AbstractModule
 
         $this->normalizeMediaApiSettings($params);
 
-        if (empty($params['fieldset_dimensions']['process_dimensions'])) {
+        if (empty($params['fieldset_cache']['process_cache'])
+            && empty($params['fieldset_dimensions']['process_dimensions'])
+        ) {
             return true;
         }
 
         $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
 
-        $params = ['query' => $params['fieldset_dimensions']['query'] ?: null];
-        $job = $dispatcher->dispatch(\IiifServer\Job\MediaDimensions::class, $params);
-        $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
+        if (!empty($params['fieldset_cache']['process_cache'])) {
+            $query = [];
+            parse_str($params['fieldset_cache']['query_cache'] ?? '', $query);
+            $args = ['query' => $query ?: []];
+            $job = $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
+            $message = 'Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
+        } elseif (!empty($params['fieldset_dimensions']['process_dimensions'])) {
+            $query = [];
+            parse_str($params['fieldset_dimensions']['query'] ?? '', $query);
+            $args = ['query' => $query ?: []];
+            $job = $dispatcher->dispatch(\IiifServer\Job\MediaDimensions::class, $args);
+            $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
+        }
+
         $message = new PsrMessage(
             $message,
             [
@@ -209,6 +233,55 @@ class Module extends AbstractModule
         $message->setEscapeHtml(false);
         $controller->messenger()->addSuccess($message);
         return true;
+    }
+
+    public function handleAfterSaveItem(Event $event): void
+    {
+        // Don't run creation of manifests during sizing during a batch edit of
+        // items, because it runs one job by item and it is slow.
+        // A batch process is always partial.
+        /** @var \Omeka\Api\Request $request */
+        $request = $event->getParam('request');
+        if ($request->getOption('isPartial')) {
+            return;
+        }
+
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        if (!$settings->get('iiifserver_manifest_cache')) {
+            return;
+        }
+
+        /** @var \Omeka\Entity\Item $item */
+        $item = $event->getParam('response')->getContent();
+        $args = [
+            'query' => ['id' => $item->getId()],
+        ];
+
+        /** @var \Omeka\Job\Dispatcher $dispatcher */
+        $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+        $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
+    }
+
+    public function handleAfterDeleteItem(Event $event): void
+    {
+        /** @var \Omeka\Api\Request $request */
+        $request = $event->getParam('request');
+        $itemId = $request->getId();
+        if (!$itemId) {
+            return;
+        }
+
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+
+        foreach ([2, 3] as $version) {
+            $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
+            if (file_exists($filepath) && is_writeable($filepath)) {
+                @unlink($filepath);
+            }
+        }
     }
 
     /**

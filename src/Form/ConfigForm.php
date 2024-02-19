@@ -1025,6 +1025,39 @@ class ConfigForm extends Form
             ])
         ;
 
+        $this
+            ->add([
+                'name' => 'fieldset_cache',
+                'type' => Fieldset::class,
+                'options' => [
+                    'label' => 'Cache manifests', // @translate
+                ],
+            ]);
+        $fieldset = $this->get('fieldset_cache');
+        $fieldset
+            ->add([
+                'name' => 'query_cache',
+                'type' => Element\Text::class,
+                'options' => [
+                    'label' => 'Query to filter items to cache', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'query_cache',
+                ],
+            ])
+            ->add([
+                'name' => 'process_cache',
+                'type' => Element\Submit::class,
+                'options' => [
+                    'label' => 'Cache selected item manifests in background', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'process_cache',
+                    'value' => 'Process', // @translate
+                ],
+            ])
+        ;
+
         // Available in module Derivative Media.
         $this
             ->add([
