@@ -245,7 +245,12 @@ trait IiifServerControllerTrait
                     ? substr($id, 0, strlen($id) - $lengthExtension - 1)
                     : $id;
                 try {
-                    return $this->api()->read('media', ['storageId' => $storageId, 'extension' => $extension])->getContent();
+                    // Don't check the extension in order to allow complex
+                    // cases, in particular when there is an external image
+                    // server that doesn't manage other media types, or when the
+                    // extension is missing or duplicated.
+                    // Anyway, storage_id is unique.
+                    return $this->api()->read('media', ['storageId' => $storageId])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                     return null;
                 }

@@ -112,11 +112,20 @@ class IiifMediaUrl extends AbstractHelper
             $id = $resource->id();
         }
 
-        if ($this->mediaIdentifier === 'storage_id' || $this->mediaIdentifier === 'filename') {
-            $identifier = $this->mediaIdentifier === 'storage_id'
-                ? $resource->storageId()
-                : $resource->filename();
+        if ($this->mediaIdentifier === 'storage_id') {
+            $identifier = $resource->storageId();
             $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
+        } elseif ($this->mediaIdentifier === 'filename') {
+            $identifier = $resource->filename();
+            if ($identifier) {
+                $identifier = str_replace('/', '%2F', $identifier);
+                $extension = pathinfo($identifier, PATHINFO_EXTENSION);
+                if ($extension) {
+                    $identifier = mb_substr($identifier, 0, - mb_strlen($extension) - 1);
+                }
+            } else {
+                $identifier = $id;
+            }
         } elseif ($this->mediaIdentifier === 'media_id') {
             $identifier = $id;
         } else {

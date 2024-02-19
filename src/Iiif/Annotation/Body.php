@@ -166,8 +166,7 @@ class Body extends AbstractResourceType
 
         if ($this->contentResource->isAudioVideo()) {
             // TODO Manage iiif 3 audio video.
-            $imageUrl = $this->iiifMediaUrl;
-            return $imageUrl($this->resource, 'mediaserver/media', $this->imageApiVersion, [
+            return $this->iiifMediaUrl->__invoke($this->resource, 'mediaserver/media', $this->imageApiVersion, [
                 'format' => $this->resource->extension(),
             ]);
         }
