@@ -42,6 +42,7 @@ use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
+use Omeka\Entity\Item;
 use Omeka\Module\AbstractModule;
 
 class Module extends AbstractModule
@@ -134,6 +135,13 @@ class Module extends AbstractModule
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
+        // Update dimensions of medias on item save.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.hydrate.post',
+            [$this, 'handleBeforeSaveItem']
+        );
+
         // TODO Update manifests on media update.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
@@ -233,6 +241,28 @@ class Module extends AbstractModule
         $message->setEscapeHtml(false);
         $controller->messenger()->addSuccess($message);
         return true;
+    }
+
+    public function handleBeforeSaveItem(Event $event): void
+    {
+        /** @var \Omeka\Api\Request $request */
+        $request = $event->getParam('request');
+
+        // Don't run sizing during a batch edit of items, because it runs one
+        // job by item and it is slow. A batch process is always partial.
+        if ($request->getOption('isPartial')) {
+            return;
+        }
+
+        /** @var \Omeka\Api\Adapter\ItemAdapter $itemAdapter */
+        $itemAdapter = $event->getTarget();
+        if (!$itemAdapter->shouldHydrate($request, 'o:media')) {
+            return;
+        }
+
+        /** @var \Omeka\Entity\Item $item */
+        $item = $event->getParam('entity');
+        $this->prepareSizeItem($item);
     }
 
     public function handleAfterSaveItem(Event $event): void
@@ -357,5 +387,75 @@ class Module extends AbstractModule
             'ktx2',
         ])));
         $settings->set('extension_whitelist', $whitelist);
+    }
+
+    /**
+     * Only unsized medias are dimensionned.
+     *
+     * @see \IiifServer\Module::prepareSizeItem()
+     * @see \IiifServer\Job\MediaDimensions::prepareSize()
+     */
+    protected function prepareSizeItem(Item $item): void
+    {
+        $medias = $item->getMedia();
+        if (!$medias->count()) {
+            return;
+        }
+
+        /** @var \IiifServer\Mvc\Controller\Plugin\MediaDimension $mediaDimension */
+        $services = $this->getServiceLocator();
+        $imageTypes = array_keys($services->get('Config')['thumbnails']['types']);
+        $mediaDimension = $services->get('ControllerPluginManager')->get('mediaDimension');
+
+        /** @var \Omeka\Entity\Media $media */
+        foreach ($medias as $media) {
+            $mainMediaType = strtok((string) $media->getMediaType(), '/');
+            if (!in_array($mainMediaType, ['image', 'audio', 'video'])) {
+                continue;
+            }
+
+            // Keep possible data added by another module.
+            $mediaData = $media->getData() ?: [];
+
+            // Don't redo sizing here.
+            if (($mainMediaType === 'image' && !empty($mediaData['dimensions']['large']['width']))
+                || ($mainMediaType === 'audio' && !empty($mediaData['dimensions']['original']['duration']))
+                || ($mainMediaType === 'video' && !empty($mediaData['dimensions']['original']['duration']))
+            ) {
+                continue;
+            }
+
+            // Reset dimensions to make the sizer working.
+            // TODO In rare cases, the original file is removed once the thumbnails are built.
+            $mediaData['dimensions'] = [];
+            $media->setData($mediaData);
+
+            $failedTypes = [];
+            foreach ($mainMediaType === 'image' ? $imageTypes : ['original'] as $imageType) {
+                $result = $mediaDimension->__invoke($media, $imageType);
+                $result = array_filter($result);
+                if (!$result) {
+                    $failedTypes[] = $imageType;
+                }
+                // Store the dimensions in all cases (empty array), to know that
+                // the dimensions were processed.
+                $mediaData['dimensions'][$imageType] = $result;
+            }
+
+            if (count($failedTypes)) {
+                $this->logger->err(
+                    'Item #{item_id} / media #{media_id}: Error getting dimensions for types "{types}".', // @translate
+                    [
+                        'item_id' => $item->getId(),
+                        'media_id' => $media->getId(),
+                        'types' => implode('", "', $failedTypes),
+                    ]
+                );
+            }
+
+            $media->setData($mediaData);
+        }
+
+        // No flush.
     }
 }
