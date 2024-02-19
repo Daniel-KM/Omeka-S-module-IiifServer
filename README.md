@@ -30,18 +30,23 @@ Installation
 
 ### Module
 
-Installation can be done:
+See general end user documentation for [installing a module].
+
+The module [Common] must be installed first.
+
+The module uses external libraries, so use the release zip to install it, or
+use and init the source.
 
 * From the zip
 
 Download the last release [IiifServer.zip] from the list of releases (the
-master does not contain the dependencies), uncompress it in the `modules`
-directory, and rename the module folder `IiifServer`.
+master does not contain the dependency), and uncompress it in the `modules`
+directory.
 
-* From the source and for development:
+* From the source and for development
 
-If the module was installed from the source, check if the name of the folder of
-the module is `IiifServer`, go to the root of the module, and run:
+If the module was installed from the source, rename the name of the folder of
+the module to `IiifServer`, go to the root of the module, and run:
 
 ```sh
 composer install --no-dev
@@ -794,6 +799,8 @@ format.
 [GD]: https://secure.php.net/manual/en/book.image.php
 [Imagick]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
+[Installing a module]: https://omeka.org/s/docs/user-manual/modules
+[Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [IiifServer.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
 [structures]: https://iiif.io/api/presentation/3.0/#54-range
 [DataType Rdf]: https://gitlab.com/Daniel-KM/Omeka-S-module-DataTypeRdf
