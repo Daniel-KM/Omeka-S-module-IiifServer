@@ -81,14 +81,18 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_cache_derivativemedia',
-                'type' => Element\Checkbox::class,
+                'name' => 'iiifserver_manifest_cache',
+                'type' => CommonElement\OptionalRadio::class,
                 'options' => [
-                    'label' => 'Cache manifests for instant access (require module Derivative Media)', // @translate
+                    'label' => 'Cache', // @translate
                     'info' => 'A cache may be required when there are more than 100 to 1000 media, depending on server, or when there are many visitors.', // @translate
+                    'value_options' => [
+                        '1' => 'Cache manifest for instant access', // @translate'
+                        '0' => 'Create manifest in real time', // @translate'
+                    ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_cache_derivativemedia',
+                    'id' => 'iiifserver_manifest_cache',
                 ],
             ])
 

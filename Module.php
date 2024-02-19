@@ -37,6 +37,7 @@ if (!class_exists(\Common\TraitModule::class)) {
 use Common\Stdlib\PsrMessage;
 use Common\TraitModule;
 use IiifServer\Form\ConfigForm;
+use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
@@ -77,6 +78,7 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $plugins = $services->get('ControllerPluginManager');
         $translate = $plugins->get('translate');
+        $translator = $services->get('MvcTranslator');
 
         if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
             $message = new \Omeka\Stdlib\Message(
@@ -85,11 +87,58 @@ class Module extends AbstractModule
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
+
+        $config = $services->get('Config');
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+
+        if (!$this->checkDestinationDir($basePath . '/iiif/2')) {
+            $message = new PsrMessage(
+                'The directory "{directory}" is not writeable.', // @translate
+                ['directory' => $basePath . '/iiif']
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
+        }
+
+        if (!$this->checkDestinationDir($basePath . '/iiif/3')) {
+            $message = new PsrMessage(
+                'The directory "{directory}" is not writeable.', // @translate
+                ['directory' => $basePath . '/iiif']
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
+        }
     }
 
     protected function postInstall(): void
     {
         $this->updateWhitelist();
+    }
+
+    protected function postUninstall(): void
+    {
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
+        $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $dirPath = $basePath . '/iiif';
+        $this->rmDir($dirPath);
+    }
+
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
+    {
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.create.post',
+            [$this, 'handleAfterSaveItem']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.update.post',
+            [$this, 'handleAfterSaveItem']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ItemAdapter::class,
+            'api.delete.post',
+            [$this, 'handleAfterDeleteItem']
+        );
     }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -165,6 +214,7 @@ class Module extends AbstractModule
     /**
      * Same in Iiif server and Image server.
      *
+     * @see \IiifServer\Module::normalizeMediaApiSettings()
      * @see \ImageServer\Module::normalizeMediaApiSettings()
      */
     protected function normalizeMediaApiSettings(array $params): void
