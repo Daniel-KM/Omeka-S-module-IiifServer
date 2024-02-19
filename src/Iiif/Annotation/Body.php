@@ -254,7 +254,7 @@ class Body extends AbstractResourceType
             : null;
     }
 
-    public function duration(): ?string
+    public function duration(): ?float
     {
         return method_exists($this->contentResource, 'duration')
             ? $this->contentResource->duration()

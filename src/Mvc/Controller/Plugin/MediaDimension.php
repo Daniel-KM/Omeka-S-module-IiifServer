@@ -208,9 +208,14 @@ class MediaDimension extends AbstractPlugin
         $getId3 = new GetId3();
         $data = $getId3->analyze($filepath);
         $data = $this->fixOggDuration($data);
+        // In IIIF, the width and height should be positive integer and duration
+        // should be a positive float.
+        // In a previous version, a string was used instead of the float to
+        // avoid the modification of the value during json conversion, but this
+        // is an event that doesn't occur.
         $width = empty($data['video']['resolution_x']) ? null : (int) $data['video']['resolution_x'];
         $height = !$width || empty($data['video']['resolution_y']) ? null : (int) $data['video']['resolution_y'];
-        $duration = empty($data['playtime_seconds']) ? null : (string) $data['playtime_seconds'];
+        $duration = empty($data['playtime_seconds']) ? null : (float) $data['playtime_seconds'];
 
         return [
             'width' => $width,

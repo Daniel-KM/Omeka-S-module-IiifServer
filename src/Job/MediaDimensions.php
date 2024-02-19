@@ -181,6 +181,10 @@ class MediaDimensions extends AbstractJob
         array_unshift($this->imageTypes, 'original');
     }
 
+    /**
+     * @see \IiifServer\Module::prepareSizeItem()
+     * @see \IiifServer\Job\MediaDimensions::prepareSize()
+     */
     protected function prepareSize(MediaRepresentation $media): void
     {
         $mainMediaType = strtok((string) $media->mediaType(), '/');

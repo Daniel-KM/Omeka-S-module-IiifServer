@@ -289,7 +289,7 @@ class Canvas extends AbstractResourceType
         return $this->canvasDimensions()['width'];
     }
 
-    public function duration(): ?string
+    public function duration(): ?float
     {
         return $this->canvasDimensions()['duration'];
     }
@@ -300,7 +300,9 @@ class Canvas extends AbstractResourceType
             $heights = [0];
             $widths = [0];
             $durations = [0];
+            /** @var \IiifServer\Iiif\AnnotationPage $item */
             foreach ($this->items() as $item) {
+                /** @var \IiifServer\Iiif\Annotation $itemItem */
                 foreach ($item->items() as $itemItem) {
                     if ($itemItem->motivation() !== 'painting') {
                         continue;

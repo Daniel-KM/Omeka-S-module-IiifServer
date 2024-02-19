@@ -149,9 +149,10 @@ trait TraitMedia
     }
 
     /**
-     * Duration is a string, because the format is not defined: time, seconds, or float.
+     * In a previous version, duration was a string, because the format was not
+     * defined: time, seconds, or float. Now, it is always a float.
      */
-    public function duration(): ?string
+    public function duration(): ?float
     {
         return $this->mediaDimension()['duration'];
     }
@@ -243,10 +244,10 @@ trait TraitMedia
     protected function mediaDimension(): array
     {
         if (!array_key_exists('media_dimension', $this->_storage)) {
-            $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
             /** @var ?\Omeka\Api\Representation\MediaRepresentation $media */
             $media = $this->resource->primaryMedia();
             if (!$media) {
+                $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
                 return $this->_storage['media_dimension'];
             }
 
@@ -256,32 +257,22 @@ trait TraitMedia
                 case 'iiif':
                     // Currently, Omeka manages only images, but doesn't check.
                     $mediaData = $media->mediaData();
-                    if (isset($mediaData['width'])) {
-                        $this->_storage['media_dimension']['width'] = (int) $mediaData['width'];
-                    }
-                    if (isset($mediaData['height'])) {
-                        $this->_storage['media_dimension']['height'] = (int) $mediaData['height'];
-                    }
-                    if (isset($mediaData['duration'])) {
-                        $this->_storage['media_dimension']['duration'] = (string) $mediaData['duration'];
-                    }
+                    $this->_storage['media_dimension']['width'] = empty($mediaData['width']) ? null : (int) $mediaData['width'];
+                    $this->_storage['media_dimension']['height'] = empty($mediaData['height']) ? null : (int) $mediaData['height'];
+                    $this->_storage['media_dimension']['duration'] = empty($mediaData['duration']) ? null : (float) $mediaData['duration'];
                     return $this->_storage['media_dimension'];
                 // TODO Manage other type of media (youtube, etc.).
                 default:
                     break;
             }
 
-            // Manual check.
-            if ($this->isAudioVideo()) {
-                $this->_storage['media_dimension'] = $this->mediaDimension->__invoke($media);
-            } elseif ($this->isImage()) {
-                $this->_storage['media_dimension'] = $this->imageSize->__invoke($media);
-                $this->_storage['media_dimension']['duration'] = null;
-            }
-            // Data may be stored in a bad format.
-            $this->_storage['media_dimension']['width'] = $this->_storage['media_dimension']['width'] ? (int) $this->_storage['media_dimension']['width'] : null;
-            $this->_storage['media_dimension']['height'] = $this->_storage['media_dimension']['height'] ? (int) $this->_storage['media_dimension']['height'] : null;
-            $this->_storage['media_dimension']['duration'] = $this->_storage['media_dimension']['duration'] ? (string) $this->_storage['media_dimension']['duration'] : null;
+            // Manual check for files.
+            $this->_storage['media_dimension'] = $this->mediaDimension->__invoke($media) + ['width' => null, 'height' => null, 'duration' => null];
+            // Data may be stored in a old format.
+            // TODO Remove this check of media storage of dimensions: they should be good.
+            $this->_storage['media_dimension']['width'] = empty($this->_storage['media_dimension']['width']) ? null : (int) $this->_storage['media_dimension']['width'];
+            $this->_storage['media_dimension']['height'] = empty($this->_storage['media_dimension']['height']) ? null : (int) $this->_storage['media_dimension']['height'];
+            $this->_storage['media_dimension']['duration'] = empty($this->_storage['media_dimension']['duration']) ? null : (float) $this->_storage['media_dimension']['duration'];
         }
         return $this->_storage['media_dimension'];
     }
