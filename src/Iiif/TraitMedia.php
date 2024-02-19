@@ -49,6 +49,11 @@ trait TraitMedia
     protected $mediaDimension;
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * @var bool
      */
     protected $isMediaIiif;
@@ -108,6 +113,7 @@ trait TraitMedia
         $this->mediaDimension = $controllerPlugins->get('mediaDimension');
         $this->imageSize = $controllerPlugins->get('imageSize');
         $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
+        $this->settings = $services->get('Omeka\Settings');
         return $this;
     }
 
@@ -181,27 +187,36 @@ trait TraitMedia
         }
 
         $mediaType = $this->resource->mediaType();
-        if ($mediaType) {
-            if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
-                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
-                // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
-                if ($extension === 'json') {
-                    return 'model/vnd.threejs+json';
-                } elseif ($extension === 'gltf') {
-                    return 'model/gltf+json';
-                }
-            }
-            if ($mediaType === 'application/octet-stream') {
-                $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
-                if ($extension === 'glb') {
-                    return 'model/gltf-binary';
-                }
-            }
-            // TODO Don't use the original format for the image?
-            return $this->isImage() ? 'image/jpeg' : $mediaType;
+        if (!$mediaType) {
+            return null;
         }
 
-        return null;
+        if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
+            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
+            if ($extension === 'json') {
+                return 'model/vnd.threejs+json';
+            } elseif ($extension === 'gltf') {
+                return 'model/gltf+json';
+            }
+        }
+        if ($mediaType === 'application/octet-stream') {
+            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            if ($extension === 'glb') {
+                return 'model/gltf-binary';
+            }
+        }
+
+        // TODO Don't use the original format for the image?
+        if ($this->isImage()) {
+            return 'image/jpeg';
+        }
+
+        if ($mediaType === 'audio/mpeg' && $this->settings->get('iiifserver_media_api_fix_uv_mp3')) {
+            $mediaType = 'audio/mp4';
+        }
+
+        return $mediaType;
     }
 
     /**
