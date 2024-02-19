@@ -2,7 +2,7 @@
 
 namespace IiifServer;
 
-use Omeka\Stdlib\Message;
+use Common\Stdlib\PsrMessage;
 
 /**
  * @var Module $this
@@ -19,12 +19,21 @@ use Omeka\Stdlib\Message;
 $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
+$translate = $plugins->get('translate');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 $entityManager = $services->get('Omeka\EntityManager');
 
 $defaultConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 $defaultSettings = $defaultConfig['iiifserver']['config'];
+
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
+    $message = new \Omeka\Stdlib\Message(
+        $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+        'Common', '3.4.53'
+    );
+    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+}
 
 if (version_compare($oldVersion, '3.5.1', '<')) {
     $this->createTilesMainDir($services);
@@ -49,7 +58,6 @@ if (version_compare($oldVersion, '3.5.8', '<')) {
 
 if (version_compare($oldVersion, '3.5.9', '<')) {
     $moduleManager = $services->get('Omeka\ModuleManager');
-    $t = $services->get('MvcTranslator');
     $module = $moduleManager->getModule('ArchiveRepertory');
     if ($module) {
         $version = $module->getDb('version');
@@ -58,7 +66,7 @@ if (version_compare($oldVersion, '3.5.9', '<')) {
             // Nothing to do.
         } elseif (version_compare($version, '3.15.4', '<')) {
             throw new \Omeka\Module\Exception\ModuleCannotInstallException(
-                $t->translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).') // @translate
+                $translate('This version requires Archive Repertory 3.15.4 or greater (used for some 3D views).') // @translate
             );
         }
     }
@@ -89,11 +97,13 @@ if (version_compare($oldVersion, '3.5.14', '<')) {
 }
 
 if (version_compare($oldVersion, '3.6.0', '<')) {
-    $message = new Message(
-        'The module IIIF Server was split into two modules: %1$sIIIF Server%3$s, that creates iiif manifest, and %2$sImage Server%3$s, that provides the tiled images. In that way, it is simpler to use an external image server via core media "IIIF Image". The upgrade is automatic, but you need to install the two modules.', // @translate
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer" target="_blank" rel="noopener">',
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer" target="_blank" rel="noopener">',
-        '</a>'
+    $message = new PsrMessage(
+        'The module IIIF Server was split into two modules: {link_url}IIIF Server{link_end}, that creates iiif manifest, and {link_url_2}Image Server{link_end}, that provides the tiled images. In that way, it is simpler to use an external image server via core media "IIIF Image". The upgrade is automatic, but you need to install the two modules.', // @translate
+        [
+            'link_url' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer" target="_blank" rel="noopener">',
+            'link_url_2' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-ImageServer" target="_blank" rel="noopener">',
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
@@ -193,40 +203,44 @@ if (version_compare($oldVersion, '3.6.5.3', '<')) {
     );
     $settings->delete('iiifserver_manifest_image_api_disabled');
 
-    $message = new Message(
+    $message = new PsrMessage(
         'The module IIIF Server is now totally independant from the module Image Server and any other external image server can be used.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'Check the config of the image server, if any, in the config of this module.' // @translate
     );
     $messenger->addWarning($message);
-    $message = new Message(
-        'The module IIIF Server supports creation of structures through a table-of-contents-like value: see %sreadme%s.', // @translate
-        '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents" target="_blank" rel="noopener">',
-        '</a>'
+    $message = new PsrMessage(
+        'The module IIIF Server supports creation of structures through a table-of-contents-like value: see {link_url}readme{link_end}.', // @translate
+        [
+            'link_url' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents" target="_blank" rel="noopener">',
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
 }
 
 if (version_compare($oldVersion, '3.6.8.3', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'XML Alto is supported natively and it can be displayed as an overlay layer if your viewer supports it.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'The xml media-type should be a precise one: "application/alto+xml", not "text/xml" or "application/xml".', // @translate
     );
     $messenger->addWarning($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'New files are automatically managed, but you may need modules Bulk Edit or Easy Admin to fix old ones, if any.' // @translate
     );
     $messenger->addWarning($message);
-    $message = new Message(
-        'Badly formatted xml files may be fixed dynamically, but it will affect performance. See %1$sreadme%2$s.', // @translate
-        '<a href="https://github.com/symac/Omeka-S-module-IiifSearch">',
-        '</a>'
+    $message = new PsrMessage(
+        'Badly formatted xml files may be fixed dynamically, but it will affect performance. See {link_url}readme{link_end}.', // @translate
+        [
+            'link_url' => '<a href="https://github.com/symac/Omeka-S-module-IiifSearch">',
+            'link_end' => '</a>',
+        ]
     );
     $message->setEscapeHtml(false);
     $messenger->addWarning($message);
@@ -234,7 +248,7 @@ if (version_compare($oldVersion, '3.6.8.3', '<')) {
 
 if (version_compare($oldVersion, '3.6.10', '<')) {
     $settings->set('iiifserver_access_resource_skip', false);
-    $message = new Message(
+    $message = new PsrMessage(
         'An option allows to skip the rights managed by module Access Resource.' // @translate
     );
     $messenger->addSuccess($message);
@@ -246,18 +260,18 @@ if (version_compare($oldVersion, '3.6.13', '<')) {
         : 'no';
     $settings->delete('iiifserver_enable_utf8_fix');
     $settings->set('iiifserver_xml_fix_mode', $enableUtf8Fix);
-    $message = new Message(
+    $message = new PsrMessage(
         'A new option allows to fix bad xml and invalid utf-8 characters.' // @translate
     );
     $messenger->addSuccess($message);
 }
 
 if (version_compare($oldVersion, '3.6.14', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'A new option allows to cache manifests in order to delivrate them instantly.' // @translate
     );
     $messenger->addSuccess($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'A new resource block allows to display the iiif manifest link to copy in clipboard.' // @translate
     );
     $messenger->addSuccess($message);
@@ -265,12 +279,49 @@ if (version_compare($oldVersion, '3.6.14', '<')) {
 
 if (version_compare($oldVersion, '3.6.17', '<')) {
     $homepage = $settings->get('iiifserver_manifest_homepage', $defaultSettings['iiifserver_manifest_homepage']);
-    $settings->set('iiifserver_manifest_homepage', [$homepage]);
+    $settings->set('iiifserver_manifest_homepage', is_array($homepage) ? $homepage : [$homepage]);
 
     $settings->set('iiifserver_manifest_provider', $defaultSettings['iiifserver_manifest_provider']);
 
-    $message = new Message(
+    $message = new PsrMessage(
         'A new option allows to set the provider.' // @translate
     );
     $messenger->addSuccess($message);
+}
+
+if (version_compare($oldVersion, '3.6.18', '<')) {
+    // Check the optional module Derivative Media for incompatibility.
+    if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
+        $message = new \Omeka\Stdlib\Message(
+            $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+            'Derivative Media', '3.4.10'
+        );
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+    }
+
+    // Fix previous upgrade.
+    $homepage = $settings->get('iiifserver_manifest_homepage', $defaultSettings['iiifserver_manifest_homepage']);
+    $settings->set('iiifserver_manifest_homepage', is_array($homepage) ? $homepage : [$homepage]);
+
+    $message = new PsrMessage(
+        'A new option allows to limit the files types to download.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    $settings->set('iiifserver_manifest_cache', true);
+    $settings->delete('iiifserver_manifest_cache_derivativemedia', true);
+
+    $message = new PsrMessage(
+        'A new option allows to cache the manifests on save. It is set on, but may be disabled in settings. A job was launched to create all manifests.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    $hasUniversalViewer = $this->checkModuleActiveVersion('UniversalViewer', '3.6.8');
+    $settings->set('iiifserver_media_api_fix_uv_mp3', $hasUniversalViewer);
+    if ($hasUniversalViewer) {
+        $message = new PsrMessage(
+            'A new option allows to fix playing mp3 with Universal Viewer v4.' // @translate
+        );
+        $messenger->addSuccess($message);
+    }
 }
