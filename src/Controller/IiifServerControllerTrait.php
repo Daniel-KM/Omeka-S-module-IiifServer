@@ -277,11 +277,13 @@ trait IiifServerControllerTrait
         ) {
             return '3';
         }
+
         if (strpos($accept, 'iiif.io/api/presentation/2/context.json')
             || strpos($accept, 'iiif.io/api/image/2/context.json')
         ) {
             return '2';
         }
+
         return null;
     }
 
@@ -304,6 +306,7 @@ trait IiifServerControllerTrait
         } else {
             $this->requestedApiVersion = $this->settings()->get('iiifserver_media_api_default_version', '2') ?: '2';
         }
+
         return $this->requestedApiVersion;
     }
 
