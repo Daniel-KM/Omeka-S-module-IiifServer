@@ -454,7 +454,7 @@ trait TraitLinking
                 }
             } else {
                 $sites = $api->search('sites', ['limit' => 1, 'sort_by' => 'id'])->getContent();
-                $this->_storage['site'] = reset($sites) ?: null;
+                $this->_storage['site'] = $sites ? reset($sites) : null;
             }
         }
         return $this->_storage['site'];
