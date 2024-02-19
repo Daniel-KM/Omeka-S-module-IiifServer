@@ -43,7 +43,7 @@ class NoopServerController extends AbstractActionController
     protected $routeInfo = 'imageserver/info';
 
     public function __construct(
-        Translator $translator,
+        Translator $translator
     ) {
         $this->translator = $translator;
     }

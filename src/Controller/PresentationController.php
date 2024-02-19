@@ -40,7 +40,7 @@ class PresentationController extends AbstractActionController
     use IiifServerControllerTrait;
 
     public function __construct(
-        Translator $translator,
+        Translator $translator
     ) {
         $this->translator = $translator;
     }
