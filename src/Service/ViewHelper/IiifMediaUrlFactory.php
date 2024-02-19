@@ -16,14 +16,14 @@ class IiifMediaUrlFactory implements FactoryInterface
         return new IiifMediaUrl(
             $urlHelper,
             $helpers->get('iiifCleanIdentifiers'),
-            $urlHelper('top', [], ['force_canonical' => true]),
+            $helpers->get('ServerUrl')($helpers->get('BasePath')()),
             $settings->get('iiifserver_media_api_url', ''),
             $settings->get('iiifserver_media_api_default_version', '2'),
             $settings->get('iiifserver_media_api_supported_versions', ['2/2', '3/2']),
-            $settings->get('iiifserver_identifier_prefix', ''),
             $settings->get('iiifserver_url_force_from', ''),
             $settings->get('iiifserver_url_force_to', ''),
             $settings->get('iiifserver_media_api_identifier', ''),
+            $settings->get('iiifserver_identifier_prefix', ''),
             (bool) $settings->get('iiifserver_media_api_support_non_image', false)
         );
     }

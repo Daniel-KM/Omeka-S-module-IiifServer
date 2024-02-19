@@ -53,6 +53,11 @@ class IiifUrl extends AbstractHelper
     /**
      * @var string
      */
+    protected $baseUrlPath;
+
+    /**
+     * @var string
+     */
     protected $defaultVersion;
 
     /**
@@ -74,27 +79,30 @@ class IiifUrl extends AbstractHelper
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
      * @param IiifMediaUrl $iifImageUrl
+     * @param string $baseUrlPath
      * @param string $defaultVersion
-     * @param string $prefix
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
+     * @param string $prefix
      */
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
         IiifMediaUrl $iifImageUrl,
+        $baseUrlPath,
         $defaultVersion,
-        $prefix,
         $forceUrlFrom,
-        $forceUrlTo
+        $forceUrlTo,
+        $prefix
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
         $this->iiifMediaUrl = $iifImageUrl;
+        $this->baseUrlPath = $baseUrlPath;
         $this->defaultVersion = $defaultVersion;
-        $this->prefix = $prefix;
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
+        $this->prefix = $prefix;
     }
 
     /**
@@ -169,6 +177,14 @@ class IiifUrl extends AbstractHelper
             $params,
             $urlOptions
         );
+
+        // Fix issue when the method is called from a sub-job or when there is a
+        // proxy.
+        if ($this->baseUrlPath && strpos($urlIiif, $this->baseUrlPath) !== 0) {
+            $urlIiif = substr($urlIiif, 0, 11) === 'https:/iiif'
+                ? $this->baseUrlPath . substr($urlIiif, 6)
+                : $this->baseUrlPath . substr($urlIiif, 5);
+        }
 
         return $this->forceToIfRequired($urlIiif);
     }
