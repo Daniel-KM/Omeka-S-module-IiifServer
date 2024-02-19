@@ -1017,7 +1017,7 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_media_api_fix_uv_mp3',
                 'type' => Element\Checkbox::class,
                 'options' => [
-                    'label' => 'Use "audio/mp4" instead of "audio/mpeg" (fix playing mp3 in Universal Viewer)', // @translate
+                    'label' => 'Use "audio/mp4" instead of "audio/mpeg" (fix playing mp3 in Universal Viewer v4)', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_fix_uv_mp3',
