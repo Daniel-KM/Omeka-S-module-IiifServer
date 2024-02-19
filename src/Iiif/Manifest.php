@@ -259,10 +259,19 @@ class Manifest extends AbstractResourceType
      */
     public function rendering(): array
     {
+        $mediaTypes = $this->settings->get('iiifserver_manifest_rendering_media_types') ?: ['all'];
+        if (in_array('none', $mediaTypes)) {
+            return [];
+        }
+
         $renderings = [];
         $site = $this->defaultSite();
         $siteSlug = $site ? $site->slug() : null;
+        $allMediaTypes = in_array('all', $mediaTypes);
         foreach ($this->resource->media() as $media) {
+            if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
+                continue;
+            }
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
                 $rendering = new Rendering($media, [

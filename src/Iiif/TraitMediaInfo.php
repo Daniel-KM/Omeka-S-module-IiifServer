@@ -105,6 +105,8 @@ trait TraitMediaInfo
             return $this;
         }
 
+        // TODO Store media-type too.
+
         // Since this method is called only by manifest, it should be empty.
         $this->_storage['media_info'] ??= [];
 

@@ -2,6 +2,7 @@
 
 namespace IiifServer\Form;
 
+use Common\Form\Element as CommonElement;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
@@ -361,6 +362,23 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_manifest_seealso_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_manifest_rendering_media_types',
+                'type' => CommonElement\MediaTypeSelect::class,
+                'options' => [
+                    'label' => 'Media types of files to include in download', // @translate
+                    'prepend_value_options' => [
+                        'none' => 'None', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_rendering_media_types',
+                    'multiple' => true,
+                    'class' => 'chosen-select',
+                    'data-placeholder' => 'Select media-types to download', // @translate
                 ],
             ])
 
@@ -1079,6 +1097,10 @@ class ConfigForm extends Form
             ])
             ->add([
                 'name' => 'iiifserver_manifest_seealso_property',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_rendering_media_types',
                 'required' => false,
             ])
             ->add([
