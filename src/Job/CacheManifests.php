@@ -61,43 +61,63 @@ class CacheManifests extends AbstractJob
                 return;
             }
 
+            $failed = false;
             foreach ([2, 3] as $version) {
                 $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
                 if (file_exists($filepath) && !is_writeable($filepath) && !unlink($filepath)) {
                     $this->logger->err(
-                        'Item #{item_id}: Unable to remove existing file "{file}". Manfest version {version} skipped.', // @translate
+                        'Item #{item_id}: Unable to remove existing file "{file}". Manifest version {version} skipped.', // @translate
                         ['item_id' => $itemId, 'file' => "/iiif/$version/$itemId.manifest.json", 'version' => $version]
                     );
                     continue;
                 }
 
                 try {
+                    /** @var \Omeka\Api\Representation\ItemRepresentation $item */
                     $item = $api->read('items', $itemId)->getContent();
                 } catch (\Exception $e) {
                     continue;
                 }
 
-                $manifest = $version === 2 ? $iiifManifest2($item) : $iiifManifest3($item);
-
-                if ($manifest) {
-                    if (!is_string($manifest)) {
-                        $manifest = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-                    }
-                    $result = file_put_contents($filepath, $manifest);
-                    if (!$result) {
+                try {
+                    $manifest = $version === 2 ? $iiifManifest2($item) : $iiifManifest3($item);
+                } catch (\Exception $e) {
+                    $failed = true;
+                    if ($item->media()) {
                         $this->logger->err(
-                            'Item #{item_id}: Unable to store the manifest version {version}.', // @translate
+                            'Item #{item_id}: Unable to create manifest {version}.', // @translate
                             ['item_id' => $itemId, 'version' => $version]
                         );
-                        continue;
                     }
+                    continue;
+                }
+
+                if (!$manifest) {
+                    $failed = true;
+                    continue;
+                }
+
+                if (!is_string($manifest)) {
+                    $manifest = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                }
+
+                $result = file_put_contents($filepath, $manifest);
+                if (!$result) {
+                    $failed = true;
+                    $this->logger->err(
+                        'Item #{item_id}: Unable to store the manifest version {version}.', // @translate
+                        ['item_id' => $itemId, 'version' => $version]
+                    );
                 }
             }
 
-            $this->logger->info(
-                'Item #{item_id}: iiif manifests created successfully.', // @translate
-                ['item_id' => $itemId]
-            );
+            // Don't add a message when failed or skipped: already done.
+            if (!$failed) {
+                $this->logger->info(
+                    'Item #{item_id}: iiif manifests created successfully.', // @translate
+                    ['item_id' => $itemId]
+                );
+            }
 
             if ((++$index % 100) === 0) {
                 $entityManager->clear();
