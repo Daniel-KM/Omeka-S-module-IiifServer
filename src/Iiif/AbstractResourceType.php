@@ -122,29 +122,9 @@ abstract class AbstractResourceType extends AbstractType
     ];
 
     /**
-     * @var AbstractResourceEntityRepresentation
+     * @var \Common\Stdlib\EasyMeta
      */
-    protected $resource;
-
-    /**
-     * @var array
-     */
-    protected $options;
-
-    /**
-     * @var \Laminas\Log\Logger
-     */
-    protected $logger;
-
-    /**
-     * @var \Omeka\Settings\Settings
-     */
-    protected $settings;
-
-    /**
-     * @var \Laminas\View\Helper\Url
-     */
-    protected $urlHelper;
+    protected $easyMeta;
 
     /**
      * @var \IiifServer\View\Helper\IiifCleanIdentifiers
@@ -157,14 +137,44 @@ abstract class AbstractResourceType extends AbstractType
     protected $iiifUrl;
 
     /**
+     * @var \Laminas\Log\Logger
+     */
+    protected $logger;
+
+    /**
      * @var \IiifServer\View\Helper\PublicResourceUrl
      */
     protected $publicResourceUrl;
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
+     * @var \Common\I18n\Translator
+     */
+    protected $translator;
+
+    /**
+     * @var \Laminas\View\Helper\Url
+     */
+    protected $urlHelper;
+
+    /**
      * @var array
      */
     protected $manifest;
+
+    /**
+     * @var array
+     */
+    protected $options;
+
+    /**
+     * @var AbstractResourceEntityRepresentation
+     */
+    protected $resource;
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
@@ -172,13 +182,15 @@ abstract class AbstractResourceType extends AbstractType
         $this->options = $options ?? [];
 
         $services = $resource->getServiceLocator();
-        $this->logger = $services->get('Omeka\Logger');
         $viewHelpers = $services->get('ViewHelperManager');
+        $this->easyMeta = $services->get('EasyMeta');
+        $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
+        $this->logger = $services->get('Omeka\Logger');
+        $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
+        $this->translator = $services->get('MvcTranslator');
         $this->settings = $services->get('Omeka\Settings');
         $this->urlHelper = $viewHelpers->get('url');
-        $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
-        $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
     }
 
     public function context(): ?string

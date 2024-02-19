@@ -203,11 +203,8 @@ class Manifest extends AbstractResourceType
             }
         }
 
-        $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
-        $appendFlatStructure = !$settings()->get('iiifserver_manifest_structures_skip_flat');
-
-        $settings = $this->resource->getServiceLocator()->get('ControllerPluginManager')->get('settings');
-        $structureProperty = $settings()->get('iiifserver_manifest_structures_property');
+        $appendFlatStructure = !$this->settings->get('iiifserver_manifest_structures_skip_flat');
+        $structureProperty = $this->settings->get('iiifserver_manifest_structures_property');
         if (!$structureProperty) {
             if ($appendFlatStructure && $total > 1) {
                 $structure = $this->defaultStructure();

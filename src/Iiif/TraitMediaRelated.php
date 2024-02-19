@@ -61,7 +61,7 @@ trait TraitMediaRelated
 
         if ($matchXmlImage === null) {
             $services = $media->getServiceLocator();
-            $settings = $services->get('Omeka\Settings');
+            $settings = $this->settings ?? $services->get('Omeka\Settings');
             $matchXmlImage = $settings->get('iiifserver_xml_image_match', 'order');
             $skipReservedXml = (bool) $settings->get('iiifserver_access_ocr_skip');
             if ($skipReservedXml) {

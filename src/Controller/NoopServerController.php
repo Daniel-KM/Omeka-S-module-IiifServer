@@ -29,8 +29,9 @@
 
 namespace IiifServer\Controller;
 
+use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Omeka\Stdlib\Message;
+use Laminas\Mvc\I18n\Translator;
 
 class NoopServerController extends AbstractActionController
 {
@@ -41,13 +42,19 @@ class NoopServerController extends AbstractActionController
      */
     protected $routeInfo = 'imageserver/info';
 
+    public function __construct(
+        Translator $translator,
+    ) {
+        $this->translator = $translator;
+    }
+
     public function infoAction()
     {
         $resource = $this->fetchResource('media');
         if (!$resource) {
-            return $this->jsonError(new Message(
-                'Media "%s" not found.', // @translate
-                $this->params('id')
+            return $this->viewError(new PsrMessage(
+                'Media #{media_id} not found.', // @translate
+                ['media_id' => $this->params('id')]
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
 
@@ -57,9 +64,9 @@ class NoopServerController extends AbstractActionController
             return $this->forward()->dispatch(\IiifServer\Controller\MediaController::class, $params);
         }
 
-        return $this->jsonError(new Message(
-            'The media server is unavailable for resource "%s".', // @translate
-            $this->params('id')
+        return $this->jsonError(new PsrMessage(
+            'The media server is unavailable for resource #"{resource_id}".', // @translate
+            ['resource_id' => $this->params('id')]
         ), \Laminas\Http\Response::STATUS_CODE_503);
     }
 
@@ -67,14 +74,14 @@ class NoopServerController extends AbstractActionController
     {
         $resource = $this->fetchResource('media');
         if (!$resource) {
-            return $this->viewError(new Message(
-                'Media "%s" not found.', // @translate
-                $this->params('id')
+            return $this->viewError(new PsrMessage(
+                'Media #{media_id} not found.', // @translate
+                ['media_id' => $this->params('id')]
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
-        return $this->viewError(new Message(
-            'The media server is unavailable for resource "%s".', // @translate
-            $this->params('id')
+        return $this->viewError(new PsrMessage(
+            'The media server is unavailable for resource #{resource_id}.', // @translate
+            ['resource_id' => $this->params('id')]
         ), \Laminas\Http\Response::STATUS_CODE_503);
     }
 

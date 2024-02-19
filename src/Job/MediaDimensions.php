@@ -4,7 +4,6 @@ namespace IiifServer\Job;
 
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Job\AbstractJob;
-use Omeka\Stdlib\Message;
 
 class MediaDimensions extends AbstractJob
 {
@@ -91,18 +90,18 @@ class MediaDimensions extends AbstractJob
         $response = $api->search('items', $query);
         $this->totalToProcess = $response->getTotalResults();
         if (empty($this->totalToProcess)) {
-            $this->logger->warn(new Message(
+            $this->logger->warn(
                 'No item selected. You may check your query.' // @translate
-            ));
+            );
             return;
         }
 
         $this->prepareSizer();
 
-        $this->logger->info(new Message(
-            'Starting bulk sizing for %1$d items (%2$s media).', // @translate
-            $this->totalToProcess, $this->filter
-        ));
+        $this->logger->info(
+            'Starting bulk sizing for {total} items ({mode} media).', // @translate
+            ['total' => $this->totalToProcess, 'mode' => $this->filter]
+        );
 
         $offset = 0;
         $this->totalMedias = 0;
@@ -121,10 +120,10 @@ class MediaDimensions extends AbstractJob
 
             foreach ($items as $key => $item) {
                 if ($this->shouldStop()) {
-                    $this->logger->warn(new Message(
-                        'The job "Media Dimensions" was stopped: %1$d/%2$d resources processed.', // @translate
-                        $offset + $key, $this->totalToProcess
-                    ));
+                    $this->logger->warn(
+                        'The job "Media Dimensions" was stopped: {count}/{total} resources processed.', // @translate
+                        ['count' => $offset + $key, 'total' => $this->totalToProcess]
+                    );
                     break 2;
                 }
 
@@ -151,15 +150,17 @@ class MediaDimensions extends AbstractJob
             $offset += self::SQL_LIMIT;
         }
 
-        $this->logger->notice(new Message(
-            'End of bulk sizing: %1$d/%2$d items processed, %3$d audio, video and images files sized, %4$d errors, %5$d skipped on a total of %6$d images.', // @translate
-            $this->totalProcessed,
-            $this->totalToProcess,
-            $this->totalSucceed,
-            $this->totalFailed,
-            $this->totalSkipped,
-            $this->totalMedias
-        ));
+        $this->logger->notice(
+            'End of bulk sizing: {count}/{total} items processed, {count_succeed} audio, video and images files sized, {count_failed} errors, {count_skipped} skipped on a total of {count_medias} images.', // @translate
+            [
+                'count' => $this->totalProcessed,
+                'total' => $this->totalToProcess,
+                'count_succeed' => $this->totalSucceed,
+                'count_failed' => $this->totalFailed,
+                'count_skipped' => $this->totalSkipped,
+                'count_medias' => $this->totalMedias,
+            ]
+        );
     }
 
     protected function prepareSizer(): void
@@ -222,10 +223,10 @@ class MediaDimensions extends AbstractJob
                 break;
         }
 
-        $this->logger->info(new Message(
-            'Media #%d: Sizing', // @translate
-            $media->id()
-        ));
+        $this->logger->info(
+            'Media #{media_id}: Sizing', // @translate
+            ['media_id' => $media->id()]
+        );
 
         /** @var \Omeka\Entity\Media $mediaEntity */
         $mediaEntity = $this->mediaRepository->find($media->id());
@@ -244,11 +245,13 @@ class MediaDimensions extends AbstractJob
             $mediaData['dimensions'][$imageType] = $result;
         }
         if (count($failedTypes)) {
-            $this->logger->err(new Message(
-                'Media #%1$d: Error getting dimensions for types "%2$s".', // @translate
-                $mediaEntity->getId(),
-                implode('", "', $failedTypes)
-            ));
+            $this->logger->err(
+                'Media #{media_id}: Error getting dimensions for types "{types}".', // @translate
+                [
+                    'media_id' => $mediaEntity->getId(),
+                    'types' => implode('", "', $failedTypes),
+                ]
+            );
             ++$this->totalFailed;
         }
 

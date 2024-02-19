@@ -29,10 +29,10 @@
 
 namespace IiifServer\Iiif;
 
+use Common\Stdlib\PsrMessage;
 use IiifServer\Iiif\Exception\RuntimeException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Stdlib\Message;
 
 /**
  *@link https://iiif.io/api/presentation/3.0/#rendering
@@ -54,12 +54,12 @@ class Rendering extends AbstractResourceType
     {
         parent::__construct($resource, $options);
 
-        if (!($resource instanceof MediaRepresentation)) {
-            $message = new Message(
-                'Resource #%1$d: A media is required to build a canvas.', // @translate
-                $resource->id()
+        if (!$resource instanceof MediaRepresentation) {
+            $message = new PsrMessage(
+                'Resource #{resource_id}: A media is required to build a canvas.', // @translate
+                ['resource_id' => $resource->id()]
             );
-            $this->logger->err($message);
+            $this->logger->err($message->getMessage(), $message->getContext());
             throw new RuntimeException((string) $message);
         }
 

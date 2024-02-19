@@ -31,9 +31,10 @@
 namespace IiifServer\Controller;
 
 use Access\Mvc\Controller\Plugin\IsAllowedMediaContent;
+use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\Mvc\I18n\Translator;
 use Omeka\File\Store\StoreInterface;
-use Omeka\Stdlib\Message;
 
 /**
  * The Media controller class.
@@ -45,23 +46,25 @@ class MediaController extends AbstractActionController
     use IiifServerControllerTrait;
 
     /**
+     * @var StoreInterface
+     */
+    protected $store;
+
+    /**
      * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
      */
     protected $isAllowedMediaContent;
 
     protected $routeInfo = 'mediaserver/info';
 
-    /**
-     * @var StoreInterface
-     */
-    protected $store;
-
     public function __construct(
         StoreInterface $store,
+        Translator $translator,
         ?string $basePath,
         ?IsAllowedMediaContent $isAllowedMediaContent
     ) {
         $this->store = $store;
+        $this->translator = $translator;
         $this->basePath = $basePath;
         $this->isAllowedMediaContent = $isAllowedMediaContent;
     }
@@ -73,9 +76,9 @@ class MediaController extends AbstractActionController
     {
         $media = $this->fetchResource('media');
         if (!$media) {
-            return $this->viewError(new Message(
-                'Media "%s" not found.', // @translate
-                $this->params('id')
+            return $this->viewError(new PsrMessage(
+                'Media #{media_id} not found.', // @translate
+                ['media_id' => $this->params('id')]
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
 
@@ -87,7 +90,7 @@ class MediaController extends AbstractActionController
         // checked.
         $format = strtolower((string) $this->params('format'));
         if (pathinfo($media->filename(), PATHINFO_EXTENSION) != $format) {
-            return $this->viewError(new Message(
+            return $this->viewError(new PsrMessage(
                 'The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the requested format is not supported.' // @translate
             ), \Laminas\Http\Response::STATUS_CODE_500);
         }
@@ -143,7 +146,7 @@ class MediaController extends AbstractActionController
                 $filepath = $this->basePath
                     . DIRECTORY_SEPARATOR . $this->getStoragePath('original', $media->filename());
                 if (!file_exists($filepath) || filesize($filepath) == 0) {
-                    return $this->viewError(new Message(
+                    return $this->viewError(new PsrMessage(
                         'The IIIF server encountered an unexpected error that prevented it from fulfilling the request: the resulting file is not found.' // @translate
                     ), \Laminas\Http\Response::STATUS_CODE_500);
                 }

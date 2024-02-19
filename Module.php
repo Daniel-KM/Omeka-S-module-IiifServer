@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2023 Daniel Berthereau
+ * Copyright 2015-2024 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -30,21 +30,27 @@
 
 namespace IiifServer;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
-use Generic\AbstractModule;
+use Common\Stdlib\PsrMessage;
+use Common\TraitModule;
 use IiifServer\Form\ConfigForm;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
+use Omeka\Module\AbstractModule;
 
 class Module extends AbstractModule
 {
+    use TraitModule;
+
     const NAMESPACE = __NAMESPACE__;
+
+    protected $dependencies = [
+        'Common',
+    ];
 
     public function onBootstrap(MvcEvent $event): void
     {
@@ -66,6 +72,21 @@ class Module extends AbstractModule
             );
     }
 
+    protected function preInstall(): void
+    {
+        $services = $this->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
+        $translate = $plugins->get('translate');
+
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.53'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+    }
+
     protected function postInstall(): void
     {
         $this->updateWhitelist();
@@ -80,7 +101,7 @@ class Module extends AbstractModule
             . ' ' . $translate('In all cases, empty properties are not set.') // @translate
             . ' ' . $translate('Futhermore, the event "iiifserver.manifest" is available to change any data.') // @translate
             . '</p>'
-            . parent::getConfigForm($renderer);
+            . $this->getConfigFormAuto($renderer);
     }
 
     public function handleConfigForm(AbstractController $controller)
@@ -94,7 +115,7 @@ class Module extends AbstractModule
         $form = $services->get('FormElementManager')->get(ConfigForm::class);
         $params = $controller->getRequest()->getPost();
 
-        if (!parent::handleConfigForm($controller)) {
+        if (!$this->handleConfigFormAuto($controller)) {
             return false;
         }
 
@@ -122,31 +143,20 @@ class Module extends AbstractModule
 
         $params = ['query' => $params['fieldset_dimensions']['query'] ?: null];
         $job = $dispatcher->dispatch(\IiifServer\Job\MediaDimensions::class, $params);
-        if ($this->isModuleActive('Log')) {
-            $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
-            $message = new \Log\Stdlib\PsrMessage(
-                $message,
-                [
-                    'link' => sprintf('<a href="%s">',
-                        htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
-                    ),
-                    'job_id' => $job->getId(),
-                    'link_end' => '</a>',
-                    'link_log' => sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])),
-                ]
-            );
-        } else {
-            $message = 'Storing dimensions of images, audio and video (%1$sjob #%2$d%3$s, %4$slogs%3$s)'; // @translate
-            $message = new \Omeka\Stdlib\Message(
-                $message,
-                sprintf('<a href="%s">',
+        $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
+        $message = new PsrMessage(
+            $message,
+            [
+                'link' => sprintf('<a href="%s">',
                     htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
                 ),
-                $job->getId(),
-                '</a>',
-                sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
-            );
-        }
+                'job_id' => $job->getId(),
+                'link_end' => '</a>',
+                'link_log' => $this->isModuleActive('Log')
+                    ? sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                    : sprintf('<a href="%1$s">', $controller->url()->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+            ]
+        );
         $message->setEscapeHtml(false);
         $controller->messenger()->addSuccess($message);
         return true;

@@ -30,13 +30,20 @@
 
 namespace IiifServer\Controller;
 
+use Common\Stdlib\PsrMessage;
+use Laminas\Mvc\I18n\Translator;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\Mvc\Exception\NotFoundException;
-use Omeka\Stdlib\Message;
 
 class PresentationController extends AbstractActionController
 {
     use IiifServerControllerTrait;
+
+    public function __construct(
+        Translator $translator,
+    ) {
+        $this->translator = $translator;
+    }
 
     public function indexAction()
     {
@@ -160,9 +167,9 @@ class PresentationController extends AbstractActionController
         } elseif ($type === 'annotation-list' && $name) {
             return $this->annotationListAction();
         }
-        return $this->jsonError(new Message(
-            'The type "%s" is currently only managed as uri, not url', // @translate
-            $type
+        return $this->jsonError(new PsrMessage(
+            'The type "{type}" is currently only managed as uri, not url', // @translate
+            ['type' => $type]
         ), \Laminas\Http\Response::STATUS_CODE_501);
     }
 

@@ -15,6 +15,7 @@ class MediaControllerFactory implements FactoryInterface
         $plugins = $services->get('ControllerPluginManager');
         return new MediaController(
             $services->get('Omeka\File\Store'),
+            $services->get('MvcTranslator'),
             $basePath,
             $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null
         );

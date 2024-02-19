@@ -29,15 +29,23 @@
 
 namespace IiifServer\Controller;
 
+use Common\Stdlib\PsrMessage;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Omeka\Api\Exception\BadRequestException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Stdlib\Message;
 
+/**
+ * The translator should be init first.
+ */
 trait IiifServerControllerTrait
 {
+    /**
+     * @var \Laminas\Mvc\I18n\Translator
+     */
+    protected $translator;
+
     /**
      * Full path to the files.
      *
@@ -65,7 +73,7 @@ trait IiifServerControllerTrait
      */
     public function badAction()
     {
-        return $this->viewError(new Message(
+        return $this->viewError(new PsrMessage(
                 'The image server cannot fulfill the request: the arguments are incorrect.' // @translate
             ),
             \Laminas\Http\Response::STATUS_CODE_400
@@ -94,9 +102,9 @@ trait IiifServerControllerTrait
             : $this->fetchResource('resources');
 
         if (!$resource) {
-            return $this->jsonError(new Message(
-                'Media "%s" not found.', // @translate
-                $this->params('id')
+            return $this->jsonError(new PsrMessage(
+                'Media #{media_id}" not found.', // @translate
+                ['media_id' => $this->params('id')]
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
 
@@ -144,9 +152,9 @@ trait IiifServerControllerTrait
     {
         $resource = $this->fetchResource('media');
         if (!$resource) {
-            return $this->jsonError(new Message(
-                'Media "%s" not found.', // @translate
-                $this->params('id')
+            return $this->jsonError(new PsrMessage(
+                'Media #{media_id} not found.', // @translate
+                ['media_id' => $this->params('id')]
             ), \Laminas\Http\Response::STATUS_CODE_404);
         }
 
@@ -344,14 +352,8 @@ trait IiifServerControllerTrait
 
     protected function viewMessage($exceptionOrMessage): string
     {
-        if (is_object($exceptionOrMessage)) {
-            if ($exceptionOrMessage instanceof \Exception) {
-                return $exceptionOrMessage->getMessage();
-            }
-            if ($exceptionOrMessage instanceof Message) {
-                return (string) sprintf($this->translate($exceptionOrMessage->getMessage()), ...$exceptionOrMessage->getArgs());
-            }
-        }
-        return $this->translate((string) $exceptionOrMessage);
+        return $exceptionOrMessage instanceof \Exception
+            ? $exceptionOrMessage->getMessage()
+            : $this->translator->translate($exceptionOrMessage);
     }
 }

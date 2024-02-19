@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -29,9 +29,10 @@
 
 namespace IiifServer\Iiif;
 
+use ArrayObject;
+use Common\Stdlib\PsrMessage;
 use Doctrine\Inflector\InflectorFactory;
 use JsonSerializable;
-use Omeka\Stdlib\Message;
 
 /**
  * Manage the IIIF objects.
@@ -146,6 +147,7 @@ abstract class AbstractType implements JsonSerializable
         // Ideally should be in class AbstractResourceType.
         $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
         $hasResource = isset($this->resource);
+        // TODO Use easyMeta.
         $resourceName = $hasResource ? $this->resource->resourceName() : null;
         $resourceNames = [
             'items' => 'item',
@@ -154,25 +156,41 @@ abstract class AbstractType implements JsonSerializable
         ];
         if ($e) {
             if ($hasResource) {
-                $message = new Message(
-                    "%1\$s #%2\$d: Exception when processing iiif resource type \"%3\$s\":\n%4\$s", // @translate
-                    ucfirst($resourceNames[$resourceName]), $this->resource->id(), $this->type(), $e->getMessage()
+                $message = new PsrMessage(
+                    "{resource} #{resource_id}: Exception when processing iiif resource type \"{type}\":\n{message}", // @translate
+                    [
+                        'resource' => ucfirst($resourceNames[$resourceName]),
+                        'resource_id' => $this->resource->id(),
+                        'type' => $this->type(),
+                        'message' => $e->getMessage(),
+                    ]
                 );
             } else {
-                $message = new Message(
-                    "Exception when processing iiif resource type \"%1\$s\":\n%2\$s", // @translate
-                    $this->type(), $e->getMessage()
+                $message = new PsrMessage(
+                    "Exception when processing iiif resource type \"{type}\":\n{message}", // @translate
+                    [
+                        'type' => $this->type(),
+                        'message' => $e->getMessage(),
+                    ]
                 );
             }
         } elseif ($hasResource) {
-            $message = new Message(
-                '%1$s #%2$d: Missing required keys for iiif resource type "%3$s": "%4$s".', // @translate
-                ucfirst($resourceNames[$resourceName]), $this->resource->id(), $this->type(), implode('", "', $missingKeys)
+            $message = new PsrMessage(
+                '{resource} #{resource_id}: Missing required keys for iiif resource type "{type}": "{keys}".', // @translate
+                [
+                    'resource' => ucfirst($resourceNames[$resourceName]),
+                    'resource_id' => $this->resource->id(),
+                    'type' => $this->type(),
+                    'keys' => implode('", "', $missingKeys),
+                ]
             );
         } else {
-            $message = new Message(
-                'Missing required keys for iiif resource type "%1$s": "%2$s".', // @translate
-                $this->type(), implode('", "', $missingKeys)
+            $message = new PsrMessage(
+                'Missing required keys for iiif resource type "{type}": "{keys}".', // @translate
+                [
+                    'type' => $this->type(),
+                    'keys' => implode('", "', $missingKeys),
+                ]
             );
         }
 
@@ -180,7 +198,7 @@ abstract class AbstractType implements JsonSerializable
         // upper one is needed. The same for logger.
         // The lower level does not know if it called for itself or not.
         if ($this->logger) {
-            $this->logger->err($message);
+            $this->logger->err($message->getMessage(), $message->getContext());
         }
 
         if ($throwException) {
@@ -204,7 +222,7 @@ abstract class AbstractType implements JsonSerializable
                 return !empty($v);
             }
             // Normally, there is no object anymore.
-            if ($v instanceof \ArrayObject) {
+            if ($v instanceof ArrayObject) {
                 return (bool) $v->count();
             }
             if ($v instanceof JsonSerializable) {
