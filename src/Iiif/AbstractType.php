@@ -31,7 +31,6 @@ namespace IiifServer\Iiif;
 
 use ArrayObject;
 use Common\Stdlib\PsrMessage;
-use Doctrine\Inflector\InflectorFactory;
 use JsonSerializable;
 
 /**
@@ -91,13 +90,15 @@ abstract class AbstractType implements JsonSerializable
         // Always refresh the content.
         $this->content = [];
 
-        $allowedProperties = array_filter($this->propertyRequirements, fn ($v) => $v !== self::NOT_ALLOWED);
-        $inflector = InflectorFactory::create()->build();
-        foreach (array_keys($allowedProperties) as $property) {
-            $method = $inflector->camelize(str_replace('@', '', $property));
-            if (method_exists($this, $method)) {
-                $this->content[$property] = $this->$method();
-            }
+        /** @see https://iiif.io/api/presentation/3.0/#48-keyword-mappings */
+        // By default, only "@context" requires a "@". "@id", "@type" and
+        // "@none" may exist and are mapped to "id", "type" and "none".
+        // Old implementation or external specs can use "@" everywhere, like
+        // "@graph".
+        $allowedProperties = array_keys(array_filter($this->propertyRequirements, fn ($v) => $v !== self::NOT_ALLOWED));
+        foreach ($allowedProperties as $property) {
+            $method = mb_substr($property, 0, 1) === '@' ? mb_substr($property, 1) : $property;
+            $this->content[$property] = $this->$method();
         }
 
         return $this->content;
@@ -131,7 +132,8 @@ abstract class AbstractType implements JsonSerializable
             // Second check for the children.
             // Instead of a recursive method, use jsonSerialize, that does the
             // same de facto.
-            //  TODO Find a way to get only the upper exception with the path of classes.
+            // TODO Find a way to get only the upper exception with the path of classes.
+            // TODO This process is too much slow.
             try {
                 json_encode($output);
                 return true;
