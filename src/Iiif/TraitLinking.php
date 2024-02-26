@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -35,13 +35,19 @@ use Omeka\Api\Representation\SiteRepresentation;
 trait TraitLinking
 {
     /**
+     * @var \Omeka\Api\Representation\SiteRepresentation|null
+     */
+    protected $defaultSite;
+
+    /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
 
-    public function initLinking(): AbstractType
+    public function initLinking(): self
     {
         $services = $this->resource->getServiceLocator();
+        $this->defaultSite = $services->get('ViewHelperManager')->get('defaultSite')();
         $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
         return $this;
     }
@@ -114,13 +120,16 @@ trait TraitLinking
                     }
                     // displayTitle() can't be used, because language is needed.
                     $template = $this->resource->resourceTemplate();
-                    if ($template && $template->titleProperty()) {
-                        $term = $template->titleProperty()->term();
-                        $values = $this->resource->value($term, ['all' => true]);
-                        if (empty($values) && $term !== 'dcterms:title') {
-                            $values = $this->resource->value('dcterms:title', ['all' => true]);
+                    if ($template) {
+                        $titleProperty = $template->titleProperty();
+                        if ($titleProperty) {
+                            $titlePropertyTerm = $titleProperty->term();
+                            if ($titlePropertyTerm !== 'dcterms:title') {
+                                $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
+                            }
                         }
-                    } else {
+                    }
+                    if (empty($values)) {
                         $values = $this->resource->value('dcterms:title', ['all' => true]);
                     }
                     break;
@@ -138,13 +147,16 @@ trait TraitLinking
                     $format = 'application/ld+json';
                     // displayTitle() can't be used, because language is needed.
                     $template = $this->resource->resourceTemplate();
-                    if ($template && $template->titleProperty()) {
-                        $term = $template->titleProperty()->term();
-                        $values = $this->resource->value($term, ['all' => true]);
-                        if (empty($values) && $term !== 'dcterms:title') {
-                            $values = $this->resource->value('dcterms:title', ['all' => true]);
+                    if ($template) {
+                        $titleProperty = $template->titleProperty();
+                        if ($titleProperty) {
+                            $titlePropertyTerm = $titleProperty->term();
+                            if ($titlePropertyTerm !== 'dcterms:title') {
+                                $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
+                            }
                         }
-                    } else {
+                    }
+                    if (empty($values)) {
                         $values = $this->resource->value('dcterms:title', ['all' => true]);
                     }
                     break;
@@ -439,23 +451,7 @@ trait TraitLinking
     protected function defaultSite(): ?SiteRepresentation
     {
         if (!array_key_exists('site', $this->_storage)) {
-            $this->_storage['site'] = null;
-            if (!$this->resource) {
-                return null;
-            }
-            /** @var \Omeka\Api\Manager $api */
-            $api = $this->resource->getServiceLocator()->get('Omeka\ApiManager');
-            $defaultSiteId = $this->settings->get('default_site');
-            if ($defaultSiteId) {
-                try {
-                    $this->_storage['site'] = $api->read('sites', ['id' => $defaultSiteId])->getContent();
-                } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                    $this->_storage['site'] = null;
-                }
-            } else {
-                $sites = $api->search('sites', ['limit' => 1, 'sort_by' => 'id'])->getContent();
-                $this->_storage['site'] = $sites ? reset($sites) : null;
-            }
+            $this->_storage['site'] = $this->defaultSite;
         }
         return $this->_storage['site'];
     }

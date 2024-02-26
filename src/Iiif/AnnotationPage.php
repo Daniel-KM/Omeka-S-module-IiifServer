@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -121,15 +121,15 @@ class AnnotationPage extends AbstractResourceType
 
     protected $callingMotivation;
 
-    protected $dereferenced = false;
+    protected $isDereferenced = false;
 
     public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
         $this->callingResource = $options['callingResource'] ?? null;
         $this->callingMotivation = $options['callingMotivation'] ?? null;
-        $this->dereferenced = !empty($options['dereferenced']);
-        if ($this->dereferenced) {
+        $this->isDereferenced = !empty($options['isDereferenced']);
+        if ($this->isDereferenced) {
             $this->propertyRequirements['@context'] = self::REQUIRED;
         }
         // Xml is used only for annotation.
@@ -143,6 +143,7 @@ class AnnotationPage extends AbstractResourceType
         if ($this->callingMotivation !== 'painting') {
             return $this->_storage['id'] ?? null;
         }
+        // Here, the resource is a media.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $this->resource->id(),
@@ -199,7 +200,7 @@ class AnnotationPage extends AbstractResourceType
      * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
      * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
      */
-    protected function initAnnotationPage(): AbstractType
+    protected function initAnnotationPage(): self
     {
         if (empty($this->callingResource)) {
             return $this;
@@ -212,6 +213,7 @@ class AnnotationPage extends AbstractResourceType
 
         $callingResourceId = $this->callingResource->id();
 
+        // Here, the resource is a media.
         $this->_storage['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $callingResourceId,
@@ -220,7 +222,7 @@ class AnnotationPage extends AbstractResourceType
         $this->_storage['type'] = $this->type;
         $this->_storage['label'] = 'Text of the current page'; // @translate
         $this->_storage['items'] = [];
-        if ($this->dereferenced) {
+        if ($this->isDereferenced) {
             $this->initAnnotationPageLines();
         }
 
@@ -236,7 +238,7 @@ class AnnotationPage extends AbstractResourceType
      *
      * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
      */
-    protected function initAnnotationPageLines(): AbstractType
+    protected function initAnnotationPageLines(): self
     {
         $this->_storage['items'] = [];
 

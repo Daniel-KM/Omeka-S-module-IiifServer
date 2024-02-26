@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -116,7 +116,7 @@ class SeeAlso extends AbstractResourceType
      *
      * @todo Merge with TraitLinking SeeAlso.
      */
-    protected function initSeeAlso(): AbstractType
+    protected function initSeeAlso(): self
     {
         if (!$this->type || empty($this->callingResource)) {
             return $this;

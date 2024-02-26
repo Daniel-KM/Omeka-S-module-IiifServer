@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -162,6 +162,7 @@ class Canvas extends AbstractResourceType
     {
         // TODO Use a specific value if any in the resource.
         // TODO Factorize with TraitLinking->start().
+        // Here, the resource is a media.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'canvas',
             'name' => $this->options['target_name'],
@@ -192,12 +193,18 @@ class Canvas extends AbstractResourceType
                 $fallback = $this->resource->displayTitle($fallback);
                 // no break;
             case 'template':
+                // displayTitle() can't be used, because language is needed.
                 $template = $this->resource->resourceTemplate();
-                if ($template && $template->titleProperty()) {
-                    $labelProperty = $template->titleProperty()->term();
-                    $values = $this->resource->value($labelProperty, ['all' => true]);
+                if ($template) {
+                    $titleProperty = $template->titleProperty();
+                    if ($titleProperty) {
+                        $titlePropertyTerm = $titleProperty->term();
+                        if ($titlePropertyTerm !== 'dcterms:title') {
+                            $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
+                        }
+                    }
                 }
-                if (!$values) {
+                if (empty($values)) {
                     $values = $this->resource->value('dcterms:title', ['all' => true, 'default' => $fallback]);
                 }
                 break;

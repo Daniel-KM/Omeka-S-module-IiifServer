@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2023 Daniel Berthereau
+ * Copyright 2015-2024 Daniel Berthereau
  * Copyright 2016-2017 BibLibre
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -789,9 +789,9 @@ class IiifManifest2 extends AbstractHelper
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
             $imageApiContextUri = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $imageComplianceLevelUri = is_array($mediaData['profile']) ? $mediaData['profile'][0] : $mediaData['profile'];
-            $imageComplianceLevel = $this->_iiifComplianceLevel($mediaData['profile']);
-            $imageUrl = $this->_iiifThumbnailUrl($imageBaseUri, $imageApiContextUri, $imageComplianceLevel);
-            $service = $this->_iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
+            $imageComplianceLevel = $this->iiifComplianceLevel($mediaData['profile']);
+            $imageUrl = $this->iiifThumbnailUrl($imageBaseUri, $imageApiContextUri, $imageComplianceLevel);
+            $service = $this->iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
             $thumbnail = [
                 'id' => $imageUrl,
                 '@type' => 'dctypes:Image',
@@ -863,13 +863,13 @@ class IiifManifest2 extends AbstractHelper
             // In Image API 3.0, the "@id" property becomes "id".
             $imageComplianceLevelUri = is_array($mediaData['profile']) ? $mediaData['profile'][0] : $mediaData['profile'];
 
-            $imageResource['@id'] = $this->_iiifImageFullUrl($imageBaseUri, $imageApiContextUri);
+            $imageResource['@id'] = $this->iiifImageFullUrl($imageBaseUri, $imageApiContextUri);
             $imageResource['@type'] = 'dctypes:Image';
             $imageResource['format'] = 'image/jpeg';
             $imageResource['width'] = $mediaData['width'];
             $imageResource['height'] = $mediaData['height'];
 
-            $imageResourceService = $this->_iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
+            $imageResourceService = $this->iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
             $imageResource['service'] = $imageResourceService;
 
             $image['resource'] = $imageResource;
@@ -905,9 +905,9 @@ class IiifManifest2 extends AbstractHelper
 
         if ($service) {
             $imageUrlService = $this->view->iiifMediaUrl($media, 'imageserver/id', $service);
-            $contextUri = $this->_iiifImageServiceUri($service);
-            $profileUri = $this->_iiifImageProfileUri($contextUri, $level);
-            $imageResourceService = $this->_iiifImageService($imageUrlService, $contextUri, $profileUri);
+            $contextUri = $this->iiifImageServiceUri($service);
+            $profileUri = $this->iiifImageProfileUri($contextUri, $level);
+            $imageResourceService = $this->iiifImageService($imageUrlService, $contextUri, $profileUri);
             $iiifTileInfo = $view->iiifTileInfo($media);
             if ($iiifTileInfo) {
                 $imageResourceService['tiles'] = [$iiifTileInfo];
@@ -1018,9 +1018,14 @@ class IiifManifest2 extends AbstractHelper
             case 'template':
                 $template = $media->resourceTemplate();
                 $label = false;
-                if ($template && $template->titleProperty()) {
-                    $labelProperty = $template->titleProperty()->term();
-                    $label = $media->value($labelProperty, ['default' => false]);
+                if ($template) {
+                    $titleProperty = $template->titleProperty();
+                    if ($titleProperty) {
+                        $titlePropertyTerm = $template->titleProperty()->term();
+                        if ($titlePropertyTerm !== 'dcterms:title') {
+                            $label = $media->value($titlePropertyTerm, ['default' => false]);
+                        }
+                    }
                 }
                 if (!$label) {
                     $label = $media->value('dcterms:title', ['default' => $fallback]);
@@ -1591,7 +1596,7 @@ class IiifManifest2 extends AbstractHelper
      * supported by the server
      * @return string IIIF thumbnail URL
      */
-    protected function _iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel)
+    protected function iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel): string
     {
         // NOTE: this function does not support level0 implementations (need to use `sizes` from the info.json)
         // TODO handle square thumbnails, depending on server capabilities (see 'regionSquare' feature https://iiif.io/api/image/2.1/#profile-description): e.g. $baseUri . '/square/200,200/0/default.jpg';
@@ -1621,7 +1626,7 @@ class IiifManifest2 extends AbstractHelper
      * server, as stated by the JSON-LD context URI
      * @return string IIIF full size URL of the image
      */
-    protected function _iiifImageFullUrl($baseUri, $contextUri)
+    protected function iiifImageFullUrl($baseUri, $contextUri): string
     {
         switch ($contextUri) {
             case '1.1':
@@ -1644,7 +1649,7 @@ class IiifManifest2 extends AbstractHelper
      * @param string $service
      * @return string Context uri of  the service.
      */
-    protected function _iiifImageServiceUri($service): string
+    protected function iiifImageServiceUri($service): string
     {
         $serviceToUris = [
             // TODO Check what is the real 0.
@@ -1663,17 +1668,24 @@ class IiifManifest2 extends AbstractHelper
      * Helper to set the compliance level to the IIIF Image API, based on the
      * compliance level URI.
      *
+     *@see https://iiif.io/api/image/1.1/compliance/
+     *
+     * Copy:
+     * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
+     *
      * @param array|string $profile Contents of the `profile` property from the
      * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
-    protected function _iiifComplianceLevel($profile)
+    protected function iiifComplianceLevel($profile): string
     {
         // In Image API 2.1, the profile property is a list, and the first entry
         // is the compliance level URI.
         // In Image API 1.1 and 3.0, the profile property is a string.
         if (is_array($profile)) {
-            $profile = $profile[0];
+            $profile = reset($profile);
         }
 
         $profileToLevels = [
@@ -1704,7 +1716,7 @@ class IiifManifest2 extends AbstractHelper
      * @param string $level
      * @return string Image API profile uri.
      */
-    protected function _iiifImageProfileUri($contextUri, $level)
+    protected function iiifImageProfileUri($contextUri, $level): string
     {
         $contextUriToLevels = [
             'http://library.stanford.edu/iiif/image-api/1.0/context.json' => [
@@ -1742,6 +1754,10 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Helper to create the IIIF Image API service block.
      *
+     * Copy:
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifImageService()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifImageService()
+     *
      * @param string $baseUri IIIF base URI of the image (including the
      * identifier slot)
      * @param string $contextUri Version of the API Image supported by the
@@ -1751,7 +1767,7 @@ class IiifManifest2 extends AbstractHelper
      * @return object $service IIIF Image API service block to be appended to
      * the Manifest
      */
-    protected function _iiifImageService($baseUri, $contextUri, $complianceLevelUri)
+    protected function iiifImageService($baseUri, $contextUri, $complianceLevelUri): array
     {
         $service = [];
         $service['@context'] = $contextUri;

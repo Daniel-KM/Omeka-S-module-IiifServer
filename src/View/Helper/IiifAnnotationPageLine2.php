@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2023 Daniel Berthereau
+ * Copyright 2015-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -29,10 +29,10 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\TraitMediaRelated;
 use IiifServer\Iiif\TraitXml;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
-use IiifServer\Iiif\TraitMediaRelated;
 
 class IiifAnnotationPageLine2 extends AbstractHelper
 {
@@ -64,6 +64,7 @@ class IiifAnnotationPageLine2 extends AbstractHelper
      * @see \IiifServer\View\Helper\IiifAnnotationPageLine3
      * @see \IiifServer\View\Helper\IiifManifest2::otherContents()
      * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
+     * @see \AdvancedSearch\Stdlib\FulltextSearchDelegator::save()
      *
      * @param MediaRepresentation $resource
      * @param int|string $index Used to set the standard name of the image.

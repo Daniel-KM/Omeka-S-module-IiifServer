@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -240,6 +240,7 @@ class ImageService3 extends AbstractResourceType
                 $orUrl = true;
                 // no break.
             case 'item':
+                // Here, the resource is a media.
                 $url = $this->rightsResource($this->resource->item());
                 if ($url || !$orUrl) {
                     return $url;

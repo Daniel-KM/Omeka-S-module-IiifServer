@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -196,8 +196,8 @@ class Body extends AbstractResourceType
             $imageResourceServices = [];
             $context = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $id = $mediaData['id'] ?? $mediaData['@id'];
-            $type = $this->_iiifType($context);
-            $profile = $this->_iiifComplianceLevel($mediaData['profile']);
+            $type = $this->iiifType($context);
+            $profile = $this->iiifComplianceLevel($mediaData['profile']);
             if (!$id || !$type || !$profile) {
                 return null;
             }
@@ -264,7 +264,7 @@ class Body extends AbstractResourceType
     /**
      * Get the iiif type from the context.
      */
-    protected function _iiifType(string $context): ?string
+    protected function iiifType(string $context): ?string
     {
         $contexts = [
             'http://library.stanford.edu/iiif/image-api/context.json' => 'ImageService1',
@@ -277,21 +277,26 @@ class Body extends AbstractResourceType
 
     /**
      * Helper to set the compliance level to the IIIF Image API, based on the
-     * compliance level URI
+     * compliance level URI.
      *
-     * @see https://iiif.io/api/image/1.1/compliance/
+     *@see https://iiif.io/api/image/1.1/compliance/
+     *
+     * Copy:
+     * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
      *
      * @param array|string $profile Contents of the `profile` property from the
      * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
-    protected function _iiifComplianceLevel($profile): string
+    protected function iiifComplianceLevel($profile): string
     {
         // In Image API 2.1, the profile property is a list, and the first entry
         // is the compliance level URI.
         // In Image API 1.1 and 3.0, the profile property is a string.
         if (is_array($profile)) {
-            $profile = $profile[0];
+            $profile = reset($profile);
         }
 
         $profileToLlevels = [

@@ -83,9 +83,9 @@ REGEX;
         $count = 0;
         $result = preg_replace_callback($regex, $utf8replacer, $string, -1, $count);
         if ($count && $string !== $result) {
-            $this->logger->warn(sprintf(
+            $this->logger->warn(
                 'Warning: some files contain invalid unicode characters and cannot be processed quickly.' // @translate
-            ));
+            );
         }
 
         return $result;

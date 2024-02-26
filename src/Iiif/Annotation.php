@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -115,6 +115,7 @@ class Annotation extends AbstractResourceType
 
     public function id(): ?string
     {
+        // Here, the resource is a media.
         if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
             return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
                 'type' => 'annotation-page',
@@ -136,14 +137,14 @@ class Annotation extends AbstractResourceType
 
     public function body()
     {
-        if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
-            return new Annotation\TextualBody($this->resource, $this->options);
-        }
-        return new Annotation\Body($this->resource, $this->options);
+        return isset($this->options['body']) && $this->options['body'] === 'TextualBody'
+            ? new Annotation\TextualBody($this->resource, $this->options)
+            : new Annotation\Body($this->resource, $this->options);
     }
 
     public function target(): ?string
     {
+        // Here, the resource is a media.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => $this->options['target_type'] ?? 'canvas',
             'name' => $this->options['target_name'] ?? $this->resource->id(),
@@ -156,6 +157,7 @@ class Annotation extends AbstractResourceType
 
     public function label(): ?ValueLanguage
     {
+        // No label for a textual body.
         if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {
             return null;
         }

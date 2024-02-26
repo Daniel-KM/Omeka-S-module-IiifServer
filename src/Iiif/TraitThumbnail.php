@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -46,7 +46,7 @@ trait TraitThumbnail
      */
     protected $iiifMediaUrl;
 
-    protected function initThumbnail(): AbstractType
+    protected function initThumbnail(): self
     {
         $services = $this->resource->getServiceLocator();
         $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
@@ -109,9 +109,9 @@ trait TraitThumbnail
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
             $imageApiContextUri = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $imageComplianceLevelUri = is_array($mediaData['profile']) ? $mediaData['profile'][0] : $mediaData['profile'];
-            $imageComplianceLevel = $this->_iiifComplianceLevel($mediaData['profile']);
-            $imageUrl = $this->_iiifThumbnailUrl($imageBaseUri, $imageApiContextUri, $imageComplianceLevel);
-            $thumbnailService = $this->_iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
+            $imageComplianceLevel = $this->iiifComplianceLevel($mediaData['profile']);
+            $imageUrl = $this->iiifThumbnailUrl($imageBaseUri, $imageApiContextUri, $imageComplianceLevel);
+            $thumbnailService = $this->iiifImageService($imageBaseUri, $imageApiContextUri, $imageComplianceLevelUri);
             $thumbnail = [
                 'id' => $imageUrl,
                 'type' => 'Image',
@@ -131,6 +131,10 @@ trait TraitThumbnail
     /**
      * Helper to create a IIIF URL for the thumbnail
      *
+     * Copy:
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifThumbnailUrl()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifThumbnailUrl()
+     *
      * @param string $baseUri IIIF base URI of the image (URI up to the
      * identifier, w/o trailing slash)
      * @param string $contextUri Version of the API Image supported by the
@@ -139,7 +143,7 @@ trait TraitThumbnail
      * supported by the server
      * @return string IIIF thumbnail URL
      */
-    protected function _iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel): string
+    protected function iiifThumbnailUrl($baseUri, $contextUri, $complianceLevel): string
     {
         // NOTE: this function does not support level0 implementations (need to use `sizes` from the info.json)
         // TODO handle square thumbnails, depending on server capabilities (see 'regionSquare' feature https://iiif.io/api/image/2.1/#profile-description): e.g. $baseUri . '/square/200,200/0/default.jpg';
@@ -161,19 +165,26 @@ trait TraitThumbnail
 
     /**
      * Helper to set the compliance level to the IIIF Image API, based on the
-     * compliance level URI
+     * compliance level URI.
+     *
+     *@see https://iiif.io/api/image/1.1/compliance/
+     *
+     * Copy:
+     * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
      *
      * @param array|string $profile Contents of the `profile` property from the
      * info.json
      * @return string Image API compliance level (returned value: level0 | level1 | level2)
      */
-    protected function _iiifComplianceLevel($profile): string
+    protected function iiifComplianceLevel($profile): string
     {
         // In Image API 2.1, the profile property is a list, and the first entry
         // is the compliance level URI.
         // In Image API 1.1 and 3.0, the profile property is a string.
         if (is_array($profile)) {
-            $profile = $profile[0];
+            $profile = reset($profile);
         }
 
         $profileToLlevels = [
@@ -200,6 +211,10 @@ trait TraitThumbnail
     /**
      * Helper to create the IIIF Image API service block
      *
+     * Copy:
+     * @see \IiifServer\Iiif\TraitThumbnail::iiifImageService()
+     * @see \IiifServer\View\Helper\IiifManifest2::iiifImageService()
+     *
      * @param string $baseUri IIIF base URI of the image (including the
      * identifier slot)
      * @param string $contextUri Version of the API Image supported by the
@@ -211,7 +226,7 @@ trait TraitThumbnail
      *
      * @todo Normalize iiif image service as Service.
      */
-    protected function _iiifImageService($baseUri, $contextUri, $complianceLevelUri): array
+    protected function iiifImageService($baseUri, $contextUri, $complianceLevelUri): array
     {
         $service = [];
         $service['@context'] = $contextUri;

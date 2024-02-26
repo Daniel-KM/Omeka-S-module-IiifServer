@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -131,6 +131,7 @@ class ContentResource extends AbstractResourceType
             return $this->id;
         }
 
+        // Here, the resource is a media.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'content-resource',
             'name' => $this->resource->id(),
@@ -181,7 +182,7 @@ class ContentResource extends AbstractResourceType
         return $languages;
     }
 
-    protected function prepareMediaId(): AbstractType
+    protected function prepareMediaId(): self
     {
         // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
         $ingester = $this->resource->ingester();

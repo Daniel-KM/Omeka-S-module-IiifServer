@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2015-2023 Daniel Berthereau
+ * Copyright 2015-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -88,8 +88,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        // To init TraitRights requires services or a resource, so use vocabulary.
-        // $this->initTraitRights();
+        // To init TraitRights requires Settings, so use vocabulary.
         $this->settings = $this->view->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
 
         $license = $this->rightsResource();

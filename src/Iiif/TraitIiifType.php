@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -39,7 +39,7 @@ trait TraitIiifType
      * @todo Remove this unused variable.
      * @todo Rendering type It's not clealy specified, except in the context. All dctype or not? Other than dctype? Default?
      *
-     * Important: iiif use "Sound", not "Audio".
+     * Warning: Iiif uses "Sound", not "Audio".
      *
      * @link https://iiif.io/api/image/3/context.json
      * @link https://iiif.io/api/presentation/3.0/#type
@@ -244,7 +244,7 @@ trait TraitIiifType
         'http://iiif.io/api/image/3/context.json' => 'Image',
     ];
 
-    protected function initIiifType(): AbstractType
+    protected function initIiifType(): self
     {
         $this->type = null;
 

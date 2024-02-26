@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright 2020-2023 Daniel Berthereau
+ * Copyright 2020-2024 Daniel Berthereau
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software. You can use, modify and/or
@@ -106,7 +106,7 @@ trait TraitMedia
         // 'wmv' => 'video/x-ms-wmv',
     ];
 
-    protected function initMedia(): AbstractType
+    protected function initMedia(): self
     {
         $services = $this->resource->getServiceLocator();
         $controllerPlugins = $services->get('ControllerPluginManager');
