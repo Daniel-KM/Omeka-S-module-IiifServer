@@ -112,22 +112,28 @@ class IiifMediaUrl extends AbstractHelper
             $id = $resource->id();
         }
 
-        if ($this->mediaIdentifier === 'storage_id') {
+        if ($this->mediaIdentifier === 'media_id') {
+            $identifier = $id;
+        } elseif ($this->mediaIdentifier === 'storage_id') {
             $identifier = $resource->storageId();
             $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
         } elseif ($this->mediaIdentifier === 'filename') {
             $identifier = $resource->filename();
+            $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
+        } elseif ($this->mediaIdentifier === 'filename_image') {
+            $identifier = $resource->filename();
             if ($identifier) {
-                $identifier = str_replace('/', '%2F', $identifier);
-                $extension = pathinfo($identifier, PATHINFO_EXTENSION);
-                if ($extension) {
-                    $identifier = mb_substr($identifier, 0, - mb_strlen($extension) - 1);
+                $mediaType = $resource->mediaType();
+                $mainMediaType = strtok((string) $mediaType, '/');
+                // Remove extension only for non-images: the extension is
+                // required for Cantaloupe to find the image.
+                if ($mainMediaType !== 'image') {
+                    $identifier = $resource->storageId() ?: (string) $id;
                 }
+                $identifier = str_replace('/', '%2F', $identifier);
             } else {
                 $identifier = $id;
             }
-        } elseif ($this->mediaIdentifier === 'media_id') {
-            $identifier = $id;
         } else {
             // The identifier will be the identifier set in clean url or the
             // media id.

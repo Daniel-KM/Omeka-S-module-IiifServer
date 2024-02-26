@@ -975,12 +975,13 @@ class ConfigForm extends Form
                 'type' => Element\Radio::class,
                 'options' => [
                     'label' => 'Media identifier', // @translate
-                    'info' => 'Using the full filename allows to use an image server like Cantaloupe sharing the Omeka original files directory.', // @translate
+                    'info' => 'Using the full filename with extension for images allows to use an image server like Cantaloupe sharing the Omeka original files directory. In other cases, this option is not recommended because the identifier should not have an extension.', // @translate
                     'value_options' => [
                         'default' => 'Default', // @translate
                         'media_id' => 'Media id', // @translate
                         'storage_id' => 'Filename', // @translate
-                        'filename' => 'Filename with extension', // @translate
+                        'filename' => 'Filename with extension (all)', // @translate
+                        'filename_image' => 'Filename with extension (image only)', // @translate
                     ],
                 ],
                 'attributes' => [
