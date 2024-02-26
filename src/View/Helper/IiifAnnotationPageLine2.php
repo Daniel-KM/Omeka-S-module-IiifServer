@@ -29,14 +29,12 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\TraitMediaRelated;
 use IiifServer\Iiif\TraitXml;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
 
 class IiifAnnotationPageLine2 extends AbstractHelper
 {
-    use TraitMediaRelated;
     use TraitXml;
 
     /**
@@ -50,19 +48,9 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     protected $fixUtf8;
 
     /**
-     * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
-     */
-    protected $isAllowedMediaContent;
-
-    /**
      * @var \Laminas\Log\Logger
      */
     protected $logger;
-
-    /**
-     * @var \Omeka\Settings\Settings
-     */
-    protected $settings;
 
     /**
      * @var string
@@ -93,30 +81,27 @@ class IiifAnnotationPageLine2 extends AbstractHelper
      *
      * @param MediaRepresentation $resource
      * @param int|string $index Used to set the standard name of the image.
-     * @return object|null
+     * @return array|null
      */
-    public function __invoke(MediaRepresentation $resource, $index)
+    public function __invoke(MediaRepresentation $resource, $index): ?array
     {
         $view = $this->view;
 
-        $this->resource = $resource;
-
-        $services = $resource->getServiceLocator();
-        $plugins = $services->get('ControllerPluginManager');
-
-        $this->logger = $services->get('Omeka\Logger');
-        $this->settings = $services->get('Omeka\Settings');
-        $this->isAllowedMediaContent = $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null;
-
-        $relatedMedia = $this->relatedMediaOcr($resource, $index);
+        /** @see \IiifServer\View\Helper\IiifMediaRelatedOcr $relatedMediaOcr */
+        $relatedMedia = $view->iiifMediaRelatedOcr($resource, $index);
         if (!$relatedMedia) {
             return null;
         }
 
+        $this->resource = $resource;
+
+        $services = $resource->getServiceLocator();
         $config = $services->get('Config');
+        $plugins = $services->get('ControllerPluginManager');
         $this->basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $this->fixUtf8 = $plugins->get('fixUtf8');
-        $this->xmlFixMode = $this->settings->get('iiifsearch_xml_fix_mode', 'no');
+        $this->logger = $services->get('Omeka\Logger');
+        $this->xmlFixMode = $view->setting('iiifsearch_xml_fix_mode', 'no');
 
         $xml = $this->loadXml($relatedMedia);
         if (!$xml) {

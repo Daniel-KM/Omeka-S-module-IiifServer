@@ -27,14 +27,13 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\Iiif;
+namespace IiifServer\View\Helper;
 
+use Access\Mvc\Controller\Plugin\IsAllowedMediaContent;
+use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
 
-/**
- * @todo Merge with TraitMediaInfo.
- */
-trait TraitMediaRelated
+class IiifMediaRelatedOcr extends AbstractHelper
 {
     /**
      * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
@@ -42,9 +41,24 @@ trait TraitMediaRelated
     protected $isAllowedMediaContent;
 
     /**
-     * @var \Omeka\Settings\Settings
+     * @var string
      */
-    protected $settings;
+    protected $matchXmlImage;
+
+    /**
+     * @var bool
+     */
+    protected $skipReservedXml;
+
+    public function __construct(
+        ?IsAllowedMediaContent $isAllowedMediaContent,
+        string $matchXmlImage,
+        bool $skipReservedXml
+    ) {
+        $this->isAllowedMediaContent = $isAllowedMediaContent;
+        $this->matchXmlImage = $matchXmlImage;
+        $this->skipReservedXml = $skipReservedXml;
+    }
 
     /**
      * Get the related media according to the setting (order or name).
@@ -57,23 +71,16 @@ trait TraitMediaRelated
      * @see \IiifServer\View\Helper\IiifManifest2::otherContent()
      * @see \IiifServer\View\Helper\IiifManifest2::relatedMediaOcr()
      */
-    protected function relatedMediaOcr(MediaRepresentation $media, $indexOne): ?MediaRepresentation
+    public function __invoke(MediaRepresentation $media, ?int $indexOne = null): ?MediaRepresentation
     {
         static $relatedMedias = [];
-        static $matchXmlImage;
-        static $skipReservedXml;
 
         $mediaId = $media->id();
         if (array_key_exists($mediaId, $relatedMedias)) {
             return $relatedMedias[$mediaId];
         }
 
-        if ($matchXmlImage === null) {
-            $matchXmlImage = (string) $this->settings->get('iiifserver_xml_image_match', 'order');
-            $skipReservedXml = (bool) $this->settings->get('iiifserver_access_ocr_skip');
-        }
-
-        if ($skipReservedXml
+        if ($this->skipReservedXml
             && $this->isAllowedMediaContent
             && !$this->isAllowedMediaContent->__invoke($media)
         ) {
@@ -81,14 +88,14 @@ trait TraitMediaRelated
             return null;
         }
 
-        $relatedMedias[$mediaId] = $matchXmlImage === 'basename'
+        $relatedMedias[$mediaId] = $this->matchXmlImage === 'basename'
             ? $this->relatedMediaBasename($media)
             : $this->relatedMediaOrder($media, $indexOne);
 
         return $relatedMedias[$mediaId];
     }
 
-    protected function relatedMediaOrder(MediaRepresentation $callingResource, $indexOne): ?MediaRepresentation
+    protected function relatedMediaOrder(MediaRepresentation $callingResource, ?int $indexOne): ?MediaRepresentation
     {
         static $xmlAltoMedias;
         static $imageMediasIndexes;
@@ -100,6 +107,7 @@ trait TraitMediaRelated
             $xmlAltoMedias = [];
             $imageIndex = 0;
             $xmlIndex = 0;
+            // TODO Check if an api query is quicker than a loop on all item media.
             foreach ($callingResource->item()->media() as $media) {
                 $mediaType = $media->mediaType();
                 if ($mediaType === 'application/alto+xml') {
@@ -132,6 +140,7 @@ trait TraitMediaRelated
 
         // Get the ocr for each image.
         $relatedMedia = null;
+        // TODO First filter on media of the item by media type if it is quicker than a loop.
         foreach ($callingResource->item()->media() as $rMedia) {
             if ($rMedia->id() === $callingResourceId) {
                 continue;

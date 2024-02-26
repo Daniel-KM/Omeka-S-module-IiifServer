@@ -36,7 +36,6 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class AnnotationPage extends AbstractResourceType
 {
-    use TraitMediaRelated;
     use TraitXml;
 
     protected $type = 'AnnotationPage';
@@ -226,7 +225,7 @@ class AnnotationPage extends AbstractResourceType
             return $this;
         }
 
-        $relatedMedia = $this->relatedMediaOcr($this->callingResource, null);
+        $relatedMedia = $this->iiifMediaRelatedOcr->__invoke($this->callingResource, null);
         if (!$relatedMedia) {
             return $this;
         }

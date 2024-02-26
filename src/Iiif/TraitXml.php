@@ -47,6 +47,11 @@ trait TraitXml
     protected $fixUtf8;
 
     /**
+     * @var \Laminas\Log\Logger
+     */
+    protected $logger;
+
+    /**
      * @var string
      */
     protected $xmlFixMode;

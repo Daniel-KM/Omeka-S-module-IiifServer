@@ -30,8 +30,6 @@
 
 namespace IiifServer\View\Helper;
 
-use Access\View\Helper\IsAllowedMediaContent;
-use IiifServer\Iiif\TraitMediaRelated;
 use IiifServer\Iiif\TraitDescriptiveRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -46,18 +44,12 @@ use Omeka\Settings\Settings;
  */
 class IiifManifest2 extends AbstractHelper
 {
-    use TraitMediaRelated;
     use TraitDescriptiveRights;
 
     /**
      * @var int
      */
     protected $defaultHeight = 400;
-
-    /**
-     * @var \Access\View\Helper\IsAllowedMediaContent
-     */
-    protected $isAllowedMediaContent;
 
     /**
      * @var \Omeka\View\Helper\Setting
@@ -97,12 +89,10 @@ class IiifManifest2 extends AbstractHelper
     protected $resource;
 
     public function __construct(
-        ?IsAllowedMediaContent $isAllowedMediaContent,
         Settings $settings,
         TempFileFactory $tempFileFactory,
         ?string $basePath
     ) {
-        $this->isAllowedMediaContent = $isAllowedMediaContent;
         $this->settings = $settings;
         $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
@@ -1819,7 +1809,7 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function seeAlso(MediaRepresentation $media, int $indexOne): ?array
     {
-        $relatedMedia = $this->relatedMediaOcr($media, $indexOne);
+        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, $indexOne);
         if (!$relatedMedia) {
             return null;
         }
@@ -1839,7 +1829,7 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function otherContents(MediaRepresentation $media, int $indexOne): ?array
     {
-        $relatedMedia = $this->relatedMediaOcr($media, $indexOne);
+        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, $indexOne);
         if (!$relatedMedia) {
             return null;
         }

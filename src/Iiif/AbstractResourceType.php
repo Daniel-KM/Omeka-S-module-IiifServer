@@ -209,6 +209,11 @@ abstract class AbstractResourceType extends AbstractType
     protected $iiifMediaUrl;
 
     /**
+     * @var \IiifServer\View\Helper\IiifMediaRelatedOcr
+     */
+    protected $iiifMediaRelatedOcr;
+
+    /**
      * @var \IiifServer\View\Helper\IiifTileInfo
      */
     protected $iiifTileInfo;
@@ -313,6 +318,7 @@ abstract class AbstractResourceType extends AbstractType
         $this->easyMeta = $this->services->get('EasyMeta');
         $this->fixUtf8 = $plugins->get('fixUtf8');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
+        $this->iiifMediaRelatedOcr = $viewHelpers->get('iiifMediaRelatedOcr');
         $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
         $this->iiifTypeOfMedia = $viewHelpers->get('iiifTypeOfMedia');
