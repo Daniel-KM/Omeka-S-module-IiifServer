@@ -63,9 +63,7 @@ class IiifCleanIdentifiers extends AbstractHelper
         $isNumeric = is_numeric($first);
         $isResource = is_object($first);
 
-        $returnId = function ($v) {
-            return is_object($v) ? (string) $v->id() : (string) $v;
-        };
+        $returnId = fn ($v) => is_object($v) ? (string) $v->id() : (string) $v;
 
         if (!$this->getIdentifiersFromResources
             || (!$isNumeric && !$isResource)
@@ -102,16 +100,12 @@ class IiifCleanIdentifiers extends AbstractHelper
             }
         } elseif ($this->rawIdentifier) {
             // Fake function for simplicity.
-            $output = function ($v) {
-                return $v;
-            };
+            $output = fn ($v) => $v;
         }
         // Default options.
         else {
             // According to the specifications, the ":" should not be url encoded.
-            $output = function ($v) {
-                return str_replace('%3A', ':', rawurlencode($v));
-            };
+            $output = fn ($v) => str_replace('%3A', ':', rawurlencode($v));
         }
 
         $result = $this->getIdentifiersFromResources->__invoke($in);

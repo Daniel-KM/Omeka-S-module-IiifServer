@@ -122,7 +122,6 @@ class IiifAnnotationList2 extends AbstractHelper
             'subtype' => 'annotation',
         ]);
 
-
         $annotationList = [
             '@context' => 'http://www.shared-canvas.org/ns/context.json',
             '@id' => $baseAnnotationUrl,

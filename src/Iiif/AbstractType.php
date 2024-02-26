@@ -204,7 +204,7 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
                 } elseif (is_array($value)) {
                     // TODO Make items, etc. a generic collection.
                     // There may be sub-arrays (metadata) and list of objects.
-                    if (is_integer(key($value))) {
+                    if (is_int(key($value))) {
                         // Sub-normalization is recursively managed.
                         foreach ($value as $val) {
                             $this[$property][] = is_object($val) && method_exists($val, 'normalize')

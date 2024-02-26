@@ -29,8 +29,8 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\MediaRepresentation;
 use Common\Stdlib\PsrMessage;
+use Omeka\Api\Representation\MediaRepresentation;
 
 trait TraitLinking
 {
@@ -359,7 +359,7 @@ trait TraitLinking
                         'type' => 'SpecificResource',
                         // Here, we are in manifest. So the value is used for
                         // audio/video, so the first media, so index #1.
-                        'source' =>$id,
+                        'source' => $id,
                         'selector' => [
                             'type' => 'PointSelector',
                             't' => $value->value(),

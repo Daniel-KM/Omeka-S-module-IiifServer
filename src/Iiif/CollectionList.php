@@ -124,7 +124,7 @@ class CollectionList extends AbstractType
     public function setServiceLocator(ServiceLocatorInterface $services): self
     {
         $this->services = $services;
-        $viewHelpers = $this->services ->get('ViewHelperManager');
+        $viewHelpers = $this->services->get('ViewHelperManager');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         return $this;
     }
@@ -158,11 +158,11 @@ class CollectionList extends AbstractType
             if (is_object($resource)) {
                 if ($resource instanceof ItemRepresentation) {
                     $referenced = new ReferencedManifest();
-                    $referenced ->setResource($resource);
+                    $referenced->setResource($resource);
                     $items[] = $referenced;
                 } elseif ($resource instanceof ItemSetRepresentation) {
                     $referenced = new ReferencedCollection();
-                    $referenced ->setResource($resource);
+                    $referenced->setResource($resource);
                     $items[] = $referenced;
                 }
             } else {

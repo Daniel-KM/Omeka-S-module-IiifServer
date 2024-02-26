@@ -150,7 +150,7 @@ class IiifManifest2 extends AbstractHelper
 
             // Presentation information.
             'viewingDirection' => '',
-            'viewingHint' =>'',
+            'viewingHint' => '',
 
             // Rights Information.
             'license' => '',
@@ -1303,9 +1303,7 @@ class IiifManifest2 extends AbstractHelper
 
         $rangeToArray = $this->view->plugin('rangeToArray');
 
-        $isInteger = function ($value): bool {
-            return (string) (int) $value === (string) $value;
-        };
+        $isInteger = fn ($value): bool => (string) (int) $value === (string) $value;
 
         // Convert the literal value and prepare all the ranges.
 
@@ -1850,7 +1848,7 @@ class IiifManifest2 extends AbstractHelper
      * module Annotate. There is only one list, so don't return an array of
      * arrays.
      */
-    protected  function otherContentAnnotationList(MediaRepresentation $media, int $indexOne): ?array
+    protected function otherContentAnnotationList(MediaRepresentation $media, int $indexOne): ?array
     {
         static $api;
         static $oaHasSelector;

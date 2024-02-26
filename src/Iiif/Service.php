@@ -29,8 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-
 /**
  *@link https://iiif.io/api/presentation/3.0/#service
  */

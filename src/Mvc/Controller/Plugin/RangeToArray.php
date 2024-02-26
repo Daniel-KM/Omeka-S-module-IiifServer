@@ -55,9 +55,7 @@ class RangeToArray extends AbstractPlugin
         $list = explode(' ', $string);
 
         // Skip fake range and ranges with multiple "-".
-        $list = array_values(array_filter($list, function ($v) {
-            return $v !== '-' && substr_count($v, '-') <= 1;
-        }));
+        $list = array_values(array_filter($list, fn ($v) => $v !== '-' && substr_count($v, '-') <= 1));
 
         if (empty($list)) {
             return [];

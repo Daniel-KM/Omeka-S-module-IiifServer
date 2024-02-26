@@ -77,7 +77,7 @@ class Size extends AbstractType
         $this->services = $resource->getServiceLocator();
 
         $plugins = $this->services->get('ControllerPluginManager');
-        $viewHelpers = $this->services ->get('ViewHelperManager');
+        $viewHelpers = $this->services->get('ViewHelperManager');
 
         $this->imageSize = $plugins->get('imageSize');
         $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
