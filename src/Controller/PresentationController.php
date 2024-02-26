@@ -31,19 +31,12 @@
 namespace IiifServer\Controller;
 
 use Common\Stdlib\PsrMessage;
-use Laminas\Mvc\I18n\Translator;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\Mvc\Exception\NotFoundException;
 
 class PresentationController extends AbstractActionController
 {
     use IiifServerControllerTrait;
-
-    public function __construct(
-        Translator $translator
-    ) {
-        $this->translator = $translator;
-    }
 
     public function indexAction()
     {

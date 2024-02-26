@@ -130,10 +130,12 @@ return [
         ],
     ],
     'controllers' => [
+        'invokables' => [
+            Controller\NoopServerController::class => Controller\NoopServerController::class,
+            Controller\PresentationController::class => Controller\PresentationController::class,
+        ],
         'factories' => [
             Controller\MediaController::class => Service\Controller\MediaControllerFactory::class,
-            Controller\NoopServerController::class => Service\Controller\NoopServerControllerFactory::class,
-            Controller\PresentationController::class => Service\Controller\PresentationControllerFactory::class,
         ],
     ],
     'controller_plugins' => [

@@ -102,7 +102,7 @@ trait TraitMedia
         'xhtml' => 'application/xhtml+xml',
         'xml' => 'text/xml',
         // To support a proprietary format that is not supported by many browsers/os:
-        // Add it in config/config.module.php too.
+        // Add it in config/module.config.php too.
         // 'wmv' => 'video/x-ms-wmv',
     ];
 

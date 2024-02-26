@@ -33,7 +33,6 @@ namespace IiifServer\Controller;
 use Access\Mvc\Controller\Plugin\IsAllowedMediaContent;
 use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Laminas\Mvc\I18n\Translator;
 use Omeka\File\Store\StoreInterface;
 
 /**
@@ -59,12 +58,10 @@ class MediaController extends AbstractActionController
 
     public function __construct(
         StoreInterface $store,
-        Translator $translator,
         ?string $basePath,
         ?IsAllowedMediaContent $isAllowedMediaContent
     ) {
         $this->store = $store;
-        $this->translator = $translator;
         $this->basePath = $basePath;
         $this->isAllowedMediaContent = $isAllowedMediaContent;
     }

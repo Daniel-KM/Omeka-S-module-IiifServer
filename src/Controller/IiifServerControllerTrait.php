@@ -36,16 +36,8 @@ use Omeka\Api\Exception\BadRequestException;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
-/**
- * The translator should be init first.
- */
 trait IiifServerControllerTrait
 {
-    /**
-     * @var \Laminas\Mvc\I18n\Translator
-     */
-    protected $translator;
-
     /**
      * Full path to the files.
      *
@@ -359,6 +351,6 @@ trait IiifServerControllerTrait
     {
         return $exceptionOrMessage instanceof \Exception
             ? $exceptionOrMessage->getMessage()
-            : $this->translator->translate($exceptionOrMessage);
+            : $this->translator()->translate($exceptionOrMessage);
     }
 }

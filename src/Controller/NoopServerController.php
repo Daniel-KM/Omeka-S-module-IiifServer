@@ -31,7 +31,6 @@ namespace IiifServer\Controller;
 
 use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Laminas\Mvc\I18n\Translator;
 
 class NoopServerController extends AbstractActionController
 {
@@ -41,12 +40,6 @@ class NoopServerController extends AbstractActionController
      * @var string
      */
     protected $routeInfo = 'imageserver/info';
-
-    public function __construct(
-        Translator $translator
-    ) {
-        $this->translator = $translator;
-    }
 
     public function infoAction()
     {
