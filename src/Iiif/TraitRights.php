@@ -34,6 +34,11 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 trait TraitRights
 {
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * List of allowed urls for rights for api 3.
      *
      * Creative commons machine readable statements are http, but the https are
@@ -49,17 +54,6 @@ trait TraitRights
         'https://rightsstatements.org/',
         // Other uris are allowed only by iiif extensions.
     ];
-
-    /**
-     * @var \Omeka\Settings\Settings
-     */
-    protected $settings;
-
-    protected function initTraitRights(): self
-    {
-        $this->settings ??= $this->resource->getServiceLocator()->get('Omeka\Settings');
-        return $this;
-    }
 
     /**
      * Get the license of the resource.

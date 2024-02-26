@@ -34,6 +34,16 @@ use Omeka\Api\Representation\MediaRepresentation;
 trait TraitMediaInfo
 {
     /**
+     * @var array
+     */
+    protected $mediaInfos = [];
+
+    /**
+     * @var array
+     */
+    protected $mediaInfosSingle = [];
+
+    /**
      * Get the iiif type according to the type of the media.
      *
      * It is not recommended to loop directly on media info: it can store media
@@ -51,11 +61,11 @@ trait TraitMediaInfo
             return null;
         }
         $mediaId = $media->id();
-        if (!array_key_exists($mediaId, $this->_storage['media_info'] ?? [])) {
+        if (!array_key_exists($mediaId, $this->mediaInfos)) {
             $this->prepareMediaInfoSingle($media);
-            return $this->_storage['media_info_single'][$mediaId];
+            return $this->mediaInfosSingle[$mediaId];
         }
-        return $this->_storage['media_info'][$mediaId];
+        return $this->mediaInfos[$mediaId];
     }
 
     /**
@@ -69,10 +79,10 @@ trait TraitMediaInfo
             return null;
         }
         $mediaId = $media->id();
-        if (!array_key_exists($mediaId, $this->_storage['media_info_single'] ?? [])) {
+        if (!array_key_exists($mediaId, $this->mediaInfosSingle)) {
             $this->prepareMediaInfoSingle($media);
         }
-        return $this->_storage['media_info_single'][$mediaId];
+        return $this->mediaInfosSingle[$mediaId];
     }
 
     /**
@@ -108,7 +118,7 @@ trait TraitMediaInfo
         // TODO Store media-type too.
 
         // Since this method is called only by manifest, it should be empty.
-        $this->_storage['media_info'] ??= [];
+        $this->mediaInfos = [];
 
         $canvasPaintings = [];
         $canvasSupplementings = [];
@@ -137,7 +147,8 @@ trait TraitMediaInfo
             $mediaId = $media->id();
             $mediaIds[] = $mediaId;
             $result[$mediaId] = null;
-            $contentResource = new ContentResource($media);
+            $contentResource = new ContentResource();
+            $contentResource->setResource($media);
             if ($contentResource->hasIdAndType()) {
                 $iiifType = $contentResource->type();
                 if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
@@ -251,7 +262,7 @@ trait TraitMediaInfo
             }
         }
 
-        $this->_storage['media_info'] += $result;
+        $this->mediaInfos += $result;
 
         return $this;
     }
@@ -263,23 +274,22 @@ trait TraitMediaInfo
     {
         $mediaId = $media->id();
 
-        $this->_storage['media_info_single'] ??= [];
-
-        $contentResource = new ContentResource($media);
+        $contentResource = new ContentResource();
+        $contentResource->setResource($media);
         if ($contentResource->hasIdAndType()) {
             $iiifType = $contentResource->type();
-            $this->_storage['media_info_single'][$mediaId]['content'] = $contentResource;
-            $this->_storage['media_info_single'][$mediaId]['on'] = 'Canvas';
+            $this->mediaInfosSingle[$mediaId]['content'] = $contentResource;
+            $this->mediaInfosSingle[$mediaId]['on'] = 'Canvas';
             if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
-                $this->_storage['media_info_single'][$mediaId]['key'] = 'annotation';
-                $this->_storage['media_info_single'][$mediaId]['motivation'] = 'painting';
+                $this->mediaInfosSingle[$mediaId]['key'] = 'annotation';
+                $this->mediaInfosSingle[$mediaId]['motivation'] = 'painting';
             } else {
-                $this->_storage['media_info_single'][$mediaId]['key'] = null;
-                $this->_storage['media_info_single'][$mediaId]['motivation'] = null;
+                $this->mediaInfosSingle[$mediaId]['key'] = null;
+                $this->mediaInfosSingle[$mediaId]['motivation'] = null;
             }
         } else {
             // Cannot be a canvas.
-            $this->_storage['media_info_single'][$mediaId] = null;
+            $this->mediaInfosSingle[$mediaId] = null;
         }
 
         return $this;

@@ -29,6 +29,9 @@
 
 namespace IiifServer\Iiif;
 
+use Common\Stdlib\PsrMessage;
+use IiifServer\Iiif\Exception\RuntimeException;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**
@@ -111,13 +114,23 @@ class ContentResource extends AbstractResourceType
      */
     protected $resource;
 
-    public function __construct(MediaRepresentation $resource, array $options = null)
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
-        parent::__construct($resource, $options);
-        $this->initIiifType();
-        $this->initMedia();
-        $this->initThumbnail();
-        $this->prepareMediaId();
+        parent::setResource($resource);
+
+        if (!$resource instanceof MediaRepresentation) {
+            $message = new PsrMessage(
+                'Resource #{resource_id}: A media is required to build a ContentResource.', // @translate
+                ['resource_id' => $resource->id()]
+            );
+            $this->logger->err($message->getMessage(), $message->getContext());
+            throw new RuntimeException((string) $message);
+        }
+
+        $this
+            ->initIiifType()
+            ->prepareMediaId();
+        return $this;
     }
 
     public function hasIdAndType(): bool

@@ -29,52 +29,31 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitImage
+trait TraitDescriptiveLabel
 {
-    use TraitThumbnail;
-
-    /**
-     * @var \IiifServer\View\Helper\IiifMediaUrl
-     */
-    protected $iiifMediaUrl;
-
-    /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
-     */
-    protected $imageSize;
-
-    /**
-     * @var array
-     */
-    protected $imageSizesByType = [];
-
-    public function isImage(): bool
+    public function label(): ?ValueLanguage
     {
-        return $this->type === 'Image';
-    }
-
-    public function width(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['width'] : null;
-    }
-
-    public function height(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['height'] : null;
-    }
-
-    protected function imageSize(string $type = 'original'): ?array
-    {
-        if (!$this->isImage()) {
+        if (!property_exists($this, 'resource') || !$this->resource) {
             return null;
         }
 
-        if (!array_key_exists($type, $this->imageSizesByType)) {
-            $this->imageSizesByType[$type] = $this->imageSize->__invoke($this->resource->primaryMedia(), $type);
+        // displayTitle() can't be used, because language is needed.
+        $values = [];
+        $template = $this->resource->resourceTemplate();
+        if ($template) {
+            $titleProperty = $template->titleProperty();
+            if ($titleProperty) {
+                $titlePropertyTerm = $titleProperty->term();
+                if ($titlePropertyTerm !== 'dcterms:title') {
+                    $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
+                }
+            }
         }
 
-        return $this->imageSizesByType[$type];
+        if (empty($values)) {
+            $values = $this->resource->value('dcterms:title', ['all' => true]);
+        }
+
+        return new ValueLanguage($values, false, '[Untitled]'); // @translate
     }
 }

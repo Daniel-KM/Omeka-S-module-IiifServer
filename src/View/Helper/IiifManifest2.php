@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use Access\View\Helper\IsAllowedMediaContent;
 use IiifServer\Iiif\TraitMediaRelated;
 use IiifServer\Iiif\TraitRights;
 use Laminas\View\Helper\AbstractHelper;
@@ -38,6 +39,7 @@ use Omeka\Api\Representation\AssetRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\File\TempFileFactory;
+use Omeka\Settings\Settings;
 
 /**
  * The casting to (object) that was used because the json encoding converts array into object or array, was removed.
@@ -53,9 +55,19 @@ class IiifManifest2 extends AbstractHelper
     protected $defaultHeight = 400;
 
     /**
+     * @var \Access\View\Helper\IsAllowedMediaContent
+     */
+    protected $isAllowedMediaContent;
+
+    /**
      * @var \Omeka\View\Helper\Setting
      */
     protected $setting;
+
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
 
     /**
      * @var \Omeka\File\TempFileFactory
@@ -85,9 +97,13 @@ class IiifManifest2 extends AbstractHelper
     protected $resource;
 
     public function __construct(
+        ?IsAllowedMediaContent $isAllowedMediaContent,
+        Settings $settings,
         TempFileFactory $tempFileFactory,
         ?string $basePath
     ) {
+        $this->isAllowedMediaContent = $isAllowedMediaContent;
+        $this->settings = $settings;
         $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
     }
@@ -101,8 +117,6 @@ class IiifManifest2 extends AbstractHelper
     public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
         $this->resource = $resource;
-
-        $this->initTraitRights();
 
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {

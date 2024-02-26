@@ -37,6 +37,16 @@ use Omeka\Api\Representation\MediaRepresentation;
 trait TraitMediaRelated
 {
     /**
+     * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
+     */
+    protected $isAllowedMediaContent;
+
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * Get the related media according to the setting (order or name).
      *
      * @todo Factorize IiifAnnotationPageLine2, IiifManifest2 and AnnotationPage.
@@ -51,8 +61,7 @@ trait TraitMediaRelated
     {
         static $relatedMedias = [];
         static $matchXmlImage;
-        /** @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent $isAllowedMediaContent */
-        static $isAllowedMediaContent;
+        static $skipReservedXml;
 
         $mediaId = $media->id();
         if (array_key_exists($mediaId, $relatedMedias)) {
@@ -60,26 +69,21 @@ trait TraitMediaRelated
         }
 
         if ($matchXmlImage === null) {
-            $services = $media->getServiceLocator();
-            $settings = $this->settings ?? $services->get('Omeka\Settings');
-            $matchXmlImage = $settings->get('iiifserver_xml_image_match', 'order');
-            $skipReservedXml = (bool) $settings->get('iiifserver_access_ocr_skip');
-            if ($skipReservedXml) {
-                $plugins = $services->get('ControllerPluginManager');
-                $isAllowedMediaContent = $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null;
-            }
+            $matchXmlImage = (string) $this->settings->get('iiifserver_xml_image_match', 'order');
+            $skipReservedXml = (bool) $this->settings->get('iiifserver_access_ocr_skip');
         }
 
-        if ($isAllowedMediaContent && !$isAllowedMediaContent($media)) {
+        if ($skipReservedXml
+            && $this->isAllowedMediaContent
+            && !$this->isAllowedMediaContent->__invoke($media)
+        ) {
             $relatedMedias[$mediaId] = null;
             return null;
         }
 
-        if ($matchXmlImage === 'basename') {
-            $relatedMedias[$mediaId] = $this->relatedMediaBasename($media);
-        } else {
-            $relatedMedias[$mediaId] = $this->relatedMediaOrder($media, $indexOne);
-        }
+        $relatedMedias[$mediaId] = $matchXmlImage === 'basename'
+            ? $this->relatedMediaBasename($media)
+            : $this->relatedMediaOrder($media, $indexOne);
 
         return $relatedMedias[$mediaId];
     }

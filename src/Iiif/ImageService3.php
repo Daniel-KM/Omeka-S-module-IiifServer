@@ -29,6 +29,9 @@
 
 namespace IiifServer\Iiif;
 
+use Common\Stdlib\PsrMessage;
+use IiifServer\Iiif\Exception\RuntimeException;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**
@@ -81,32 +84,29 @@ class ImageService3 extends AbstractResourceType
     ];
 
     /**
-     * @var bool
-     */
-    protected $hasImageServer;
-
-    /**
-     * @var ?\ImageServer\Mvc\Controller\Plugin\TileMediaInfo
-     */
-    protected $tileMediaInfo;
-
-    /**
      * @var \Omeka\Api\Representation\MediaRepresentation
      */
     protected $resource;
 
-    public function __construct(MediaRepresentation $resource, array $options = null)
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
-        parent::__construct($resource, $options);
+        parent::setResource($resource);
 
-        $plugins = $this->resource->getServiceLocator()->get('ControllerPluginManager');
-        $this->hasImageServer = $plugins->has('tileMediaInfo');
-        $this->tileMediaInfo = $this->hasImageServer ? $plugins->get('tileMediaInfo') : null;
+        if (!$resource instanceof MediaRepresentation) {
+            $message = new PsrMessage(
+                'Resource #{resource_id}: A media is required to build an ImageService.', // @translate
+                ['resource_id' => $resource->id()]
+            );
+            $this->logger->err($message->getMessage(), $message->getContext());
+            throw new RuntimeException((string) $message);
+        }
 
-        // TODO Use subclass to manage image or media. Currently, only image.
-        $this->initImage();
+        return $this;
     }
 
+    /**
+     * @todo Use subclass to manage image or media. Currently, only image.
+     */
     public function isImage(): bool
     {
         return true;
@@ -174,7 +174,10 @@ class ImageService3 extends AbstractResourceType
         // TODO Use the config for specific types.
         $imageTypes = ['medium', 'large', 'original'];
         foreach ($imageTypes as $imageType) {
-            $imageSize = new Size($this->resource, ['image_type' => $imageType]);
+            $imageSize = new Size();
+            $imageSize
+                ->setOptions(['image_type' => $imageType])
+                ->setResource($this->resource);
             if ($imageSize->hasSize()) {
                 $sizes[] = $imageSize;
             }
@@ -185,7 +188,7 @@ class ImageService3 extends AbstractResourceType
 
     public function tiles(): ?array
     {
-        if (!$this->hasImageServer || !$this->isImage()) {
+        if (!$this->hasModuleImageServer || !$this->isImage()) {
             return null;
         }
 
@@ -194,7 +197,11 @@ class ImageService3 extends AbstractResourceType
         // TODO Use a standard json-serializable TileInfo.
         $tilingData = $this->tileMediaInfo->__invoke($this->resource);
         if ($tilingData) {
-            $iiifTileInfo = new \ImageServer\Iiif\Tile($this->resource, ['tilingData' => $tilingData]);
+            $iiifTileInfo = new \ImageServer\Iiif\Tile();
+            $iiifTileInfo
+                // TODO Options should be set first for now for init, done in setResource().
+                ->setOptions(['tilingData' => $tilingData])
+                ->setResource($this->resource);
             if ($iiifTileInfo->hasTilingInfo()) {
                 $tiles[] = $iiifTileInfo;
             }
@@ -220,10 +227,10 @@ class ImageService3 extends AbstractResourceType
         $url = null;
         $orUrl = false;
 
-        $param = $this->settings->get($this->hasImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
+        $param = $this->settings->get($this->hasModuleImageServer ? 'imageserver_info_rights' : 'iiifserver_manifest_rights');
         switch ($param) {
             case 'url':
-                if ($this->hasImageServer) {
+                if ($this->hasModuleImageServer) {
                     $url = $this->settings->get('imageserver_info_rights_uri') ?: $this->settings->get('imageserver_info_rights_url');
                 } else {
                     $url = $this->settings->get('iiifserver_manifest_rights_uri') ?: $this->settings->get('iiifserver_manifest_rights_url');
@@ -233,7 +240,7 @@ class ImageService3 extends AbstractResourceType
                 $orUrl = true;
                 // no break.
             case 'property':
-                $property = $this->settings->get($this->hasImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
+                $property = $this->settings->get($this->hasModuleImageServer ? 'imageserver_info_rights_property' : 'iiifserver_manifest_rights_property');
                 $url = (string) $this->resource->value($property);
                 break;
             case 'item_or_url':
@@ -255,7 +262,7 @@ class ImageService3 extends AbstractResourceType
         }
 
         if (!$url && $orUrl) {
-            if ($this->hasImageServer) {
+            if ($this->hasModuleImageServer) {
                 $url = $this->settings->get('imageserver_info_rights_uri') ?: $this->settings->get('imageserver_info_rights_url');
             } else {
                 $url = $this->settings->get('iiifserver_manifest_rights_uri') ?: $this->settings->get('iiifserver_manifest_rights_url');

@@ -45,7 +45,12 @@ class IiifCanvas3 extends AbstractHelper
      */
     public function __invoke(MediaRepresentation $media, $index)
     {
-        $canvas = new Canvas($media, ['index' => $index]);
+        $canvas = new Canvas();
+        $canvas
+            // TODO Options should be set first for now for init, done in setResource().
+            ->setOptions(['index' => $index])
+            ->setResource($media)
+            ->normalize();
 
         // Give possibility to customize the manifest.
         $resource = $media;
@@ -53,7 +58,7 @@ class IiifCanvas3 extends AbstractHelper
         $type = 'media';
         $params = compact('format', 'canvas', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $canvas->isValid(true);
+        $canvas->normalize();
         return $canvas;
     }
 }

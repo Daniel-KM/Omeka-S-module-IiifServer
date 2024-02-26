@@ -41,6 +41,11 @@ class IiifCollectionList2 extends AbstractHelper
     use TraitRights;
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * Get the IIIF Collection manifest for the specified list of resources or url.
      *
      * @todo Use a representation/context with a getResource(), a toString()

@@ -66,7 +66,11 @@ class IiifInfo3 extends AbstractHelper
      */
     public function __invoke(MediaRepresentation $media): ImageService3
     {
-        $info = new ImageService3($media, ['version' => '3']);
+        $info = new ImageService3();
+        $info
+            ->setOptions(['version' => '3'])
+            ->setResource($media)
+            ->normalize();
 
         // Give possibility to customize the manifest.
         $resource = $media;
@@ -74,7 +78,8 @@ class IiifInfo3 extends AbstractHelper
         $type = 'image';
         $params = compact('format', 'info', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $info->isValid(true);
+        // Exception may be thrown.
+        $info->normalize();
         return $info;
     }
 }

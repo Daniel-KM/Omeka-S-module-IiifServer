@@ -29,8 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-
 /**
  *@link https://iiif.io/api/presentation/3.0/#54-range
  */
@@ -112,10 +110,12 @@ class Range extends AbstractResourceType
 
     /**
      * The option "index" or "target_name" is required.
+     *
+     * @todo Move to construct?
      */
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
-        parent::__construct($resource, $options);
+        parent::setOptions($options);
         $this->options['target_type'] = 'range';
         if (empty($this->options['target_name'])) {
             $name = $this->options['index'] ?? '0';
@@ -123,6 +123,7 @@ class Range extends AbstractResourceType
                 ? 'p' . $name
                 : $name;
         }
+        return $this;
     }
 
     public function id(): ?string

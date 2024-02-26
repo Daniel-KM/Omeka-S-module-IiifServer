@@ -53,7 +53,10 @@ class IiifAnnotationPageLine3 extends AbstractHelper
         $opts['callingMotivation'] = 'annotation';
         $opts['isDereferenced'] = true;
         foreach ($resource->item()->media() as $media) {
-            $annotationPage = new AnnotationPage($media, $opts);
+            $annotationPage = new AnnotationPage();
+            $annotationPage
+                ->setOptions($opts)
+                ->setResource($media);
             if ($annotationPage->id()) {
                 break;
             }
@@ -63,12 +66,14 @@ class IiifAnnotationPageLine3 extends AbstractHelper
             return null;
         }
 
+        $annotationPage->normalize();
+
         // Give possibility to customize the manifest.
         $format = 'annotationPage';
         $type = 'media';
         $params = compact('format', 'annotationPage', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $annotationPage->isValid(true);
+        $annotationPage->normalize();
         return $annotationPage;
     }
 }

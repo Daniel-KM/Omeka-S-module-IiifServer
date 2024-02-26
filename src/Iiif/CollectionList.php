@@ -112,60 +112,26 @@ class CollectionList extends AbstractType
     ];
 
     /**
-     * @var \Omeka\View\Helper\Api
-     */
-    protected $api;
-
-    /**
-     * @var \IiifServer\View\Helper\IiifCleanIdentifiers
-     */
-    protected $iiifCleanIdentifiers;
-
-    /**
      * @var \IiifServer\View\Helper\IiifUrl
      */
     protected $iiifUrl;
 
     /**
-     * @var \IiifServer\View\Helper\PublicResourceUrl
-     */
-    protected $publicResourceUrl;
-
-    /**
-     * @var \Omeka\Settings\Settings
-     */
-    protected $settings;
-
-    /**
-     * @var \Laminas\View\Helper\Url
-     */
-    protected $urlHelper;
-
-    /**
-     * @var array
-     */
-    protected $options;
-
-    /**
-     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]
+     * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation[]|string[]
      */
     protected $resources;
 
-    public function __construct(array $resources = null, array $options = null)
-    {
-        $this->resources = $resources;
-        $this->options = $options;
-    }
-
     public function setServiceLocator(ServiceLocatorInterface $services): self
     {
-        $viewHelpers = $services->get('ViewHelperManager');
-        $this->api = $viewHelpers->get('api');
-        $this->settings = $services->get('Omeka\Settings');
-        $this->urlHelper = $viewHelpers->get('url');
-        $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
+        $this->services = $services;
+        $viewHelpers = $this->services ->get('ViewHelperManager');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
-        $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
+        return $this;
+    }
+
+    public function setResources(array $resources): self
+    {
+        $this->resources = $resources;
         return $this;
     }
 
@@ -191,9 +157,13 @@ class CollectionList extends AbstractType
         foreach ($this->resources as $resource) {
             if (is_object($resource)) {
                 if ($resource instanceof ItemRepresentation) {
-                    $items[] = new ReferencedManifest($resource);
+                    $referenced = new ReferencedManifest();
+                    $referenced ->setResource($resource);
+                    $items[] = $referenced;
                 } elseif ($resource instanceof ItemSetRepresentation) {
-                    $items[] = new ReferencedCollection($resource);
+                    $referenced = new ReferencedCollection();
+                    $referenced ->setResource($resource);
+                    $items[] = $referenced;
                 }
             } else {
                 $protocol = substr((string) $resource, 0, 7);
@@ -210,23 +180,26 @@ class CollectionList extends AbstractType
         return $items;
     }
 
-    protected function getCleanContent(): array
+    /**
+     * For collection items, that may be empty after a search.
+     *
+     * {@inheritDoc}
+     * @see \IiifServer\Iiif\AbstractType::filterContentFilled()
+     */
+    protected function filterContentFilled($v, $k): bool
     {
-        return $this->content = array_filter($this->getContent(), function ($v, $k) {
-            if ($k === 'items') {
-                return true;
-            }
-            if (is_array($v) || is_scalar($v) || is_null($v) || is_bool($v)) {
-                return !empty($v);
-            }
-            // Normally, there is no object anymore.
-            if ($v instanceof \ArrayObject) {
-                return (bool) $v->count();
-            }
-            if ($v instanceof \JsonSerializable) {
-                return (bool) $v->jsonSerialize();
-            }
+        if ($k === 'items') {
+            return true;
+        }
+        if ($v === '0') {
+            return true;
+        }
+        if (is_array($v) || is_scalar($v) || is_null($v)) {
             return !empty($v);
-        }, ARRAY_FILTER_USE_BOTH);
+        }
+        if ($v instanceof \JsonSerializable) {
+            return (bool) $v->jsonSerialize();
+        }
+        return !empty($v);
     }
 }

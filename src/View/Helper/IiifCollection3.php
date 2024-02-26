@@ -48,14 +48,17 @@ class IiifCollection3 extends AbstractHelper
      */
     public function __invoke(AbstractResourceEntityRepresentation $resource)
     {
-        $collection = new Collection($resource);
+        $collection = new Collection();
+        $collection
+            ->setResource($resource)
+            ->normalize();
 
         // Give possibility to customize the manifest.
         $format = 'collection';
         $type = 'collection';
         $params = compact('format', 'collection', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $collection->isValid(true);
+        $collection->normalize();
         return $collection;
     }
 }

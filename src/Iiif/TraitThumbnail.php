@@ -37,22 +37,14 @@ trait TraitThumbnail
     protected $defaultHeight = 400;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
-     */
-    protected $imageSize;
-
-    /**
      * @var \IiifServer\View\Helper\IiifMediaUrl
      */
     protected $iiifMediaUrl;
 
-    protected function initThumbnail(): self
-    {
-        $services = $this->resource->getServiceLocator();
-        $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
-        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
-        return $this;
-    }
+    /**
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     */
+    protected $imageSize;
 
     /**
      * @todo Normalize and factorize as a standard image.

@@ -30,7 +30,6 @@
 namespace IiifServer\Iiif\Annotation;
 
 use IiifServer\Iiif\AbstractResourceType;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class TextualBody extends AbstractResourceType
 {
@@ -45,14 +44,16 @@ class TextualBody extends AbstractResourceType
         'type' => self::REQUIRED,
     ];
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
-        parent::__construct($resource, $options);
-        $this->_storage['value'] = isset($options['value']) ? (string) $options['value'] : '';
+        $this->cache['value'] = isset($options['value'])
+            ? (string) $options['value']
+            : null;
+        return parent::setOptions($options);
     }
 
     public function value(): ?string
     {
-        return $this->_storage['value'];
+        return $this->cache['value'] ?? null;
     }
 }

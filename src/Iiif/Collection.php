@@ -29,7 +29,6 @@
 
 namespace IiifServer\Iiif;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemSetRepresentation;
 
 /**
@@ -115,20 +114,6 @@ class Collection extends AbstractResourceType
         'hidden' => self::NOT_ALLOWED,
     ];
 
-    /**
-     * @var \Omeka\View\Helper\Api
-     */
-    protected $api;
-
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
-    {
-        parent::__construct($resource, $options);
-        $viewHelpers = $resource->getServiceLocator()->get('ViewHelperManager');
-        $this->api = $viewHelpers->get('api');
-        $this->initLinking();
-        $this->initThumbnail();
-    }
-
     public function id(): ?string
     {
         // TODO Check if the id is the same for items (see manifest for 2.1)
@@ -141,7 +126,9 @@ class Collection extends AbstractResourceType
         if ($this->resource instanceof ItemSetRepresentation) {
             $items = [];
             foreach ($this->api->search('items', ['item_set_id' => $this->resource->id()])->getContent() as $item) {
-                $items[] = new ReferencedManifest($item);
+                $referenced = new ReferencedManifest();
+                $referenced->setResource($item);
+                $items[] = $referenced;
             }
             return $items;
         }
@@ -189,25 +176,22 @@ class Collection extends AbstractResourceType
      * For collection items, that may be empty after a search.
      *
      * {@inheritDoc}
-     * @see \IiifServer\Iiif\AbstractType::getCleanContent()
+     * @see \IiifServer\Iiif\AbstractType::filterContentFilled()
      */
-    protected function getCleanContent(): array
+    protected function filterContentFilled($v, $k): bool
     {
-        return $this->content = array_filter($this->getContent(), function ($v, $k) {
-            if ($k === 'items') {
-                return true;
-            }
-            if (is_array($v) || is_scalar($v) || is_null($v) || is_bool($v)) {
-                return !empty($v);
-            }
-            // Normally, there is no object anymore.
-            if ($v instanceof \ArrayObject) {
-                return (bool) $v->count();
-            }
-            if ($v instanceof \JsonSerializable) {
-                return (bool) $v->jsonSerialize();
-            }
+        if ($k === 'items') {
+            return true;
+        }
+        if ($v === '0') {
+            return true;
+        }
+        if (is_array($v) || is_scalar($v) || is_null($v)) {
             return !empty($v);
-        }, ARRAY_FILTER_USE_BOTH);
+        }
+        if ($v instanceof \JsonSerializable) {
+            return (bool) $v->jsonSerialize();
+        }
+        return !empty($v);
     }
 }

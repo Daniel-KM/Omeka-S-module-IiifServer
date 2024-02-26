@@ -61,11 +61,12 @@ class Service extends AbstractType
     protected $id;
 
     /**
-     * @var array
+     * @todo Move options to internal array.
+     *
+     * {@inheritDoc}
+     * @see \IiifServer\Iiif\AbstractType::setOptions()
      */
-    protected $options;
-
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = [])
+    public function setOptions(array $options): self
     {
         if (isset($options['@id'])) {
             $options['id'] = $options['@id'];
@@ -75,7 +76,7 @@ class Service extends AbstractType
             $options['type'] = $options['@type'];
             unset($options['@type']);
         }
-        $this->options = array_filter($options);
+        return parent::setOptions(array_filter($options));
     }
 
     public function getContent(): array

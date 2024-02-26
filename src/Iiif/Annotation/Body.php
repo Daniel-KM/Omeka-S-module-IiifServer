@@ -31,7 +31,6 @@ namespace IiifServer\Iiif\Annotation;
 
 use IiifServer\Iiif\AbstractResourceType;
 use IiifServer\Iiif\TraitMedia;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * @todo The body should be created according or by the image server.
@@ -86,7 +85,7 @@ class Body extends AbstractResourceType
      */
     protected $contentResource;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
         $this->contentResource = $options['content'];
         unset($options['content']);
@@ -105,18 +104,7 @@ class Body extends AbstractResourceType
             $this->propertyRequirements['duration'] = self::REQUIRED;
         }
 
-        parent::__construct($resource, $options);
-
-        $this->initMedia();
-
-        $services = $this->resource->getServiceLocator();
-        $viewHelpers = $services->get('ViewHelperManager');
-        $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
-        $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
-        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
-
-        $this->imageApiVersion = $this->settings->get('iiifserver_media_api_default_version', '2');
-        $this->imageApiSupportedVersions = (array) $this->settings->get('iiifserver_media_api_supported_versions', ['2/2', '3/2']);
+        return parent::setOptions($options);
     }
 
     public function id(): ?string
@@ -140,7 +128,7 @@ class Body extends AbstractResourceType
             if (empty($size)) {
                 $size = $this->imageSize->__invoke($this->resource, 'large');
                 if (empty($size)) {
-                    $iiifSize = $this->imageApiVersion === '3' ? 'max' : 'full';
+                    $iiifSize = $this->iiifImageApiVersion === '3' ? 'max' : 'full';
                 } else {
                     $iiifSize = $size['width'] . ',' . $size['height'];
                 }
@@ -155,7 +143,7 @@ class Body extends AbstractResourceType
                 $iiifSize = $size['width'] . ',' . $size['height'];
             }
 
-            return $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/media', $this->imageApiVersion, [
+            return $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/media', $this->iiifImageApiVersion, [
                 'region' => 'full',
                 'size' => $iiifSize,
                 'rotation' => 0,
@@ -166,7 +154,7 @@ class Body extends AbstractResourceType
 
         if ($this->contentResource->isAudioVideo()) {
             // TODO Manage iiif 3 audio video.
-            return $this->iiifMediaUrl->__invoke($this->resource, 'mediaserver/media', $this->imageApiVersion, [
+            return $this->iiifMediaUrl->__invoke($this->resource, 'mediaserver/media', $this->iiifImageApiVersion, [
                 'format' => $this->resource->extension(),
             ]);
         }
@@ -222,7 +210,7 @@ class Body extends AbstractResourceType
             }
 
             $imageResourceServices = [];
-            foreach ($this->imageApiSupportedVersions as $supportedVersion) {
+            foreach ($this->iiifImageApiSupportedVersions as $supportedVersion) {
                 $service = strtok($supportedVersion, '/');
                 $level = strtok('/') ?: '0';
                 $imageResourceService = [

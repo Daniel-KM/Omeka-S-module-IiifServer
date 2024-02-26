@@ -42,7 +42,17 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     /**
      * @var string
      */
-    protected $_baseUrl;
+    protected $basePath;
+
+    /**
+     * @var \IiifServer\Mvc\Controller\Plugin\FixUtf8
+     */
+    protected $fixUtf8;
+
+    /**
+     * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
+     */
+    protected $isAllowedMediaContent;
 
     /**
      * @var \Laminas\Log\Logger
@@ -50,9 +60,24 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     protected $logger;
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
+     * @var string
+     */
+    protected $xmlFixMode;
+
+    /**
      * @var \Omeka\Api\Representation\MediaRepresentation
      */
     protected $resource;
+
+    /**
+     * @var string
+     */
+    protected $_baseUrl;
 
     /**
      * Get the IIIF annotation page with lines for the specified resource.
@@ -73,16 +98,25 @@ class IiifAnnotationPageLine2 extends AbstractHelper
     public function __invoke(MediaRepresentation $resource, $index)
     {
         $view = $this->view;
-        $plugins = $view->getHelperPluginManager();
-        $this->logger = $plugins->get('logger')();
+
+        $this->resource = $resource;
+
+        $services = $resource->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
+
+        $this->logger = $services->get('Omeka\Logger');
+        $this->settings = $services->get('Omeka\Settings');
+        $this->isAllowedMediaContent = $plugins->has('isAllowedMediaContent') ? $plugins->get('isAllowedMediaContent') : null;
 
         $relatedMedia = $this->relatedMediaOcr($resource, $index);
         if (!$relatedMedia) {
             return null;
         }
 
-        $this->resource = $resource;
-        $this->initTraitXml();
+        $config = $services->get('Config');
+        $this->basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $this->fixUtf8 = $plugins->get('fixUtf8');
+        $this->xmlFixMode = $this->settings->get('iiifsearch_xml_fix_mode', 'no');
 
         $xml = $this->loadXml($relatedMedia);
         if (!$xml) {

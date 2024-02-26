@@ -51,16 +51,6 @@ trait TraitXml
      */
     protected $xmlFixMode;
 
-    protected function initTraitXml(): self
-    {
-        $services = $this->resource->getServiceLocator();
-        $config = $services->get('Config');
-        $this->basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        $this->fixUtf8 = $services->get('ControllerPluginManager')->get('fixUtf8');
-        $this->xmlFixMode = $services->get('Omeka\Settings')->get('iiifsearch_xml_fix_mode', 'no');
-        return $this;
-    }
-
     /**
      * @see \IiifSearch\View\Helper\IiifSearch::loadXml()
      *

@@ -31,6 +31,11 @@ namespace IiifServer\Iiif;
 
 trait TraitViewing
 {
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
     protected $viewingDirections = [
         'left-to-right',
         'right-to-left',

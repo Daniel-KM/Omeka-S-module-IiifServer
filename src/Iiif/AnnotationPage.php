@@ -30,7 +30,6 @@
 namespace IiifServer\Iiif;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Omeka\Api\Representation\MediaRepresentation;
 
 /**
  *@link https://iiif.io/api/presentation/3.0/#55-annotation-page
@@ -123,25 +122,36 @@ class AnnotationPage extends AbstractResourceType
 
     protected $isDereferenced = false;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
-        parent::__construct($resource, $options);
+        parent::setOptions($options);
+
         $this->callingResource = $options['callingResource'] ?? null;
         $this->callingMotivation = $options['callingMotivation'] ?? null;
         $this->isDereferenced = !empty($options['isDereferenced']);
         if ($this->isDereferenced) {
             $this->propertyRequirements['@context'] = self::REQUIRED;
         }
+
+        return $this;
+    }
+
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
+    {
+        parent::setResource($resource);
+
         // Xml is used only for annotation.
         if ($this->callingMotivation === 'annotation') {
             $this->initAnnotationPage();
         }
+
+        return $this;
     }
 
     public function id(): ?string
     {
         if ($this->callingMotivation !== 'painting') {
-            return $this->_storage['id'] ?? null;
+            return $this->cache['id'] ?? null;
         }
         // Here, the resource is a media.
         return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
@@ -155,9 +165,7 @@ class AnnotationPage extends AbstractResourceType
         if ($this->callingMotivation === 'painting') {
             return parent::label();
         }
-        return isset($this->_storage['label'])
-            ? new ValueLanguage(['none' => [$this->_storage['label']]])
-            : null;
+        return $this->cache['label'] ?? null;
     }
 
     /**
@@ -168,14 +176,26 @@ class AnnotationPage extends AbstractResourceType
      * The canvas can have multiple items, for example when a page is composed
      * of fragments.
      */
-    public function items(): ?array
+    public function items(): array
     {
-        if ($this->callingMotivation === 'annotation') {
-            return $this->_storage['items'] ?? null;
+        if (array_key_exists('items', $this->cache)) {
+            return $this->cache['items'];
         }
 
-        $item = new Annotation($this->resource, $this->options);
-        return [$item];
+        if ($this->callingMotivation === 'annotation') {
+            $this->cache['items'] = [];
+            return $this->cache['items'];
+        }
+
+        $item = new Annotation();
+        $item
+            ->setOptions($this->options)
+            ->setResource($this->resource);
+
+        $this->cache['items'] = [
+            $item,
+        ];
+        return $this->cache['items'];
     }
 
     /**
@@ -214,20 +234,22 @@ class AnnotationPage extends AbstractResourceType
         $callingResourceId = $this->callingResource->id();
 
         // Here, the resource is a media.
-        $this->_storage['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+        $this->cache['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $callingResourceId,
             'subtype' => 'line',
         ]);
-        $this->_storage['type'] = $this->type;
-        $this->_storage['label'] = 'Text of the current page'; // @translate
-        $this->_storage['items'] = [];
+        $this->cache['type'] = $this->type;
+        $this->cache['label'] = new ValueLanguage([
+            'none' => ['Text of the current page'], // @translate
+        ]);
+        $this->cache['items'] = [];
         if ($this->isDereferenced) {
             $this->initAnnotationPageLines();
         }
 
-        if (!count($this->_storage['items'])) {
-            $this->_storage = [];
+        if (!count($this->cache['items'])) {
+            $this->cache = [];
         }
 
         return $this;
@@ -240,9 +262,7 @@ class AnnotationPage extends AbstractResourceType
      */
     protected function initAnnotationPageLines(): self
     {
-        $this->_storage['items'] = [];
-
-        $this->initTraitXml();
+        $this->cache['items'] = [];
 
         $xml = $this->loadXml($this->resource);
         if (!$xml) {
@@ -280,7 +300,11 @@ class AnnotationPage extends AbstractResourceType
                 continue;
             }
             $opts['index'] = ++$index;
-            $this->_storage['items'][] = new Annotation($this->resource, $opts);
+            $item = new Annotation();
+            $item
+                ->setOptions($opts)
+                ->setResource($this->resource);
+            $this->cache['items'][] = $item;
         }
 
         return $this;

@@ -58,6 +58,11 @@ trait TraitMedia
      */
     protected $isMediaIiif;
 
+    /**
+     * @var array
+     */
+    protected $dimensionsMedia;
+
     protected $formatsToMediaTypes = [
         // @link https://iiif.io/api/image/3.0/#45-format
         'jpg' => 'image/jpeg',
@@ -106,17 +111,6 @@ trait TraitMedia
         // 'wmv' => 'video/x-ms-wmv',
     ];
 
-    protected function initMedia(): self
-    {
-        $services = $this->resource->getServiceLocator();
-        $controllerPlugins = $services->get('ControllerPluginManager');
-        $this->mediaDimension = $controllerPlugins->get('mediaDimension');
-        $this->imageSize = $controllerPlugins->get('imageSize');
-        $this->iiifMediaUrl = $services->get('ViewHelperManager')->get('iiifMediaUrl');
-        $this->settings = $services->get('Omeka\Settings');
-        return $this;
-    }
-
     public function isImage(): bool
     {
         return $this->type === 'Image';
@@ -154,7 +148,7 @@ trait TraitMedia
      */
     public function duration(): ?float
     {
-        return $this->mediaDimension()['duration'];
+        return $this->mediaDimensions()['duration'];
     }
 
     /**
@@ -234,46 +228,50 @@ trait TraitMedia
 
     protected function mediaSize(): array
     {
-        $data = $this->mediaDimension();
+        $data = $this->mediaDimensions();
         return [
             'width' => $data['width'],
             'height' => $data['height'],
         ];
     }
 
-    protected function mediaDimension(): array
+    protected function mediaDimensions(): array
     {
-        if (!array_key_exists('media_dimension', $this->_storage)) {
-            /** @var ?\Omeka\Api\Representation\MediaRepresentation $media */
-            $media = $this->resource->primaryMedia();
-            if (!$media) {
-                $this->_storage['media_dimension'] = ['width' => null, 'height' => null, 'duration' => null];
-                return $this->_storage['media_dimension'];
-            }
-
-            // Automatic check via the ingester.
-            $ingester = $media->ingester();
-            switch ($ingester) {
-                case 'iiif':
-                    // Currently, Omeka manages only images, but doesn't check.
-                    $mediaData = $media->mediaData();
-                    $this->_storage['media_dimension']['width'] = empty($mediaData['width']) ? null : (int) $mediaData['width'];
-                    $this->_storage['media_dimension']['height'] = empty($mediaData['height']) ? null : (int) $mediaData['height'];
-                    $this->_storage['media_dimension']['duration'] = empty($mediaData['duration']) ? null : (float) $mediaData['duration'];
-                    return $this->_storage['media_dimension'];
-                // TODO Manage other type of media (youtube, etc.).
-                default:
-                    break;
-            }
-
-            // Manual check for files.
-            $this->_storage['media_dimension'] = $this->mediaDimension->__invoke($media) + ['width' => null, 'height' => null, 'duration' => null];
-            // Data may be stored in a old format.
-            // TODO Remove this check of media storage of dimensions: they should be good.
-            $this->_storage['media_dimension']['width'] = empty($this->_storage['media_dimension']['width']) ? null : (int) $this->_storage['media_dimension']['width'];
-            $this->_storage['media_dimension']['height'] = empty($this->_storage['media_dimension']['height']) ? null : (int) $this->_storage['media_dimension']['height'];
-            $this->_storage['media_dimension']['duration'] = empty($this->_storage['media_dimension']['duration']) ? null : (float) $this->_storage['media_dimension']['duration'];
+        if (!empty($this->dimensionsMedia)) {
+            return $this->dimensionsMedia;
         }
-        return $this->_storage['media_dimension'];
+
+        /** @var ?\Omeka\Api\Representation\MediaRepresentation $media */
+        $media = $this->resource->primaryMedia();
+        if (!$media) {
+            $this->dimensionsMedia = ['width' => null, 'height' => null, 'duration' => null];
+            return $this->dimensionsMedia;
+        }
+
+        // Automatic check via the ingester.
+        $ingester = $media->ingester();
+        switch ($ingester) {
+            case 'iiif':
+                // Currently, Omeka manages only images, but doesn't check.
+                $mediaData = $media->mediaData();
+                $this->dimensionsMedia['width'] = empty($mediaData['width']) ? null : (int) $mediaData['width'];
+                $this->dimensionsMedia['height'] = empty($mediaData['height']) ? null : (int) $mediaData['height'];
+                $this->dimensionsMedia['duration'] = empty($mediaData['duration']) ? null : (float) $mediaData['duration'];
+                return $this->dimensionsMedia;
+            // TODO Manage other type of media (youtube, etc.).
+            default:
+                break;
+        }
+
+        // Manual check for files.
+        $this->dimensionsMedia = $this->mediaDimension->__invoke($media)
+            + ['width' => null, 'height' => null, 'duration' => null];
+        // Data may be stored in a old format.
+        // TODO Remove this check of media storage of dimensions: they should be good.
+        $this->dimensionsMedia['width'] = empty($this->dimensionsMedia['width']) ? null : (int) $this->dimensionsMedia['width'];
+        $this->dimensionsMedia['height'] = empty($this->dimensionsMedia['height']) ? null : (int) $this->dimensionsMedia['height'];
+        $this->dimensionsMedia['duration'] = empty($this->dimensionsMedia['duration']) ? null : (float) $this->dimensionsMedia['duration'];
+
+        return $this->dimensionsMedia;
     }
 }

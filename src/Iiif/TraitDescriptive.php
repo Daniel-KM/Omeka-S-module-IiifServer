@@ -38,6 +38,16 @@ trait TraitDescriptive
     use TraitRights;
 
     /**
+     * @var \IiifServer\View\Helper\MediaDimension
+     */
+    protected $mediaDimension;
+
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * List metadata of the resource.
      *
      * @todo Remove setting iiifserver_manifest_html_descriptive for v3.0.

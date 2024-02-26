@@ -29,10 +29,8 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\TraitXml;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\MediaRepresentation;
-use IiifServer\Iiif\TraitMediaRelated;
 
 class IiifAnnotationList2 extends AbstractHelper
 {

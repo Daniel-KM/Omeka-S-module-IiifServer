@@ -29,6 +29,9 @@
 
 namespace IiifServer\Iiif;
 
+use Common\Stdlib\PsrMessage;
+use IiifServer\Iiif\Exception\RuntimeException;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
 /**
@@ -127,17 +130,25 @@ class Canvas extends AbstractResourceType
     ];
 
     /**
-     * This construct is required, because the resource must be a media.
+     * This method is required, because the resource must be a media for now.
+     *
+     * Warning: setResource() should be called after setOptions() in order to manage init.
+     * @todo Make init independant of order setResource() or setOptions().
      */
-    public function __construct(MediaRepresentation $resource, array $options = null)
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
-        parent::__construct($resource, $options);
+        parent::setResource($resource);
 
-        $this
-            ->initMedia()
-            ->initThumbnail()
-            ->initTraitRights();
+        if (!$resource instanceof MediaRepresentation) {
+            $message = new PsrMessage(
+                'Resource #{resource_id}: A media is required to build a Canvas.', // @translate
+                ['resource_id' => $resource->id()]
+            );
+            $this->logger->err($message->getMessage(), $message->getContext());
+            throw new RuntimeException((string) $message);
+        }
 
+        // TODO Move this option management in setOptions().
         // TODO Add linking properties when not in manifest.
         // The option should contain an index, that is the position from 1 in
         // the list of canvases (available in storage too).
@@ -155,7 +166,7 @@ class Canvas extends AbstractResourceType
             }
         }
 
-        $this->initThumbnail();
+        return $this;
     }
 
     public function id(): ?string
@@ -222,69 +233,93 @@ class Canvas extends AbstractResourceType
      */
     public function items(): array
     {
-        if (!array_key_exists('items', $this->_storage)) {
-            $this->_storage['items'] = [];
-            if (isset($this->options['key']) && $this->options['key'] === 'annotation'
-                && isset($this->options['motivation']) && $this->options['motivation'] === 'painting'
-            ) {
-                $opts = $this->options;
-                $opts['callingResource'] = $this->resource;
-                $opts['callingMotivation'] = 'painting';
-                $item = new AnnotationPage($this->resource, $opts);
-                $this->_storage['items'][] = $item;
-            }
+        if (array_key_exists('items', $this->cache)) {
+            return $this->cache['items'];
         }
-        return $this->_storage['items'];
+
+        $this->cache['items'] = [];
+        if (isset($this->options['key']) && $this->options['key'] === 'annotation'
+            && isset($this->options['motivation']) && $this->options['motivation'] === 'painting'
+        ) {
+            $opts = $this->options;
+            $opts['callingResource'] = $this->resource;
+            $opts['callingMotivation'] = 'painting';
+            $item = new AnnotationPage();
+            // TODO Options should be set first for now for init, done in setResource().
+            $item
+                ->setOptions($opts)
+                ->setResource($this->resource);
+            $this->cache['items'][] = $item;
+        }
+        return $this->cache['items'];
     }
 
     public function annotations(): array
     {
-        if (!array_key_exists('annotations', $this->_storage)) {
-            $this->_storage['annotations'] = [];
-            if ($this->resource instanceof MediaRepresentation) {
-                $opts = $this->options;
-                $opts['callingResource'] = $this->resource;
-                $opts['callingMotivation'] = 'annotation';
-                foreach ($this->resource->item()->media() as $media) {
-                    $annotation = new AnnotationPage($media, $opts);
-                    if ($annotation->id()) {
-                        $this->_storage['annotations'][] = $annotation;
-                    }
+        if (array_key_exists('annotations', $this->cache)) {
+            return $this->cache['annotations'];
+        }
+
+        $this->cache['annotations'] = [];
+        if ($this->resource instanceof MediaRepresentation) {
+            $opts = $this->options;
+            $opts['callingResource'] = $this->resource;
+            $opts['callingMotivation'] = 'annotation';
+            foreach ($this->resource->item()->media() as $media) {
+                $annotation = new AnnotationPage();
+                // TODO Options should be set first for now for init, done in setResource().
+                $annotation
+                    ->setOptions($opts)
+                    ->setResource($media);
+                if ($annotation->id()) {
+                    $this->cache['annotations'][] = $annotation;
                 }
             }
         }
-        return $this->_storage['annotations'];
+        return $this->cache['annotations'];
     }
 
     public function rendering(): array
     {
-        if (!array_key_exists('rendering', $this->_storage)) {
-            $this->_storage['rendering'] = [];
-            if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
-                $rendering = new Rendering($this->resource, $this->options);
-                $this->_storage['rendering'][] = $rendering;
-            }
+        if (array_key_exists('rendering', $this->cache)) {
+            return $this->cache['rendering'];
         }
-        return $this->_storage['rendering'];
+
+        $this->cache['rendering'] = [];
+        if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
+            $rendering = new Rendering();
+            // TODO Options should be set first for now for init, done in setResource().
+            $rendering
+                ->setOptions($this->options)
+                ->setResource($this->resource);
+            $this->cache['rendering'][] = $rendering;
+        }
+        return $this->cache['rendering'];
     }
 
     public function seeAlso(): array
     {
-        if (!array_key_exists('seeAlso', $this->_storage)) {
-            $this->_storage['seeAlso'] = [];
-            if ($this->resource instanceof MediaRepresentation) {
-                $opts = $this->options;
-                $opts['callingResource'] = $this->resource;
-                $opts['callingMotivation'] = 'seeAlso';
-                foreach ($this->resource->item()->media() as $media) {
-                    $seeAlso = new SeeAlso($media, $opts);
-                    if ($seeAlso->id()) {
-                        $this->_storage['seeAlso'][] = $seeAlso;
-                    }
+        if (array_key_exists('seeAlso', $this->cache)) {
+            return $this->cache['seeAlso'];
+        }
+
+        $this->cache['seeAlso'] = [];
+        if ($this->resource instanceof MediaRepresentation) {
+            $opts = $this->options;
+            $opts['callingResource'] = $this->resource;
+            $opts['callingMotivation'] = 'seeAlso';
+            foreach ($this->resource->item()->media() as $media) {
+                $seeAlso = new SeeAlso();
+                // TODO Options should be set first for now for init, done in setResource().
+                $seeAlso
+                    ->setOptions($opts)
+                    ->setResource($media);
+                if ($seeAlso->id()) {
+                    $this->cache['seeAlso'][] = $seeAlso;
                 }
             }
         }
-        return $this->_storage['seeAlso'];
+        return $this->cache['seeAlso'];
     }
 
     public function height(): ?int
@@ -302,50 +337,56 @@ class Canvas extends AbstractResourceType
         return $this->canvasDimensions()['duration'];
     }
 
+    /**
+     * The canvas dimensions is the max size of any of its items.
+     * @return array
+     */
     protected function canvasDimensions(): array
     {
-        if (!array_key_exists('dimension', $this->_storage)) {
-            $heights = [0];
-            $widths = [0];
-            $durations = [0];
-            /** @var \IiifServer\Iiif\AnnotationPage $item */
-            foreach ($this->items() as $item) {
-                /** @var \IiifServer\Iiif\Annotation $itemItem */
-                foreach ($item->items() as $itemItem) {
-                    if ($itemItem->motivation() !== 'painting') {
-                        continue;
-                    }
-                    $body = $itemItem->body();
-                    if (method_exists($body, 'height')) {
-                        $heights[] = $body->height();
-                    }
-                    if (method_exists($body, 'width')) {
-                        $widths[] = $body->width();
-                    }
-                    if (method_exists($body, 'duration')) {
-                        $durations[] = $body->duration();
-                    }
-                }
-            }
-            $this->_storage['dimension']['height'] = max($heights) ?: null;
-            $this->_storage['dimension']['width'] = max($widths) ?: null;
-            $this->_storage['dimension']['duration'] = max($durations) ?: null;
-
-            /* // TODO Required dimensions of canvas. It should work with pdf and UV.
-            // The canvas must have a size or a duration. It depends on the type
-            // of the view.
-            // Image / Video.
-            if (empty($this->_storage['dimension']['duration'])) {
-                $this->propertyRequirements['width'] = self::REQUIRED;
-                $this->propertyRequirements['height'] = self::REQUIRED;
-            }
-            // Audio / Video.
-            if (empty($this->_storage['dimension']['width'])) {
-                $this->propertyRequirements['duration'] = self::REQUIRED;
-            }
-            */
+        if (array_key_exists('dimensions', $this->cache)) {
+            return $this->cache['dimensions'];
         }
 
-        return $this->_storage['dimension'];
+        $this->cache['dimensions'] = [];
+        $heights = [0];
+        $widths = [0];
+        $durations = [0];
+        /** @var \IiifServer\Iiif\AnnotationPage $item */
+        foreach ($this->items() as $item) {
+            /** @var \IiifServer\Iiif\Annotation $itemItem */
+            foreach ($item->items() as $itemItem) {
+                if ($itemItem->motivation() !== 'painting') {
+                    continue;
+                }
+                $body = $itemItem->body();
+                if (method_exists($body, 'height')) {
+                    $heights[] = $body->height();
+                }
+                if (method_exists($body, 'width')) {
+                    $widths[] = $body->width();
+                }
+                if (method_exists($body, 'duration')) {
+                    $durations[] = $body->duration();
+                }
+            }
+        }
+        $this->cache['dimensions']['height'] = max($heights) ?: null;
+        $this->cache['dimensions']['width'] = max($widths) ?: null;
+        $this->cache['dimensions']['duration'] = max($durations) ?: null;
+
+        /* // TODO Required dimensions of canvas. It should work with pdf and UV.
+        // The canvas must have a size or a duration. It depends on the type
+        // of the view.
+        // Image / Video.
+        if (empty($this->cache['dimensions']['duration'])) {
+            $this->propertyRequirements['width'] = self::REQUIRED;
+            $this->propertyRequirements['height'] = self::REQUIRED;
+        }
+        // Audio / Video.
+        if (empty($this->cache['dimensions']['width'])) {
+            $this->propertyRequirements['duration'] = self::REQUIRED;
+        }
+        */
+        return $this->cache['dimensions'];
     }
 }

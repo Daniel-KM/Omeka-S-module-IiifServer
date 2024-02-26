@@ -30,7 +30,6 @@
 namespace IiifServer\Iiif;
 
 use Omeka\Api\Representation\MediaRepresentation;
-use Omeka\Api\Representation\SiteRepresentation;
 
 trait TraitLinking
 {
@@ -40,17 +39,29 @@ trait TraitLinking
     protected $defaultSite;
 
     /**
+     * @var \IiifServer\View\Helper\IiifUrl
+     */
+    protected $iiifUrl;
+
+    /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
 
-    public function initLinking(): self
-    {
-        $services = $this->resource->getServiceLocator();
-        $this->defaultSite = $services->get('ViewHelperManager')->get('defaultSite')();
-        $this->imageSize = $services->get('ControllerPluginManager')->get('imageSize');
-        return $this;
-    }
+    /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
+     * @var \Omeka\Settings\SiteSettings
+     */
+    protected $siteSettings;
+
+    /**
+     * @var \Laminas\View\Helper\Url
+     */
+    protected $urlHelper;
 
     public function homepage(): ?array
     {
@@ -59,11 +70,10 @@ trait TraitLinking
             return null;
         }
 
-        $site = $this->defaultSite();
+        $site = $this->defaultSite;
         if ($site) {
-            $siteSettings = $this->resource->getServiceLocator()->get('Omeka\Settings\Site');
-            $siteSettings->setTargetId($site->id());
-            $language = $siteSettings->get('locale') ?: ($this->settings->get('locale') ?: 'none');
+            $this->siteSettings->setTargetId($site->id());
+            $language = $this->siteSettings->get('locale') ?: ($this->settings->get('locale') ?: 'none');
         } else {
             $language = $this->settings->get('locale') ?: 'none';
         }
@@ -446,13 +456,5 @@ trait TraitLinking
         }
 
         return null;
-    }
-
-    protected function defaultSite(): ?SiteRepresentation
-    {
-        if (!array_key_exists('site', $this->_storage)) {
-            $this->_storage['site'] = $this->defaultSite;
-        }
-        return $this->_storage['site'];
     }
 }

@@ -50,42 +50,49 @@ class Rendering extends AbstractResourceType
         'format' => self::OPTIONAL,
     ];
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
-        parent::__construct($resource, $options);
+        // The options should be set first.
+
+        parent::setResource($resource);
 
         if (!$resource instanceof MediaRepresentation) {
             $message = new PsrMessage(
-                'Resource #{resource_id}: A media is required to build a canvas.', // @translate
+                'Resource #{resource_id}: A media is required to build a Rendering.', // @translate
                 ['resource_id' => $resource->id()]
             );
             $this->logger->err($message->getMessage(), $message->getContext());
             throw new RuntimeException((string) $message);
         }
 
-        $this->initIiifType();
+        $this
+            ->initIiifType();
+
+        return $this;
     }
 
     public function id(): ?string
     {
-        if (!array_key_exists('id', $this->_storage)) {
-            // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
-            $url = $this->resource->originalUrl();
-            if ($url) {
-                $id = $url;
-            } else {
-                $siteSlug = @$this->options['siteSlug'];
-                if ($siteSlug) {
-                    // TODO Return media page or item page? Add an option.
-                    $id = $this->resource->siteUrl($siteSlug, true);
-                } else {
-                    $id = null;
-                }
-            }
-            $this->_storage['id'] = $id;
+        if (array_key_exists('id', $this->cache)) {
+            return $this->cache['id'];
         }
 
-        return $this->_storage['id'];
+        // FIXME Manage all media Omeka types (Iiif, youtube, etc.)..
+        $url = $this->resource->originalUrl();
+        if ($url) {
+            $id = $url;
+        } else {
+            $siteSlug = $this->options['siteSlug'] ?? null;
+            if ($siteSlug) {
+                // TODO Return media page or item page? Add an option.
+                $id = $this->resource->siteUrl($siteSlug, true);
+            } else {
+                $id = null;
+            }
+        }
+        $this->cache['id'] = $id;
+
+        return $this->cache['id'];
     }
 
     /**

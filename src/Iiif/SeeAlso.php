@@ -53,21 +53,36 @@ class SeeAlso extends AbstractResourceType
 
     protected $callingMotivation;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
-        parent::__construct($resource, $options);
+        parent::setOptions($options);
         $this->callingResource = $options['callingResource'] ?? null;
         $this->callingMotivation = $options['callingMotivation'] ?? null;
+        return $this;
+    }
+
+    /**
+     * Warning: setResource() must be called after setOptions().
+     * @todo Make setResource() and setOptions() independant.
+     *
+     * {@inheritDoc}
+     * @see \IiifServer\Iiif\AbstractResourceType::setResource()
+     */
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
+    {
+        parent::setResource($resource);
         // For now, manage only media seeAlso.
         if ($resource instanceof MediaRepresentation) {
-            $this->initIiifType();
-            $this->initSeeAlso();
+            $this
+                ->initIiifType()
+                ->initSeeAlso();
         }
+        return $this;
     }
 
     public function id(): ?string
     {
-        return $this->_storage['id'] ?? null;
+        return $this->cache['id'] ?? null;
     }
 
     /**
@@ -79,9 +94,7 @@ class SeeAlso extends AbstractResourceType
      */
     public function label(): ?ValueLanguage
     {
-        return empty($this->_storage['label'])
-            ? null
-            : new ValueLanguage(['none' => [$this->_storage['label']]]);
+        return $this->cache['label'] ?? null;
     }
 
     /**
@@ -91,7 +104,7 @@ class SeeAlso extends AbstractResourceType
      */
     public function format(): ?string
     {
-        return $this->_storage['format'] ?? null;
+        return $this->cache['format'] ?? null;
     }
 
     /**
@@ -99,7 +112,7 @@ class SeeAlso extends AbstractResourceType
      */
     public function profile(): ?string
     {
-        return $this->_storage['profile'] ?? null;
+        return $this->cache['profile'] ?? null;
     }
 
     /**
@@ -145,11 +158,13 @@ class SeeAlso extends AbstractResourceType
         $this->type = 'Dataset';
 
         // TODO Manage other alto versions than v3 (should be stored in media for quick check).
-        $this->_storage['id'] = $this->resource->originalUrl();
-        $this->_storage['type'] = $this->type;
-        $this->_storage['label'] = $this->mediaLabels[$mediaType] ?? $this->type;
-        $this->_storage['format'] = $mediaType;
-        $this->_storage['profile'] = 'http://www.loc.gov/standards/alto/v3/alto.xsd';
+        $this->cache['id'] = $this->resource->originalUrl();
+        $this->cache['type'] = $this->type;
+        $this->cache['label'] = new ValueLanguage([
+            'none' => [$this->mediaLabels[$mediaType] ?? $this->type],
+        ]);
+        $this->cache['format'] = $mediaType;
+        $this->cache['profile'] = 'http://www.loc.gov/standards/alto/v3/alto.xsd';
 
         return $this;
     }

@@ -81,7 +81,10 @@ class IiifManifest3 extends AbstractHelper
      */
     protected function buildManifestItem(ItemRepresentation $item)
     {
-        $manifest = new Manifest($item);
+        $manifest = new Manifest();
+        $manifest
+            ->setResource($item)
+            ->normalize();
 
         // Give possibility to customize the manifest.
         $resource = $item;
@@ -89,7 +92,7 @@ class IiifManifest3 extends AbstractHelper
         $type = 'item';
         $params = compact('format', 'manifest', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $manifest->isValid(true);
+        $manifest->normalize();
         return $manifest;
     }
 }

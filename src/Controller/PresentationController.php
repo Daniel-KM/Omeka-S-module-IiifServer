@@ -246,7 +246,7 @@ class PresentationController extends AbstractActionController
         if ($version === '2') {
             $iiifCanvas = $viewHelpers->get('iiifCanvas2');
             try {
-                $canvas = $iiifCanvas($canvas->resource(), $name);
+                $canvas = $iiifCanvas($canvas->getResource(), $name);
             } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
                 return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
             }

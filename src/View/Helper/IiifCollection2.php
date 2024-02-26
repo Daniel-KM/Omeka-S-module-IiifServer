@@ -43,6 +43,11 @@ class IiifCollection2 extends AbstractHelper
     use TraitRights;
 
     /**
+     * @var \Omeka\Settings\Settings
+     */
+    protected $settings;
+
+    /**
      * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation
      */
     protected $resource;
@@ -88,7 +93,7 @@ class IiifCollection2 extends AbstractHelper
         $view = $this->getView();
 
         $this->resource = $resource;
-        $this->initTraitRights();
+        $this->settings = $this->resource->getServiceLocator()->get('Omeka\Settings');
 
         $isItemSet = $resource->resourceName() === 'item_sets';
 

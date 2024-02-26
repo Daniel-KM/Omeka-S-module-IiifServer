@@ -48,11 +48,15 @@ class IiifCollectionList3 extends AbstractHelper
      */
     public function __invoke(array $resourcesOrUrls, $url = null)
     {
-        $collection = new CollectionList($resourcesOrUrls, ['iiif_url' => $url]);
-
         // The services cannot be extracted from resources, so set them here.
         $services = @$this->view->getHelperPluginManager()->getServiceLocator();
-        $collection->setServiceLocator($services);
+
+        $collection = new CollectionList();
+        $collection
+            ->setServiceLocator($services)
+            ->setResources($resourcesOrUrls)
+            ->setOptions(['iiif_url' => $url])
+            ->normalize();
 
         // Give possibility to customize the manifest.
         $resource = $resourcesOrUrls;
@@ -60,7 +64,7 @@ class IiifCollectionList3 extends AbstractHelper
         $type = 'collection';
         $params = compact('format', 'collection', 'resource', 'type');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
-        $collection->isValid(true);
+        $collection->normalize();
         return $collection;
     }
 }

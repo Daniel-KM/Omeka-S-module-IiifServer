@@ -134,19 +134,14 @@ class Manifest extends AbstractResourceType
      */
     protected $rangeToArray;
 
-    public function __construct(AbstractResourceEntityRepresentation $resource, array $options = null)
+    public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
-        parent::__construct($resource, $options);
-
-        $services = $this->resource->getServiceLocator();
-        $this->rangeToArray = $services->get('ControllerPluginManager')->get('rangeToArray');
+        parent::setResource($resource);
 
         $this
-            ->initMedia()
-            ->initLinking()
-            ->initThumbnail()
-            ->initTraitRights()
             ->prepareMediaInfoList();
+
+        return $this;
     }
 
     public function id(): string
@@ -174,12 +169,17 @@ class Manifest extends AbstractResourceType
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && !empty($mediaInfo['index'])) {
-                $items[] = new Canvas($media, [
-                    'index' => $mediaInfo['index'] ?? null,
-                    'content' => $mediaInfo['content'],
-                    'key' => $mediaInfo['key'],
-                    'motivation' => $mediaInfo['motivation'],
-                ]);
+                $canvas = new Canvas();
+                $canvas
+                    // TODO Options should be set first for now for init, done in setResource().
+                    ->setOptions([
+                        'index' => $mediaInfo['index'] ?? null,
+                        'content' => $mediaInfo['content'],
+                        'key' => $mediaInfo['key'],
+                        'motivation' => $mediaInfo['motivation'],
+                    ])
+                    ->setResource($media);
+                $items[] = $canvas;
             }
         }
         return $items;
@@ -276,12 +276,16 @@ class Manifest extends AbstractResourceType
             }
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
-                $rendering = new Rendering($media, [
-                    'index' => $media->id(),
-                    'siteSlug' => $siteSlug,
-                    'content' => $mediaInfo['content'],
-                    'on' => 'Manifest',
-                ]);
+                $rendering = new Rendering();
+                // TODO Options should be set first for now for init, done in setResource().
+                $rendering
+                    ->setOptions([
+                        'index' => $media->id(),
+                        'siteSlug' => $siteSlug,
+                        'content' => $mediaInfo['content'],
+                        'on' => 'Manifest',
+                    ])
+                    ->setResource($media);
                 if ($rendering->id() && $rendering->type()) {
                     $renderings[] = $rendering;
                 }
@@ -341,16 +345,25 @@ class Manifest extends AbstractResourceType
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
-                $canvases[] = new ReferencedCanvas($mediaInfo['content']->resource());
+                $canvas = new ReferencedCanvas();
+                $canvas
+                    // TODO Options should be set first for now for init, done in setResource().
+                    ->setOptions([])
+                    ->setResource($mediaInfo['content']->getResource());
+                $canvases[] = $canvas;
             }
         }
 
-        return new Range($this->resource, [
-            'index' => 'rstructure1',
-            'label' => 'Content',
-            'items' => $canvases,
-            'skip' => ['@context' => true],
-        ]);
+        $range = new Range();
+        $range
+            ->setOptions([
+                'index' => 'rstructure1',
+                'label' => 'Content',
+                'items' => $canvases,
+                'skip' => ['@context' => true],
+            ])
+            ->setResource($this->resource);
+        return $range;
     }
 
     /**
@@ -445,9 +458,14 @@ class Manifest extends AbstractResourceType
                     continue;
                 }
                 // This is not a full Canvas, just a reference, so skip label.
-                $canvases[$itemName] = new ReferencedCanvas($this->resource->primaryMedia(), [
-                    'index' => $cleanItemName,
-                ]);
+                $referencedCanvas = new ReferencedCanvas();
+                $referencedCanvas
+                    // TODO Options should be set first for now for init, done in setResource().
+                    ->setOptions([
+                        'index' => $cleanItemName,
+                    ])
+                    ->setResource($this->resource->primaryMedia());
+                $canvases[$itemName] = $referencedCanvas;
             }
         }
 
@@ -464,21 +482,30 @@ class Manifest extends AbstractResourceType
                 // The index is a range.
                 // Check if the item is in ascendants to avoid an infinite loop.
                 if (in_array($itemName, $ascendants)) {
-                    $canvases[$itemName] = new ReferencedCanvas($this->resource->primaryMedia(), [
-                        'index' => $itemName,
-                    ]);
-                    $parentRange['items'][] = $canvases[$itemName];
+                    $referencedCanvas = new ReferencedCanvas();
+                    $referencedCanvas
+                        // TODO Options should be set first for now for init, done in setResource().
+                        ->setOptions([
+                            'index' => $itemName,
+                        ])
+                        ->setResource($this->resource->primaryMedia());
+                    $canvases[$itemName] = $referencedCanvas;
+                    $parentRange['items'][] = $referencedCanvas;
                     continue;
                 }
                 $ascendants[] = $itemName;
                 $range = ['items' => []];
                 $buildStructure($rangesChildren[$itemName], $range, $ascendants);
-                $parentRange['items'][] = new Range($this->resource, [
-                    'index' => $itemName,
-                    'label' => $ranges[$itemName],
-                    'items' => $range['items'],
-                    'skip' => ['@context' => true],
-                ]);
+                $rangeResource = new Range();
+                $rangeResource
+                    ->setOptions([
+                        'index' => $itemName,
+                        'label' => $ranges[$itemName],
+                        'items' => $range['items'],
+                        'skip' => ['@context' => true],
+                    ])
+                    ->setResource($this->resource);
+                $parentRange['items'][] = $rangeResource;
                 array_pop($ascendants);
             }
         };
@@ -504,12 +531,16 @@ class Manifest extends AbstractResourceType
         if (count($roots) === 1) {
             $structure = reset($structure['items']);
         } else {
-            $structure = new Range($this->resource, [
-                'index' => 'rstructure' . $indexStructure,
-                'label' => 'Content',
-                'items' => $structure['items'],
-                'skip' => ['@context' => true],
-            ]);
+            $range = new Range();
+            $range
+                ->setOptions([
+                    'index' => 'rstructure' . $indexStructure,
+                    'label' => 'Content',
+                    'items' => $structure['items'],
+                    'skip' => ['@context' => true],
+                ])
+                ->setResource($this->resource);
+            $structure = $range;
         }
 
         return $structure;

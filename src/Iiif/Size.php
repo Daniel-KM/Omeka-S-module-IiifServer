@@ -47,23 +47,42 @@ class Size extends AbstractType
     ];
 
     /**
+     * @var \IiifServer\View\Helper\IiifMediaUrl
+     */
+    protected $iiifMediaUrl;
+
+    /**
+     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     */
+    protected $imageSize;
+
+    /**
      * @var \Omeka\Api\Representation\MediaRepresentation
      */
     protected $resource;
 
-    /**
-     * @var array
-     */
-    protected $options;
-
-    public function __construct(MediaRepresentation $resource, array $options = null)
+    public function setOptions(array $options): self
     {
-        $this->resource = $resource;
-        $this->options = $options ?: [];
+        parent::setOptions($options);
         if (empty($this->options['image_type'])) {
             $this->options['image_type'] = 'original';
         }
-        $this->initImage();
+        return $this;
+    }
+
+    public function setResource(MediaRepresentation $resource): self
+    {
+        // This is an extension of AbstractType, not AbstractResourceType.
+        $this->resource = $resource;
+        $this->services = $resource->getServiceLocator();
+
+        $plugins = $this->services->get('ControllerPluginManager');
+        $viewHelpers = $this->services ->get('ViewHelperManager');
+
+        $this->imageSize = $plugins->get('imageSize');
+        $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
+
+        return $this;
     }
 
     public function isImage(): bool
