@@ -239,8 +239,8 @@ class Manifest extends AbstractResourceType
                         // The full media infos should be passed for SeeAlso and
                         // Annotations.
                         'mediaInfos' => [
-                            'seeAlso' => array_filter($this->mediaInfos, fn ($v) => $v['key'] === 'seeAlso'),
-                            'annotation' => array_filter($this->mediaInfos, fn ($v) => $v['relatedMediaOcr']),
+                            'seeAlso' => array_filter($this->mediaInfos, fn ($v) => ($v['key'] ?? null) === 'seeAlso'),
+                            'annotation' => array_filter($this->mediaInfos, fn ($v) => $v['relatedMediaOcr'] ?? false),
                         ],
                     ])
                     ->setResource($media);
