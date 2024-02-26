@@ -65,8 +65,7 @@ class Rendering extends AbstractResourceType
             throw new RuntimeException((string) $message);
         }
 
-        $this
-            ->initIiifType();
+        $this->type = $this->IiifTypeOfMedia->__invoke($resource);
 
         return $this;
     }

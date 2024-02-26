@@ -27,9 +27,12 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace IiifServer\Iiif;
+namespace IiifServer\View\Helper;
 
-trait TraitIiifType
+use Laminas\View\Helper\AbstractHelper;
+use Omeka\Api\Representation\MediaRepresentation;
+
+class IiifTypeOfMedia extends AbstractHelper
 {
     /**
      * The rendering types are defined by the resource class and media type.
@@ -244,43 +247,41 @@ trait TraitIiifType
         'http://iiif.io/api/image/3/context.json' => 'Image',
     ];
 
-    protected function initIiifType(): self
+    public function __invoke(MediaRepresentation $media): ?string
     {
-        $this->type = null;
+        static $mediaIiifTypes = [];
 
-        if ($this->resource->ingester() === 'iiif') {
-            $mediaData = $this->resource->mediaData();
+        $mediaId = $media->id();
+        if (array_key_exists($mediaId, $mediaIiifTypes)) {
+            return $mediaIiifTypes[$mediaId];
+        }
+
+        if ($media->ingester() === 'iiif') {
+            $mediaData = $media->mediaData();
             if (isset($mediaData['type'])) {
                 if (in_array($mediaData['type'], $this->iiifImageServiceTypes)) {
-                    $this->type = 'Image';
-                    return $this;
+                    return $mediaIiifTypes[$mediaId] = 'Image';
                 }
-                $this->type = $mediaData['type'];
-                return $this;
+                $mediaIiifTypes[$mediaId] = $mediaData['type'];
+                return $mediaData['type'];
             }
             if (isset($mediaData['@type'])) {
-                $this->type = $mediaData['@type'];
                 if (in_array($mediaData['@type'], $this->iiifImageServiceTypes)) {
-                    $this->type = 'Image';
-                    return $this;
+                    return $mediaIiifTypes[$mediaId] = 'Image';
                 }
-                $this->type = $mediaData['@type'];
-                return $this;
+                return $mediaIiifTypes[$mediaId] = $mediaData['@type'];
             }
             if (isset($mediaData['protocol']) && isset($this->iiifProfileToTypes[$mediaData['protocol']])) {
-                $this->type = $this->iiifProfileToTypes[$mediaData['protocol']];
-                return $this;
+                return $mediaIiifTypes[$mediaId] = $this->iiifProfileToTypes[$mediaData['protocol']];
             }
             if (isset($mediaData['@context'])) {
                 if (is_array($mediaData['@context'])) {
                     $intersect = array_intersect_key($this->iiifProfileToTypes, array_flip($mediaData['@context']));
                     if ($intersect) {
-                        $this->type = reset($intersect);
-                        return $this;
+                        return $mediaIiifTypes[$mediaId] = reset($intersect);
                     }
                 } elseif (isset($this->iiifProfileToTypes[$mediaData['@context']])) {
-                    $this->type = $this->iiifProfileToTypes[$mediaData['@context']];
-                    return $this;
+                    return $mediaIiifTypes[$mediaId] = $this->iiifProfileToTypes[$mediaData['@context']];
                 }
             }
             if (isset($mediaData['format'])) {
@@ -289,58 +290,53 @@ trait TraitIiifType
         }
 
         if (empty($mediaType)) {
-            $mediaType = $this->resource->mediaType();
+            $mediaType = $media->mediaType();
             if (empty($mediaType)) {
-                return $this;
+                return $mediaIiifTypes[$mediaId] = null;
             }
         }
 
         // Managed some common media types.
         if (isset($this->mediaTypes[$mediaType])) {
-            $this->type = $this->mediaTypes[$mediaType];
-            return $this;
+            return $mediaIiifTypes[$mediaId] = $this->mediaTypes[$mediaType];
         }
 
         // TODO Improve detection of type "Model".
         if ($mediaType === 'text/plain' || $mediaType === 'application/json') {
-            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            $extension = strtolower(pathinfo((string) $media->source(), PATHINFO_EXTENSION));
             // TODO Convert old "text/plain" into "application/json" or "model/gltf+json".
             if ($extension === 'json' || $extension === 'gltf') {
-                $this->type = 'Model';
-                return $this;
+                return $mediaIiifTypes[$mediaId] = 'Model';
             }
         }
 
         if ($mediaType === 'application/octet-stream') {
-            $extension = strtolower(pathinfo((string) $this->resource->source(), PATHINFO_EXTENSION));
+            $extension = strtolower(pathinfo((string) $media->source(), PATHINFO_EXTENSION));
             if ($extension === 'glb') {
-                $this->type = 'Model';
-                return $this;
+                return $mediaIiifTypes[$mediaId] = 'Model';
             }
         }
 
         $mainMediaType = strtok($mediaType, '/');
         if (isset($this->mainMediaTypes[$mainMediaType])) {
-            $this->type = $this->mainMediaTypes[$mainMediaType];
-            return $this;
+            return $mediaIiifTypes[$mediaId] = $this->mainMediaTypes[$mainMediaType];
         }
 
-        $renderer = $this->resource->renderer();
+        $renderer = $media->renderer();
         if (isset($this->rendererTypes[$renderer])) {
-            $this->type = $this->rendererTypes[$renderer];
-            return $this;
+            return $mediaIiifTypes[$mediaId] = $this->rendererTypes[$renderer];
         }
 
         /* These cases are normally managed by the media type above.
-        // $extension = $this->resource->extension();
+        // $extension = $media->extension();
         if ($renderer === 'file') {
             // See \Omeka\Media\Renderer::render()
-            // $fileRenderers = $this->resource->getServiceLocator()->get('Config')['file_renderers'] + ['factories' => []];
+            // $fileRenderers = $media->getServiceLocator()->get('Config')['file_renderers'] + ['factories' => []];
             /** @var \Omeka\Media\FileRenderer\Manager $fileRendererManager
-            // $fileRendererManager = $this->resource->getServiceLocator()->get('Omeka\Media\FileRenderer\Manager');
+            // $fileRendererManager = $media->getServiceLocator()->get('Omeka\Media\FileRenderer\Manager');
         }
-        */
+         */
 
-        return $this;
+        return $mediaIiifTypes[$mediaId] = null;
     }
 }

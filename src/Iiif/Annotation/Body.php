@@ -184,7 +184,7 @@ class Body extends AbstractResourceType
             $imageResourceServices = [];
             $context = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
             $id = $mediaData['id'] ?? $mediaData['@id'];
-            $type = $this->iiifType($context);
+            $type = $this->iiifImageServiceType($context);
             $profile = $this->iiifComplianceLevel($mediaData['profile']);
             if (!$id || !$type || !$profile) {
                 return null;
@@ -252,7 +252,7 @@ class Body extends AbstractResourceType
     /**
      * Get the iiif type from the context.
      */
-    protected function iiifType(string $context): ?string
+    protected function iiifImageServiceType(string $context): ?string
     {
         $contexts = [
             'http://library.stanford.edu/iiif/image-api/context.json' => 'ImageService1',

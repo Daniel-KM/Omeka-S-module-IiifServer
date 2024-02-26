@@ -213,6 +213,11 @@ abstract class AbstractResourceType extends AbstractType
     protected $iiifTileInfo;
 
     /**
+     * @var \IiifServer\View\Helper\IiifTypeOfMedia
+     */
+    protected $IiifTypeOfMedia;
+
+    /**
      * @var \IiifServer\View\Helper\IiifUrl
      */
     protected $iiifUrl;
@@ -309,6 +314,7 @@ abstract class AbstractResourceType extends AbstractType
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
+        $this->iiifTypeOfMedia = $viewHelpers->get('iiifTypeOfMedia');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->imageSize = $plugins->get('imageSize');
         $this->isAllowedMediaContent = $this->hasModuleAccess ? $plugins->get('isAllowedMediaContent') : null;

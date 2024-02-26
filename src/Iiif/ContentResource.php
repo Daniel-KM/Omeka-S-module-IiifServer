@@ -127,9 +127,10 @@ class ContentResource extends AbstractResourceType
             throw new RuntimeException((string) $message);
         }
 
-        $this
-            ->initIiifType()
-            ->prepareMediaId();
+        $this->type = $this->IiifTypeOfMedia->__invoke($resource);
+
+        $this->prepareMediaId();
+
         return $this;
     }
 

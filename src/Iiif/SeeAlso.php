@@ -73,9 +73,8 @@ class SeeAlso extends AbstractResourceType
         parent::setResource($resource);
         // For now, manage only media seeAlso.
         if ($resource instanceof MediaRepresentation) {
-            $this
-                ->initIiifType()
-                ->initSeeAlso();
+            $this->type = $this->IiifTypeOfMedia->__invoke($resource);
+            $this->initSeeAlso();
         }
         return $this;
     }
