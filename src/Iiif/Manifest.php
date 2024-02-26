@@ -231,7 +231,7 @@ class Manifest extends AbstractResourceType
         // Don't loop media info directly.
         foreach ($this->resource->media() as $media) {
             $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && !empty($mediaInfo['index'])) {
+            if ($mediaInfo && !empty($mediaInfo['painting'])) {
                 $canvas = new Canvas();
                 $canvas
                     // TODO Options should be set first for now for init, done in setResource().

@@ -383,6 +383,7 @@ class ConfigForm extends Form
                     'label' => 'Media types of files to include in download', // @translate
                     'prepend_value_options' => [
                         'none' => 'None', // @translate
+                        'all' => 'All', // @translate
                     ],
                 ],
                 'attributes' => [
