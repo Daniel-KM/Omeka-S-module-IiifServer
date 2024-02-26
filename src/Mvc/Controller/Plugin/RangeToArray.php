@@ -19,6 +19,8 @@ class RangeToArray extends AbstractPlugin
      *   max value is used. If min or max is null, the range is a single value.
      * - if a separator is set, string values will be kept, for example with ";"
      *   for "cover; 2-4; 9-; back cover", the output will be `['cover', 2, 3, 4, 9, 'back cover']`.
+     * - To manage names with "-", another extender can be set, for example "/".
+     *   Nevertheless, the same rules above apply.
      */
     public function __invoke(
         string $string,
@@ -26,11 +28,12 @@ class RangeToArray extends AbstractPlugin
         ?int $max = null,
         bool $unique = false,
         bool $sort = false,
-        ?string $separator = null
+        ?string $separator = null,
+        ?string $extender = '-'
     ): array {
         $result = is_null($separator)
-            ? $this->rangeToArrayInteger($string, $min, $max)
-            : $this->rangeToArrayString($string, $min, $max, $separator);
+            ? $this->rangeToArrayInteger($string, $min, $max, $extender ?? '-')
+            : $this->rangeToArrayString($string, $min, $max, $separator, $extender ?? '-');
 
         if ($unique) {
             $result = array_values(array_unique($result));
@@ -46,16 +49,17 @@ class RangeToArray extends AbstractPlugin
     protected function rangeToArrayInteger(
         string $string,
         ?int $min = null,
-        ?int $max = null
+        ?int $max = null,
+        string $extender = ''
     ): array {
-        $string = preg_replace('/[^0-9-]/', ' ', $string);
+        $string = preg_replace('/[^0-9' . preg_quote($extender, '/') . ']/', ' ', $string);
         $string = preg_replace('/\s+/', ' ', $string);
         $string = trim($string);
 
         $list = explode(' ', $string);
 
         // Skip fake range and ranges with multiple "-".
-        $list = array_values(array_filter($list, fn ($v) => $v !== '-' && substr_count($v, '-') <= 1));
+        $list = array_values(array_filter($list, fn ($v) => $v !== $extender && substr_count($v, $extender) <= 1));
 
         if (empty($list)) {
             return [];
@@ -63,11 +67,11 @@ class RangeToArray extends AbstractPlugin
 
         $result = [];
         foreach ($list as $range) {
-            if (strpos($range, '-') === false) {
+            if (strpos($range, $extender) === false) {
                 $result[] = (int) $range;
                 continue;
             }
-            [$from, $to] = explode('-', $range);
+            [$from, $to] = explode($extender, $range);
             $from = strlen($from) ? (int) $from : null;
             $to = strlen($to) ? (int) $to : null;
             if (is_null($from)) {
@@ -93,12 +97,15 @@ class RangeToArray extends AbstractPlugin
         string $string,
         ?int $min = null,
         ?int $max = null,
-        string $separator = ''
+        string $separator = '',
+        string $extender = '-'
     ): array {
         $result = [];
         foreach (array_filter(array_map('trim', explode($separator, $string)), 'strlen') as $str) {
-            if (preg_replace('/[^0-9-]/', '', $str) === $str) {
-                $result = array_merge($result, $this->rangeToArrayInteger($str, $min, $max));
+            if (preg_replace('/[^0-9' . preg_quote($extender, '/') . ']/', '', $str) === $str) {
+                $result = array_merge($result, $this->rangeToArrayInteger($str, $min, $max, $extender));
+            } elseif (strpos($str, $extender) !== false) {
+                $result[] = $str;
             } else {
                 $result[] = $str;
             }

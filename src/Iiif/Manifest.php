@@ -223,6 +223,7 @@ class Manifest extends AbstractResourceType
      * canvas rendering.
      *
      * @todo Manage multiple files by canvas for supplementing and rendering.
+     * @todo Use the specific index (cover, etc.) instead of the index of painting.
      */
     public function items(): array
     {

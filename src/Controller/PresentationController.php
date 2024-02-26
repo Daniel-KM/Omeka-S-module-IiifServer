@@ -198,7 +198,9 @@ class PresentationController extends AbstractActionController
         // structure. It may be used in Iiif Search too.
         // Note: the position is not the item's one, non-iiif media are skipped.
 
-        // A canvas name can be hard coded in a table of contents, for example "cover".
+        // A canvas name can be hard coded in a table of contents, for example
+        // "cover".
+        // TODO Manage the hard coded index in manifest main iiif items (currently only media index).
 
         $name = $this->params('name');
         if (!$name) {
@@ -231,7 +233,7 @@ class PresentationController extends AbstractActionController
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
         $found = false;
-        // In iiif, here, items means canvases.
+        // In iiif, here, items means canvases (so one or more files).
         foreach ($manifest->items() as $canvas) {
             if ($name === basename($canvas->id())) {
                 $found = true;

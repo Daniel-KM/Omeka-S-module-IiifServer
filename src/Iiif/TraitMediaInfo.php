@@ -264,7 +264,9 @@ trait TraitMediaInfo
         $indexes = [];
         foreach ($mediaIds as $mediaId) {
             $mediaInfo = $this->mediaInfos[$mediaId];
-            if ($mediaInfo) {
+            if ($mediaInfo === null) {
+                $this->mediaInfos[$mediaId] = [];
+            } else {
                 $index = ($this->mediaInfos[$mediaId]['on'] ?? '')
                     . '-' . ($this->mediaInfos[$mediaId]['key'] ?? '')
                     . '-' . ($this->mediaInfos[$mediaId]['motivation'] ?? '');
@@ -272,6 +274,12 @@ trait TraitMediaInfo
                     $indexes[$index] = 0;
                 }
                 $this->mediaInfos[$mediaId]['index'] = ++$indexes[$index];
+                // The copy of indexes allows to use array_column() without mix.
+                if ($index === 'Canvas-annotation-painting') {
+                    $this->mediaInfos[$mediaId]['painting'] = $this->mediaInfos[$mediaId]['index'];
+                } elseif ($index === 'Canvas-annotation-supplementing') {
+                    $this->mediaInfos[$mediaId]['supplementing'] = $this->mediaInfos[$mediaId]['index'];
+                }
             }
         }
 
