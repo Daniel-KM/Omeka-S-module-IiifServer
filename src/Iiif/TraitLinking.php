@@ -29,6 +29,7 @@
 
 namespace IiifServer\Iiif;
 
+use Common\Stdlib\PsrMessage;
 use Omeka\Api\Representation\MediaRepresentation;
 
 trait TraitLinking
@@ -65,35 +66,82 @@ trait TraitLinking
 
     public function homepage(): ?array
     {
-        $homePages = $this->settings->get('iiifserver_manifest_homepage', ['property_or_resource']);
-        if (empty($homePages) || in_array('none', $homePages)) {
-            return null;
+        if (array_key_exists('homepage', $this->cache)) {
+            return $this->cache['homepage'];
         }
+
+        $homePages = $this->settings->get('iiifserver_manifest_homepage', ['property_or_resources']);
+        if (empty($homePages) || in_array('none', $homePages)) {
+            $this->cache['homepage'] = [];
+            return $this->cache['homepage'];
+        }
+        $homePages = array_combine($homePages, $homePages);
+
+        $defaultLocale = ($this->settings->get('locale') ?: 'none');
 
         $site = $this->defaultSite;
         if ($site) {
             $this->siteSettings->setTargetId($site->id());
-            $language = $this->siteSettings->get('locale') ?: ($this->settings->get('locale') ?: 'none');
+            $language = $this->siteSettings->get('locale') ?: $defaultLocale;
         } else {
-            $language = $this->settings->get('locale') ?: 'none';
+            $language = $defaultLocale;
         }
 
-        $homePagesAll = array_fill_keys($homePages, true);
-        $onlyPropertyOrResource = isset($homePagesAll['property_or_resource']);
-        if ($onlyPropertyOrResource) {
-            $homePagesAll['property'] ??= false;
-            $homePagesAll['resource'] ??= false;
-            unset($homePagesAll['property_or_resource']);
+        // TODO Move this cleaning of list of home page into config.
+
+        $hasResource = isset($homePages['resource']);
+        $hasResources = isset($homePages['resources']);
+        $hasPropertyOrResources = isset($homePages['property_or_resources']);
+        $hasPropertyOrResource = isset($homePages['property_or_resource']);
+
+        if ($hasPropertyOrResource) {
+            $homePages['property'] = 'property';
+            $homePages['resource'] = 'resource';
+            unset($homePages['property_or_resource']);
+        }
+        if ($hasPropertyOrResources) {
+            $homePages['property'] = 'property';
+            $homePages['resources'] = 'resources';
+            unset($homePages['property_or_resources']);
+            unset($homePages['property_or_resource']);
         }
 
-        $output = [];
-        foreach (array_keys($homePagesAll) as $homePage) {
+        // "site" is default site, but "sites" is sites of the resource.
+        $sites = (isset($homePages['resources']) || isset($homePages['sites'])) && method_exists($this->resource, 'sites')
+            ? $this->resource->sites()
+            : [];
+
+        $homePageValue = function ($id, $format, $language, $values, $fallback) {
+            $label = new ValueLanguage($values, false, $fallback);
+            return [
+                'id' => $id,
+                'type' => 'Text',
+                'label' => $label->jsonSerialize(),
+                'format' => $format,
+                'language' => [
+                    $language,
+                ],
+            ];
+        };
+
+        $result = [
+            'property' => [],
+            'resource' => [],
+            'resources' => [],
+            'site' => [],
+            'sites' => [],
+            'api' => [],
+        ];
+
+        foreach ($homePages as $homePage) {
             $id = null;
             $values = [];
             $fallback = null;
             $format = 'text/html';
             switch ($homePage) {
                 default:
+                case 'property_or_resource':
+                case 'property_or_resources':
                     continue 2;
                 case 'property':
                     $property = $this->settings->get('iiifserver_manifest_homepage_property');
@@ -101,46 +149,46 @@ trait TraitLinking
                         continue 2;
                     }
                     /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
-                    $values = $this->resource->value($property, ['all' => true]);
-                    if ($values) {
-                        foreach ($values as $value) {
+                    $resourceValues = $this->resource->value($property, ['all' => true]);
+                    if ($resourceValues) {
+                        foreach ($resourceValues as $value) {
                             $val = $value->uri() ?: $value->value();
                             if (filter_var($val, FILTER_VALIDATE_URL)) {
                                 $id = $val;
-                                break;
+                                if ($value->type() === 'uri') {
+                                    $fallback = $value->value() ?: 'Source'; // @translate
+                                } else {
+                                    $fallback = 'Source'; // @translate
+                                }
+                                $result['property'][] = $homePageValue($id, $format, $language, [], $fallback);
                             }
                         }
                     }
-                    if (empty($id)) {
-                        continue 2;
-                    }
-                    if ($value->type() === 'uri') {
-                        $fallback = $value->value() ?: 'Source';
-                    } else {
-                        $fallback = 'Source';
-                    }
-                    $values = [];
                     break;
                 case 'resource':
                     if ($site) {
                         $id = $this->resource->siteUrl($site->slug(), true);
+                        $fallback = (string) new PsrMessage(
+                            'Resource in site: {site_title}', // @translate
+                            ['site_title' => $site->title()]
+                        );
                     } else {
                         $id = $this->resource->apiUrl();
                         $format = 'application/ld+json';
+                        $fallback = 'Json-ld api'; // @translate
                     }
-                    // displayTitle() can't be used, because language is needed.
-                    $template = $this->resource->resourceTemplate();
-                    if ($template) {
-                        $titleProperty = $template->titleProperty();
-                        if ($titleProperty) {
-                            $titlePropertyTerm = $titleProperty->term();
-                            if ($titlePropertyTerm !== 'dcterms:title') {
-                                $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
-                            }
-                        }
-                    }
-                    if (empty($values)) {
-                        $values = $this->resource->value('dcterms:title', ['all' => true]);
+                    $result['resource'][] = $homePageValue($id, $format, $language, [], $fallback);
+                    break;
+                case 'resources':
+                    foreach ($sites as $site) {
+                        $this->siteSettings->setTargetId($site->id());
+                        $id = $this->resource->siteUrl($site->slug(), true);
+                        $locale = $this->siteSettings->get('locale') ?: $defaultLocale;
+                        $fallback = (string) new PsrMessage(
+                            'Resource in site: {site_title}', // @translate
+                            ['site_title' => $site->title()]
+                        );
+                        $result['resources'][] = $homePageValue($id, $format, $locale, [], $fallback);
                     }
                     break;
                 case 'site':
@@ -151,49 +199,45 @@ trait TraitLinking
                         $id = $this->urlHelper->__invoke('top', [], ['force_canonical' => true]);
                         $values = [$language => [$this->settings->get('installation_title')]];
                     }
+                    $result['site'][] = $homePageValue($id, $format, $language, $values, $fallback);
+                    break;
+                case 'sites':
+                    foreach ($sites as $site) {
+                        $this->siteSettings->setTargetId($site->id());
+                        $id = $site->siteUrl($site->slug(), true);
+                        $locale = $this->siteSettings->get('locale') ?: $defaultLocale;
+                        $values = [$locale => [$site->title()]];
+                        $result['sites'][] = $homePageValue($id, $format, $locale, $values, $fallback);
+                    }
                     break;
                 case 'api':
                     $id = $this->resource->apiUrl();
                     $format = 'application/ld+json';
-                    // displayTitle() can't be used, because language is needed.
-                    $template = $this->resource->resourceTemplate();
-                    if ($template) {
-                        $titleProperty = $template->titleProperty();
-                        if ($titleProperty) {
-                            $titlePropertyTerm = $titleProperty->term();
-                            if ($titlePropertyTerm !== 'dcterms:title') {
-                                $values = $this->resource->value($titlePropertyTerm, ['all' => true]);
-                            }
-                        }
-                    }
-                    if (empty($values)) {
-                        $values = $this->resource->value('dcterms:title', ['all' => true]);
-                    }
+                    $fallback = 'Json-ld api'; // @translate
+                    $result['api'][] = $homePageValue($id, $format, $language, [], $fallback);
                     break;
-                case 'none':
-                    return null;
-            }
-            if ($id) {
-                $label = new ValueLanguage($values, false, $fallback);
-                $output[$homePage] = [
-                    'id' => $id,
-                    'type' => 'Text',
-                    'label' => $label,
-                    'format' => $format,
-                    'language' => [
-                        $language,
-                    ],
-                ];
             }
         }
 
-        if ($onlyPropertyOrResource
-            && (!empty($output['property']) && !empty($output['resource']) && !$homePagesAll['resource'])
-        ) {
-            unset($output['resource']);
+        if ($result['property']) {
+            if ($hasPropertyOrResource && !$hasResource) {
+                unset($result['resource']);
+            }
+            if ($hasPropertyOrResources && !$hasResources) {
+                unset($result['resources']);
+            }
         }
 
-        return array_values($output);
+        $output = [];
+        foreach ($result as $value) {
+            $output = array_merge(array_values($output), array_values($value));
+        }
+
+        $this->cache['homepage'] = count($output) < 2
+            ? $output
+            : array_values(array_map('unserialize', array_unique(array_map('serialize', array_filter($output)))));
+
+        return $this->cache['homepage'];
     }
 
     public function provider(): ?array

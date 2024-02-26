@@ -286,9 +286,12 @@ class ConfigForm extends Form
                     'value_options' => [
                         'none' => 'No link', // @translate
                         'property' => 'Property specified below', // @translate
-                        'resource' => 'Resource page', // @translate
-                        'property_or_resource' => 'Property if any, else resource page', // @translate
-                        'site' => 'Site home page (not recommended)', // @translate
+                        'resource' => 'Resource page (default site)', // @translate
+                        'resources' => 'Resource pages (all sites)', // @translate
+                        'property_or_resource' => 'Property if any, else resource page (defaut site)', // @translate
+                        'property_or_resources' => 'Property if any, else resource pages (all sites)', // @translate
+                        'site' => 'Default site home page (not recommended)', // @translate
+                        'sites' => 'Site home pages (not recommended)', // @translate
                         'api' => 'Api (not recommended)', // @translate
                     ],
                 ],

@@ -536,7 +536,7 @@ return [
             'iiifserver_manifest_rights_url' => '',
             'iiifserver_manifest_rights_text' => '',
             'iiifserver_manifest_homepage' => [
-                'property_or_resource',
+                'property_or_resources',
             ],
             'iiifserver_manifest_homepage_property' => '',
             'iiifserver_manifest_provider' => [
