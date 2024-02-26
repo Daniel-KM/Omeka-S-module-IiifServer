@@ -37,7 +37,38 @@ trait TraitBehavior
     protected $settings;
 
     /**
-     * @todo Should have the property "behaviors", present in AbstractResourceType.
+     * List of excluding behaviors.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#behavior
+     *
+     * @var array
+     */
+    protected $behaviorsExcluding = [
+        // Temporal behaviors.
+        'auto-advance' => ['no-auto-advance'],
+        'no-auto-advance' => ['auto-advance'],
+        'repeat' => ['no-repeat'],
+        'no-repeat' => ['repeat'],
+        // Layout behaviors.
+        'unordered' => ['individuals', 'continuous', 'paged'],
+        'individuals' => ['unordered', 'continuous', 'paged'],
+        'continuous' => ['unordered', 'individuals', 'paged'],
+        'paged' => ['unordered', 'individuals', 'continuous', 'facing-pages', 'non-paged'],
+        'facing-pages' => ['paged', 'non-paged'],
+        'non-paged' => ['paged', 'facing-pages'],
+        // Collection behaviors.
+        'multi-part' => ['together'],
+        'together' => ['multi-part'],
+        // Range behaviors.
+        'sequence' => ['thumbnail-nav', 'no-nav'],
+        'thumbnail-nav' => ['sequence', 'no-nav'],
+        'no-nav' => ['sequence', 'thumbnail-nav'],
+        // Miscellaneous behaviors.
+        'hidden' => [],
+    ];
+
+    /**
+     * @todo Should have the key "behaviors", present in AbstractResourceType?
      */
     public function behavior(): ?array
     {
@@ -48,6 +79,11 @@ trait TraitBehavior
         if (empty($behaviors)) {
             $behaviors = $this->settings->get('iiifserver_manifest_behavior_default', []);
         }
+
+        if (in_array('none', $behaviors)) {
+            return [];
+        }
+
         foreach ($behaviors as $key => $behavior) {
             $behavior = (string) $behavior;
             if (!isset($this->behaviors[$behavior])
@@ -56,8 +92,13 @@ trait TraitBehavior
                 unset($behaviors[$key]);
             }
         }
-        return empty($behaviors) || in_array('none', $behaviors)
-            ? null
-            : $behaviors;
+
+        // Check for exclusions.
+        $result = $behaviors;
+        foreach ($result as $behavior) {
+            $behaviors = array_diff($behaviors, $this->behaviorsExcluding[$behavior] ?? []);
+        }
+
+        return array_values($behaviors);
     }
 }
