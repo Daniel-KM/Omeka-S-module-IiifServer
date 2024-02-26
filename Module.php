@@ -82,10 +82,10 @@ class Module extends AbstractModule
         $translate = $plugins->get('translate');
         $translator = $services->get('MvcTranslator');
 
-        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.54')) {
             $message = new \Omeka\Stdlib\Message(
                 $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Common', '3.4.53'
+                'Common', '3.4.54'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -287,6 +287,8 @@ class Module extends AbstractModule
         $args = [
             'query' => ['id' => $item->getId()],
         ];
+
+        // TODO Use a direct strategy since manifest is created quickly now.
 
         /** @var \Omeka\Job\Dispatcher $dispatcher */
         $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);

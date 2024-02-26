@@ -27,10 +27,10 @@ $entityManager = $services->get('Omeka\EntityManager');
 $defaultConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 $defaultSettings = $defaultConfig['iiifserver']['config'];
 
-if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.54')) {
     $message = new \Omeka\Stdlib\Message(
         $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-        'Common', '3.4.53'
+        'Common', '3.4.54'
     );
     throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
 }
@@ -309,10 +309,10 @@ if (version_compare($oldVersion, '3.6.18', '<')) {
     $messenger->addSuccess($message);
 
     $settings->set('iiifserver_manifest_cache', true);
-    $settings->delete('iiifserver_manifest_cache_derivativemedia', true);
+    $settings->delete('iiifserver_manifest_cache_derivativemedia');
 
     $message = new PsrMessage(
-        'A new option allows to cache the manifests on save. It is set on, but may be disabled in settings. A job was launched to create all manifests.' // @translate
+        'A new option allows to cache the manifests on save. It is set on, but may be disabled in settings.' // @translate
     );
     $messenger->addSuccess($message);
 
@@ -325,8 +325,33 @@ if (version_compare($oldVersion, '3.6.18', '<')) {
         $messenger->addSuccess($message);
     }
 
+    /* // Disable caching on upgrade.
     require_once dirname(__DIR__, 2) . '/src/Job/CacheManifests.php';
     $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
     $args = ['query' => []];
     $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
+    */
+}
+
+if (version_compare($oldVersion, '3.6.19', '<')) {
+    if ($this->isModuleActive('ImageServer') && !$this->isModuleVersionAtLeast('ImageServer', '3.6.16')) {
+        $message = new \Omeka\Stdlib\Message(
+            $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+            'ImageServer', '3.6.16'
+        );
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+    }
+
+    $settings->set('iiifserver_manifest_summary_property', $settings->get('iiifserver_manifest_description_property', 'template'));
+    $settings->delete('iiifserver_manifest_description_property');
+
+    $message = new PsrMessage(
+        'The creation of manifests is now a lot quicker and can be done in real time in most of the cases. The cache is still available for big manifests and for instant access.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    $message = new PsrMessage(
+        'If you use the feature "table of contents", a new format was integrated. Management of the old ones will be removed in version 3.6.20. A job is added in module EasyAdmin (version 3.4.17) to do the conversion.' // @translate
+    );
+    $messenger->addWarning($message);
 }
