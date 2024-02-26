@@ -325,6 +325,7 @@ if (version_compare($oldVersion, '3.6.18', '<')) {
         $messenger->addSuccess($message);
     }
 
+    require_once dirname(__DIR__, 2) . '/src/Job/CacheManifests.php';
     $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
     $args = ['query' => []];
     $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
