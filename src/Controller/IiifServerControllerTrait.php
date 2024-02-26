@@ -352,8 +352,12 @@ trait IiifServerControllerTrait
 
     protected function viewMessage($exceptionOrMessage): string
     {
-        return $exceptionOrMessage instanceof \Exception
-            ? $exceptionOrMessage->getMessage()
-            : $this->translator()->translate($exceptionOrMessage);
+        if ($exceptionOrMessage instanceof \Exception) {
+            return (string) $exceptionOrMessage->getMessage();
+        }
+        if ($exceptionOrMessage instanceof PsrMessage) {
+            return (string) $exceptionOrMessage->setTranslator($this->translator());
+        }
+        return $this->translate($exceptionOrMessage);
     }
 }
