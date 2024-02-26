@@ -324,4 +324,8 @@ if (version_compare($oldVersion, '3.6.18', '<')) {
         );
         $messenger->addSuccess($message);
     }
+
+    $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+    $args = ['query' => []];
+    $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
 }
