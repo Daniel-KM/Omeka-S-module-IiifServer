@@ -89,6 +89,12 @@ class ValueLanguage implements JsonSerializable
         $this->prepareOutput();
     }
 
+    public static function output($values, bool $allowHtml = false, ?string $fallback = null, bool $multipleValues = false): ?array
+    {
+        return (new ValueLanguage($values, $allowHtml, $fallback, $multipleValues))
+            ->jsonSerialize();
+    }
+
     /**
      * Get all the data as array.
      */

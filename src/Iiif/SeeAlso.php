@@ -92,7 +92,7 @@ class SeeAlso extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
      */
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         return $this->cache['label'] ?? null;
     }
@@ -160,7 +160,7 @@ class SeeAlso extends AbstractResourceType
         // TODO Manage other alto versions than v3 (should be stored in media for quick check).
         $this->cache['id'] = $this->resource->originalUrl();
         $this->cache['type'] = $this->type;
-        $this->cache['label'] = new ValueLanguage([
+        $this->cache['label'] = ValueLanguage::output([
             'none' => [$this->mediaLabels[$mediaType] ?? $this->type],
         ]);
         $this->cache['format'] = $mediaType;

@@ -160,7 +160,7 @@ class AnnotationPage extends AbstractResourceType
         ]);
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         if ($this->callingMotivation === 'painting') {
             return parent::label();
@@ -240,7 +240,7 @@ class AnnotationPage extends AbstractResourceType
             'subtype' => 'line',
         ]);
         $this->cache['type'] = $this->type;
-        $this->cache['label'] = new ValueLanguage([
+        $this->cache['label'] = ValueLanguage::output([
             'none' => ['Text of the current page'], // @translate
         ]);
         $this->cache['items'] = [];

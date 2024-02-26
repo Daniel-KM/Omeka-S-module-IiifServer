@@ -31,7 +31,7 @@ namespace IiifServer\Iiif;
 
 trait TraitDescriptiveLabel
 {
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         if (!property_exists($this, 'resource') || !$this->resource) {
             return null;
@@ -54,6 +54,6 @@ trait TraitDescriptiveLabel
             $values = $this->resource->value('dcterms:title', ['all' => true]);
         }
 
-        return new ValueLanguage($values, false, '[Untitled]'); // @translate
+        return ValueLanguage::output($values, false, '[Untitled]'); // @translate
     }
 }

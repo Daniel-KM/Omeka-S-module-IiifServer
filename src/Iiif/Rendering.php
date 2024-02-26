@@ -102,7 +102,7 @@ class Rendering extends AbstractResourceType
      * {@inheritDoc}
      * @see \IiifServer\Iiif\AbstractResourceType::getLabel()
      */
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         if (!$this->type) {
             return null;
@@ -115,7 +115,7 @@ class Rendering extends AbstractResourceType
         $label = $format
             ? sprintf('%1$s [%2$s]', $this->type, $format)
             : $this->type;
-        return new ValueLanguage(['none' => [$label]]);
+        return ValueLanguage::output(['none' => [$label]]);
     }
 
     /**

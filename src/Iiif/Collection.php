@@ -155,7 +155,7 @@ class Collection extends AbstractResourceType
                 $result[] = [
                     'id' => $value->uri(),
                     'type' => 'Manifest',
-                    'label' => new ValueLanguage((string) $value->value(), false, '[Untitled]'),
+                    'label' => ValueLanguage::output((string) $value->value(), false, '[Untitled]'),
                 ];
             } else {
                 $urlManifest = (string) $value;
@@ -163,7 +163,7 @@ class Collection extends AbstractResourceType
                     $result[] = [
                         'id' => $urlManifest,
                         'type' => 'Manifest',
-                        'label' => new ValueLanguage('[Untitled]', false),
+                        'label' => ValueLanguage::output('[Untitled]', false),
                     ];
                 }
             }

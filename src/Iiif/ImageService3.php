@@ -123,7 +123,7 @@ class ImageService3 extends AbstractResourceType
         return 'http://iiif.io/api/image/3/context.json';
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         // There is no label for an image service.
         return null;

@@ -159,7 +159,7 @@ class Annotation extends AbstractResourceType
         ]);
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         // No label for a textual body.
         if (isset($this->options['body']) && $this->options['body'] === 'TextualBody') {

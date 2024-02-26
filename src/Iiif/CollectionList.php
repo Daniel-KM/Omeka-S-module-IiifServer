@@ -145,10 +145,10 @@ class CollectionList extends AbstractType
         return $this->options['iiif_url'] ?? $this->iiifUrl->__invoke($this->resources, 'iiifserver/set', '3');
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         $values = ['none' => ['Collection list']];
-        return new ValueLanguage($values);
+        return ValueLanguage::output($values);
     }
 
     public function items(): array
@@ -172,7 +172,7 @@ class CollectionList extends AbstractType
                     $items[] = [
                         'id' => $resource,
                         'type' => 'Manifest',
-                        'label' => new ValueLanguage('[Untitled]', false),
+                        'label' => ValueLanguage::output('[Untitled]', false),
                     ];
                 }
             }

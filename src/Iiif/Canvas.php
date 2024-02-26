@@ -180,7 +180,7 @@ class Canvas extends AbstractResourceType
         ]);
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         $labelOption = $this->settings->get('iiifserver_manifest_canvas_label');
         $values = [];
@@ -224,7 +224,7 @@ class Canvas extends AbstractResourceType
                 // Use fallback.
                 break;
         }
-        return new ValueLanguage($values, false, $fallback);
+        return ValueLanguage::output($values, false, $fallback);
     }
 
     /**

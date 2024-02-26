@@ -111,8 +111,8 @@ trait TraitDescriptive
             $metadataLabel = new ValueLanguage($labels);
 
             $metadata[] = [
-                'label' => $metadataLabel,
-                'value' => $metadataValue,
+                'label' => $metadataLabel->jsonSerialize(),
+                'value' => $metadataValue->jsonSerialize(),
             ];
         }
         return $metadata;
@@ -180,19 +180,17 @@ trait TraitDescriptive
         return null;
     }
 
-    public function summary(): ?ValueLanguage
+    public function summary(): ?array
     {
         $summaryProperty = $this->settings->get('iiifserver_manifest_summary_property');
-        $values = [];
-        if ($summaryProperty) {
-            // TODO Manage language of the summary.
-            $values = $summaryProperty === 'template'
-                ? array_filter([$this->resource->displayDescription()])
-                : $this->resource->value($summaryProperty, ['all' => true]);
+        if (!$summaryProperty) {
+            return null;
         }
-        return count($values)
-            ? new ValueLanguage($values, true)
-            : null;
+        // TODO Manage language of the summary.
+        $values = $summaryProperty === 'template'
+            ? array_filter([$this->resource->displayDescription()])
+            : $this->resource->value($summaryProperty, ['all' => true]);
+        return ValueLanguage::output($values, true);
     }
 
     /**
@@ -240,8 +238,8 @@ trait TraitDescriptive
         $metadataLabel = new ValueLanguage($labels);
 
         return [
-            'label' => $metadataLabel,
-            'value' => $metadataValue,
+            'label' => $metadataLabel->jsonSerialize(),
+            'value' => $metadataValue->jsonSerialize(),
         ];
     }
 

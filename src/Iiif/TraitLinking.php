@@ -112,11 +112,10 @@ trait TraitLinking
             : [];
 
         $homePageValue = function ($id, $format, $language, $values, $fallback) {
-            $label = new ValueLanguage($values, false, $fallback);
             return [
                 'id' => $id,
                 'type' => 'Text',
-                'label' => $label->jsonSerialize(),
+                'label' => ValueLanguage::output($values, false, $fallback),
                 'format' => $format,
                 'language' => [
                     $language,
@@ -306,7 +305,7 @@ trait TraitLinking
                     $output['simple'] = [
                         'id' => $this->urlHelper->__invoke('top', [], ['force_canonical' => true]),
                         'type' => 'Agent',
-                        'label' => new ValueLanguage([], false, $this->settings->get('installation_title')),
+                        'label' => ValueLanguage::output([], false, $this->settings->get('installation_title')),
                     ];
                     $logo = $this->logo();
                     if ($logo) {

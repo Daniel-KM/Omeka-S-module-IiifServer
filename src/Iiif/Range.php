@@ -134,10 +134,10 @@ class Range extends AbstractResourceType
         ]);
     }
 
-    public function label(): ?ValueLanguage
+    public function label(): ?array
     {
         return isset($this->options['label'])
-            ? new ValueLanguage($this->options['label'])
+            ? ValueLanguage::output($this->options['label'])
             : null;
     }
 
