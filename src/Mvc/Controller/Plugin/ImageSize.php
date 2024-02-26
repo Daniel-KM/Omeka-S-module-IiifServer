@@ -61,21 +61,22 @@ class ImageSize extends AbstractPlugin
      */
     public function __invoke($image, string $type = 'original', bool $force = false): array
     {
-        if ($image instanceof MediaRepresentation) {
+        // A security check. Useful?
+        if (strpos($type, '/..') !== false || strpos($type, '../') !== false) {
+            return $this->emptySize;
+        } elseif ($image instanceof MediaRepresentation) {
             return $this->sizeMedia($image, $type, $force);
-        }
-        if ($image instanceof AssetRepresentation) {
+        } elseif ($image instanceof AssetRepresentation) {
             return $this->sizeAsset($image, $force);
-        }
-        if ($image instanceof Media) {
+        } elseif ($image instanceof Media) {
             $image = $this->adapterManager->get('media')->getRepresentation($image);
             return $this->sizeMedia($image, $type, $force);
-        }
-        if ($image instanceof Asset) {
+        } elseif ($image instanceof Asset) {
             $image = $this->adapterManager->get('assets')->getRepresentation($image);
             return $this->sizeAsset($image, $force);
+        } else {
+            return $this->getWidthAndHeight((string) $image);
         }
-        return $this->getWidthAndHeight((string) $image);
     }
 
     /**
@@ -83,14 +84,12 @@ class ImageSize extends AbstractPlugin
      */
     protected function sizeMedia(MediaRepresentation $media, string $type, bool $force): array
     {
-        // Check if this is an image.
-        $mainMediaType = substr((string) $media->mediaType(), 0, 5);
-        if ($mainMediaType !== 'image'
-            // A security check.
-            || strpos($type, '/..') !== false
-            || strpos($type, '../') !== false
-        ) {
-            return $this->emptySize;
+        // Check if this is an image for type original.
+        if ($type === 'original') {
+            $mainMediaType = substr((string) $media->mediaType(), 0, 5);
+            if ($mainMediaType !== 'image') {
+                return $this->emptySize;
+            }
         }
 
         // Check if size is already stored. The stored dimension may be null.
