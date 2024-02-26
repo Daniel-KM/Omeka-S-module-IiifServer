@@ -156,13 +156,15 @@ class SeeAlso extends AbstractResourceType
         $this->type = 'Dataset';
 
         // TODO Manage other alto versions than v3 (should be stored in media for quick check).
-        $this->cache['id'] = $this->resource->originalUrl();
+        $this->cache['id'] = empty($this->options['useExtraFile'])
+            ? $this->resource->originalUrl()
+            : $this->options['mediaInfos']['extraFiles']['alto'];
         $this->cache['type'] = $this->type;
         $this->cache['label'] = ValueLanguage::output([
             'none' => [$this->mediaLabels[$mediaType] ?? $this->type],
         ]);
         $this->cache['format'] = $mediaType;
-        $this->cache['profile'] = 'http://www.loc.gov/standards/alto/v3/alto.xsd';
+        $this->cache['profile'] = 'http://www.loc.gov/standards/alto/v4/alto.xsd';
 
         return $this;
     }

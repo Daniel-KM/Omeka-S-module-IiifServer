@@ -1813,7 +1813,7 @@ class IiifManifest2 extends AbstractHelper
         }
         return [
             '@id' => $relatedMedia->originalUrl(),
-            'profile' => 'http://www.loc.gov/standards/alto/v3/alto.xsd',
+            'profile' => 'http://www.loc.gov/standards/alto/v4/alto.xsd',
             'format' => 'application/alto+xml',
             'label' => 'ALTO XML',
         ];

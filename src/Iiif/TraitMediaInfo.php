@@ -261,14 +261,17 @@ trait TraitMediaInfo
         }
 
         // Prepare mapping between media and canvas index one time and store it.
-        $index = 0;
+        $indexes = [];
         foreach ($mediaIds as $mediaId) {
             $mediaInfo = $this->mediaInfos[$mediaId];
-            if ($mediaInfo
-                && $mediaInfo['on'] === 'Canvas'
-                && ($mediaInfo['key'] ?? null) === 'annotation'
-            ) {
-                $this->mediaInfos[$mediaId]['index'] = ++$index;
+            if ($mediaInfo) {
+                $index = ($this->mediaInfos[$mediaId]['on'] ?? '')
+                    . '-' . ($this->mediaInfos[$mediaId]['key'] ?? '')
+                    . '-' . ($this->mediaInfos[$mediaId]['motivation'] ?? '');
+                if (empty($indexes[$index])) {
+                    $indexes[$index] = 0;
+                }
+                $this->mediaInfos[$mediaId]['index'] = ++$indexes[$index];
             }
         }
 

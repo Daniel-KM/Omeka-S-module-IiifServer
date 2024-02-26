@@ -273,6 +273,23 @@ class Canvas extends AbstractResourceType
                     $this->cache['seeAlso'][] = $seeAlso;
                 }
             }
+            /*
+            // Here, the single alto file is useless, because this is a media.
+            // Anyway, the sub process skip it because there is no media.
+            if (empty($this->cache['seeAlso']) && !empty($this->options['mediaInfos']['extraFiles']['alto'])) {
+                // There is only one annotation with alto ocr.
+                // TODO Manage pdf2xml (and tsv!)
+                $opts['useExtraFiles'] = true;
+                $seeAlso = new SeeAlso();
+                // TODO Options should be set first for now for init, done in setResource().
+                $seeAlso
+                    ->setOptions($opts)
+                    ->setResource($this->resource);
+                if ($seeAlso->id()) {
+                    $this->cache['seeAlso'][] = $seeAlso;
+                }
+            }
+            */
         }
         return $this->cache['seeAlso'];
     }
@@ -333,12 +350,28 @@ class Canvas extends AbstractResourceType
             $opts = $this->options;
             $opts['callingResource'] = $this->resource;
             $opts['callingMotivation'] = 'annotation';
+            // Currently, only alto ocr can be added.
+            // TODO Clarify process: currently, use only one
             foreach ($this->options['mediaInfos']['annotation'] ?? [] as $mediaData) {
                 $annotation = new AnnotationPage();
                 // TODO Options should be set first for now for init, done in setResource().
                 $annotation
                     ->setOptions($opts)
                     ->setResource($mediaData['content']->getResource());
+                if ($annotation->id()) {
+                    $this->cache['annotations'][] = $annotation;
+                }
+            }
+            if (empty($this->cache['annotations']) && !empty($this->options['mediaInfos']['extraFiles']['alto'])) {
+                // There is only one annotation with alto ocr.
+                // TODO Manage pdf2xml (and tsv!)
+                $annotation = new AnnotationPage();
+                $opts['useExtraFiles'] = true;
+                // This is not a file, so it is dereferenced.
+                $opts['isDereferenced'] = true;
+                $annotation
+                    ->setOptions($opts)
+                    ->setResource($this->resource);
                 if ($annotation->id()) {
                     $this->cache['annotations'][] = $annotation;
                 }

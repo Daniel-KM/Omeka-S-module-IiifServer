@@ -229,9 +229,19 @@ class AnnotationPage extends AbstractResourceType
             return $this;
         }
 
-        $relatedMedia = $this->iiifMediaRelatedOcr->__invoke($this->callingResource, null);
-        if (!$relatedMedia) {
-            return $this;
+        if (!empty($this->options['useExtraFiles'])) {
+            $filepath = $this->options['mediaInfos']['extraFiles']['alto'] ?? null;
+            $imageNumber = $this->options['mediaInfos']['indexes'][$this->resource->id()] ?? null;
+            if (!$filepath || !$imageNumber) {
+                return $this;
+            }
+        } else {
+            $relatedMedia = $this->iiifMediaRelatedOcr->__invoke($this->callingResource, null);
+            if (!$relatedMedia) {
+                return $this;
+            }
+            $filepath = null;
+            $imageNumber = null;
         }
 
         $callingResourceId = $this->callingResource->id();
@@ -248,7 +258,7 @@ class AnnotationPage extends AbstractResourceType
         ]);
         $this->cache['items'] = [];
         if ($this->isDereferenced) {
-            $this->initAnnotationPageLines();
+            $this->initAnnotationPageLines($filepath, $imageNumber);
         }
 
         if (!count($this->cache['items'])) {
@@ -263,11 +273,13 @@ class AnnotationPage extends AbstractResourceType
      *
      * @see \IiifServer\View\Helper\IiifAnnotationPageLine2
      */
-    protected function initAnnotationPageLines(): self
+    protected function initAnnotationPageLines(?string $filepath = null, ?int $imageNumber = null): self
     {
         $this->cache['items'] = [];
 
-        $xml = $this->loadXml($this->resource);
+        $xml = $filepath
+            ? @simplexml_load_file($filepath)
+            : $this->loadXml($this->resource);
         if (!$xml) {
             return $this;
         }
@@ -282,13 +294,17 @@ class AnnotationPage extends AbstractResourceType
         $opts['body'] = 'TextualBody';
         $opts['target_name'] = $this->callingResource->id();
         $index = 0;
-        foreach ($xml->xpath('/alto:alto/alto:Layout//alto:TextLine') as $xmlTextLine) {
+        $xpath = $imageNumber
+            ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']//alto:TextLine"
+            : '/alto:alto/alto:Layout//alto:TextLine';
+        foreach ($xml->xpath($xpath) as $xmlTextLine) {
+            // TODO Add a coefficient when text is extracted from pdf, not images.
             $attributes = $xmlTextLine->attributes();
             $zone = [];
-            $zone['left'] = (int) @$attributes->HPOS;
-            $zone['top'] = (int) @$attributes->VPOS;
-            $zone['width'] = (int) @$attributes->WIDTH;
-            $zone['height'] = (int) @$attributes->HEIGHT;
+            $zone['left'] = (int) (@$attributes->HPOS);
+            $zone['top'] = (int) (@$attributes->VPOS);
+            $zone['width'] = (int) (@$attributes->WIDTH);
+            $zone['height'] = (int) (@$attributes->HEIGHT);
             $opts['target_fragment'] = 'xywh=' . implode(',', $zone);
             $value = '';
             /** @var \SimpleXMLElement $xmlString */
