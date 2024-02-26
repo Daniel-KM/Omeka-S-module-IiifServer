@@ -64,7 +64,7 @@ trait TraitLinking
      */
     protected $urlHelper;
 
-    public function homepage(): ?array
+    public function homepage(): array
     {
         if (array_key_exists('homepage', $this->cache)) {
             return $this->cache['homepage'];
@@ -166,13 +166,17 @@ trait TraitLinking
                     break;
                 case 'resource':
                     if ($site) {
-                        $id = $this->resource->siteUrl($site->slug(), true);
+                        // To get the url from the resource is slow.
+                        // $id = $this->resource->siteUrl($site->slug(), true);
+                        $id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $site->slug(), 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
                         $fallback = (string) new PsrMessage(
                             'Resource in site: {site_title}', // @translate
                             ['site_title' => $site->title()]
                         );
                     } else {
-                        $id = $this->resource->apiUrl();
+                        // To get the url from the resource is slow.
+                        // $id = $this->resource->apiUrl();
+                        $id = $this->urlHelper->__invoke('api/default', ['resource' => $this->resource->resourceName(), 'id' => $this->resource->id()], ['force_canonical' => true]);
                         $format = 'application/ld+json';
                         $fallback = 'Json-ld api'; // @translate
                     }
@@ -181,7 +185,9 @@ trait TraitLinking
                 case 'resources':
                     foreach ($sites as $site) {
                         $this->siteSettings->setTargetId($site->id());
-                        $id = $this->resource->siteUrl($site->slug(), true);
+                        // To get the url from the resource is slow.
+                        // $id = $this->resource->siteUrl($site->slug(), true);
+                        $id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $site->slug(), 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
                         $locale = $this->siteSettings->get('locale') ?: $defaultLocale;
                         $fallback = (string) new PsrMessage(
                             'Resource in site: {site_title}', // @translate
@@ -192,7 +198,9 @@ trait TraitLinking
                     break;
                 case 'site':
                     if ($site) {
-                        $id = $site->siteUrl($site->slug(), true);
+                        // To get the url from the resource is slow.
+                        // $id = $this->resource->siteUrl($site->slug(), true);
+                        $id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $site->slug(), 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
                         $values = [$language => [$site->title()]];
                     } else {
                         $id = $this->urlHelper->__invoke('top', [], ['force_canonical' => true]);
@@ -203,14 +211,18 @@ trait TraitLinking
                 case 'sites':
                     foreach ($sites as $site) {
                         $this->siteSettings->setTargetId($site->id());
-                        $id = $site->siteUrl($site->slug(), true);
+                        // To get the url from the resource is slow.
+                        // $id = $this->resource->siteUrl($site->slug(), true);
+                        $id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $site->slug(), 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
                         $locale = $this->siteSettings->get('locale') ?: $defaultLocale;
                         $values = [$locale => [$site->title()]];
                         $result['sites'][] = $homePageValue($id, $format, $locale, $values, $fallback);
                     }
                     break;
                 case 'api':
-                    $id = $this->resource->apiUrl();
+                    // To get the url from the resource is slow.
+                    // $id = $this->resource->apiUrl();
+                    $id = $this->urlHelper->__invoke('api/default', ['resource' => $this->resource->resourceName(), 'id' => $this->resource->id()], ['force_canonical' => true]);
                     $format = 'application/ld+json';
                     $fallback = 'Json-ld api'; // @translate
                     $result['api'][] = $homePageValue($id, $format, $language, [], $fallback);
@@ -408,7 +420,9 @@ trait TraitLinking
 
         // Added the link to the json-ld representation.
         $output[] = [
-            'id' => $this->resource->apiUrl(),
+            // To get the url from the resource is slow.
+            // 'id' => $this->resource->apiUrl(),
+            'id' => $this->urlHelper->__invoke('api/default', ['resource' => $this->resource->resourceName(), 'id' => $this->resource->id()], ['force_canonical' => true]),
             'type' => 'Dataset',
             'label' => ['none' => ['Api rest json-ld']],
             'format' => 'application/ld+json',

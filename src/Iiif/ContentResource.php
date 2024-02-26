@@ -215,7 +215,9 @@ class ContentResource extends AbstractResourceType
             $siteSlug = $this->options['siteSlug'] ?? null;
             if ($siteSlug) {
                 // TODO Return media page or item page? Add an option or use content-resource url.
-                $this->id = $this->resource->siteUrl($siteSlug, true);
+                // To get the url from resource is slow.
+                // $this->id = $this->resource->siteUrl($siteSlug, true);
+                $this->id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $siteSlug, 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
             }
         }
 

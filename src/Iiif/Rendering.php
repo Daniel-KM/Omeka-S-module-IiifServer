@@ -85,7 +85,9 @@ class Rendering extends AbstractResourceType
             $siteSlug = $this->options['siteSlug'] ?? null;
             if ($siteSlug) {
                 // TODO Return media page or item page? Add an option.
-                $id = $this->resource->siteUrl($siteSlug, true);
+                // To get the site url from resource is slow.
+                // $id = $this->resource->siteUrl($siteSlug, true);
+                $id = $this->urlHelper->__invoke('site/resource-id', ['site-slug' => $siteSlug, 'controller' => $this->resource->getControllerName(), 'action' => 'show', 'id' => $this->resource->id()], ['force_canonical' => true]);
             } else {
                 $id = null;
             }
