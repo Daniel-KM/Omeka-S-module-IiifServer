@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace IiifServer\View\Helper;
 
 use Laminas\View\Helper\AbstractHelper;
@@ -10,7 +11,7 @@ use Omeka\Api\Representation\AbstractResourceRepresentation;
 class PublicResourceUrl extends AbstractHelper
 {
     /**
-     * @var string
+     * @var string|null
      */
     protected $defaultSiteSlug;
 

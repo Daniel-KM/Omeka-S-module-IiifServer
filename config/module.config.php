@@ -114,8 +114,6 @@ return [
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
             'rangeToArray' => Service\ViewHelper\RangeToArrayFactory::class,
-            // Currently in module Next and in a pull request for core.
-            'defaultSiteSlug' => Service\ViewHelper\DefaultSiteSlugFactory::class,
             'publicResourceUrl' => Service\ViewHelper\PublicResourceUrlFactory::class,
         ],
     ],
