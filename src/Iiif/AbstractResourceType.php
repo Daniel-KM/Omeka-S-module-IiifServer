@@ -39,13 +39,13 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 abstract class AbstractResourceType extends AbstractType
 {
     /**
-     * List of keys for the resource type.
+     * Ordered list of properties associated with requirements for the type.
      *
-     * @link https://iiif.io/api/presentation/3.0/#a-summary-of-property-requirements
+     * @see https://iiif.io/api/presentation/3.0/#a-summary-of-property-requirements
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::NOT_ALLOWED,
 
         'id' => self::NOT_ALLOWED,

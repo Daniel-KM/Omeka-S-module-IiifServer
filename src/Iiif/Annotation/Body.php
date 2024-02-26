@@ -40,7 +40,7 @@ class Body extends AbstractResourceType
 {
     use TraitMedia;
 
-    protected $keys = [
+    protected $propertyRequirements = [
         // Types for annotation body are not iiif.
 
         '@context' => self::NOT_ALLOWED,
@@ -48,8 +48,8 @@ class Body extends AbstractResourceType
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
         'format' => self::REQUIRED,
-        // These keys are required or not allowed according to the type (image,
-        // audio, or video). See construct.
+        // These properties are required or not allowed according to the
+        // resource type (image, audio, or video). See construct.
         'service' => self::RECOMMENDED,
         'height' => self::RECOMMENDED,
         'width' => self::RECOMMENDED,
@@ -92,17 +92,17 @@ class Body extends AbstractResourceType
         unset($options['content']);
 
         if ($this->contentResource->isImage()) {
-            $this->keys['height'] = self::REQUIRED;
-            $this->keys['width'] = self::REQUIRED;
-            $this->keys['duration'] = self::NOT_ALLOWED;
+            $this->propertyRequirements['height'] = self::REQUIRED;
+            $this->propertyRequirements['width'] = self::REQUIRED;
+            $this->propertyRequirements['duration'] = self::NOT_ALLOWED;
         } elseif ($this->contentResource->isVideo()) {
-            $this->keys['height'] = self::REQUIRED;
-            $this->keys['width'] = self::REQUIRED;
-            $this->keys['duration'] = self::REQUIRED;
+            $this->propertyRequirements['height'] = self::REQUIRED;
+            $this->propertyRequirements['width'] = self::REQUIRED;
+            $this->propertyRequirements['duration'] = self::REQUIRED;
         } elseif ($this->contentResource->isAudio()) {
-            $this->keys['height'] = self::NOT_ALLOWED;
-            $this->keys['width'] = self::NOT_ALLOWED;
-            $this->keys['duration'] = self::REQUIRED;
+            $this->propertyRequirements['height'] = self::NOT_ALLOWED;
+            $this->propertyRequirements['width'] = self::NOT_ALLOWED;
+            $this->propertyRequirements['duration'] = self::REQUIRED;
         }
 
         parent::__construct($resource, $options);

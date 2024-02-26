@@ -37,7 +37,10 @@ use JsonSerializable;
 /**
  * Manage the IIIF objects.
  *
- * @todo Use JsonLdSerializable?
+ * Whatever the array is filled with, it returns always a valid json IIIF object.
+ * Default values can be set too.
+ *
+ * @todo Implements JsonLdSerializable.
  *
  * @author Daniel Berthereau
  */
@@ -54,16 +57,16 @@ abstract class AbstractType implements JsonSerializable
     protected $logger;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $type;
+    protected $type = null;
 
     /**
-     * List of ordered keys for the type, associated with the requirement type.
+     * Ordered list of properties associated with requirements for the type.
      *
      * @var array
      */
-    protected $keys = [];
+    protected $propertyRequirements = [];
 
     /**
      * Store the current object for output.
@@ -88,14 +91,12 @@ abstract class AbstractType implements JsonSerializable
         // Always refresh the content.
         $this->content = [];
 
-        $allowedKeys = array_filter($this->keys, function ($v) {
-            return $v !== self::NOT_ALLOWED;
-        });
+        $allowedProperties = array_filter($this->propertyRequirements, fn ($v) => $v !== self::NOT_ALLOWED);
         $inflector = InflectorFactory::create()->build();
-        foreach (array_keys($allowedKeys) as $key) {
-            $method = $inflector->camelize(str_replace('@', '', $key));
+        foreach (array_keys($allowedProperties) as $property) {
+            $method = $inflector->camelize(str_replace('@', '', $property));
             if (method_exists($this, $method)) {
-                $this->content[$key] = $this->$method();
+                $this->content[$property] = $this->$method();
             }
         }
 
@@ -121,14 +122,12 @@ abstract class AbstractType implements JsonSerializable
     {
         $output = $this->getCleanContent();
 
-        // Check if all required data are present in root keys.
-        $requiredKeys = array_filter($this->keys, function ($v) {
-            return $v === self::REQUIRED;
-        });
-        $intersect = array_intersect_key($requiredKeys, $output);
+        // Check if all required data are present in root properties.
+        $requiredProperties = array_filter($this->propertyRequirements, fn ($v) => $v === self::REQUIRED);
+        $intersect = array_intersect_key($requiredProperties, $output);
 
         $e = null;
-        if (count($requiredKeys) === count($intersect)) {
+        if (count($requiredProperties) === count($intersect)) {
             // Second check for the children.
             // Instead of a recursive method, use jsonSerialize, that does the
             // same de facto.
@@ -145,7 +144,7 @@ abstract class AbstractType implements JsonSerializable
         }
 
         // Ideally should be in class AbstractResourceType.
-        $missingKeys = array_keys(array_diff_key($requiredKeys, $intersect));
+        $missingProperties = array_keys(array_diff_key($requiredProperties, $intersect));
         $hasResource = isset($this->resource);
         // TODO Use easyMeta.
         $resourceName = $hasResource ? $this->resource->resourceName() : null;
@@ -176,20 +175,20 @@ abstract class AbstractType implements JsonSerializable
             }
         } elseif ($hasResource) {
             $message = new PsrMessage(
-                '{resource} #{resource_id}: Missing required keys for iiif resource type "{type}": "{keys}".', // @translate
+                '{resource} #{resource_id}: Missing required properties for iiif resource type "{type}": {properties}.', // @translate
                 [
                     'resource' => ucfirst($resourceNames[$resourceName]),
                     'resource_id' => $this->resource->id(),
                     'type' => $this->type(),
-                    'keys' => implode('", "', $missingKeys),
+                    'properties' => implode(', ', $missingProperties),
                 ]
             );
         } else {
             $message = new PsrMessage(
-                'Missing required keys for iiif resource type "{type}": "{keys}".', // @translate
+                'Missing required properties for iiif resource type "{type}": {properties}.', // @translate
                 [
                     'type' => $this->type(),
-                    'keys' => implode('", "', $missingKeys),
+                    'properties' => implode(', ', $missingProperties),
                 ]
             );
         }

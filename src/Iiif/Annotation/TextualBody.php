@@ -36,7 +36,7 @@ class TextualBody extends AbstractResourceType
 {
     protected $type = 'TextualBody';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         // Types for annotation body are not iiif.
 
         '@context' => self::NOT_ALLOWED,

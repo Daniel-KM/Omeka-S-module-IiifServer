@@ -38,7 +38,7 @@ class Range extends AbstractResourceType
 {
     protected $type = 'Range';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::OPTIONAL,
 
         'id' => self::REQUIRED,

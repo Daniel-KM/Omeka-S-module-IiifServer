@@ -44,7 +44,7 @@ class CollectionList extends AbstractType
 {
     protected $type = 'Collection';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::REQUIRED,
 
         'id' => self::REQUIRED,

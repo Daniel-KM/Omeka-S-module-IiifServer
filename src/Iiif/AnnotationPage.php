@@ -42,7 +42,7 @@ class AnnotationPage extends AbstractResourceType
 
     protected $type = 'AnnotationPage';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::NOT_ALLOWED,
 
         'id' => self::REQUIRED,
@@ -130,7 +130,7 @@ class AnnotationPage extends AbstractResourceType
         $this->callingMotivation = $options['callingMotivation'] ?? null;
         $this->dereferenced = !empty($options['dereferenced']);
         if ($this->dereferenced) {
-            $this->keys['@context'] = self::REQUIRED;
+            $this->propertyRequirements['@context'] = self::REQUIRED;
         }
         // Xml is used only for annotation.
         if ($this->callingMotivation === 'annotation') {

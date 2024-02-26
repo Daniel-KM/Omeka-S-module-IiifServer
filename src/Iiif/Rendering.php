@@ -43,7 +43,7 @@ class Rendering extends AbstractResourceType
 
     protected $type = null;
 
-    protected $keys = [
+    protected $propertyRequirements = [
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
         'label' => self::OPTIONAL,

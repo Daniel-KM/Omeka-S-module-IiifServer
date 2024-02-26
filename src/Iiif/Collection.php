@@ -43,7 +43,7 @@ class Collection extends AbstractResourceType
 
     protected $type = 'Collection';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::REQUIRED,
 
         'id' => self::REQUIRED,

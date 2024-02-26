@@ -40,7 +40,7 @@ class ReferencedManifest extends Manifest
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
         'label' => self::REQUIRED,

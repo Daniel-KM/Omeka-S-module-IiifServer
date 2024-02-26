@@ -54,7 +54,7 @@ class ContentResource extends AbstractResourceType
      */
     protected $type = null;
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::NOT_ALLOWED,
 
         'id' => self::REQUIRED,

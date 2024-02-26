@@ -36,7 +36,7 @@ class Annotation extends AbstractResourceType
 {
     protected $type = 'Annotation';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::NOT_ALLOWED,
 
         'id' => self::REQUIRED,

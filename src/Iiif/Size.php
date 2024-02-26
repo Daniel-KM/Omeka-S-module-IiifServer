@@ -40,7 +40,7 @@ class Size extends AbstractType
 
     protected $type = 'Size';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         'type' => self::OPTIONAL,
         'width' => self::REQUIRED,
         'height' => self::REQUIRED,

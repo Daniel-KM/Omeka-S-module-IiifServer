@@ -44,7 +44,7 @@ trait TraitDescriptive
      * @todo Remove publicResourceUrl for v3.0?
      * @todo Remove some settings for v3.0.
      * @todo Use displayValues() or the event?
-     * @todo Remove special properties used in other keys.
+     * @todo Remove special properties used in other property.
      */
     public function metadata(): array
     {

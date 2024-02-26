@@ -41,7 +41,7 @@ class ImageService3 extends AbstractResourceType
 
     protected $type = 'ImageService3';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::REQUIRED,
 
         // Technical properties.

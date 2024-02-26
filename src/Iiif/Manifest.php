@@ -46,11 +46,13 @@ class Manifest extends AbstractResourceType
     protected $type = 'Manifest';
 
     /**
+     * Ordered list of properties associated with requirements for the type.
+     *
      * @link https://iiif.io/api/presentation/3.0/#b-example-manifest-response
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::REQUIRED,
 
         'id' => self::REQUIRED,

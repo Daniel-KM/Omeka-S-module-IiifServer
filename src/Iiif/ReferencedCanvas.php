@@ -39,7 +39,7 @@ class ReferencedCanvas extends Canvas
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
     ];

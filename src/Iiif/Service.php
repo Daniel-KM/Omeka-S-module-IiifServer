@@ -38,7 +38,7 @@ class Service extends AbstractType
 {
     protected $type = 'Service';
 
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::OPTIONAL,
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,

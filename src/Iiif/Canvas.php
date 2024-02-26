@@ -50,7 +50,7 @@ class Canvas extends AbstractResourceType
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         '@context' => self::OPTIONAL,
 
         'id' => self::REQUIRED,
@@ -329,12 +329,12 @@ class Canvas extends AbstractResourceType
             // of the view.
             // Image / Video.
             if (empty($this->_storage['dimension']['duration'])) {
-                $this->keys['width'] = self::REQUIRED;
-                $this->keys['height'] = self::REQUIRED;
+                $this->propertyRequirements['width'] = self::REQUIRED;
+                $this->propertyRequirements['height'] = self::REQUIRED;
             }
             // Audio / Video.
             if (empty($this->_storage['dimension']['width'])) {
-                $this->keys['duration'] = self::REQUIRED;
+                $this->propertyRequirements['duration'] = self::REQUIRED;
             }
             */
         }

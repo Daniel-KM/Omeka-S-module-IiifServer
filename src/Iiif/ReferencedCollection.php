@@ -39,7 +39,7 @@ class ReferencedCollection extends Collection
      *
      * @var array
      */
-    protected $keys = [
+    protected $propertyRequirements = [
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
         'label' => self::REQUIRED,
