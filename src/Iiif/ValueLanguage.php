@@ -147,7 +147,7 @@ class ValueLanguage implements JsonSerializable
                         $lang = $value->lang() ?: 'none';
                         if ($this->multipleValues || empty($this->output[$lang])) {
                             $this->output[$lang][] = $value->type() === 'uri'
-                                ? $value->uri()
+                                ? (string) $value->uri()
                                 : strip_tags((string) $value);
                         }
                     }
@@ -156,7 +156,7 @@ class ValueLanguage implements JsonSerializable
                 // This check is normally useless.
                 if (!$this->multipleValues) {
                     foreach ($this->values as $lang => &$v) {
-                        $v = [reset($v)];
+                        $v = [is_array($v) ? (string) reset($v) : (string) $v];
                     }
                     unset($v);
                 }
