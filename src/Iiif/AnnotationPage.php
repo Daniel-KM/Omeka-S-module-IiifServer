@@ -288,23 +288,49 @@ class AnnotationPage extends AbstractResourceType
         $altoNamespace = $namespaces['alto'] ?? $namespaces[''] ?? 'http://www.loc.gov/standards/alto/ns-v4#';
         $xml->registerXPathNamespace('alto', $altoNamespace);
 
+        // Check the size of the page stored in alto and the real size of image.
+        // With common tools, it may be 300 / 108.
+        // It allows to fix refactored images and alto extracted from pdf via
+        // the module Extract Ocr.
+        [$widthImage, $heightImage] = array_values($this->imageSize->__invoke($this->callingResource));
+        $xpath = $imageNumber
+            ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@WIDTH"
+            : '/alto:alto/alto:Layout/alto:Page/@WIDTH';
+        $widthLayout = $xml->xpath($xpath);
+        $widthLayout = (string) reset($widthLayout);
+        $xpath = $imageNumber
+            ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@HEIGHT"
+            : '/alto:alto/alto:Layout/alto:Page/@HEIGHT';
+        $heightLayout = $xml->xpath($xpath);
+        $heightLayout = (string) reset($heightLayout);
+        if ($widthImage && $heightImage && $widthLayout && $heightLayout) {
+            $widthCoef = $widthImage / $widthLayout;
+            $heightCoef = $heightImage / $heightLayout;
+        } else {
+            $widthCoef = 1;
+            $heightCoef = 1;
+        }
+
         $opts = [];
         $opts['callingResource'] = $this->callingResource;
         $opts['motivation'] = 'supplementing';
         $opts['body'] = 'TextualBody';
         $opts['target_name'] = $this->callingResource->id();
+
+
         $index = 0;
         $xpath = $imageNumber
             ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']//alto:TextLine"
             : '/alto:alto/alto:Layout//alto:TextLine';
+
         foreach ($xml->xpath($xpath) as $xmlTextLine) {
             // TODO Add a coefficient when text is extracted from pdf, not images.
             $attributes = $xmlTextLine->attributes();
             $zone = [];
-            $zone['left'] = (int) (@$attributes->HPOS);
-            $zone['top'] = (int) (@$attributes->VPOS);
-            $zone['width'] = (int) (@$attributes->WIDTH);
-            $zone['height'] = (int) (@$attributes->HEIGHT);
+            $zone['left'] = (int) (@$attributes->HPOS * $widthCoef);
+            $zone['top'] = (int) (@$attributes->VPOS * $widthCoef);
+            $zone['width'] = (int) (@$attributes->WIDTH * $heightCoef);
+            $zone['height'] = (int) (@$attributes->HEIGHT * $heightCoef);
             $opts['target_fragment'] = 'xywh=' . implode(',', $zone);
             $value = '';
             /** @var \SimpleXMLElement $xmlString */
