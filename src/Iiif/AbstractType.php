@@ -102,10 +102,10 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
     public function jsonSerialize(): array
     {
         // Remove useless key/values. There is no empty values.
-        // Normally, there is no empty ArrayObject or any other object.
+        // Normally, there is no empty ArrayObject or any other object inside
+        // internal array.
         // For now, there are exceptions with Collection and CollectionList,
         // so use a method.
-        // return array_filter($result , fn ($v) => $v !== null && $v !== '' && $v !== []);
         return array_filter($this->getArrayCopy(), [$this, 'filterContentFilled'], ARRAY_FILTER_USE_BOTH);
     }
 
@@ -180,6 +180,9 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
             'media' => 'media',
         ];
         $resourceName = $resource ? $resourceNames[$resource->resourceName()] ?? $resource->resourceName() : null;
+
+        $debug = false;
+
         // Fill allowed properties.
         $allowedProperties = $this->getProperties();
         foreach ($allowedProperties as $property) {
@@ -195,20 +198,28 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
             $method = mb_substr($property, 0, 1) === '@' ? mb_substr($property, 1) : $property;
             if (method_exists($this, $method)) {
                 $value = $this->$method();
-                if (is_object($value) && method_exists($value, 'normalize')) {
-                    $this[$property] = $value->normalize();
-                } elseif (is_array($value) && is_integer(key($value))) {
+                // Normally there is no object: output is scalar, null or array.
+                if (is_null($value) || is_scalar($value)) {
+                    $this[$property] = $value;
+                } elseif (is_array($value)) {
                     // TODO Make items, etc. a generic collection.
-                    // There is no sub-arrays. Sub-normalization is recursively managed.
-                    foreach ($value as $val) {
-                        $this[$property][] = is_object($val) && method_exists($val, 'normalize')
-                            ? $val->normalize()
-                            : $val;
+                    // There may be sub-arrays (metadata) and list of objects.
+                    if (is_integer(key($value))) {
+                        // Sub-normalization is recursively managed.
+                        foreach ($value as $val) {
+                            $this[$property][] = is_object($val) && method_exists($val, 'normalize')
+                                ? $val->normalize()
+                                : $val;
+                        }
+                    } else {
+                        $this[$property] = $value;
                     }
+                } elseif (is_object($value) && method_exists($value, 'normalize')) {
+                    $this[$property] = $value->normalize();
                 } else {
                     $this[$property] = $value;
                 }
-            } else {
+            } elseif ($debug) {
                 if ($resource) {
                     $message = new PsrMessage(
                         '{resource} #{resource_id}: Unknown property "{property}" for iiif resource type {type}.', // @translate
@@ -386,20 +397,15 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
     /**
      * Remove empty values of a iiif array.
      *
-     * In IIIF, there is no empty array, empty string, number 0, boolean false
-     * or null, String "0" is possible.
+     * In IIIF, there is no empty array, empty string, number 0 or null.
+     * String "0" is possible.
+     * @todo Check if number 0 is possible in external services.
      */
     protected function filterContentFilled($v, $k): bool
     {
-        if ($v === '0') {
-            return true;
-        }
-        if (is_array($v) || is_scalar($v) || is_null($v)) {
-            return !empty($v);
-        }
-        if ($v instanceof \JsonSerializable) {
-            return (bool) $v->jsonSerialize();
-        }
-        return !empty($v);
+        // Any array, string, numeric, boolean, object, etc. is filled.
+        return $v === '0'
+            || is_bool($v)
+            || !empty($v);
     }
 }

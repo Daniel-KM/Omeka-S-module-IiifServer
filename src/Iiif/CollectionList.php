@@ -188,18 +188,10 @@ class CollectionList extends AbstractType
      */
     protected function filterContentFilled($v, $k): bool
     {
-        if ($k === 'items') {
-            return true;
-        }
-        if ($v === '0') {
-            return true;
-        }
-        if (is_array($v) || is_scalar($v) || is_null($v)) {
-            return !empty($v);
-        }
-        if ($v instanceof \JsonSerializable) {
-            return (bool) $v->jsonSerialize();
-        }
-        return !empty($v);
+        // Any array, string, numeric, boolean, object, etc. is filled.
+        return $k === 'items'
+            || $v === '0'
+            || is_bool($v)
+            || !empty($v);
     }
 }
