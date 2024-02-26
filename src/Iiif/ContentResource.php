@@ -106,6 +106,11 @@ class ContentResource extends AbstractResourceType
         'hidden' => self::OPTIONAL,
     ];
 
+    /**
+     * @var \Omeka\Api\Representation\MediaRepresentation
+     */
+    protected $resource;
+
     public function __construct(MediaRepresentation $resource, array $options = null)
     {
         parent::__construct($resource, $options);
@@ -153,6 +158,27 @@ class ContentResource extends AbstractResourceType
             ? sprintf('%1$s [%2$s]', $this->type, $format)
             : $this->type;
         return new ValueLanguage(['none' => [$label]]);
+    }
+
+    public function language(): array
+    {
+        $languages = [];
+
+        $lang = $this->resource->lang();
+        // FIXME Lang may be a code with encoding.
+        if ($lang && strlen($lang) === 2) {
+            $languages[] = $lang;
+        }
+
+        // TODO Use module Table for languages.
+        foreach ($this->resource->value('dcterms:language', ['all' => true]) as $language) {
+            $languageCode = (string) $language;
+            if (strlen($languageCode) === 2) {
+                $languages[] = $languageCode;
+            }
+        }
+
+        return $languages;
     }
 
     protected function prepareMediaId(): AbstractType
