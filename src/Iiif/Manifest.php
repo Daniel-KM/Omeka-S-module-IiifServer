@@ -139,7 +139,9 @@ class Manifest extends AbstractResourceType
         parent::setResource($resource);
 
         $this
-            ->prepareMediaInfoList();
+            ->prepareMediaInfoList()
+            ->prepareExtraFilesInfoList()
+        ;
 
         return $this;
     }

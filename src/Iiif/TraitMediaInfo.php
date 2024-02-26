@@ -36,6 +36,11 @@ trait TraitMediaInfo
     /**
      * @var array
      */
+    protected $extraFiles = [];
+
+    /**
+     * @var array
+     */
     protected $mediaInfos = [];
 
     /**
@@ -265,6 +270,29 @@ trait TraitMediaInfo
             ) {
                 $this->mediaInfos[$mediaId]['index'] = ++$index;
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Categorize extra files to prepare and include them only once in manifest.
+     *
+     * For now only the alto files created by the module ExtractOcr are managed.
+     */
+    private function prepareExtraFilesInfoList(): self
+    {
+        if ($this->type !== 'Manifest') {
+            return $this;
+        }
+
+        // The module create a single xml alto for all pages of a pdf.
+        $this->extraFiles['alto'] = [];
+
+        $filename = $this->resource->id() . '.alto.xml';
+        $filepath = $this->basePath . '/alto/' . $filename;
+        if (file_exists($filepath)) {
+            $this->extraFiles['alto'][$this->resource->id()] = $filepath;
         }
 
         return $this;

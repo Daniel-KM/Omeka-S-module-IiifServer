@@ -99,7 +99,19 @@ trait TraitLinking
             }
         }
 
-        // Added the link to the json-ld representation.
+        // Add the link to the whole alto if any.
+        if (isset($this->extraFiles['alto'][$this->resource->id()])) {
+            $altoId = $this->baseUri. '/alto/' . basename($this->extraFiles['alto'][$this->resource->id()]);
+            $output[] = [
+                'id' => $altoId,
+                'type' => 'Dataset',
+                'label' => ['none' => ['Alto xml (ocr)']],
+                'format' => 'application/alto+xml',
+                'profile' => 'http://www.loc.gov/standards/alto/ns-v4#',
+            ];
+        }
+
+        // Add the link to the json-ld representation.
         $output[] = [
             // To get the url from the resource is slow.
             // 'id' => $this->resource->apiUrl(),

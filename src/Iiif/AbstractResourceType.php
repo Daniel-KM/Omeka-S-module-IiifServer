@@ -164,6 +164,11 @@ abstract class AbstractResourceType extends AbstractType
     protected $basePath;
 
     /**
+     * @var string
+     */
+    protected $baseUri;
+
+    /**
      * @var \Omeka\Api\Representation\SiteRepresentation|null
      */
     protected $defaultSite;
@@ -313,7 +318,6 @@ abstract class AbstractResourceType extends AbstractType
         $this->hasModuleImageServer = $plugins->has('tileMediaInfo');
 
         $this->api = $this->services->get('Omeka\ApiManager');
-        $this->basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $this->defaultSite = $viewHelpers->get('defaultSite')();
         $this->easyMeta = $this->services->get('EasyMeta');
         $this->fixUtf8 = $plugins->get('fixUtf8');
@@ -336,6 +340,8 @@ abstract class AbstractResourceType extends AbstractType
         // TODO Use plugin url to simplify call.
         $this->urlHelper = $viewHelpers->get('url');
 
+        $this->basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $this->baseUri = $config['file_store']['local']['base_uri'] ?: (rtrim($this->urlHelper->__invoke('top', [], ['force_canonical' => true]), '/') . '/files');
         $this->iiifImageApiVersion = $this->settings->get('iiifserver_media_api_default_version', '2');
         $this->iiifImageApiSupportedVersions = (array) $this->settings->get('iiifserver_media_api_supported_versions', ['2/2', '3/2']);
         $this->xmlFixMode = $this->settings->get('iiifsearch_xml_fix_mode', 'no');
