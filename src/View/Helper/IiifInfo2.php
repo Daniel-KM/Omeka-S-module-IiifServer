@@ -162,7 +162,7 @@ class IiifInfo2 extends AbstractHelper
             $info['protocol'] = 'http://wellcomelibrary.org/ld/ixif';
         }
 
-        // The trait TraitRights may be not available. Currently require module Iiif Server.
+        // The trait TraitDescriptiveRights may be not available. Currently require module Iiif Server.
         // It uses different settings anyway.
         $license = $this->rightsResource($media);
         if ($license) {
@@ -207,7 +207,7 @@ class IiifInfo2 extends AbstractHelper
     }
 
     /**
-     * @see \IiifServer\Iiif\TraitRights
+     * @see \IiifServer\Iiif\TraitDescriptiveRights
      */
     protected function rightsResource(MediaRepresentation $resource = null): ?string
     {

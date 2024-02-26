@@ -29,29 +29,18 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitViewing
+trait TraitStructuralAnnotations
 {
     /**
      * @var \Omeka\Settings\Settings
      */
     protected $settings;
 
-    protected $viewingDirections = [
-        'left-to-right',
-        'right-to-left',
-        'top-to-bottom',
-        'bottom-to-top',
-    ];
-
-    public function viewingDirection(): ?string
+    /**
+     * @todo Structural annotations.
+     */
+    public function annotations(): array
     {
-        $viewingDirectionProperty = $this->settings->get('iiifserver_manifest_viewing_direction_property');
-        if ($viewingDirectionProperty) {
-            $viewingDirection = strip_tags((string) $this->resource->value($viewingDirectionProperty));
-        }
-        if (empty($viewingDirection)) {
-            $viewingDirection = $this->settings->get('iiifserver_manifest_viewing_direction_default');
-        }
-        return in_array($viewingDirection, $this->viewingDirections) ? $viewingDirection : null;
+        return [];
     }
 }

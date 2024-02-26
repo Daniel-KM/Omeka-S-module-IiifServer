@@ -29,52 +29,29 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitImage
+trait TraitTechnicalViewing
 {
-    use TraitDescriptiveThumbnail;
-
     /**
-     * @var \IiifServer\View\Helper\IiifMediaUrl
+     * @var \Omeka\Settings\Settings
      */
-    protected $iiifMediaUrl;
+    protected $settings;
 
-    /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
-     */
-    protected $imageSize;
+    protected $viewingDirections = [
+        'left-to-right',
+        'right-to-left',
+        'top-to-bottom',
+        'bottom-to-top',
+    ];
 
-    /**
-     * @var array
-     */
-    protected $imageSizesByType = [];
-
-    public function isImage(): bool
+    public function viewingDirection(): ?string
     {
-        return $this->type === 'Image';
-    }
-
-    public function width(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['width'] : null;
-    }
-
-    public function height(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['height'] : null;
-    }
-
-    protected function imageSize(string $type = 'original'): ?array
-    {
-        if (!$this->isImage()) {
-            return null;
+        $viewingDirectionProperty = $this->settings->get('iiifserver_manifest_viewing_direction_property');
+        if ($viewingDirectionProperty) {
+            $viewingDirection = strip_tags((string) $this->resource->value($viewingDirectionProperty));
         }
-
-        if (!array_key_exists($type, $this->imageSizesByType)) {
-            $this->imageSizesByType[$type] = $this->imageSize->__invoke($this->resource->primaryMedia(), $type);
+        if (empty($viewingDirection)) {
+            $viewingDirection = $this->settings->get('iiifserver_manifest_viewing_direction_default');
         }
-
-        return $this->imageSizesByType[$type];
+        return in_array($viewingDirection, $this->viewingDirections) ? $viewingDirection : null;
     }
 }

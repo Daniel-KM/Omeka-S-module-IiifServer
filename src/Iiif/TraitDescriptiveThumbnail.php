@@ -29,7 +29,7 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitThumbnail
+trait TraitDescriptiveThumbnail
 {
     /**
      * @var int
@@ -124,7 +124,7 @@ trait TraitThumbnail
      * Helper to create a IIIF URL for the thumbnail
      *
      * Copy:
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifThumbnailUrl()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifThumbnailUrl()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifThumbnailUrl()
      *
      * @param string $baseUri IIIF base URI of the image (URI up to the
@@ -163,7 +163,7 @@ trait TraitThumbnail
      *
      * Copy:
      * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifComplianceLevel()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
      *
      * @param array|string $profile Contents of the `profile` property from the
@@ -204,7 +204,7 @@ trait TraitThumbnail
      * Helper to create the IIIF Image API service block
      *
      * Copy:
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifImageService()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifImageService()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifImageService()
      *
      * @param string $baseUri IIIF base URI of the image (including the

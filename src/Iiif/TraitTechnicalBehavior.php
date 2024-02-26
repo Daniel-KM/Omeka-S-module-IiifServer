@@ -29,7 +29,7 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitBehavior
+trait TraitTechnicalBehavior
 {
     /**
      * @var \Omeka\Settings\Settings
@@ -70,7 +70,7 @@ trait TraitBehavior
     /**
      * @todo Should have the key "behaviors", present in AbstractResourceType?
      */
-    public function behavior(): ?array
+    public function behavior(): array
     {
         $behaviorProperty = $this->settings->get('iiifserver_manifest_behavior_property', []);
         if ($behaviorProperty) {

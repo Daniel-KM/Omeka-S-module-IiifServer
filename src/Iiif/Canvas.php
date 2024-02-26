@@ -39,12 +39,11 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Canvas extends AbstractResourceType
 {
-    use TraitBehavior;
     use TraitDescriptive;
     // TODO Use TraitMedia in Canvas?
     // use TraitMedia;
-    use TraitThumbnail;
     // TODO Use TraitLinking for seeAlso.
+    use TraitTechnicalBehavior;
 
     protected $type = 'Canvas';
 
@@ -228,6 +227,72 @@ class Canvas extends AbstractResourceType
     }
 
     /**
+     * @todo Manage the provider at the canvas level.
+     */
+    public function provider(): ?array
+    {
+        return null;
+    }
+
+    public function height(): ?int
+    {
+        return $this->canvasDimensions()['height'];
+    }
+
+    public function width(): ?int
+    {
+        return $this->canvasDimensions()['width'];
+    }
+
+    public function duration(): ?float
+    {
+        return $this->canvasDimensions()['duration'];
+    }
+
+    public function seeAlso(): array
+    {
+        if (array_key_exists('seeAlso', $this->cache)) {
+            return $this->cache['seeAlso'];
+        }
+
+        $this->cache['seeAlso'] = [];
+        if ($this->resource instanceof MediaRepresentation) {
+            $opts = $this->options;
+            $opts['callingResource'] = $this->resource;
+            $opts['callingMotivation'] = 'seeAlso';
+            foreach ($this->resource->item()->media() as $media) {
+                $seeAlso = new SeeAlso();
+                // TODO Options should be set first for now for init, done in setResource().
+                $seeAlso
+                    ->setOptions($opts)
+                    ->setResource($media);
+                if ($seeAlso->id()) {
+                    $this->cache['seeAlso'][] = $seeAlso;
+                }
+            }
+        }
+        return $this->cache['seeAlso'];
+    }
+
+    public function rendering(): array
+    {
+        if (array_key_exists('rendering', $this->cache)) {
+            return $this->cache['rendering'];
+        }
+
+        $this->cache['rendering'] = [];
+        if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
+            $rendering = new Rendering();
+            // TODO Options should be set first for now for init, done in setResource().
+            $rendering
+                ->setOptions($this->options)
+                ->setResource($this->resource);
+            $this->cache['rendering'][] = $rendering;
+        }
+        return $this->cache['rendering'];
+    }
+
+    /**
      * As the process converts Omeka resource, there is only one file by canvas
      * currently.
      */
@@ -277,64 +342,6 @@ class Canvas extends AbstractResourceType
             }
         }
         return $this->cache['annotations'];
-    }
-
-    public function rendering(): array
-    {
-        if (array_key_exists('rendering', $this->cache)) {
-            return $this->cache['rendering'];
-        }
-
-        $this->cache['rendering'] = [];
-        if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
-            $rendering = new Rendering();
-            // TODO Options should be set first for now for init, done in setResource().
-            $rendering
-                ->setOptions($this->options)
-                ->setResource($this->resource);
-            $this->cache['rendering'][] = $rendering;
-        }
-        return $this->cache['rendering'];
-    }
-
-    public function seeAlso(): array
-    {
-        if (array_key_exists('seeAlso', $this->cache)) {
-            return $this->cache['seeAlso'];
-        }
-
-        $this->cache['seeAlso'] = [];
-        if ($this->resource instanceof MediaRepresentation) {
-            $opts = $this->options;
-            $opts['callingResource'] = $this->resource;
-            $opts['callingMotivation'] = 'seeAlso';
-            foreach ($this->resource->item()->media() as $media) {
-                $seeAlso = new SeeAlso();
-                // TODO Options should be set first for now for init, done in setResource().
-                $seeAlso
-                    ->setOptions($opts)
-                    ->setResource($media);
-                if ($seeAlso->id()) {
-                    $this->cache['seeAlso'][] = $seeAlso;
-                }
-            }
-        }
-        return $this->cache['seeAlso'];
-    }
-
-    public function height(): ?int
-    {
-        return $this->canvasDimensions()['height'];
-    }
-
-    public function width(): ?int
-    {
-        return $this->canvasDimensions()['width'];
-    }
-
-    public function duration(): ?float
-    {
-        return $this->canvasDimensions()['duration'];
     }
 
     /**

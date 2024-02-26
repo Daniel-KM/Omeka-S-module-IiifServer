@@ -175,7 +175,7 @@ class Body extends AbstractResourceType
     /**
      * @todo Return array of Service.
      */
-    public function service(): ?array
+    public function service(): array
     {
         // TODO Move this in ContentResource or TraitMedia.
 
@@ -225,7 +225,7 @@ class Body extends AbstractResourceType
             return $imageResourceServices;
         }
 
-        return null;
+        return [];
     }
 
     public function height(): ?int
@@ -271,7 +271,7 @@ class Body extends AbstractResourceType
      *
      * Copy:
      * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifComplianceLevel()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
      *
      * @param array|string $profile Contents of the `profile` property from the

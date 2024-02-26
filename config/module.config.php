@@ -101,7 +101,7 @@ return [
             'iiifManifest' => View\Helper\IiifManifest::class,
             'iiifManifestExternal' => View\Helper\IiifManifestExternal::class,
             'iiifManifestLink' => View\Helper\IiifManifestLink::class,
-            'iiifTypeOfMedia' => View\Helper\iiifTypeOfMedia::class,
+            'iiifTypeOfMedia' => View\Helper\IiifTypeOfMedia::class,
         ],
         'factories' => [
             'iiifCleanIdentifiers' => Service\ViewHelper\IiifCleanIdentifiersFactory::class,

@@ -29,52 +29,58 @@
 
 namespace IiifServer\Iiif;
 
-trait TraitImage
+trait TraitLinkingLogo
 {
-    use TraitDescriptiveThumbnail;
-
-    /**
-     * @var \IiifServer\View\Helper\IiifMediaUrl
-     */
-    protected $iiifMediaUrl;
-
     /**
      * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
      */
     protected $imageSize;
 
     /**
-     * @var array
+     * @var \Omeka\Settings\Settings
      */
-    protected $imageSizesByType = [];
+    protected $settings;
 
-    public function isImage(): bool
+    /**
+     * @todo Normalize logo().
+     */
+    public function logo(): array
     {
-        return $this->type === 'Image';
-    }
-
-    public function width(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['width'] : null;
-    }
-
-    public function height(): ?int
-    {
-        $size = $this->imageSize();
-        return $size ? (int) $size['height'] : null;
-    }
-
-    protected function imageSize(string $type = 'original'): ?array
-    {
-        if (!$this->isImage()) {
-            return null;
+        $url = $this->settings->get('iiifserver_manifest_logo_default');
+        if (!$url) {
+            return [];
         }
 
-        if (!array_key_exists($type, $this->imageSizesByType)) {
-            $this->imageSizesByType[$type] = $this->imageSize->__invoke($this->resource->primaryMedia(), $type);
+        // TODO Improve check of media type of the logo.
+        $format = strtolower(pathinfo($url, PATHINFO_EXTENSION));
+        $mediaTypes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            'gif' => 'image/gif',
+            'svg' => 'image/svg+xml',
+        ];
+
+        try {
+            $size = $this->imageSize->__invoke($url);
+        } catch (\Exception $e) {
+            return [];
         }
 
-        return $this->imageSizesByType[$type];
+        if (empty($size['width']) || empty($size['height'])) {
+            return [];
+        }
+
+        $output = [
+            'id' => $url,
+            'type' => 'Image',
+            'format' => @$mediaTypes[$format],
+            'height' => $size['height'],
+            'width' => $size['width'],
+        ];
+        return [
+            $output,
+        ];
     }
 }

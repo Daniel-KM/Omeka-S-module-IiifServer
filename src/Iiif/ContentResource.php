@@ -41,9 +41,9 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class ContentResource extends AbstractResourceType
 {
-    use TraitIiifType;
+    use TraitDescriptiveThumbnail;
     use TraitMedia;
-    use TraitThumbnail;
+    use TraitStructuralAnnotations;
 
     /**
      * @var string
@@ -127,7 +127,7 @@ class ContentResource extends AbstractResourceType
             throw new RuntimeException((string) $message);
         }
 
-        $this->type = $this->IiifTypeOfMedia->__invoke($resource);
+        $this->type = $this->iiifTypeOfMedia->__invoke($resource);
 
         $this->prepareMediaId();
 

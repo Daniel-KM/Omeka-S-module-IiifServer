@@ -39,8 +39,6 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class Rendering extends AbstractResourceType
 {
-    use TraitIiifType;
-
     protected $type = null;
 
     protected $propertyRequirements = [
@@ -65,7 +63,7 @@ class Rendering extends AbstractResourceType
             throw new RuntimeException((string) $message);
         }
 
-        $this->type = $this->IiifTypeOfMedia->__invoke($resource);
+        $this->type = $this->iiifTypeOfMedia->__invoke($resource);
 
         return $this;
     }

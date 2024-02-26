@@ -36,12 +36,12 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class Manifest extends AbstractResourceType
 {
-    use TraitBehavior;
     use TraitDescriptive;
     use TraitLinking;
     use TraitMediaInfo;
-    use TraitThumbnail;
-    use TraitViewing;
+    use TraitStructuralAnnotations;
+    use TraitTechnicalBehavior;
+    use TraitTechnicalViewing;
 
     protected $type = 'Manifest';
 
@@ -150,6 +150,65 @@ class Manifest extends AbstractResourceType
     }
 
     /**
+     * Unlike "services", "service" lists the services that applies only to the
+     * current resource. The spec examples are limited to image service and to
+     * an extension service. Search and autocompletion is used too by libraries.
+     * Authentication services are used only as sub-servivces.
+     *
+     * The default list of services is:
+     * ImageService1: Image API version 1
+     * ImageService2: Image API version 2
+     * SearchService1: Search API version 1
+     * AutoCompleteService1: Search API version 1
+     * AuthCookieService1: Authentication API version 1
+     * AuthTokenService1: Authentication API version 1
+     * AuthLogoutService1: Authentication API version 1
+     *
+     * @see https://iiif.io/api/presentation/3.0/#service
+     */
+    public function service(): array
+    {
+        return $this->service;
+    }
+
+    /**
+     * In manifest, the rendering is used for media to be downloaded.
+     */
+    public function rendering(): array
+    {
+        $mediaTypes = $this->settings->get('iiifserver_manifest_rendering_media_types') ?: ['all'];
+        if (in_array('none', $mediaTypes)) {
+            return [];
+        }
+
+        $renderings = [];
+        $siteSlug = $this->defaultSite ? $this->defaultSite->slug() : null;
+        $allMediaTypes = in_array('all', $mediaTypes);
+        foreach ($this->resource->media() as $media) {
+            if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
+                continue;
+            }
+            $mediaInfo = $this->mediaInfo($media);
+            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
+                $rendering = new Rendering();
+                $rendering
+                    // TODO Options should be set first for now for init, done in setResource().
+                    ->setOptions([
+                        'index' => $media->id(),
+                        'siteSlug' => $siteSlug,
+                        'content' => $mediaInfo['content'],
+                        'on' => 'Manifest',
+                    ])
+                    ->setResource($media);
+                if ($rendering->id() && $rendering->type()) {
+                    $renderings[] = $rendering;
+                }
+            }
+        }
+        return $renderings;
+    }
+
+    /**
      * As the process converts Omeka resource, there is only one file by canvas
      * currently.
      *
@@ -254,86 +313,6 @@ class Manifest extends AbstractResourceType
         }
 
         return $structures;
-    }
-
-    /**
-     * In manifest, the rendering is used for media to be downloaded.
-     */
-    public function rendering(): array
-    {
-        $mediaTypes = $this->settings->get('iiifserver_manifest_rendering_media_types') ?: ['all'];
-        if (in_array('none', $mediaTypes)) {
-            return [];
-        }
-
-        $renderings = [];
-        $site = $this->defaultSite();
-        $siteSlug = $site ? $site->slug() : null;
-        $allMediaTypes = in_array('all', $mediaTypes);
-        foreach ($this->resource->media() as $media) {
-            if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
-                continue;
-            }
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
-                $rendering = new Rendering();
-                // TODO Options should be set first for now for init, done in setResource().
-                $rendering
-                    ->setOptions([
-                        'index' => $media->id(),
-                        'siteSlug' => $siteSlug,
-                        'content' => $mediaInfo['content'],
-                        'on' => 'Manifest',
-                    ])
-                    ->setResource($media);
-                if ($rendering->id() && $rendering->type()) {
-                    $renderings[] = $rendering;
-                }
-            }
-        }
-        return $renderings;
-    }
-
-    /**
-     * Unlike "services", "service" lists the services that applies only to the
-     * current resource. The spec examples are limited to image service and to
-     * an extension service. Search and autocompletion is used too by libraries.
-     * Authentication services are used only as sub-servivces.
-     *
-     * The default list of services is:
-     * ImageService1: Image API version 1
-     * ImageService2: Image API version 2
-     * SearchService1: Search API version 1
-     * AutoCompleteService1: Search API version 1
-     * AuthCookieService1: Authentication API version 1
-     * AuthTokenService1: Authentication API version 1
-     * AuthLogoutService1: Authentication API version 1
-     *
-     * @see https://iiif.io/api/presentation/3.0/#service
-     */
-    public function service(): ?array
-    {
-        return $this->service;
-    }
-
-    /**
-     * Unlike "service", "services" is a shortcut to avoid to repeat the same
-     * list of services to all subsequent resources. The spec examples are
-     * limited to auth and token. The key does not exist in api v2.
-     *
-     * @see https://iiif.io/api/presentation/3.0/#services
-     */
-    public function services(): ?array
-    {
-        return null;
-    }
-
-    public function appendService(Service $service): self
-    {
-        // Normally, default services are already prepared.
-        $this->service ??= [];
-        $this->service[] = $service;
-        return $this;
     }
 
     protected function defaultStructure(): ?Range
@@ -551,7 +530,7 @@ class Manifest extends AbstractResourceType
      */
     protected function checkStructure(array $structure): ?Range
     {
-        return $structure;
+        return null;
     }
 
     /**

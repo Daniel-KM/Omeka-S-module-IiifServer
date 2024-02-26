@@ -132,6 +132,7 @@ abstract class AbstractResourceType extends AbstractType
      * List of IIIF types.
      *
      * Currently not used.
+     * @todo Use AbstractResourceType only for the main iiif types. Other may derivate to get the init.
      *
      * The content is the body or the textual body.
      *
@@ -215,7 +216,7 @@ abstract class AbstractResourceType extends AbstractType
     /**
      * @var \IiifServer\View\Helper\IiifTypeOfMedia
      */
-    protected $IiifTypeOfMedia;
+    protected $iiifTypeOfMedia;
 
     /**
      * @var \IiifServer\View\Helper\IiifUrl

@@ -40,7 +40,53 @@ class ReferencedCanvas extends Canvas
      * @var array
      */
     protected $propertyRequirements = [
+        '@context' => self::NOT_ALLOWED,
+
         'id' => self::REQUIRED,
         'type' => self::REQUIRED,
+
+        // Descriptive and rights properties.
+        'label' => self::NOT_ALLOWED,
+        'metadata' => self::NOT_ALLOWED,
+        'summary' => self::NOT_ALLOWED,
+        'requiredStatement' => self::NOT_ALLOWED,
+        'rights' => self::NOT_ALLOWED,
+        'navDate' => self::NOT_ALLOWED,
+        'language' => self::NOT_ALLOWED,
+        'provider' => self::NOT_ALLOWED,
+        'thumbnail' => self::NOT_ALLOWED,
+        'placeholderCanvas' => self::NOT_ALLOWED,
+        'accompanyingCanvas' => self::NOT_ALLOWED,
+
+        // Technical properties.
+        // Id and type are set above to avoid ordering by default.
+        // 'id' => self::NOT_ALLOWED,
+        // 'type' => self::NOT_ALLOWED,
+        'format' => self::NOT_ALLOWED,
+        'profile' => self::NOT_ALLOWED,
+        'height' => self::NOT_ALLOWED,
+        'width' => self::NOT_ALLOWED,
+        'duration' => self::NOT_ALLOWED,
+        'viewingDirection' => self::NOT_ALLOWED,
+        'behavior' => self::NOT_ALLOWED,
+        'timeMode' => self::NOT_ALLOWED,
+
+        // Linking properties.
+        // External linking.
+        'seeAlso' => self::NOT_ALLOWED,
+        'service' => self::NOT_ALLOWED,
+        'homepage' => self::NOT_ALLOWED,
+        'logo' => self::NOT_ALLOWED,
+        'rendering' => self::NOT_ALLOWED,
+        // Internal linking.
+        'partOf' => self::NOT_ALLOWED,
+        'start' => self::NOT_ALLOWED,
+        'supplementary' => self::NOT_ALLOWED,
+        'services' => self::NOT_ALLOWED,
+
+        // Structural properties.
+        'items' => self::NOT_ALLOWED,
+        'structures' => self::NOT_ALLOWED,
+        'annotations' => self::NOT_ALLOWED,
     ];
 }

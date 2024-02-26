@@ -32,7 +32,7 @@ namespace IiifServer\View\Helper;
 
 use Access\View\Helper\IsAllowedMediaContent;
 use IiifServer\Iiif\TraitMediaRelated;
-use IiifServer\Iiif\TraitRights;
+use IiifServer\Iiif\TraitDescriptiveRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\AssetRepresentation;
@@ -47,7 +47,7 @@ use Omeka\Settings\Settings;
 class IiifManifest2 extends AbstractHelper
 {
     use TraitMediaRelated;
-    use TraitRights;
+    use TraitDescriptiveRights;
 
     /**
      * @var int
@@ -184,7 +184,7 @@ class IiifManifest2 extends AbstractHelper
 
         $manifest['@id'] = $this->view->iiifUrl($item, 'iiifserver/manifest', '2');
 
-        // Required for TraitRights and to avoid to load setting each time.
+        // Required for TraitDescriptiveRights and to avoid to load setting each time.
         $helpers = $this->view->getHelperPluginManager();
         $this->setting = $helpers->get('setting');
 
@@ -1688,7 +1688,7 @@ class IiifManifest2 extends AbstractHelper
      *
      * Copy:
      * @see \IiifServer\Iiif\Annotation\Body::iiifComplianceLevel()
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifComplianceLevel()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifComplianceLevel()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifComplianceLevel()
      *
      * @param array|string $profile Contents of the `profile` property from the
@@ -1771,7 +1771,7 @@ class IiifManifest2 extends AbstractHelper
      * Helper to create the IIIF Image API service block.
      *
      * Copy:
-     * @see \IiifServer\Iiif\TraitThumbnail::iiifImageService()
+     * @see \IiifServer\Iiif\TraitDescriptiveThumbnail::iiifImageService()
      * @see \IiifServer\View\Helper\IiifManifest2::iiifImageService()
      *
      * @param string $baseUri IIIF base URI of the image (including the
@@ -1793,7 +1793,7 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
-     * Added in order to use trait TraitRights.
+     * Added in order to use trait TraitDescriptiveRights.
      */
     protected function context(): ?string
     {

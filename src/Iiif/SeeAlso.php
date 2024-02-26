@@ -37,8 +37,6 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class SeeAlso extends AbstractResourceType
 {
-    use TraitIiifType;
-
     protected $type = null;
 
     protected $propertyRequirements = [
@@ -73,7 +71,7 @@ class SeeAlso extends AbstractResourceType
         parent::setResource($resource);
         // For now, manage only media seeAlso.
         if ($resource instanceof MediaRepresentation) {
-            $this->type = $this->IiifTypeOfMedia->__invoke($resource);
+            $this->type = $this->iiifTypeOfMedia->__invoke($resource);
             $this->initSeeAlso();
         }
         return $this;

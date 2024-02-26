@@ -34,6 +34,8 @@ namespace IiifServer\Iiif;
  */
 class Range extends AbstractResourceType
 {
+    use TraitStructuralAnnotations;
+
     protected $type = 'Range';
 
     protected $propertyRequirements = [

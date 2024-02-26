@@ -31,7 +31,10 @@ namespace IiifServer\Iiif;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
-trait TraitRights
+/**
+ * Rights is managed separately to be managed in view helpers.
+ */
+trait TraitDescriptiveRights
 {
     /**
      * @var \Omeka\Settings\Settings

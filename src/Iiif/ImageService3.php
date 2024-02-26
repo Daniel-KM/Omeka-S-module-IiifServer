@@ -39,8 +39,8 @@ use Omeka\Api\Representation\MediaRepresentation;
  */
 class ImageService3 extends AbstractResourceType
 {
+    use TraitDescriptiveRights;
     use TraitImage;
-    use TraitRights;
 
     protected $type = 'ImageService3';
 
@@ -123,18 +123,18 @@ class ImageService3 extends AbstractResourceType
         return 'http://iiif.io/api/image/3/context.json';
     }
 
-    public function label(): ?array
-    {
-        // There is no label for an image service.
-        return null;
-    }
-
     public function id(): ?string
     {
         $routeImage = $this->settings->get('iiifserver_media_api_identifier_infojson')
             ? 'imageserver/info'
             : 'imageserver/id';
         return $this->iiifMediaUrl->__invoke($this->resource, $routeImage, '3');
+    }
+
+    public function label(): ?array
+    {
+        // There is no label for an image service.
+        return null;
     }
 
     public function protocol(): ?string
@@ -280,21 +280,21 @@ class ImageService3 extends AbstractResourceType
         return null;
     }
 
-    public function extraQualities(): ?array
+    public function extraQualities(): array
     {
-        return null;
+        return [];
     }
 
-    public function extraFormats(): ?array
+    public function extraFormats(): array
     {
-        return null;
+        return [];
     }
 
     /**
      * @link https://iiif.io/api/image/2.1/#profile-description
      * @link https://iiif.io/api/image/3.0/#6-compliance-level-and-profile-document
      */
-    public function extraFeatures(): ?array
+    public function extraFeatures(): array
     {
         // See https://iiif.io/api/image/3/context.json.
         /*
@@ -318,6 +318,6 @@ class ImageService3 extends AbstractResourceType
             'sizeUpscaling',
         ];
         */
-        return null;
+        return [];
     }
 }

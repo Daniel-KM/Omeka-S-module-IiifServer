@@ -29,7 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\TraitRights;
+use IiifServer\Iiif\TraitDescriptiveRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -38,7 +38,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class IiifCollectionList2 extends AbstractHelper
 {
-    use TraitRights;
+    use TraitDescriptiveRights;
 
     /**
      * @var \Omeka\Settings\Settings
@@ -93,7 +93,7 @@ class IiifCollectionList2 extends AbstractHelper
 
         // TODO The dynamic list has no metadata. Use the query?
 
-        // To init TraitRights requires Settings, so use vocabulary.
+        // To init TraitDescriptiveRights requires Settings, so use vocabulary.
         $this->settings = $this->view->api()->read('vocabularies', ['id' => 1])->getContent()->getServiceLocator()->get('Omeka\Settings');
 
         $license = $this->rightsResource();
@@ -201,7 +201,7 @@ class IiifCollectionList2 extends AbstractHelper
     }
 
     /**
-     * Added in order to use trait TraitRights.
+     * Added in order to use trait TraitDescriptiveRights.
      */
     protected function context()
     {

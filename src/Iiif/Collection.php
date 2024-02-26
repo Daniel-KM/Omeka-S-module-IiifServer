@@ -38,7 +38,7 @@ class Collection extends AbstractResourceType
 {
     use TraitDescriptive;
     use TraitLinking;
-    use TraitThumbnail;
+    use TraitStructuralAnnotations;
 
     protected $type = 'Collection';
 

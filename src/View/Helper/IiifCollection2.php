@@ -30,7 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
-use IiifServer\Iiif\TraitRights;
+use IiifServer\Iiif\TraitDescriptiveRights;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -40,7 +40,7 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  */
 class IiifCollection2 extends AbstractHelper
 {
-    use TraitRights;
+    use TraitDescriptiveRights;
 
     /**
      * @var \Omeka\Settings\Settings
@@ -374,7 +374,7 @@ class IiifCollection2 extends AbstractHelper
     }
 
     /**
-     * Added in order to use trait TraitRights.
+     * Added in order to use trait TraitDescriptiveRights.
      */
     protected function context(): string
     {

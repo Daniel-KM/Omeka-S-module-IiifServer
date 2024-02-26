@@ -33,9 +33,11 @@ use Omeka\Api\Representation\MediaRepresentation;
 
 trait TraitDescriptive
 {
+    // use TraitDescriptiveLabel;
+    use TraitDescriptiveRights;
+    use TraitDescriptiveThumbnail;
+    use TraitLinkingLogo;
     use TraitMedia;
-    use TraitMediaInfo;
-    use TraitRights;
 
     /**
      * @var \IiifServer\View\Helper\MediaDimension
@@ -46,6 +48,16 @@ trait TraitDescriptive
      * @var \Omeka\Settings\Settings
      */
     protected $settings;
+
+    /**
+     * Label is specific for each iiif resource, so skipped for now here.
+     */
+    /*
+    public function label(): ?array
+    {
+        return null;
+    }
+    */
 
     /**
      * List metadata of the resource.
@@ -118,6 +130,172 @@ trait TraitDescriptive
         return $metadata;
     }
 
+    public function summary(): ?array
+    {
+        $summaryProperty = $this->settings->get('iiifserver_manifest_summary_property');
+        if (!$summaryProperty) {
+            return null;
+        }
+        // TODO Manage language of the summary.
+        $values = $summaryProperty === 'template'
+            ? array_filter([$this->resource->displayDescription()])
+            : $this->resource->value($summaryProperty, ['all' => true]);
+        return ValueLanguage::output($values, true);
+    }
+
+    /**
+     * @todo Normalize format of required statement.
+     *
+     * Adapted according to https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/37
+     * in order to include the rights value when it is not a url, since it is
+     * skipped when it is not an url.
+     */
+    public function requiredStatement(): ?array
+    {
+        $requiredStatement = [];
+        $requiredStatement = $this->settings->get('iiifserver_manifest_attribution_property');
+        if ($requiredStatement) {
+            $requiredStatement = $this->resource->value($requiredStatement, ['all' => true]);
+        }
+
+        if (empty($requiredStatement)) {
+            $license = $this->resource ? $this->rightsResource($this->resource, true) : null;
+            if ($license && !$this->checkAllowedLicense($license)) {
+                $requiredStatement = ['none' => [$license]];
+            } else {
+                $default = $this->settings->get('iiifserver_manifest_attribution_default');
+                if ($default) {
+                    $requiredStatement = ['none' => [$default]];
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        $metadataValue = new ValueLanguage($requiredStatement, true);
+        if (!$metadataValue->count()) {
+            return null;
+        }
+
+        $propertyLabel = 'Attribution'; // @translate
+
+        $labels = [];
+        foreach ($metadataValue->langs() as $lang) {
+            $labels[$lang][] = $propertyLabel;
+        }
+        $metadataLabel = new ValueLanguage($labels);
+
+        return [
+            'label' => $metadataLabel->jsonSerialize(),
+            'value' => $metadataValue->jsonSerialize(),
+        ];
+    }
+
+    /* Managed by TraitDescriptiveRights.
+    public function rights(): ?string
+    {
+        return null;
+    }
+    */
+
+    public function provider(): ?array
+    {
+        $providers = $this->settings->get('iiifserver_manifest_provider', []);
+        if (empty($providers) || in_array('none', $providers)) {
+            return null;
+        }
+
+        $providersAll = array_fill_keys($providers, true);
+
+        $onlyPropertyOrAgent = isset($providersAll['property_or_agent']);
+        if ($onlyPropertyOrAgent) {
+            $providersAll['property'] ??= false;
+            $providersAll['agent'] ??= false;
+            unset($providersAll['property_or_agent']);
+        }
+
+        $onlyPropertyOrSimple = isset($providersAll['property_or_simple']);
+        if ($onlyPropertyOrAgent) {
+            $providersAll['property'] ??= false;
+            $providersAll['simple'] ??= false;
+            unset($providersAll['property_or_simple']);
+        }
+
+        $output = [];
+        foreach (array_keys($providersAll) as $provider) {
+            $agent = null;
+            switch ($provider) {
+                default:
+                    continue 2;
+                case 'none':
+                    return null;
+                case 'property':
+                    $property = $this->settings->get('iiifserver_manifest_provider_property');
+                    if (!$property) {
+                        continue 2;
+                    }
+                    /** @var \Omeka\Api\Representation\ValueRepresentation[] $values */
+                    $values = $this->resource->value($property, ['all' => true]);
+                    if ($values) {
+                        foreach ($values as $value) {
+                            if (!$value->uri() && !$value->valueResource()) {
+                                $agent = $value->value();
+                                break;
+                            }
+                        }
+                    }
+                    if ($agent) {
+                        $provider = json_decode($agent, true);
+                        if ($provider && is_array($provider)) {
+                            $output['property'] = $provider;
+                        }
+                    }
+                    break;
+                case 'agent':
+                    $provider = $this->settings->get('iiifserver_manifest_provider_agent');
+                    if ($provider) {
+                        $provider = json_decode($provider, true);
+                        if ($provider && is_array($provider)) {
+                            $output['agent'] = $provider;
+                        }
+                    }
+                    break;
+                case 'simple':
+                    $output['simple'] = [
+                        'id' => $this->urlHelper->__invoke('top', [], ['force_canonical' => true]),
+                        'type' => 'Agent',
+                        'label' => ValueLanguage::output([], false, $this->settings->get('installation_title')),
+                    ];
+                    $logo = $this->logo();
+                    if ($logo) {
+                        $output['simple']['logo'] = $logo;
+                    }
+                    break;
+            }
+        }
+
+        if ($onlyPropertyOrAgent
+            && (!empty($output['property']) && !empty($output['agent']) && !$providersAll['agent'])
+        ) {
+            unset($output['agent']);
+        }
+
+        if ($onlyPropertyOrSimple
+            && (!empty($output['property']) && !empty($output['simple']) && !$providersAll['simple'])
+        ) {
+            unset($output['simple']);
+        }
+
+        return array_values($output);
+    }
+
+    /* Managed by TraitDescriptiveThumbnail.
+    public function thumbnail(): ?array
+    {
+        return null;
+    }
+     */
+
     /**
      * The placeholder canvas can be set in item or media values.
      *
@@ -178,69 +356,6 @@ trait TraitDescriptive
         }
 
         return null;
-    }
-
-    public function summary(): ?array
-    {
-        $summaryProperty = $this->settings->get('iiifserver_manifest_summary_property');
-        if (!$summaryProperty) {
-            return null;
-        }
-        // TODO Manage language of the summary.
-        $values = $summaryProperty === 'template'
-            ? array_filter([$this->resource->displayDescription()])
-            : $this->resource->value($summaryProperty, ['all' => true]);
-        return ValueLanguage::output($values, true);
-    }
-
-    /**
-     * @todo Normalize format of required statement.
-     *
-     * Adapted according to https://github.com/Daniel-KM/Omeka-S-module-IiifServer/issues/37
-     * in order to include the rights value when it is not a url, since it is
-     * skipped when it is not an url.
-     *
-     * @return ValueLanguage|array|null
-     */
-    public function requiredStatement()
-    {
-        $requiredStatement = [];
-        $requiredStatement = $this->settings->get('iiifserver_manifest_attribution_property');
-        if ($requiredStatement) {
-            $requiredStatement = $this->resource->value($requiredStatement, ['all' => true]);
-        }
-
-        if (empty($requiredStatement)) {
-            $license = $this->resource ? $this->rightsResource($this->resource, true) : null;
-            if ($license && !$this->checkAllowedLicense($license)) {
-                $requiredStatement = ['none' => [$license]];
-            } else {
-                $default = $this->settings->get('iiifserver_manifest_attribution_default');
-                if ($default) {
-                    $requiredStatement = ['none' => [$default]];
-                } else {
-                    return null;
-                }
-            }
-        }
-
-        $metadataValue = new ValueLanguage($requiredStatement, true);
-        if (!$metadataValue->count()) {
-            return $metadataValue;
-        }
-
-        $propertyLabel = 'Attribution'; // @translate
-
-        $labels = [];
-        foreach ($metadataValue->langs() as $lang) {
-            $labels[$lang][] = $propertyLabel;
-        }
-        $metadataLabel = new ValueLanguage($labels);
-
-        return [
-            'label' => $metadataLabel->jsonSerialize(),
-            'value' => $metadataValue->jsonSerialize(),
-        ];
     }
 
     /**
