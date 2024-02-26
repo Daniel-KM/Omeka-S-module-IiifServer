@@ -180,14 +180,19 @@ trait TraitDescriptive
         return null;
     }
 
-    public function summary(): ValueLanguage
+    public function summary(): ?ValueLanguage
     {
         $summaryProperty = $this->settings->get('iiifserver_manifest_description_property');
         $values = [];
         if ($summaryProperty) {
-            $values = $this->resource->value($summaryProperty, ['all' => true]);
+            // TODO Manage language of the summary.
+            $values = $summaryProperty === 'template'
+                ? array_filter([$this->resource->displayDescription()])
+                : $this->resource->value($summaryProperty, ['all' => true]);
         }
-        return new ValueLanguage($values, true);
+        return count($values)
+            ? new ValueLanguage($values, true)
+            : null;
     }
 
     /**

@@ -116,7 +116,9 @@ class IiifCollection2 extends AbstractHelper
 
         $descriptionProperty = $this->settings->get('iiifserver_manifest_description_property');
         if ($descriptionProperty) {
-            $description = strip_tags((string) $resource->value($descriptionProperty, ['default' => '']));
+            $description = $descriptionProperty === 'template'
+                ? strip_tags((string) $resource->displayDescription())
+                : strip_tags((string) $resource->value($descriptionProperty, ['default' => '']));
         }
         $manifest['description'] = $description;
 

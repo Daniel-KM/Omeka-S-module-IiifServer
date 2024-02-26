@@ -108,10 +108,13 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_manifest_description_property',
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
-                    'label' => 'Property to use for Description', // @translate
+                    'label' => 'Property to use for summary or description', // @translate
                     'info' => 'If any, the first metadata of the record will be added in all manifests and viewers for main description. It’s recommended to use "Dublin Core:Bibliographic Citation".', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
+                    'prepend_value_options' => [
+                        'template' => 'Template description', // @translate
+                    ],
                     'use_hidden_element' => true,
                 ],
                 'attributes' => [

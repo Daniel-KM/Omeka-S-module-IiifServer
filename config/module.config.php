@@ -527,7 +527,7 @@ return [
             'iiifserver_manifest_pretty_json' => true,
             'iiifserver_manifest_cache' => true,
             // Content of the manifest.
-            'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
+            'iiifserver_manifest_description_property' => 'template',
             'iiifserver_manifest_attribution_property' => '',
             'iiifserver_manifest_attribution_default' => '', // @translate
             'iiifserver_manifest_rights' => 'property_or_url',
