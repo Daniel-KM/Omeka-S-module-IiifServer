@@ -147,6 +147,7 @@ class ConfigForm extends Form
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_attribution_default',
+                    'data-placeholder' => 'Provided by Example Organization', // @translate
                 ],
             ])
 

@@ -531,7 +531,7 @@ return [
             // Content of the manifest.
             'iiifserver_manifest_description_property' => 'dcterms:bibliographicCitation',
             'iiifserver_manifest_attribution_property' => '',
-            'iiifserver_manifest_attribution_default' => 'Provided by Example Organization', // @translate
+            'iiifserver_manifest_attribution_default' => '', // @translate
             'iiifserver_manifest_rights' => 'property_or_url',
             'iiifserver_manifest_rights_property' => 'dcterms:license',
             'iiifserver_manifest_rights_uri' => 'https://rightsstatements.org/vocab/CNE/1.0/',
