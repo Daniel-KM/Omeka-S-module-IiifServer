@@ -969,8 +969,8 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_media_api_prefix',
                 'type' => Element\Text::class,
                 'options' => [
-                    'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @translate
-                    'info' => 'If set, the prefix will be added after the version: "iiif/3/xxx".', // @translate
+                    'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @ translate
+                    'info' => 'If set, the prefix will be added after the version: "iiif/3/xxx".', // @ translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_prefix',
