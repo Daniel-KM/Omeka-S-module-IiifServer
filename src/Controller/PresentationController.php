@@ -111,7 +111,8 @@ class PresentationController extends AbstractActionController
         $manifest = null;
         $toCache = false;
 
-        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache', false);
+        $settings = $this->settings();
+        $useCache = (bool) $settings->get('iiifserver_manifest_cache', false);
         if ($useCache) {
             $itemId = $resource->id();
             $config = $resource->getServiceLocator()->get('Config');
@@ -122,10 +123,11 @@ class PresentationController extends AbstractActionController
                 $manifest = json_decode($manifest, true);
                 return $this->iiifJsonLd($manifest, $version);
             }
+            $toCache = true;
         }
 
         // Compatibility with old version of DerivativeMedia.
-        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache_media', false);
+        $useCache = !$toCache && $settings->get('iiifserver_manifest_cache_media', false);
         if ($useCache && $viewHelpers->has('derivativeList')) {
             $type = 'iiif-' . (int) $version;
             $derivative = $viewHelpers->get('derivativeList')->__invoke($resource, ['type' => $type]);
@@ -157,7 +159,11 @@ class PresentationController extends AbstractActionController
             if (!file_exists(dirname($filepath))) {
                 @mkdir(dirname($filepath), 0775, true);
             }
-            @file_put_contents($filepath, json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+            $prettyPrint = (bool) $settings->get('iiifserver_manifest_pretty_json');
+            $prettyJson = $prettyPrint
+                ? JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+                : JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+            @file_put_contents($filepath, json_encode($manifest, $prettyJson));
         }
 
         return $this->iiifJsonLd($manifest, $version);
