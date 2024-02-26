@@ -85,6 +85,7 @@ class IiifAnnotationList3 extends AbstractHelper
         $opts['callingResource'] = $resource;
         $opts['callingMotivation'] = 'annotation';
         $opts['isDereferenced'] = true;
+        // TODO Use TraitMediaInfo. Or filter medias first.
         foreach ($resource->item()->media() as $media) {
             $annotationPage = new AnnotationPage();
             $annotationPage

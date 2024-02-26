@@ -149,14 +149,18 @@ class AnnotationPage extends AbstractResourceType
 
     public function id(): ?string
     {
+        if (array_key_exists('id', $this->cache)) {
+            return $this->cache['id'];
+        }
         if ($this->callingMotivation !== 'painting') {
-            return $this->cache['id'] ?? null;
+            return null;
         }
         // Here, the resource is a media.
-        return $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+        $this->cache['id'] = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
             'type' => 'annotation-page',
             'name' => $this->resource->id(),
         ]);
+        return $this->cache['id'];
     }
 
     public function label(): ?array

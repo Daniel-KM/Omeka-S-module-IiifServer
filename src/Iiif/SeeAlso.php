@@ -125,6 +125,7 @@ class SeeAlso extends AbstractResourceType
      * with a linked media or use the same basename from the original source.
      *
      * @todo Merge with TraitLinking SeeAlso.
+     * @todo Merge with mediaInfo.
      */
     protected function initSeeAlso(): self
     {

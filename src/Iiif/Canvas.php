@@ -257,15 +257,18 @@ class Canvas extends AbstractResourceType
 
         $this->cache['seeAlso'] = [];
         if ($this->resource instanceof MediaRepresentation) {
+            // Add the associated media to the current media.
+            // Currently, only the xml alto is managed.
             $opts = $this->options;
             $opts['callingResource'] = $this->resource;
             $opts['callingMotivation'] = 'seeAlso';
-            foreach ($this->resource->item()->media() as $media) {
+            foreach ($this->options['mediaInfos']['seeAlso'] ?? [] as $mediaData) {
                 $seeAlso = new SeeAlso();
                 // TODO Options should be set first for now for init, done in setResource().
                 $seeAlso
                     ->setOptions($opts)
-                    ->setResource($media);
+                    ->setResource($mediaData['content']->getResource());
+                // Useless check.
                 if ($seeAlso->id()) {
                     $this->cache['seeAlso'][] = $seeAlso;
                 }
@@ -330,12 +333,12 @@ class Canvas extends AbstractResourceType
             $opts = $this->options;
             $opts['callingResource'] = $this->resource;
             $opts['callingMotivation'] = 'annotation';
-            foreach ($this->resource->item()->media() as $media) {
+            foreach ($this->options['mediaInfos']['annotation'] ?? [] as $mediaData) {
                 $annotation = new AnnotationPage();
                 // TODO Options should be set first for now for init, done in setResource().
                 $annotation
                     ->setOptions($opts)
-                    ->setResource($media);
+                    ->setResource($mediaData['content']->getResource());
                 if ($annotation->id()) {
                     $this->cache['annotations'][] = $annotation;
                 }

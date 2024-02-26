@@ -50,7 +50,7 @@ trait TraitMediaInfo
      * that are not in the structure, for example a placeholderCanvas.
      * Media can be prepared for the resource or for a specific media.
      *
-     * @param MediaRepresentation $media
+     * @param MediaRepresentation|null $media
      * @return array|null An array containing media infos and the category, that
      * can be a canvas motivation painting or supplementing, or a canvas
      * rendering, or a manifest rendering.
@@ -71,7 +71,8 @@ trait TraitMediaInfo
     /**
      * Get the iiif type according to the type of the media.
      *
-     * This method is used for media outside manifest, for example a placeholderCanvas.
+     * This method is used for media outside manifest, for example a
+     * placeholderCanvas.
      */
     protected function mediaInfoSingle(?MediaRepresentation $media): ?array
     {
@@ -138,29 +139,35 @@ trait TraitMediaInfo
             'invalid' => [],
         ];
 
-        $result = [];
         $mediaIds = [];
         $medias = $this->resource->media();
         foreach ($medias as $media) {
             $mediaId = $media->id();
             $mediaIds[] = $mediaId;
-            $result[$mediaId] = null;
+            $this->mediaInfos[$mediaId] = null;
+            $relatedMediaOcr = $this->iiifMediaRelatedOcr->__invoke($media, null);
             $contentResource = new ContentResource();
             $contentResource->setResource($media);
             if ($contentResource->hasIdAndType()) {
                 $iiifType = $contentResource->type();
                 if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
                     $iiifTypes[$iiifType][$mediaId] = [
+                        'id' => $mediaId,
                         'content' => $contentResource,
+                        'relatedMediaOcr' => $relatedMediaOcr ? $relatedMediaOcr->id() : null,
                     ];
                 } else {
                     $iiifTypes['other'][$mediaId] = [
+                        'id' => $mediaId,
                         'content' => $contentResource,
+                        'relatedMediaOcr' => $relatedMediaOcr ? $relatedMediaOcr->id() : null,
                     ];
                 }
             } else {
                 $iiifTypes['invalid'][$mediaId] = [
+                    'id' => $mediaId,
                     'content' => $contentResource,
+                    'relatedMediaOcr' => $relatedMediaOcr ? $relatedMediaOcr->id() : null,
                 ];
             }
         }
@@ -219,48 +226,46 @@ trait TraitMediaInfo
         }
 
         // Second loop to store the category.
-        foreach (array_keys($result) as $mediaId) {
+        foreach (array_keys($this->mediaInfos) as $mediaId) {
             if (isset($canvasPaintings[$mediaId])) {
-                $result[$mediaId] = $canvasPaintings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'annotation';
-                $result[$mediaId]['motivation'] = 'painting';
+                $this->mediaInfos[$mediaId] = $canvasPaintings[$mediaId];
+                $this->mediaInfos[$mediaId]['on'] = 'Canvas';
+                $this->mediaInfos[$mediaId]['key'] = 'annotation';
+                $this->mediaInfos[$mediaId]['motivation'] = 'painting';
             } elseif (isset($canvasSupplementings[$mediaId])) {
-                $result[$mediaId] = $canvasSupplementings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'annotation';
-                $result[$mediaId]['motivation'] = 'supplementing';
+                $this->mediaInfos[$mediaId] = $canvasSupplementings[$mediaId];
+                $this->mediaInfos[$mediaId]['on'] = 'Canvas';
+                $this->mediaInfos[$mediaId]['key'] = 'annotation';
+                $this->mediaInfos[$mediaId]['motivation'] = 'supplementing';
             } elseif (isset($canvasRenderings[$mediaId])) {
-                $result[$mediaId] = $canvasRenderings[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'rendering';
-                $result[$mediaId]['motivation'] = null;
+                $this->mediaInfos[$mediaId] = $canvasRenderings[$mediaId];
+                $this->mediaInfos[$mediaId]['on'] = 'Canvas';
+                $this->mediaInfos[$mediaId]['key'] = 'rendering';
+                $this->mediaInfos[$mediaId]['motivation'] = null;
             } elseif (isset($canvasSeeAlso[$mediaId])) {
-                $result[$mediaId] = $canvasSeeAlso[$mediaId];
-                $result[$mediaId]['on'] = 'Canvas';
-                $result[$mediaId]['key'] = 'seeAlso';
-                $result[$mediaId]['motivation'] = null;
+                $this->mediaInfos[$mediaId] = $canvasSeeAlso[$mediaId];
+                $this->mediaInfos[$mediaId]['on'] = 'Canvas';
+                $this->mediaInfos[$mediaId]['key'] = 'seeAlso';
+                $this->mediaInfos[$mediaId]['motivation'] = null;
             } elseif (isset($manifestRenderings[$mediaId])) {
-                $result[$mediaId] = $manifestRenderings[$mediaId];
-                $result[$mediaId]['on'] = 'Manifest';
-                $result[$mediaId]['key'] = 'rendering';
-                $result[$mediaId]['motivation'] = null;
+                $this->mediaInfos[$mediaId] = $manifestRenderings[$mediaId];
+                $this->mediaInfos[$mediaId]['on'] = 'Manifest';
+                $this->mediaInfos[$mediaId]['key'] = 'rendering';
+                $this->mediaInfos[$mediaId]['motivation'] = null;
             }
         }
 
         // Prepare mapping between media and canvas index one time and store it.
         $index = 0;
         foreach ($mediaIds as $mediaId) {
-            $mediaInfo = $result[$mediaId];
+            $mediaInfo = $this->mediaInfos[$mediaId];
             if ($mediaInfo
                 && $mediaInfo['on'] === 'Canvas'
                 && ($mediaInfo['key'] ?? null) === 'annotation'
             ) {
-                $result[$mediaId]['index'] = ++$index;
+                $this->mediaInfos[$mediaId]['index'] = ++$index;
             }
         }
-
-        $this->mediaInfos += $result;
 
         return $this;
     }
@@ -272,12 +277,15 @@ trait TraitMediaInfo
     {
         $mediaId = $media->id();
 
+        $relatedMediaOcr = $this->iiifMediaRelatedOcr->__invoke($media, null);
         $contentResource = new ContentResource();
         $contentResource->setResource($media);
         if ($contentResource->hasIdAndType()) {
             $iiifType = $contentResource->type();
+            $this->mediaInfosSingle[$mediaId]['id'] = $mediaId;
             $this->mediaInfosSingle[$mediaId]['content'] = $contentResource;
             $this->mediaInfosSingle[$mediaId]['on'] = 'Canvas';
+            $this->mediaInfosSingle[$mediaId]['relatedMediaOcr'] = $relatedMediaOcr ? $relatedMediaOcr->id() : null;
             if (in_array($iiifType, ['Image', 'Video', 'Sound', 'Text', 'Model'])) {
                 $this->mediaInfosSingle[$mediaId]['key'] = 'annotation';
                 $this->mediaInfosSingle[$mediaId]['motivation'] = 'painting';

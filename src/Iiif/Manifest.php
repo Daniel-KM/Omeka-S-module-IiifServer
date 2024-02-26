@@ -236,6 +236,12 @@ class Manifest extends AbstractResourceType
                         'content' => $mediaInfo['content'],
                         'key' => $mediaInfo['key'],
                         'motivation' => $mediaInfo['motivation'],
+                        // The full media infos should be passed for SeeAlso and
+                        // Annotations.
+                        'mediaInfos' => [
+                            'seeAlso' => array_filter($this->mediaInfos, fn ($v) => $v['key'] === 'seeAlso'),
+                            'annotation' => array_filter($this->mediaInfos, fn ($v) => $v['relatedMediaOcr']),
+                        ],
                     ])
                     ->setResource($media);
                 $items[] = $canvas;
