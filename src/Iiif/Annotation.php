@@ -135,15 +135,16 @@ class Annotation extends AbstractResourceType
         return $this->options['motivation'] ?? null;
     }
 
-    public function body()
+    public function body(): array
     {
         $body = isset($this->options['body']) && $this->options['body'] === 'TextualBody'
-            // Set data.
             ? new Annotation\TextualBody()
             : new Annotation\Body();
-        return $body
+        $body
             ->setOptions($this->options)
-            ->setResource($this->resource);
+            ->setResource($this->resource)
+            ->normalize();
+        return $body->getArrayCopy();
     }
 
     public function target(): ?string

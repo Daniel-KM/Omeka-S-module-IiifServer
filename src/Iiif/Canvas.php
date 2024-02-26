@@ -359,15 +359,9 @@ class Canvas extends AbstractResourceType
                     continue;
                 }
                 $body = $itemItem->body();
-                if (method_exists($body, 'height')) {
-                    $heights[] = $body->height();
-                }
-                if (method_exists($body, 'width')) {
-                    $widths[] = $body->width();
-                }
-                if (method_exists($body, 'duration')) {
-                    $durations[] = $body->duration();
-                }
+                $heights[] = $body['height'] ?? 0;
+                $widths[] = $body['width'] ?? 0;
+                $durations[] = $body['duration'] ?? 0.0;
             }
         }
         $this->cache['dimensions']['height'] = max($heights) ?: null;
