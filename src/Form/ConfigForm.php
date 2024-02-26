@@ -105,7 +105,7 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_description_property',
+                'name' => 'iiifserver_manifest_summary_property',
                 'type' => OmekaElement\PropertySelect::class,
                 'options' => [
                     'label' => 'Property to use for summary or description', // @translate
@@ -118,7 +118,7 @@ class ConfigForm extends Form
                     'use_hidden_element' => true,
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_description_property',
+                    'id' => 'iiifserver_manifest_summary_property',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select a property…', // @translate
                 ],
@@ -1109,7 +1109,7 @@ class ConfigForm extends Form
                 'required' => false,
             ])
             ->add([
-                'name' => 'iiifserver_manifest_description_property',
+                'name' => 'iiifserver_manifest_summary_property',
                 'required' => false,
             ])
             ->add([

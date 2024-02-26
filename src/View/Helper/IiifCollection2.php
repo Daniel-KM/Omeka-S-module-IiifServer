@@ -114,7 +114,7 @@ class IiifCollection2 extends AbstractHelper
         $metadata = $this->iiifMetadata($resource);
         $manifest['metadata'] = $metadata;
 
-        $descriptionProperty = $this->settings->get('iiifserver_manifest_description_property');
+        $descriptionProperty = $this->settings->get('iiifserver_manifest_summary_property');
         if ($descriptionProperty) {
             $description = $descriptionProperty === 'template'
                 ? strip_tags((string) $resource->displayDescription())

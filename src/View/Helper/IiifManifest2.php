@@ -206,7 +206,7 @@ class IiifManifest2 extends AbstractHelper
         $label = html_entity_decode($label, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
         $manifest['label'] = $label;
 
-        $descriptionProperty = $this->setting->__invoke('iiifserver_manifest_description_property');
+        $descriptionProperty = $this->setting->__invoke('iiifserver_manifest_summary_property');
         if ($descriptionProperty) {
             $description = $descriptionProperty === 'template'
                 ? strip_tags((string) $item->displayDescription())

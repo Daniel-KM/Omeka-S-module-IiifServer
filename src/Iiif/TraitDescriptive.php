@@ -182,7 +182,7 @@ trait TraitDescriptive
 
     public function summary(): ?ValueLanguage
     {
-        $summaryProperty = $this->settings->get('iiifserver_manifest_description_property');
+        $summaryProperty = $this->settings->get('iiifserver_manifest_summary_property');
         $values = [];
         if ($summaryProperty) {
             // TODO Manage language of the summary.
