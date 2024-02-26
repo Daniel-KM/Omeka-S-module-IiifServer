@@ -163,7 +163,12 @@ class PresentationController extends AbstractActionController
             $prettyJson = $prettyPrint
                 ? JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
                 : JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-            @file_put_contents($filepath, json_encode($manifest, $prettyJson));
+            // Because the json serialization of the manifest includes checks,
+            // the manifest is kept as simple array to avoid the double json
+            // encoding, here and in iiifJsonLd,
+            $jsonEncoded = json_encode($manifest, $prettyJson);
+            @file_put_contents($filepath, $jsonEncoded);
+            $manifest = json_decode($jsonEncoded, true);
         }
 
         return $this->iiifJsonLd($manifest, $version);
