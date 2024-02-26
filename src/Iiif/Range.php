@@ -73,6 +73,7 @@ class Range extends AbstractResourceType
         'seeAlso' => self::OPTIONAL,
         'service' => self::OPTIONAL,
         'homepage' => self::OPTIONAL,
+        'logo' => self::OPTIONAL,
         'rendering' => self::OPTIONAL,
         'partOf' => self::OPTIONAL,
         'start' => self::OPTIONAL,
