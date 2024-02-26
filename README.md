@@ -120,12 +120,11 @@ directive `<Directory>`.
 
 To fix Amazon cors issues, see the [aws documentation].
 
-### Cache via module [Derivative Media]
+### Cache
 
 When your documents are big (more than 100 to 1000 pages, depending on your
 server, your network and your public), you may want to cache manifests in order
-to delivrate them instantly. It is possible with module [Derivative Media]. In
-that case, check the option in the config or each module.
+to delivrate them instantly. In that case, check the option in the config.
 
 ### Local access to iiif source
 
@@ -260,17 +259,26 @@ To build structures for a complex document with a table of contents, you can use
 a specific property and fill a value with the needed json, or with a literal
 value with the following format. Each row is a part of the structure:
 
-```
-{id}, {label}, {canvasIndexOrRangeId1}; {canvasIndexOrRangeId2}; ...; {canvasIndexOrRangeIdN}
+```csv
+{id}, {label}, {canvasIndexOrRangeId1}; {canvasIndexOrRangeId2}; …; {canvasIndexOrRangeIdN}
 ```
 
 Example:
 
-```
+```csv
 cover, Front Cover, 1
 r2, Introduction, 2; 3; 4; 5
 backCover, Back Cover, 6
 ```
+
+A new format allows to include the view number in the third column:
+
+```csv
+cover, Front Cover, 1, 1
+r2, Introduction, 2, 2; 3; 4; 5
+backCover, Back Cover, 6, 6
+```
+
 
 The range id (first part of a row) is the name of the range, that will be used
 to create the uri. To avoid collision with other indexes, it must not be a
@@ -309,16 +317,19 @@ If you use a xml value with module [DataType Rdf], the structure above will be
 composed of canvases (element `c` here):
 
 ```xml
-<c id="cover" label="Front Cover" range="1"/>
-<c id="r2" label="Introduction" range="2; 3; 4; 5"/>
-<c id="backcover" label="Back Cover" range="6"/>
+<c id="cover" label="Front Cover" ranges="1"/>
+<c id="r2" label="Introduction" ranges="2; 3; 4; 5"/>
+<c id="backcover" label="Back Cover" ranges="6"/>
 ```
+
+The ranges can be omitted anyway, since the xml structure itself provide it (see
+nested xml below).
 
 So it is possible to build complex hierarchical table of contents from this
 literal value, even with such an incomplete example, that is automatically
 completed with pages that are not sections:
 
-```
+```csv
 toc, Table of Contents, cover; intro; r1; r2; backcover
     cover, Front cover, cover
     intro, Introduction, 2-5
@@ -351,7 +362,7 @@ equivalent of this nested xml:
 <c id="illustration3" label="Third illustration non paginated" range="illus3"/>
 ```
 
-equivalent of this flat indented xml (not recommended):
+equivalent of this flat indented xml (not recommended and deprecated):
 
 ```xml
 <c id="toc" label="Table of Contents" range="cover; intro; r1; r2; backcover"/>
@@ -702,26 +713,29 @@ the module [Three JS Model viewer].
 TODO / Bugs
 -----------
 
-- [ ] Implements ArrayObject to all classes to simplify events.
-- [ ] When a item set contains non image items, the left panel with the index is displayed only when the first item contains an image (UV).
+- [x] Implements ArrayObject to all classes to simplify events.
+- [ ] Implements ArrayObject to all classes to simplify events for Iiif v2.
+- [x] Use only arrays, not standard objects.
+- [ ] Type of manifest: Use a list of classes or templates to determine the 3D files.
+- [x] Type of manifest: Include pdf as rendering.
+- [ ] Structure: Clarify names of canvases and referenced canvas in the table of contents and list of items.
+- [ ] Structure: Implements recursive ranges in structures for IIIF v2.
+- [ ] Structure: Normalize the format of the structure: csv? ini? yaml? xml? Provide an automatic upgrade too.
+- [ ] Structure: Convert structure v3 to v2 and vice-versa.
+- [x] Structure: Fully support alphanumeric name for canvas id.
+- [ ] Structure: Support translation of structure (use the language of the value?).
+- [ ] Structure: Full support of named canvases.
 - [ ] Use the option "no storage" for url of a media for external server.
-- [ ] Job to update data of [IIIF Image].
-- [ ] Use only arrays, not standard objects.
 - [ ] Manage url prefix.
-- [ ] Implements recursive ranges in structures for IIIF v2.
-- [ ] Normalize the format of the structure: csv? ini? yaml? xml? Provide an automatic upgrade too.
-- [ ] Convert structure v3 to v2 and vice-versa.
-- [x] Fully support alphanumeric name for canvas id.
-- [ ] Support translation of structure (use the language of the value?).
-- [ ] Full support of named canvases.
-- [ ] Use a list of classes or templates to determine the 3D files.
-- [ ] Create a table to cache big iiif manifests (useless for image info.json).
+- [ ] When a item set contains non image items, the left panel with the index is displayed only when the first item contains an image (UV).
+- [ ] Job to update data of [IIIF Image].
+- [x] Create a way to cache big iiif manifests (useless for image info.json).
 - [ ] Always return a thumbnail in iiif v3.
 - [ ] Include thumbnails in canvas to avoid fetching info.json (so cache whole manifest).
-- [ ] Include pdf as rendering.
-- [ ] Check if multiple roots is working for structures in iiif v3.
-- [ ] Store dimensions on item/media save.
+- [x] Check if multiple roots is working for structures in iiif v3. (yes, as multiple structures).
+- [x] Store dimensions on item/media save.
 - [ ] Create a plugin MediaData that will merge MediaDimension, ImageSize, and allows to get media type.
+- [ ] Clarify option for home page with "default site", that may not be a site of the item.
 
 See module [Image Server].
 
@@ -768,7 +782,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2023 (see [Daniel-KM])
+* Copyright Daniel Berthereau, 2015-2024 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
 * Copyright Régis Robineau, 2019 (see [regisrob])
 * Copyright Satoru Nakamura, 2021 (see [nakamura196])
@@ -799,7 +813,7 @@ format.
 [GD]: https://secure.php.net/manual/en/book.image.php
 [Imagick]: https://php.net/manual/en/book.imagick.php
 [ImageMagick]: https://www.imagemagick.org/
-[Installing a module]: https://omeka.org/s/docs/user-manual/modules
+[installing a module]: https://omeka.org/s/docs/user-manual/modules
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [IiifServer.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/releases
 [structures]: https://iiif.io/api/presentation/3.0/#54-range
@@ -813,7 +827,6 @@ format.
 [official list]: https://github.com/IIIF/awesome-iiif/#image-servers
 [internal image server]: #image-server
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
-[Derivative Media]: https://gitlab.com/Daniel-KM/Omeka-S-module-DerivativeMedia
 [IIIF presentation 2.1]: https://iiif.io/api/presentation/2.1/#range
 [IIIF presentation 3.0]: https://iiif.io/api/presentation/3.0/#54-range
 [Ark]: https://gitlab.com/Daniel-KM/omeka-s-module-Ark
