@@ -111,7 +111,7 @@ class PresentationController extends AbstractActionController
         $manifest = null;
         $toCache = false;
 
-        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache_derivativemedia', false);
+        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache', false);
         if ($useCache && $viewHelpers->has('derivativeList')) {
             $type = 'iiif-' . (int) $version;
             $derivative = $viewHelpers->get('derivativeList')->__invoke($resource, ['type' => $type]);
