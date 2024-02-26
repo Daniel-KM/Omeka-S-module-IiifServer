@@ -112,6 +112,20 @@ class PresentationController extends AbstractActionController
         $toCache = false;
 
         $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache', false);
+        if ($useCache) {
+            $itemId = $resource->id();
+            $config = $resource->getServiceLocator()->get('Config');
+            $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+            $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
+            if (file_exists($filepath) && is_readable($filepath)) {
+                $manifest = file_get_contents($filepath);
+                $manifest = json_decode($manifest, true);
+                return $this->iiifJsonLd($manifest, $version);
+            }
+        }
+
+        // Compatibility with old version of DerivativeMedia.
+        $useCache = (bool) $this->settings()->get('iiifserver_manifest_cache_media', false);
         if ($useCache && $viewHelpers->has('derivativeList')) {
             $type = 'iiif-' . (int) $version;
             $derivative = $viewHelpers->get('derivativeList')->__invoke($resource, ['type' => $type]);
