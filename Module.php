@@ -443,7 +443,7 @@ class Module extends AbstractModule
             }
 
             if (count($failedTypes)) {
-                $this->logger->err(
+                $this->getServiceLocator()->get('Omeka\Logger')->err(
                     'Item #{item_id} / media #{media_id}: Error getting dimensions for types "{types}".', // @translate
                     [
                         'item_id' => $item->getId(),
