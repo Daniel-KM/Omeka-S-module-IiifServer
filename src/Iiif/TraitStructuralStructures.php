@@ -248,6 +248,8 @@ trait TraitStructuralStructures
      *
      * @see https://iiif.io/api/presentation/3.0/#54-range
      * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     *
+     * @see \IiifServer\View\Helper\IiifManifest2::convertStructure()
      */
     protected function convertStructure(array $toc): ?Range
     {
