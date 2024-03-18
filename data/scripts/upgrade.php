@@ -12,6 +12,7 @@ use Common\Stdlib\PsrMessage;
  *
  * @var \Omeka\Api\Manager $api
  * @var \Omeka\Settings\Settings $settings
+ * @var \Common\Stdlib\EasyMeta $easyMeta
  * @var \Doctrine\DBAL\Connection $connection
  * @var \Doctrine\ORM\EntityManager $entityManager
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
@@ -20,6 +21,8 @@ $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
+$urlPlugin = $plugins->get('url');
+$easyMeta = $services->get('EasyMeta');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 $entityManager = $services->get('Omeka\EntityManager');
@@ -354,4 +357,41 @@ if (version_compare($oldVersion, '3.6.19', '<')) {
         'If you use the feature "table of contents", a new format was integrated. Management of the old ones will be removed in version 3.6.20. A job is added in module EasyAdmin (version 3.4.17) to do the conversion.' // @translate
     );
     $messenger->addWarning($message);
+}
+
+
+if (version_compare($oldVersion, '3.6.20', '<')) {
+    $structureProperty = $settings->get('iiifserver_manifest_structures_property');
+    $structurePropertyId = $easyMeta->propertyId($structureProperty);
+    if ($structurePropertyId) {
+        // Module classes are not available during upgrade.
+        $qb = $connection->createQueryBuilder();
+        $qb
+            ->select('COUNT(value.id)')
+            ->from('value', 'value')
+            ->innerJoin('value', 'item', 'item', 'item.id = value.resource_id')
+            ->where('value.property_id = ' . $structurePropertyId)
+            ->andWhere('value.value IS NOT NULL')
+            ->andWhere('value.value != ""')
+            ->orderBy('value.id', 'asc');
+        $structures = $connection->executeQuery($qb)->fetchOne();
+        if ($structures) {
+            require_once dirname(__DIR__, 2) . '/src/Job/UpgradeStructures.php';
+            $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+            $job = $dispatcher->dispatch(\IiifServer\Job\UpgradeStructures::class);
+            $message = new PsrMessage(
+                'A job was launched to upgrade the format of "table of contents". Replaced tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate' // @translate
+                [
+                    'link' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
+                    'job_id' => $job->getId(),
+                    'link_end' => '</a>',
+                    'link_log' => class_exists('Log\Entity\Log')
+                        ? sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                        : sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+                ]
+            );
+            $message->setEscapeHtml(false);
+            $messenger->addWarning($message);
+        }
+    }
 }
