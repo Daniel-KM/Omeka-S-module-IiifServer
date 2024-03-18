@@ -105,6 +105,7 @@ class RangeToArray extends AbstractPlugin
             if (preg_replace('/[^0-9' . preg_quote($extender, '/') . ']/', '', $str) === $str) {
                 $result = array_merge($result, $this->rangeToArrayInteger($str, $min, $max, $extender));
             } elseif (strpos($str, $extender) !== false) {
+                // TODO Range to array with a string should be finalized.
                 $result[] = $str;
             } else {
                 $result[] = $str;

@@ -207,7 +207,7 @@ trait TraitStructuralStructures
                 return null;
             }
 
-            return count($lines4) !== $total
+            return count($lines4) !== ($total - $empty)
                 ? $this->extractStructureProcessNoViewNumber($lines3, $indexStructure)
                 : $this->extractStructureProcessWithViewNumber($lines4, $indexStructure);
         }
@@ -242,7 +242,7 @@ trait TraitStructuralStructures
             if (!$lines3 || $empty === $total) {
                 return null;
             }
-            return count($lines4) !== $total
+            return count($lines4) !== ($total - $empty)
                 ? $this->extractStructureProcessNoViewNumber($lines3, $indexStructure)
                 : $this->extractStructureProcessWithViewNumber($lines4, $indexStructure);
         }
@@ -253,6 +253,7 @@ trait TraitStructuralStructures
         if (!$xml) {
             return null;
         }
+
         // The three columns format via nested xml is not managed.
         $is3 = (bool) strpos($literalStructure, 'range_standard="');
         if ($is3) {
