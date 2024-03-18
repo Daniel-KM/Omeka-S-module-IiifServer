@@ -39,6 +39,7 @@ use Common\TraitModule;
 use IiifServer\Form\ConfigForm;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\ModuleManager\ModuleManager;
 use Laminas\Mvc\Controller\AbstractController;
 use Laminas\Mvc\MvcEvent;
 use Laminas\View\Renderer\PhpRenderer;
@@ -55,14 +56,18 @@ class Module extends AbstractModule
         'Common',
     ];
 
+    public function init(ModuleManager $moduleManager): void
+    {
+        // The autoload doesn’t work with GetId3.
+        // @see \IiifServer\Service\ControllerPlugin\MediaDimensionFactory
+        require_once __DIR__ . '/vendor/autoload.php';
+    }
+
     public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
 
-        // The autoload doesn’t work with GetId3.
-        // @see \IiifServer\Service\ControllerPlugin\MediaDimensionFactory
-        require_once __DIR__ . '/vendor/autoload.php';
-
+        /** @var \Omeka\Permissions\Acl $acl */
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
         $acl
             ->allow(
@@ -157,6 +162,18 @@ class Module extends AbstractModule
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.delete.post',
             [$this, 'handleAfterDeleteItem']
+        );
+
+        // Add a job to upgrade structure from v3.
+        $sharedEventManager->attach(
+            \EasyAdmin\Form\CheckAndFixForm::class,
+            'form.add_elements',
+            [$this, 'handleJobsForm']
+        );
+        $sharedEventManager->attach(
+            \EasyAdmin\Controller\CheckAndFixController::class,
+            'easyadmin.job',
+            [$this, 'handleEasyAdminJobs']
         );
     }
 
@@ -313,6 +330,52 @@ class Module extends AbstractModule
             if (file_exists($filepath) && is_writeable($filepath)) {
                 @unlink($filepath);
             }
+        }
+    }
+
+    public function handleJobsForm(Event $event): void
+    {
+        /**
+         * @var \EasyAdmin\Form\CheckAndFixForm $form
+         * @var \Laminas\Form\Element\Radio $process
+         */
+        $form = $event->getTarget();
+        $fieldset = $form->get('module_tasks');
+        $process = $fieldset->get('process');
+        $valueOptions = $process->getValueOptions();
+        $valueOptions['iiifserver_upgrade_structure'] = 'Upgrade old table of contents to new format with four columns (module IIIF Server)'; // @translate
+        $process->setValueOptions($valueOptions);
+        $fieldset
+            ->add([
+                'type' => \Laminas\Form\Fieldset::class,
+                'name' => 'iiifserver_upgrade_structure',
+                'options' => [
+                    'label' => 'Options to upgrade table of contents', // @translate
+                ],
+                'attributes' => [
+                    'class' => 'iiifserver_upgrade_structure',
+                ],
+            ]);
+        $fieldset->get('iiifserver_upgrade_structure')
+            ->add([
+                'name' => 'query',
+                'type' => \Omeka\Form\Element\Query::class,
+                'options' => [
+                    'label' => 'Limit upgrade of tables of contents to specific items', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_upgrade_structure-query',
+                ],
+            ]);
+    }
+
+    public function handleEasyAdminJobs(Event $event): void
+    {
+        $process = $event->getParam('process');
+        if ($process === 'iiifserver_upgrade_structure') {
+            $params = $event->getParam('params');
+            $event->setParam('job', \IiifServer\Job\UpgradeStructures::class);
+            $event->setParam('args', $params['module_tasks']['iiifserver_upgrade_structure'] ?? []);
         }
     }
 
