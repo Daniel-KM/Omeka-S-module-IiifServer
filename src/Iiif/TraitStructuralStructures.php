@@ -107,26 +107,16 @@ trait TraitStructuralStructures
         }
 
         $structures = [];
-        foreach ($stValues as $index => $literalStructure) {
-            // Check if the structure is stored as json.
-            // TODO Manage storage of structure as json.
+        foreach ($stValues as $literalStructure) {
+            // Check if a structure is stored as xml or toc code.
+            // Json is currently unsupported.
             $literalStructure = (string) $literalStructure;
-            $structure = @json_decode($literalStructure, true);
-            if ($structure && is_array($structure)) {
-                $firstRange = reset($structure);
-                if (!is_array($firstRange)) {
-                    continue;
+            $toc = $this->extractStructure($literalStructure);
+            if (!empty($toc)) {
+                $structure = $this->convertStructure($toc);
+                if ($structure) {
+                    $structures[] = $structure;
                 }
-                $structure = isset($firstRange['@type'])
-                    ? $this->convertToStructure3($structure)
-                    : $this->checkStructure($structure);
-            }
-            // Else check if a structure is stored as xml or toc code.
-            else {
-                $structure = $this->extractStructure($literalStructure, ++$index);
-            }
-            if (!empty($structure)) {
-                $structures[] = $structure;
             }
         }
 
@@ -166,7 +156,12 @@ trait TraitStructuralStructures
     }
 
     /**
-     * Prepare to convert a json, literal or xml structure into a range.
+     * Prepare to convert a literal or xml structure into a range.
+     *
+     * For literal formats, there are two columns (label and view), three
+     * columns (name, label and view) or four columns (name, label, views and
+     * sub-sections).
+     * For xml, the structure may be flat or nested.
      *
      * The previous process allowed more complex table of contents, with
      * unreferenced, duplicate or missing files.
@@ -176,7 +171,7 @@ trait TraitStructuralStructures
      *
      * @see \IiifServer\View\Helper\IiifManifest2::extractStructure()
      */
-    protected function extractStructure(string $literalStructure, int $indexStructure): ?Range
+    protected function extractStructure(string $literalStructure): ?array
     {
         if (mb_substr(trim($literalStructure), 0, 1) !== '<') {
             // Split by newline code, but don't filter empty lines in order to
@@ -185,6 +180,7 @@ trait TraitStructuralStructures
             // Check if this is the old format (three columns and mixed pages
             // numbers and ranges) or the new one.
             $matches = [];
+            $lines2 = [];
             $lines3 = [];
             $lines4 = [];
             $total = 0;
@@ -196,67 +192,26 @@ trait TraitStructuralStructures
                     ++$empty;
                     continue;
                 }
-                if (preg_match('~^(?<name>[^,]*?)\s*,\s*(?<label>.*?)\s*,\s*(?<children>[^,]+?)$~u', $line, $matches)) {
-                    $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'children' => $matches['children']];
+                if (preg_match('~^(?<label>.*)\s*,\s*(?<views>[\d\s;/-]*)$~u', $line, $matches)) {
+                    $lines2[$lineIndex] = ['name' => null, 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => ''];
                 }
-                if (preg_match('~^(?<id>[^,]*?)\s*,\s*(?<label>.*?)\s*,\s*(?<views>[\d -]*)\s*,\s*(?<ranges>[^,]+?)$~u', $line, $matches)) {
-                    $lines4[$lineIndex] = ['id' => $matches['id'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];;
+                if (preg_match('~^(?<name>[^,]*)\s*,\s*(?<label>.*)\s*,\s*(?<views>[\d\s;/-]*)$~u', $line, $matches)) {
+                    $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => ''];
+                }
+                if (preg_match('~^(?<name>[^,]*?)\s*,\s*(?<label>.*?)\s*,\s*(?<views>[\d\s;/-]*)\s*,\s*(?<ranges>[^,]+)$~u', $line, $matches)) {
+                    $lines4[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];
                 }
             }
-            if (!$lines3 || $empty === $total) {
+            if ($empty === $total) {
                 return null;
             }
-
-            return count($lines4) !== ($total - $empty)
-                ? $this->extractStructureProcessNoViewNumber($lines3, $indexStructure)
-                : $this->extractStructureProcessWithViewNumber($lines4, $indexStructure);
+            return count($lines4) === ($total - $empty) ? $lines4 : (count($lines3) >= count($lines2) ? $lines3 : $lines2);
         }
 
-        // Flat xml for old format (three columns): the new format is always nested.
-        $isFlat = mb_strpos($literalStructure, '"/>') < mb_strpos($literalStructure, '<c ', 1);
-        if ($isFlat) {
-            // Split by newline code, but don't filter empty lines in order to
-            // keep range indexes in complex cases.
-            $sourceLines = explode("\n", $literalStructure);
-            // Check if this is the old format (three columns and mixed pages
-            // numbers and ranges) or the new one.
-            $matches = [];
-            $lines3 = [];
-            $lines4 = [];
-            $total = 0;
-            $empty = 0;
-            foreach ($sourceLines as $lineIndex => $line) {
-                ++$total;
-                $line = trim($line);
-                if (!$line) {
-                    ++$empty;
-                    continue;
-                }
-                if (preg_match('~\s*(<c\s*id="(?<name>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:range_standard="(?<children>[^"]*)"\s*/>)?~', $line, $matches)) {
-                    $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'children' => $matches['children']];
-                }
-                if (preg_match('~\s*(<c\s*id="(?<id>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:views="(?<views>[^"]*)")?\s*(?:ranges="(?<ranges>[^"]*)"\s*/>)?~', $line, $matches)) {
-                    $lines4[$lineIndex] = ['id' => $matches['id'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];
-                }
-            }
-            if (!$lines3 || $empty === $total) {
-                return null;
-            }
-            return count($lines4) !== ($total - $empty)
-                ? $this->extractStructureProcessNoViewNumber($lines3, $indexStructure)
-                : $this->extractStructureProcessWithViewNumber($lines4, $indexStructure);
-        }
-
-        // Nested xml requires SimpleXML, because the ranges are not set in the
-        // new format.
+        // Nested xml requires SimpleXML, because the sub-sections are not set
+        // as attributes.
         $xml = simplexml_load_string($literalStructure);
         if (!$xml) {
-            return null;
-        }
-
-        // The three columns format via nested xml is not managed.
-        $is3 = (bool) strpos($literalStructure, 'range_standard="');
-        if ($is3) {
             return null;
         }
 
@@ -270,9 +225,9 @@ trait TraitStructuralStructures
                 }
             }
             $lines[] = [
-                'id' => (string) ($xml['id'] ?? null),
-                'label' => (string) ($xml['label'] ?? null),
-                'views' => (string) ($xml['views'] ?? null),
+                'name' => isset($xml['id']) ? (string) $xml['id'] : '',
+                'label' => isset($xml['label']) ? (string) $xml['label'] : '',
+                'views' => isset($xml['views']) ? (string) $xml['views'] : '',
                 'ranges' => $ranges,
             ];
             foreach ($xml->children() as $element) {
@@ -283,154 +238,7 @@ trait TraitStructuralStructures
         };
         $lines = [];
         $xmlToArray($xml, $lines);
-
-        return $this->extractStructureProcessWithViewNumber($lines, $indexStructure);
-    }
-
-     /**
-     * Convert a literal structure into a range (without view).
-     *
-     * The lines are the preprocessed literal structure.
-     *
-     * @see https://iiif.io/api/presentation/3.0/#54-range
-     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
-     * @deprecated Will be removed in a future version.
-     */
-    protected function extractStructureProcessNoViewNumber(array $toc, int $indexStructure): ?Range
-    {
-        $structure = [];
-        $ranges = [];
-        $rangesChildren = [];
-        $canvases = [];
-
-        // Convert the literal value and prepare all the ranges.
-
-        foreach ($toc as $lineIndex => $matches) {
-            $name = strlen($matches['name']) === 0 ? 'r' . ($lineIndex + 1) : $matches['name'];
-            $label = $matches['label'];
-            $children = $this->rangeToArray->__invoke($matches['children'], 1, null, false, false, ';');
-            // Unlike previous version, the line is kept even without children.
-            // A line is always a range to display.
-            $ranges[$name] = $label;
-            $rangesChildren[$name] = $children;
-        }
-
-        // If the values wasn't a formatted structure, there is no indexes.
-        if (!count($ranges)) {
-            return null;
-        }
-
-        // In a referenced canvas, the media is not used, but a media is
-        // required to init the referenced canvases with the primary media.
-        // TODO Or add "target_name" as option in referenced canvas.
-        // TODO For canvases, the primary media should not be used, only the right media, even if it is useless for a reference.
-        $primaryMedia = $this->resource->primaryMedia();
-
-        // Prepare the list of canvases. This second step is needed because the
-        // list of ranges should be complete to determine if an index is a
-        // range or a canvas.
-        foreach ($rangesChildren as $itemNames) {
-            foreach ($itemNames as $itemName) {
-                $itemName = (string) $itemName;
-                // Manage an exception: protected duplicate name for a canvas
-                // and a range).
-                $isProtected = mb_strlen($itemName) > 1 && mb_substr($itemName, 0, 1) === '"' && mb_substr($itemName, -1, 1) === '"';
-                $cleanItemName = $isProtected
-                    ? trim(mb_substr($itemName, 1, -1))
-                    : $itemName;
-                if ((isset($ranges[$cleanItemName]) && !$isProtected)
-                    || isset($canvases[$cleanItemName])
-                ) {
-                    continue;
-                }
-                // This is not a full Canvas, just a reference, so skip label.
-                $referencedCanvas = new ReferencedCanvas();
-                $referencedCanvas
-                    // TODO Options should be set first for now for init, done in setResource().
-                    ->setOptions([
-                        'index' => $cleanItemName,
-                    ])
-                    ->setResource($primaryMedia);
-                $canvases[$itemName] = $referencedCanvas;
-            }
-        }
-
-        // TODO Improve process to avoid recursive process (one loop and by-reference variables).
-
-        $buildStructure = null;
-        $buildStructure = function (array $itemNames, &$parentRange, array &$ascendants)
-            use ($ranges, $canvases, $rangesChildren, $primaryMedia, &$buildStructure): void {
-            foreach ($itemNames as $itemName) {
-                if (isset($canvases[$itemName])) {
-                    $parentRange['items'][] = $canvases[$itemName];
-                    continue;
-                }
-                // TODO The type may be "SpecificResource" too (canvas part: fragment of an image, etc.).
-                // The index is a range.
-                // Check if the item is in ascendants to avoid an infinite loop.
-                if (in_array($itemName, $ascendants)) {
-                    $referencedCanvas = new ReferencedCanvas();
-                    $referencedCanvas
-                        // TODO Options should be set first for now for init, done in setResource().
-                        ->setOptions([
-                            'index' => $itemName,
-                        ])
-                        ->setResource($primaryMedia);
-                    $canvases[$itemName] = $referencedCanvas;
-                    $parentRange['items'][] = $referencedCanvas;
-                    continue;
-                }
-                $ascendants[] = $itemName;
-                $range = ['items' => []];
-                $buildStructure($rangesChildren[$itemName], $range, $ascendants);
-                $rangeResource = new Range();
-                $rangeResource
-                    ->setOptions([
-                        'index' => $itemName,
-                        'label' => $ranges[$itemName],
-                        'items' => $range['items'],
-                        'skip' => ['@context' => true],
-                    ])
-                    ->setResource($this->resource);
-                $parentRange['items'][] = $rangeResource;
-                array_pop($ascendants);
-            }
-        };
-
-        // Unlike iiif v2, there can be only one root, so a range may be added
-        // to wrap the structure.
-        $allIndexes = array_fill_keys(array_merge(...array_values($rangesChildren)), true);
-        $roots = array_keys(array_diff_key($ranges, $allIndexes));
-        if (count($roots) === 1) {
-            $rangesToBuild = $roots;
-        } else {
-            $rangesToBuild = count($roots)
-                ? $roots
-                // No loop means an infinite loop, that is managed directly.
-                : array_keys($ranges);
-        }
-
-        $structure = ['items' => []];
-        $ascendants = [];
-        $buildStructure($rangesToBuild, $structure, $ascendants);
-
-        // TODO Modify the process to create the root directly in buildStructure().
-        if (count($roots) === 1) {
-            $structure = reset($structure['items']);
-        } else {
-            $range = new Range();
-            $range
-                ->setOptions([
-                    'index' => 'rstructure' . $indexStructure,
-                    'label' => 'Content',
-                    'items' => $structure['items'],
-                    'skip' => ['@context' => true],
-                ])
-                ->setResource($this->resource);
-            $structure = $range;
-        }
-
-        return $structure;
+        return $lines;
     }
 
     /**
@@ -441,40 +249,40 @@ trait TraitStructuralStructures
      * @see https://iiif.io/api/presentation/3.0/#54-range
      * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
      */
-    protected function extractStructureProcessWithViewNumber(array $toc, int $indexStructure): ?Range
+    protected function convertStructure(array $toc): ?Range
     {
         // Prepare indexes one time.
         $this->paintingMedias ??= array_column(array_filter($this->mediaInfos), 'id', 'painting');
 
         // Convert the literal value and prepare all the ranges.
         $ranges = [];
-        foreach ($toc as $lineIndex => $matches) {
-            $id = strlen($matches['id']) === 0 ? 'r' . ($lineIndex + 1) : $matches['id'];
-            $label = $matches['label'];
+        foreach ($toc as $lineIndex => $lineData) {
+            $name = !isset($lineData['name']) || strlen($lineData['name']) === 0 ? 'r' . ($lineIndex + 1) : $lineData['name'];
+            $label = $lineData['label'] ?? '';
             // TODO Use view, that is the index of all viewed files, so like painting index.
-            $views = empty($matches['views'])
+            $views = empty($lineData['views'])
                 ? []
-                : (is_array($matches['views']) ? $matches['views'] : $this->rangeToArray->__invoke($matches['views']));
+                : (is_array($lineData['views']) ? $lineData['views'] : $this->rangeToArray->__invoke($lineData['views']));
             $mediaIds = [];
             foreach ($views as $view) {
-                $mediaIds = $this->paintingMedias[$view] ?? null;
+                $mediaIds[] = $this->paintingMedias[$view] ?? null;
             }
-            if (empty($matches['ranges']) || $matches['ranges'] === '-') {
+            if (empty($lineData['ranges']) || $lineData['ranges'] === '-') {
                 $children = [];
-            } elseif (is_array($matches['ranges'])) {
-                $children = $matches['ranges'];
-            } elseif (strpos($matches['ranges'], '/')) {
+            } elseif (is_array($lineData['ranges'])) {
+                $children = array_map('trim', $lineData['ranges']);
+            } elseif (strpos($lineData['ranges'], '/')) {
                 // Here the range should be r1-1/r1-8, so base is r1- and all
                 // ranges from 1 to 8 are filled.
-                $children = explode('/', $matches['ranges']);
-                $base = substr($children[0], 0, strrpos($children[0], '-') + 1);
-                $last = substr($children[1], strrpos($children[1], '-') + 1);
+                $children = explode('/', $lineData['ranges']);
+                $base = trim(substr($children[0], 0, strrpos($children[0], '-') + 1));
+                $last = trim(substr($children[1], strrpos($children[1], '-') + 1));
                 $children = [];
                 for ($i = 1; $i <= $last; $i++) {
                     $children[] = $base . $i;
                 }
             } else {
-                $children = explode(';', $matches['ranges']);
+                $children = array_map('trim', explode(';', $lineData['ranges']));
             }
             // Some elements of structure can have a canvas to display.
             // Multiple ranges can have the same canevas, for example multiple
@@ -486,14 +294,15 @@ trait TraitStructuralStructures
             }
             // Unlike previous version, the line is kept even without children.
             // A line is always a range to display.
-            $ranges[$id] = [
-                'id' => $id,
-                'views' => $views,
+            $ranges[$name] = [
+                'line' => $lineIndex + 1,
+                'name' => $name,
                 'label' => $label,
-                // 'media_ids' => $mediaIds,
-                'children' => $children,
                 // 'is_range' => $isRange,
                 'is_canvas' => $isCanvas,
+                'views' => $views,
+                'ranges' => $children,
+                // 'media_ids' => $mediaIds,
             ];
         }
 
@@ -528,6 +337,58 @@ trait TraitStructuralStructures
             $referencedCanvases[$index] = $referencedCanvas;
         }
 
+        $isFlatToc = !array_filter(array_column($ranges, 'ranges', 'name'));
+        if ($isFlatToc) {
+            // Use the labels from the toc, not from the referenced canvases.
+            $isFirst = true;
+            $mainIiifItems = [];
+            foreach ($ranges as $rangeData) {
+                if ($isFirst) {
+                    $isFirst = false;
+                    continue;
+                }
+                if ($rangeData['label'] === null && $rangeData['label'] === '' || !$rangeData['views']) {
+                    continue;
+                }
+                $iiifItems = array_intersect_key($referencedCanvases, array_flip($rangeData['views']));
+                if (!$iiifItems) {
+                    continue;
+                }
+                $range = new Range();
+                $range
+                    ->setOptions([
+                        'index' => $rangeData['name'],
+                        'label' => $rangeData['label'] === null || $rangeData['label'] === ''
+                            ? sprintf($this->view->translate('[View %s]'), key($iiifItems)) // @translate
+                            : $rangeData['label'],
+                        'items' => $iiifItems,
+                        'skip' => ['@context' => true],
+                    ])
+                    ->setResource($this->resource);
+                $mainIiifItems[] = $range;
+            }
+            if (!$mainIiifItems) {
+                return null;
+            }
+
+            reset($ranges);
+            $topKey = key($ranges);
+            $rangeData = $ranges[$topKey];
+
+            $range = new Range();
+            $range
+                ->setOptions([
+                    'index' => $rangeData['name'],
+                    'label' => $rangeData['label'] === null || $rangeData['label'] === ''
+                        ? $this->view->translate('[Content]') // @translate
+                        : $rangeData['label'],
+                    'items' => $mainIiifItems,
+                    'skip' => ['@context' => true],
+                ])
+                ->setResource($this->resource);
+            return $range;
+        }
+
         // TODO Improve process to avoid recursive process (one loop and by-reference variables? or flat process).
 
         $buildStructure = null;
@@ -538,7 +399,7 @@ trait TraitStructuralStructures
             $iiifItems = [];
 
             // Check if the item is in ascendants to avoid an infinite loop.
-            if (in_array($rangeData['id'], $ascendants)) {
+            if (in_array($rangeData['name'], $ascendants)) {
                 foreach ($rangeData['views'] as $view) {
                     if (isset($referencedCanvases[$view])) {
                         $iiifItems[] = $referencedCanvases[$view];
@@ -551,7 +412,7 @@ trait TraitStructuralStructures
             // Manage short toc with missing ranges.
             if ($rangeData['is_canvas']) {
                 // Append all views when children are not present in ranges.
-                if (array_intersect($rangeData['children'], array_keys($ranges))) {
+                if (array_intersect($rangeData['ranges'], array_keys($ranges))) {
                     $view = reset($rangeData['views']);
                     if (isset($referencedCanvases[$view])) {
                         $iiifItems[] = $referencedCanvases[$view];
@@ -566,8 +427,8 @@ trait TraitStructuralStructures
             }
 
             // Create iiif items, that may be ranges or canvas.
-            $ascendants[] = $rangeData['id'];
-            foreach ($rangeData['children'] as $iiifItem) {
+            $ascendants[] = $rangeData['name'];
+            foreach ($rangeData['ranges'] as $iiifItem) {
                 if (isset($ranges[$iiifItem])) {
                     $iiifItem = $buildStructure($ranges[$iiifItem], $ascendants);
                     if ($iiifItem) {
@@ -582,15 +443,15 @@ trait TraitStructuralStructures
 
             // Don't create a range without canvas.
             if (!$iiifItems) {
-                return isset($referencedCanvases[$rangeData['id']])
-                    ? $referencedCanvases[$rangeData['id']]
+                return isset($referencedCanvases[$rangeData['name']])
+                    ? $referencedCanvases[$rangeData['name']]
                     : null;
             }
 
             $range = new Range();
             $range
                 ->setOptions([
-                    'index' => $rangeData['id'],
+                    'index' => $rangeData['name'],
                     'label' => $rangeData['label'],
                     'items' => $iiifItems,
                     'skip' => ['@context' => true],
@@ -608,7 +469,7 @@ trait TraitStructuralStructures
             $range = new Range();
             $range
                 ->setOptions([
-                    'index' => $rangeData['id'],
+                    'index' => $rangeData['name'],
                     'label' => $rangeData['label'],
                     'items' => [$result],
                     'skip' => ['@context' => true],
@@ -618,21 +479,5 @@ trait TraitStructuralStructures
         }
 
         return $result;
-    }
-
-    /**
-     * @todo Check a json structure for iiif v3.
-     */
-    protected function checkStructure(array $structure): ?Range
-    {
-        return null;
-    }
-
-    /**
-     * @todo Convert a v2 structure into a v3 structure.
-     */
-    protected function convertToStructure3(array $structure): ?Range
-    {
-        return null;
     }
 }
