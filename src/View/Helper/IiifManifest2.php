@@ -606,7 +606,20 @@ class IiifManifest2 extends AbstractHelper
                 // Json is currently unsupported.
                 $toc = $this->extractStructure($literalStructure);
                 if (!empty($toc)) {
-                    $structure = $this->convertStructure($toc, $canvases);
+                    $this->rangeToArray = $this->view->plugin('rangeToArray');
+                    $indexMedias = [];
+                    foreach ($canvases as $index => $sequenceCanvas) {
+                        $id = $sequenceCanvas['images'][0]['resource']['service']['@id']
+                            ?? $sequenceCanvas['images'][0]['resource']['service']['id']
+                            ?? null;
+                        if ($id) {
+                            // The basename of the service id is the media id.
+                            $indexView = $index + 1;
+                            $indexMedias[$indexView] = (int) basename($id);
+                        }
+                    }
+                    $ranges = $this->finalizeToc($toc, $indexMedias);
+                    $structure = $this->convertStructure($ranges, $indexMedias, $canvases);
                     if (count($structure) > 0) {
                         $manifest['structures'] = $structure;
                     }
@@ -1270,90 +1283,26 @@ class IiifManifest2 extends AbstractHelper
      *
      * @see \IiifServer\Iiif\TraitStructuralStructures::convertStructure()
      */
-    protected function convertStructure(array $toc, array $sequenceCanvases): array
+    protected function convertStructure(array $ranges, array $indexMedias, array $sequenceCanvases): ?array
     {
-        // Prepare indexes one time. Set it one-based.
-        $canvasesMedias = [];
-        $referencedCanvases = [];
-        foreach ($sequenceCanvases as $index => $sequenceCanvas) {
-            $id = $sequenceCanvas['images'][0]['resource']['service']['@id']
-                ?? $sequenceCanvas['images'][0]['resource']['service']['id']
-                ?? null;
-            if ($id) {
-                // The basename of the service id is the media id.
-                $sequenceCanvasIndex = $index + 1;
-                $referencedCanvases[$sequenceCanvasIndex] = [
-                    '@id' => $sequenceCanvas['@id'] ?? $sequenceCanvas['id'],
-                    '@type' => 'sc:Canvas',
-                    // This is the label set in the sequence, that may be
-                    // different from the label from the table of contents.
-                    'label' => $sequenceCanvas['label'] ?? null,
-                ];
-                $canvasesMedias[$sequenceCanvasIndex] = (int) basename($id);
-            }
-        }
-
-        $this->rangeToArray = $this->view->plugin('rangeToArray');
-        $isInteger = fn ($value): bool => (string) (int) $value === (string) $value;
-
-        // Convert the literal value and prepare all the ranges.
-        $ranges = [];
-        foreach ($toc as $lineIndex => $lineData) {
-            $name = !isset($lineData['name']) || strlen($lineData['name']) === 0 ? 'r' . ($lineIndex + 1) : $lineData['name'];
-            $label = $lineData['label'] ?? '';
-            // TODO Use view, that is the index of all viewed files, so like painting index.
-            $views = empty($lineData['views'])
-                ? []
-                : (is_array($lineData['views']) ? $lineData['views'] : $this->rangeToArray->__invoke($lineData['views']));
-            $mediaIds = [];
-            foreach ($views as $view) {
-                $mediaIds[] = $canvasesMedias[$view] ?? null;
-            }
-            if (empty($lineData['ranges']) || $lineData['ranges'] === '-') {
-                $children = [];
-            } elseif (is_array($lineData['ranges'])) {
-                $children = array_map('trim', $lineData['ranges']);
-            } elseif (strpos($lineData['ranges'], '/')) {
-                // Here the range should be r1-1/r1-8, so base is r1- and all
-                // ranges from 1 to 8 are filled.
-                $children = explode('/', $lineData['ranges']);
-                $base = trim(substr($children[0], 0, strrpos($children[0], '-') + 1));
-                $last = trim(substr($children[1], strrpos($children[1], '-') + 1));
-                $children = [];
-                for ($i = 1; $i <= $last; $i++) {
-                    $children[] = $base . $i;
-                }
-            } else {
-                $children = array_map('trim', explode(';', $lineData['ranges']));
-            }
-            // Some elements of structure can have a canvas to display.
-            // Multiple ranges can have the same canevas, for example multiple
-            // sections or paragraphs inside a page.
-            $isRange = !empty($children) || empty($view);
-            $isCanvas = !empty($mediaIds) && !empty($view);
-            if (!$isRange && !$isCanvas) {
-                continue;
-            }
-
-            $rangeId = $this->baseUrlIiif . '/range/' . ($isInteger($name) ? 'r' . $name : rawurldecode($name));
-
-            // Unlike previous version, the line is kept even without children.
-            // A line is always a range to display.
-            $ranges[$name] = [
-                'name' => $name,
-                '@id' => $rangeId,
-                'label' => $label,
-                // 'is_range' => $isRange,
-                'is_canvas' => $isCanvas,
-                'views' => $views,
-                'ranges' => $children,
-                // 'media_ids' => $mediaIds,
-            ];
-        }
-
         // If the values wasn't a formatted structure, there is no indexes.
-        if (!count($ranges)) {
+        // A structure of one page is useless for now.
+        if (count($ranges) < 1) {
             return null;
+        }
+
+        $referencedCanvases = [];
+        foreach (array_keys($indexMedias) as $index) {
+            // Sequence canvas is 0-based, but list of views is 1-based.
+            $sequenceCanvasIndex = $index - 1;
+            $sequenceCanvas = $sequenceCanvases[$sequenceCanvasIndex];
+            $referencedCanvases[$index] = [
+                '@id' => $sequenceCanvas['@id'] ?? $sequenceCanvas['id'],
+                '@type' => 'sc:Canvas',
+                // This is the label set in the sequence, that may be
+                // different from the label from the table of contents.
+                'label' => $sequenceCanvas['label'] ?? null,
+            ];
         }
 
         // Iiif v2 structure does not need to be fully recursive.
@@ -1364,15 +1313,15 @@ class IiifManifest2 extends AbstractHelper
         // ranges are separated.
         // Nevertheless, it is used for flat toc, because it can display labels.
 
-        /*
         // Conform to specs, but not working in standard viewers.
-        // Better: members should list ranges included canvas of each range.
+        // TODO Better: members should list ranges included canvas of each range. See iiif v3. But not compliant with Mirador v2.
 
         // When there is no subranges, it means a short table of contents
         // (labels and view number), in which case the table is flat and a
         // specific top is needed.
         $isFlatToc = !array_filter(array_column($ranges, 'ranges', 'name'));
 
+        /*
         if ($isFlatToc) {
             reset($ranges);
             $topKey = key($ranges);
@@ -1385,10 +1334,10 @@ class IiifManifest2 extends AbstractHelper
                 'members' => [],
             ];
             // Use the labels from the toc, not from the referenced canvases.
-            $i = 0;
+            $isFirst = true;
             foreach ($ranges as $subRangeData) {
-                ++$i;
-                if ($i === 1) {
+                if ($isFirst) {
+                    $isFirst = false;
                     continue;
                 }
                 $firstView = reset($subRangeData['views']);
@@ -1409,9 +1358,15 @@ class IiifManifest2 extends AbstractHelper
         }
         */
 
-        $i = 0;
+        // Prepare all range ids one time.
+        $isInteger = fn ($value): bool => (string) (int) $value === (string) $value;
+        foreach ($ranges as $name => &$rangeData) {
+            $rangeData['@id'] = $this->baseUrlIiif . '/range/' . ($isInteger($name) ? 'r' . $name : rawurldecode($name));
+        }
+        unset($rangeData);
+
+        $isFirst = true;
         foreach ($ranges as $rangeData) {
-            ++$i;
             if (!count($rangeData['ranges']) && !count($rangeData['views'])) {
                 continue;
             }
@@ -1422,7 +1377,7 @@ class IiifManifest2 extends AbstractHelper
                 'label' => $rangeData['label'],
             ];
 
-            if ($i === 1) {
+            if ($isFirst && !$isFlatToc) {
                 $range['viewingHint'] = 'top';
             }
 
@@ -1439,13 +1394,15 @@ class IiifManifest2 extends AbstractHelper
             if (count($rangeData['views'])
                 // According to spec, no views on top, except if there is no
                 // ranges.
-                && !($i === 1 && count($rangeData['ranges']))
+                && !($isFirst && count($rangeData['ranges']))
             ) {
                 foreach ($rangeData['views'] as $view) {
                     $range['canvases'][] = $referencedCanvases[$view]['@id'] ?? null;
                 }
                 $range['canvases'] = array_filter($range['canvases']);
             }
+
+            $isFirst = false;
 
             $structure[] = $range;
         }

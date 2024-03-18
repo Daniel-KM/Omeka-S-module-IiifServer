@@ -113,7 +113,10 @@ trait TraitStructuralStructures
             $literalStructure = (string) $literalStructure;
             $toc = $this->extractStructure($literalStructure);
             if (!empty($toc)) {
-                $structure = $this->convertStructure($toc);
+                // Prepare indexes one time.
+                $indexMedias = $this->paintingMedias ?? array_column(array_filter($this->mediaInfos), 'id', 'painting');
+                $ranges = $this->finalizeToc($toc, $indexMedias);
+                $structure = $this->convertStructure($ranges, $indexMedias);
                 if ($structure) {
                     $structures[] = $structure;
                 }
@@ -242,22 +245,13 @@ trait TraitStructuralStructures
     }
 
     /**
-     * Convert a literal structure into a range (with view number).
-     *
-     * The lines are the preprocessed literal structure.
-     *
-     * @see https://iiif.io/api/presentation/3.0/#54-range
-     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
-     *
-     * @see \IiifServer\View\Helper\IiifManifest2::convertStructure()
+     * Finalize toc with list of views, ranges, etc.
      */
-    protected function convertStructure(array $toc): ?Range
+    protected function finalizeToc(array $toc, array $indexMedias): array
     {
-        // Prepare indexes one time.
-        $this->paintingMedias ??= array_column(array_filter($this->mediaInfos), 'id', 'painting');
-
         // Convert the literal value and prepare all the ranges.
         $ranges = [];
+
         foreach ($toc as $lineIndex => $lineData) {
             $name = !isset($lineData['name']) || strlen($lineData['name']) === 0 ? 'r' . ($lineIndex + 1) : $lineData['name'];
             $label = $lineData['label'] ?? '';
@@ -267,23 +261,28 @@ trait TraitStructuralStructures
                 : (is_array($lineData['views']) ? $lineData['views'] : $this->rangeToArray->__invoke($lineData['views']));
             $mediaIds = [];
             foreach ($views as $view) {
-                $mediaIds[] = $this->paintingMedias[$view] ?? null;
+                $mediaIds[] = $indexMedias[$view] ?? null;
             }
             if (empty($lineData['ranges']) || $lineData['ranges'] === '-') {
                 $children = [];
             } elseif (is_array($lineData['ranges'])) {
                 $children = array_map('trim', $lineData['ranges']);
             } elseif (strpos($lineData['ranges'], '/')) {
-                // Here the range should be r1-1/r1-8, so base is r1- and all
+                // Here the range should be xxx-1/xxx-8, so base is xxx- and all
                 // ranges from 1 to 8 are filled.
                 $children = explode('/', $lineData['ranges']);
                 $base = trim(substr($children[0], 0, strrpos($children[0], '-') + 1));
-                $last = trim(substr($children[1], strrpos($children[1], '-') + 1));
-                $children = [];
-                for ($i = 1; $i <= $last; $i++) {
-                    $children[] = $base . $i;
+                $baseLast = trim(substr($children[1], 0, strrpos($children[1], '-') + 1));
+                if ($base === $baseLast) {
+                    $first = trim(substr($children[0], strrpos($children[0], '-') + 1));
+                    $last = trim(substr($children[1], strrpos($children[1], '-') + 1));
+                    $children = [];
+                    for ($i = $first; $i <= $last; $i++) {
+                        $children[] = $base . $i;
+                    }
                 }
             } else {
+                // TODO Combine ";" and "/" in short range list.
                 $children = array_map('trim', explode(';', $lineData['ranges']));
             }
             // Some elements of structure can have a canvas to display.
@@ -299,6 +298,8 @@ trait TraitStructuralStructures
             $ranges[$name] = [
                 'line' => $lineIndex + 1,
                 'name' => $name,
+                // The id is useless here for v3.
+                '@id' => null,
                 'label' => $label,
                 // 'is_range' => $isRange,
                 'is_canvas' => $isCanvas,
@@ -308,8 +309,24 @@ trait TraitStructuralStructures
             ];
         }
 
+        return $ranges;
+    }
+
+    /**
+     * Convert a literal structure into a range (with view number).
+     *
+     * The lines are the preprocessed literal structure.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#54-range
+     * @see https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#input-format-of-the-property-for-structures-table-of-contents
+     *
+     * @see \IiifServer\View\Helper\IiifManifest2::convertStructure()
+     */
+    protected function convertStructure(array $ranges, array $indexMedias): ?Range
+    {
         // If the values wasn't a formatted structure, there is no indexes.
-        if (!count($ranges)) {
+        // A structure of one page is useless for now.
+        if (count($ranges) < 1) {
             return null;
         }
 
@@ -327,7 +344,7 @@ trait TraitStructuralStructures
         // all in the coded toc.
 
         $referencedCanvases = [];
-        foreach (array_keys($this->paintingMedias) as $index) {
+        foreach (array_keys($indexMedias) as $index) {
             // TODO The type may be "SpecificResource" too (canvas part: fragment of an image, etc.).
             $referencedCanvas = new ReferencedCanvas();
             $referencedCanvas
