@@ -39,16 +39,48 @@ class UpgradeStructures extends AbstractJob
             return;
         }
 
+        $query = $this->getArg('query');
+        if ($query && !is_array($query)) {
+            $queryItem = null;
+            parse_str($query, $queryItem);
+            if (empty($query)) {
+                $this->job->setStatus(\Omeka\Entity\Job::STATUS_ERROR);
+                $logger->err('A query was set but invalid or empty.'); // @translate
+                return;
+            }
+            $query = $queryItem;
+        }
+
+        $itemIds = [];
+        if ($query) {
+            $itemIds = $api->search('items', $query, ['returnScalar' => 'id'])->getContent();
+            if (!$itemIds) {
+                $logger->warn('A query was set but returned no items.'); // @translate
+                return;
+            }
+        }
+
         $qb = $connection->createQueryBuilder();
+        $bind = [];
+        $types = [];
+
         $qb
             ->select('value.id', 'value.resource_id', 'value.value')
             ->from('value', 'value')
             ->innerJoin('value', 'item', 'item', 'item.id = value.resource_id')
-            ->where('value.property_id = ' . $structurePropertyId)
+            ->where('value.property_id = :property_id')
             ->andWhere('value.value IS NOT NULL')
             ->andWhere('value.value != ""')
             ->orderBy('value.id', 'asc');
-        $structures = $connection->executeQuery($qb)->fetchAllAssociative();
+        $bind['property_id'] = $structurePropertyId;
+        $types['property_id'] = \Doctrine\DBAL\ParameterType::INTEGER;
+        if ($itemIds) {
+            $qb->andWhere('value.resource_id IN (:item_ids)');
+            $bind['item_ids'] = $itemIds;
+            $types['item_ids'] = \Doctrine\DBAL\Connection::PARAM_INT_ARRAY;
+        }
+
+        $structures = $connection->executeQuery($qb, $bind, $types)->fetchAllAssociative();
         if (!count($structures)) {
             $logger->warn('No structure to process.'); // @translate
             return;
