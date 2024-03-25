@@ -166,7 +166,7 @@ class UpgradeStructures extends AbstractJob
                     $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'children' => $matches['children']];
                 }
                 if (preg_match('~^(?<id>[^,]*?)\s*,\s*(?<label>.*?)\s*,\s*(?<views>[\d -]*)\s*,\s*(?<ranges>[^,]+?)$~u', $line, $matches)) {
-                    $lines4[$lineIndex] = ['id' => $matches['id'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];;
+                    $lines4[$lineIndex] = ['id' => $matches['id'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];
                 }
             }
             if (!$lines3 || $empty === $total) {
@@ -195,11 +195,11 @@ class UpgradeStructures extends AbstractJob
                     ++$empty;
                     continue;
                 }
-                if (preg_match('~\s*(<c\s*id="(?<name>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:range_standard="(?<children>[^"]*)"\s*/>)?~', $line, $matches)) {
-                    $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'children' => $matches['children']];
+                if (preg_match('~\s*<c\s*(?:id="(?<name>[^"]*)")?\s*(?:label="(?<label>[^"]*)")?\s*(?:range_standard="(?<children>[^"]*)")?\s*/>~', $line, $matches)) {
+                    $lines3[$lineIndex] = ['name' => $matches['name'] ?? '', 'label' => $matches['label'] ?? '', 'children' => $matches['children'] ?? ''];
                 }
-                if (preg_match('~\s*(<c\s*id="(?<id>[^"]*)")?\s*(label="(?<label>[^"]*)")?\s*(?:views="(?<views>[^"]*)")?\s*(?:ranges="(?<ranges>[^"]*)"\s*/>)?~', $line, $matches)) {
-                    $lines4[$lineIndex] = ['id' => $matches['id'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => $matches['ranges']];
+                if (preg_match('~\s*<c\s*(?:id="(?<id>[^"]*)")?\s*(?:label="(?<label>[^"]*)")?\s*(?:views="(?<views>[^"]*)")?\s*(?:ranges="(?<ranges>[^"]*)")?\s*/>~', $line, $matches)) {
+                    $lines4[$lineIndex] = ['id' => $matches['id'] ?? '', 'label' => $matches['label'] ?? '', 'views' => $matches['views'] ?? '', 'ranges' => $matches['ranges'] ?? ''];
                 }
             }
             if (!$lines3 || $empty === $total) {

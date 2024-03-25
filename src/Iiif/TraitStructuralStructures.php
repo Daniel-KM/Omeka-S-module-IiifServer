@@ -196,7 +196,7 @@ trait TraitStructuralStructures
                     continue;
                 }
                 if (preg_match('~^(?<label>.*)\s*,\s*(?<views>[\d\s;/-]*)$~u', $line, $matches)) {
-                    $lines2[$lineIndex] = ['name' => null, 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => ''];
+                    $lines2[$lineIndex] = ['name' => '', 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => ''];
                 }
                 if (preg_match('~^(?<name>[^,]*)\s*,\s*(?<label>.*)\s*,\s*(?<views>[\d\s;/-]*)$~u', $line, $matches)) {
                     $lines3[$lineIndex] = ['name' => $matches['name'], 'label' => $matches['label'], 'views' => $matches['views'], 'ranges' => ''];
