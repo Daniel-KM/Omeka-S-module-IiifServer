@@ -343,8 +343,54 @@ class Module extends AbstractModule
         $fieldset = $form->get('module_tasks');
         $process = $fieldset->get('process');
         $valueOptions = $process->getValueOptions();
-        $valueOptions['iiifserver_upgrade_structure'] = 'Upgrade old table of contents to new format with four columns (module IIIF Server)'; // @translate
+        $valueOptions['iiifserver_cache_manifests'] = 'Iiif Server: Cache manifests'; // @translate
+        $valueOptions['iiifserver_store_dimensions'] = 'Iiif Server: Store dimensions of medias'; // @translate
+        $valueOptions['iiifserver_upgrade_structure'] = 'Iiif Server: Upgrade old tables of contents to new format with four columns (to do only one time for old external manifests)'; // @translate
         $process->setValueOptions($valueOptions);
+        $fieldset
+            ->add([
+                'type' => \Laminas\Form\Fieldset::class,
+                'name' => 'iiifserver_cache_manifests',
+                'options' => [
+                    'label' => 'Options to cache manifests', // @translate
+                ],
+                'attributes' => [
+                    'class' => 'iiifserver_cache_manifests',
+                ],
+            ])
+            ->get('iiifserver_cache_manifests')
+            ->add([
+                'name' => 'query',
+                'type' => \Omeka\Form\Element\Query::class,
+                'options' => [
+                    'label' => 'Limit cache of manifests to specific items', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_cache_manifests-query',
+                ],
+            ]);
+        $fieldset
+            ->add([
+                'type' => \Laminas\Form\Fieldset::class,
+                'name' => 'iiifserver_store_dimensions',
+                'options' => [
+                    'label' => 'Options to store dimensions', // @translate
+                ],
+                'attributes' => [
+                    'class' => 'iiifserver_store_dimensions',
+                ],
+            ])
+            ->get('iiifserver_store_dimensions')
+            ->add([
+                'name' => 'query',
+                'type' => \Omeka\Form\Element\Query::class,
+                'options' => [
+                    'label' => 'Limit storage of dimensions to specific items', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_store_dimensions-query',
+                ],
+            ]);
         $fieldset
             ->add([
                 'type' => \Laminas\Form\Fieldset::class,
@@ -355,8 +401,8 @@ class Module extends AbstractModule
                 'attributes' => [
                     'class' => 'iiifserver_upgrade_structure',
                 ],
-            ]);
-        $fieldset->get('iiifserver_upgrade_structure')
+            ])
+            ->get('iiifserver_upgrade_structure')
             ->add([
                 'name' => 'query',
                 'type' => \Omeka\Form\Element\Query::class,
@@ -372,7 +418,15 @@ class Module extends AbstractModule
     public function handleEasyAdminJobs(Event $event): void
     {
         $process = $event->getParam('process');
-        if ($process === 'iiifserver_upgrade_structure') {
+        if ($process === 'iiifserver_cache_manifests') {
+            $params = $event->getParam('params');
+            $event->setParam('job', \IiifServer\Job\CacheManifests::class);
+            $event->setParam('args', $params['module_tasks']['iiifserver_cache_manifests'] ?? []);
+        } elseif ($process === 'iiifserver_store_dimensions') {
+            $params = $event->getParam('params');
+            $event->setParam('job', \IiifServer\Job\MediaDimensions::class);
+            $event->setParam('args', $params['module_tasks']['iiifserver_store_dimensions'] ?? []);
+        } elseif ($process === 'iiifserver_upgrade_structure') {
             $params = $event->getParam('params');
             $event->setParam('job', \IiifServer\Job\UpgradeStructures::class);
             $event->setParam('args', $params['module_tasks']['iiifserver_upgrade_structure'] ?? []);
