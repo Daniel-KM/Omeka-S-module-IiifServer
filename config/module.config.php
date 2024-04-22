@@ -523,7 +523,7 @@ return [
     ],
     'iiifserver' => [
         'config' => [
-            'iiifserver_manifest_default_version' => '2',
+            'iiifserver_manifest_default_version' => '3',
             'iiifserver_manifest_external_property' => 'dcterms:hasFormat',
             'iiifserver_manifest_append_cors_headers' => false,
             'iiifserver_manifest_pretty_json' => true,
