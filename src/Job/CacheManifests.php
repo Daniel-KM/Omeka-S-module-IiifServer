@@ -64,7 +64,9 @@ class CacheManifests extends AbstractJob
             $failed = false;
             foreach ([2, 3] as $version) {
                 $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
-                if (file_exists($filepath) && !is_writeable($filepath) && !unlink($filepath)) {
+                if (file_exists($filepath)
+                    && (!is_writeable($filepath) || !unlink($filepath))
+                ) {
                     $this->logger->err(
                         'Item #{item_id}: Unable to remove existing file "{file}". Manifest version {version} skipped.', // @translate
                         ['item_id' => $itemId, 'file' => "/iiif/$version/$itemId.manifest.json", 'version' => $version]
