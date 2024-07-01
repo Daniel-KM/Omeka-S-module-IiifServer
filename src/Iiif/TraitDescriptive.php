@@ -29,6 +29,7 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\ItemRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 
 trait TraitDescriptive
@@ -299,11 +300,21 @@ trait TraitDescriptive
     /**
      * The placeholder canvas can be set in item or media values.
      *
+     * Because the accompanying canvas is not supported by common iiif viewers,
+     * duplicate it with a placeholder canvas.
+     *
      * @see https://iiif.io/api/presentation/3.0/#placeholdercanvas
      *
      * @todo Return a canvas instead of an array.
      */
     public function placeholderCanvas(): ?array
+    {
+        $specificCanvas = $this->accompanyingOrPlaceholderCanvas('placeholder');
+        return $specificCanvas
+            ?: $this->placeholderCanvasDefault();
+    }
+
+    protected function placeholderCanvasDefault(): ?array
     {
         $property = $this->settings->get('iiifserver_manifest_placeholder_canvas_property');
         if (!$property) {
@@ -368,48 +379,90 @@ trait TraitDescriptive
      */
     public function accompanyingCanvas(): ?array
     {
+        return $this->accompanyingOrPlaceholderCanvas('accompanying');
+    }
+
+    protected function accompanyingOrPlaceholderCanvas(string $subType): ?array
+    {
         // TODO The accompanying canvas manages only podcast for now (an audio and a single image).
         // TODO Use a real Canvas and remove too much specific code.
 
-        if (!$this->resource instanceof MediaRepresentation
+        // TODO Factorize.
+
+        if ($subType === 'placeholder') {
+            if (!$this->resource instanceof itemRepresentation
+                || count($this->mediaInfos) !== 2
+            ) {
+                return null;
+            }
+            // Check for sound and image.
+            $first = reset($this->mediaInfos);
+            $firstMediaType = (string) $first['resource']->mediaType();
+            if (strtok($firstMediaType, '/') !== 'audio') {
+                return null;
+            }
+            $second = array_reverse($this->mediaInfos);
+            $second = reset($second);
+            $mediaAccompanying = $second['resource'];
+            $secondMediaType = (string) $mediaAccompanying->mediaType();
+            if (strtok($secondMediaType, '/') !== 'image') {
+                return null;
+            }
+
+            $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
+            if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
+                return null;
+            }
+
+            $contentResource = $second['content'];
+        } elseif (!$this->resource instanceof MediaRepresentation
             || $this->options['index'] !== 1
             || count($this->options['mediaInfos']['indexes']) !== 2
         ) {
             return null;
+        } else {
+            // Check if it is an audio.
+            // TODO Here, $this->isAudio() does not work, because this is a Canvas.
+            $mediaDims = $this->mediaDimensions();
+            if (count(array_filter($mediaDims)) !== 1 || !isset($mediaDims['duration'])) {
+                return null;
+            }
+
+            // Check if the second media is an image.
+            $mediaId = $this->options['mediaInfos']['indexes'];
+            unset($mediaId[$this->resource->id()]);
+            $mediaId = key($mediaId);
+            if (!$mediaId) {
+                return null;
+            }
+
+            try {
+                // The media should be cached by doctrine.
+                /** @var \Omeka\Api\Representation\MediaRepresentation $mediaAccompanying */
+                $mediaAccompanying = $this->api->read('media', ['id' => $mediaId])->getContent();
+            } catch (\Exception $e) {
+                return null;
+            }
+
+            $mediaType = (string) $mediaAccompanying->mediaType();
+            if (strtok($mediaType, '/') !== 'image') {
+                return null;
+            }
+
+            $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
+            if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
+                return null;
+            }
+
+            $contentResource = new ContentResource();
+            $contentResource
+                ->setResource($mediaAccompanying);
+            if (!$contentResource->hasIdAndType()) {
+                return null;
+            }
         }
 
-        // Check if it is an audio.
-        // TODO Here, $this->isAudio() does not work, because this is a Canvas.
-        $mediaDims = $this->mediaDimensions();
-        if (count(array_filter($mediaDims)) !== 1 || !isset($mediaDims['duration'])) {
-            return null;
-        }
-
-        // Check if the second media is an image.
-        $mediaId = $this->options['mediaInfos']['indexes'];
-        unset($mediaId[$this->resource->id()]);
-        $mediaId = key($mediaId);
-        if (!$mediaId) {
-            return null;
-        }
-
-        try {
-            // The media should be cached by doctrine.
-            /** @var \Omeka\Api\Representation\MediaRepresentation $mediaAccompanying */
-            $mediaAccompanying = $this->api->read('media', ['id' => $mediaId])->getContent();
-        } catch (\Exception $e) {
-            return null;
-        }
-
-        $mediaType = (string) $mediaAccompanying->mediaType();
-        if (strtok($mediaType, '/') !== 'image') {
-            return null;
-        }
-
-        $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
-        if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
-            return null;
-        }
+        $item = $mediaAccompanying->item();
 
         /*
         $opts = [
@@ -441,13 +494,6 @@ trait TraitDescriptive
         }
         */
 
-        $contentResource = new ContentResource();
-        $contentResource
-            ->setResource($mediaAccompanying);
-        if (!$contentResource->hasIdAndType()) {
-            return null;
-        }
-
         $body = new Annotation\Body();
         $body
             ->setOptions([
@@ -456,15 +502,15 @@ trait TraitDescriptive
             ->setResource($mediaAccompanying)
             ->normalize();
 
-        $target = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+        $target = $this->iiifUrl->__invoke($item, 'iiifserver/uri', '3', [
             'type' => 'canvas',
-            'name' => $this->resource->item()->id(),
-            'subtype' => 'accompanying',
+            'name' => $item->id(),
+            'subtype' => $subType,
             'subname' => $mediaAccompanying->id(),
         ]);
 
         $annotation = [
-            'id' => $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+            'id' => $this->iiifUrl->__invoke($item, 'iiifserver/uri', '3', [
                 'type' => 'annotation',
                 'name' => $mediaAccompanying->id(),
             ]),
@@ -475,9 +521,9 @@ trait TraitDescriptive
         ];
 
         $annotationPage = [
-            'id' => $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+            'id' => $this->iiifUrl->__invoke($item, 'iiifserver/uri', '3', [
                 'type' => 'annotation-page',
-                'name' => $this->resource->id(),
+                'name' => $mediaAccompanying->id(),
             ]),
             'type' => 'AnnotationPage',
             'items' => [$annotation],
