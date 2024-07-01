@@ -93,10 +93,15 @@ config of the module :
 ### CORS (Cross-Origin Resource Sharing)
 
 To be able to share manifests and contents with other IIIF servers, the server
-should allow [CORS]. The header is automatically set for manifests, but you may
-have to allow access for files via the config of the server.
+should allow [CORS]. This feature can be enable in the config of the module, in
+the config of the server or in the file `.htaccess`.
 
-On Apache 2.4, the module "headers" should be enabled:
+**Warning**: the cors headers should be set one time only. If it is set multiple
+times, it will be disabled. This is the purpose of the option in the main config
+of the module.
+
+If you prefer to append cors via the config the server, disable the option in
+the config first. On Apache 2.4, the module "headers" should be enabled:
 
 ```sh
 a2enmod headers
@@ -736,6 +741,7 @@ TODO / Bugs
 - [x] Store dimensions on item/media save.
 - [ ] Create a plugin MediaData that will merge MediaDimension, ImageSize, and allows to get media type.
 - [ ] Clarify option for home page with "default site", that may not be a site of the item.
+- [ ] Podcast on iiif v2.
 
 See module [Image Server].
 
