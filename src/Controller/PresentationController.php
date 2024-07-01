@@ -32,7 +32,7 @@ namespace IiifServer\Controller;
 
 use Common\Stdlib\PsrMessage;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Omeka\Mvc\Exception\NotFoundException;
+use Omeka\Mvc\Exception as OmekaException;
 
 class PresentationController extends AbstractActionController
 {
@@ -40,7 +40,7 @@ class PresentationController extends AbstractActionController
 
     public function indexAction()
     {
-        return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+        return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
     }
 
     public function collectionAction()
@@ -48,7 +48,7 @@ class PresentationController extends AbstractActionController
         // A collection can be an item set or an item with external manifests.
         $resource = $this->fetchResource('resources');
         if (!$resource) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $version = $this->requestedVersion();
@@ -68,7 +68,7 @@ class PresentationController extends AbstractActionController
         // TODO Set the resource type to fetch resources from identifiers?
         $resources = $this->fetchResourcesAndIiifUrls();
         if (!count($resources)) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $query = $this->params()->fromQuery();
@@ -92,7 +92,7 @@ class PresentationController extends AbstractActionController
         // It can be a forward from the module Image Server.
         $resource = $params['resource'] ?? $this->fetchResource('items');
         if (!$resource) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $viewHelpers = $this->viewHelpers();
@@ -103,6 +103,19 @@ class PresentationController extends AbstractActionController
             if ($externalManifest) {
                 return $this->redirect()->toUrl($externalManifest);
             }
+        }
+
+        // Check rights for Access.
+        // Warning: there are checks for media (option iiifserver_access_resource_skip).
+        /** @see \IiifServer\Controller\MediaController::fetchAction() */
+        if ($this->getPluginManager()->has('accessLevel')) {
+            /** @var \Access\Mvc\Controller\Plugin\AccessLevel $accessLevel */
+            $accessLevel = $this->getPluginManager()->get('accessLevel');
+            $accessLevel = $this->accessLevel($resource);
+            if ($accessLevel === 'forbidden') {
+                return $this->jsonError(new OmekaException\PermissionDeniedException, \Laminas\Http\Response::STATUS_CODE_403);
+            }
+            // TODO Manage level reserved. For now, only on media level.
         }
 
         // Version may be 2 or 3.
@@ -204,7 +217,7 @@ class PresentationController extends AbstractActionController
 
         $name = $this->params('name');
         if (!$name) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         // When the id is a clean url identifier, the id is already extracted.
@@ -242,7 +255,7 @@ class PresentationController extends AbstractActionController
         }
 
         if (!$found) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         if ($version === '2') {
@@ -263,7 +276,7 @@ class PresentationController extends AbstractActionController
 
         $name = $this->params('name');
         if (!$name) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $api = $this->api();
@@ -307,7 +320,7 @@ class PresentationController extends AbstractActionController
 
         $name = $this->params('name');
         if (!$name) {
-            return $this->jsonError(new NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
+            return $this->jsonError(new OmekaException\NotFoundException, \Laminas\Http\Response::STATUS_CODE_404);
         }
 
         $api = $this->api();
