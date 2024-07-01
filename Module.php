@@ -127,6 +127,16 @@ class Module extends AbstractModule
     protected function postInstall(): void
     {
         $this->updateWhitelist();
+
+        /** @var \Omeka\Settings\Settings $settings */
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+
+        // Set default setting for cors according to the config of the server.
+        $corsHeaders = $this->checkCorsHeaders();
+        $settings->set('iiifserver_manifest_append_cors_headers', !$corsHeaders);
+        if ($corsHeaders > 1) {
+            $this->messageCors();
+        }
     }
 
     protected function postUninstall(): void
@@ -506,6 +516,56 @@ class Module extends AbstractModule
             'ktx2',
         ])));
         $settings->set('extension_whitelist', $whitelist);
+    }
+
+    /**
+     * Check how many times the cors header is returned (zero or one).
+     *
+     * Returning the cors header "Access-Control-Allow-Origin" multiple times
+     * disable it.
+     */
+    protected function checkCorsHeaders(): int
+    {
+        // Check cors on a default file, because there may not be any media file.
+        $services = $this->getServiceLocator();
+        $assetUrl = $services->get('ViewHelperManager')->get('assetUrl');
+        $checkServerUrl = $assetUrl('css/style.css', 'Omeka', false, true, true);
+
+        $headers = get_headers($checkServerUrl, version_compare(PHP_VERSION, '8.0.0', '<') ? 1 : true);
+        if (!$headers) {
+            return 0;
+        }
+
+        return array_key_exists('Access-Control-Allow-Origin', $headers)
+            ? count((array) $headers['Access-Control-Allow-Origin'])
+            : 0;
+    }
+
+    protected function messageCors(): void
+    {
+        $services = $this->getServiceLocator();
+
+        /** @var \Omeka\Settings\Settings $settings */
+        $settings = $services->get('Omeka\Settings');
+        $appendCorsHeaders = (bool) $settings->get('iiifserver_manifest_append_cors_headers');
+
+        $plugins = $services->get('ControllerPluginManager');
+        $messenger = $plugins->get('messenger');
+
+        $checkCorsHeaders = $this->checkCorsHeaders();
+        if (!$checkCorsHeaders && !$appendCorsHeaders) {
+            $message = new PsrMessage(
+                'The cors headers are disabled. You shall enable them to allow other libraries to access to your manifests.' // @translate
+            );
+            $messenger->addWarning($message);
+        } elseif ($checkCorsHeaders > 1
+            || ($checkCorsHeaders === 1 && $appendCorsHeaders)
+        ) {
+            $message = new PsrMessage(
+                'The cors headers are enabled multiple times in the config of the module and in the config of Apache or in the file .htaccess. Duplicating the cors headers makes them disabled. You should disable the option in the config of the module, in the Apache config or in the file .htaccess.' // @translate
+            );
+            $messenger->addError($message);
+        }
     }
 
     /**
