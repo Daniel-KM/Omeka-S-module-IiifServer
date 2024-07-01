@@ -203,6 +203,8 @@ class Module extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
+        $this->messageCache();
+
         /**
          * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
          * @var \IiifServer\Form\ConfigForm $configForm
@@ -567,6 +569,22 @@ class Module extends AbstractModule
                 'The cors headers are enabled multiple times in the config of the module and in the config of Apache or in the file .htaccess. Duplicating the cors headers makes them disabled. You should disable the option in the config of the module, in the Apache config or in the file .htaccess.' // @translate
             );
             $messenger->addError($message);
+        }
+    }
+
+    protected function messageCache(): void
+    {
+        $services = $this->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
+        $settings = $services->get('Omeka\Settings');
+        $messenger = $plugins->get('messenger');
+
+        $isCacheEnabled = $settings->get('iiifserver_manifest_cache');
+        if ($isCacheEnabled) {
+            $message = new PsrMessage(
+                'When cache is enabled, you should recreate it each time the config is updated.' // @translate
+            );
+            $messenger->addWarning($message);
         }
     }
 
