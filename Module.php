@@ -174,11 +174,11 @@ class Module extends AbstractModule
             [$this, 'handleAfterDeleteItem']
         );
 
-        // Add a job to upgrade structure from v3.
+        // Add a job to upgrade structures once from v3.
         $sharedEventManager->attach(
             \EasyAdmin\Form\CheckAndFixForm::class,
             'form.add_elements',
-            [$this, 'handleJobsForm']
+            [$this, 'handleEasyAdminJobsForm']
         );
         $sharedEventManager->attach(
             \EasyAdmin\Controller\CheckAndFixController::class,
@@ -347,7 +347,7 @@ class Module extends AbstractModule
         }
     }
 
-    public function handleJobsForm(Event $event): void
+    public function handleEasyAdminJobsForm(Event $event): void
     {
         /**
          * @var \EasyAdmin\Form\CheckAndFixForm $form

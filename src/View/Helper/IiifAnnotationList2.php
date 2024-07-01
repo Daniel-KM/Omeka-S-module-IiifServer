@@ -56,7 +56,7 @@ class IiifAnnotationList2 extends AbstractHelper
      *
      * @todo Factorize IiifAnnotationList2, IiifManifest2 and AnnotationList.
      *
-     * @see \IiifServer\Iiif\AnnotationList::initAnnotationList()
+     * @see \IiifServer\View\Helper\AnnotationList
      * @see \IiifServer\View\Helper\IiifAnnotationList2
      * @see \IiifServer\View\Helper\IiifAnnotationList3
      * @see \IiifServer\View\Helper\IiifManifest2::otherContentAnnotationList()
