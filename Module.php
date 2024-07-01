@@ -189,6 +189,8 @@ class Module extends AbstractModule
 
     public function getConfigForm(PhpRenderer $renderer)
     {
+        $this->messageCors();
+
         $translate = $renderer->plugin('translate');
         return '<p>'
             . $translate('The module creates manifests with the properties from each resource (item set, item and media).') // @translate

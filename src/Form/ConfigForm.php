@@ -60,7 +60,7 @@ class ConfigForm extends Form
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'label' => 'Append CORS headers to web server response', // @translate
-                    'info' => 'CORS ("Cross Origin Resource Sharing") headers are required to share manifests and media. They are generally managed by the web server, but, if not, they can be added here.', // @translate
+                    'info' => 'CORS ("Cross Origin Resource Sharing") headers are required to share manifests and media. They are generally managed by the web server, but, if not, they can be added here. They must not be appended multiple times, else they are disabled.', // @translate
                     'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#CORS-Cross-Origin-Resource-Sharing)', // @translate
                 ],
                 'attributes' => [
