@@ -327,7 +327,7 @@ trait TraitDescriptive
             foreach ($values as $value) {
                 $vr = $value->valueResource();
                 if ($vr && (int) $vr->id() === $resourceId) {
-                    return $this->canvasFromUrl($defaultPlaceholder, null);
+                    return $this->canvasFromUrlPlaceholder($defaultPlaceholder, null);
                 }
             }
         }
@@ -342,7 +342,7 @@ trait TraitDescriptive
             $val = (string) $value->value();
             $url = $uri ?: $val;
             if (filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED)) {
-                return $this->canvasFromUrl($url, $val === $url ? null : $val);
+                return $this->canvasFromUrlPlaceholder($url, $val === $url ? null : $val);
             } elseif ($defaultPlaceholder) {
                 $dataType = $value->type();
                 if (($dataType === 'boolean' && $value->value())
@@ -350,7 +350,7 @@ trait TraitDescriptive
                     // Presence of a value means to use the default placeholder.
                     || (!$matchValue && $dataType !== 'boolean')
                 ) {
-                    return $this->canvasFromUrl($defaultPlaceholder, null);
+                    return $this->canvasFromUrlPlaceholder($defaultPlaceholder, null);
                 }
             }
         }
@@ -359,9 +359,145 @@ trait TraitDescriptive
     }
 
     /**
+     * The accompanying canvas can be set in item or media values.
+     *
+     * @see https://iiif.io/api/presentation/3.0/#accompanyingcanvas
+     * @see https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/
+     *
+     * @todo Return a canvas instead of an array.
+     */
+    public function accompanyingCanvas(): ?array
+    {
+        // TODO The accompanying canvas manages only podcast for now (an audio and a single image).
+        // TODO Use a real Canvas and remove too much specific code.
+
+        if (!$this->resource instanceof MediaRepresentation
+            || $this->options['index'] !== 1
+            || count($this->options['mediaInfos']['indexes']) !== 2
+        ) {
+            return null;
+        }
+
+        // Check if it is an audio.
+        // TODO Here, $this->isAudio() does not work, because this is a Canvas.
+        $mediaDims = $this->mediaDimensions();
+        if (count(array_filter($mediaDims)) !== 1 || !isset($mediaDims['duration'])) {
+            return null;
+        }
+
+        // Check if the second media is an image.
+        $mediaId = $this->options['mediaInfos']['indexes'];
+        unset($mediaId[$this->resource->id()]);
+        $mediaId = key($mediaId);
+        if (!$mediaId) {
+            return null;
+        }
+
+        try {
+            // The media should be cached by doctrine.
+            /** @var \Omeka\Api\Representation\MediaRepresentation $mediaAccompanying */
+            $mediaAccompanying = $this->api->read('media', ['id' => $mediaId])->getContent();
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        $mediaType = (string) $mediaAccompanying->mediaType();
+        if (strtok($mediaType, '/') !== 'image') {
+            return null;
+        }
+
+        $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
+        if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
+            return null;
+        }
+
+        /*
+        $opts = [
+            'callingResource' => $this->resource,
+            'callingMotivation' => 'painting',
+            'isDereferenced' => false,
+        ];
+
+        $annotationPage = new AnnotationPage();
+        $annotationPage
+            ->setOptions($opts)
+            ->setResource($this->resource);
+
+        return $annotationPage->id()
+            ? $annotationPage
+            : null;
+        */
+
+        /*
+        $annotation = new Annotation();
+        $annotation
+            ->setOptions([
+                'motivation' => 'painting',
+            ])
+            ->setResource($mediaAccompanying);
+
+        if (!$annotation->id()) {
+            return null;
+        }
+        */
+
+        $contentResource = new ContentResource();
+        $contentResource
+            ->setResource($mediaAccompanying);
+        if (!$contentResource->hasIdAndType()) {
+            return null;
+        }
+
+        $body = new Annotation\Body();
+        $body
+            ->setOptions([
+                'content' => $contentResource,
+            ])
+            ->setResource($mediaAccompanying)
+            ->normalize();
+
+        $target = $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+            'type' => 'canvas',
+            'name' => $this->resource->item()->id(),
+            'subtype' => 'accompanying',
+            'subname' => $mediaAccompanying->id(),
+        ]);
+
+        $annotation = [
+            'id' => $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+                'type' => 'annotation',
+                'name' => $mediaAccompanying->id(),
+            ]),
+            'type' => 'Annotation',
+            'motivation' => 'painting',
+            'body' => $body->jsonSerialize(),
+            'target' => $target,
+        ];
+
+        $annotationPage = [
+            'id' => $this->iiifUrl->__invoke($this->resource->item(), 'iiifserver/uri', '3', [
+                'type' => 'annotation-page',
+                'name' => $this->resource->id(),
+            ]),
+            'type' => 'AnnotationPage',
+            'items' => [$annotation],
+        ];
+
+        // Get a single accompanying canvas.
+        return [
+            'id' => $target,
+            'type' => 'Canvas',
+            'label' => new valueLanguage($mediaAccompanying->displayTitle()),
+            'height' => $mediaAccompanyingSize['height'],
+            'width' => $mediaAccompanyingSize['width'],
+            'items' => [$annotationPage],
+        ];
+    }
+
+    /**
      * @todo Return a real canvas instead of an url.
      */
-    protected function canvasFromUrl(string $url, ?string $label): ?array
+    protected function canvasFromUrlPlaceholder(string $url, ?string $label): ?array
     {
         // Dimensions are required for a canvas.
         $dimensions = array_filter($this->mediaDimension->__invoke($url));

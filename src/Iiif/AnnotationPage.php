@@ -142,6 +142,7 @@ class AnnotationPage extends AbstractResourceType
         // Xml is used only for annotation.
         if ($this->callingMotivation === 'annotation') {
             $this->initAnnotationPage();
+        // } elseif ($this->callingMotivation === 'painting') {
         }
 
         return $this;

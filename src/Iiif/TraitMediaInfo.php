@@ -184,9 +184,11 @@ trait TraitMediaInfo
 
         // Canvas manages only image, audio and video: it requires size and/or
         // duration.
-        // Priorities are Model, Image, then Video, Sound, and Text.
+        // Priorities are Model, Video, Sound, Image and Text.
         // Model has prioritary because when an item is a model, there are
         // multiple files, including texture images, not to be displayed.
+        // Video and Sound are prioritary on images, because they indicate an
+        // audiovisual document like a movie or a podcast with a cover image.
         if ($iiifTypes['Model']) {
             // TODO Same issue for Model than for Text?
             // $canvasRenderings = $iiifTypes['Model'];
@@ -194,15 +196,15 @@ trait TraitMediaInfo
             $iiifTypes['Model'] = [];
             // When an item is a model, images are skipped.
             $iiifTypes['Image'] = [];
-        } elseif ($iiifTypes['Image']) {
-            $canvasPaintings = $iiifTypes['Image'];
-            $iiifTypes['Image'] = [];
         } elseif ($iiifTypes['Video']) {
             $canvasPaintings = $iiifTypes['Video'];
             $iiifTypes['Video'] = [];
         } elseif ($iiifTypes['Sound']) {
             $canvasPaintings = $iiifTypes['Sound'];
             $iiifTypes['Sound'] = [];
+        } elseif ($iiifTypes['Image']) {
+            $canvasPaintings = $iiifTypes['Image'];
+            $iiifTypes['Image'] = [];
         } elseif ($iiifTypes['Text']) {
             // For pdf and other texts, Iiif says no painting, but manifest
             // rendering, but UV doesn't display it. Mirador doesn't manage them
@@ -215,8 +217,15 @@ trait TraitMediaInfo
         }
 
         // All other files are downloadable.
-        $manifestRenderings += array_replace($iiifTypes['Image'], $iiifTypes['Video'], $iiifTypes['Sound'],
-            $iiifTypes['Text'], $iiifTypes['Dataset'], $iiifTypes['Model'], $iiifTypes['other']);
+        $manifestRenderings += array_replace(
+            $iiifTypes['Image'],
+            $iiifTypes['Video'],
+            $iiifTypes['Sound'],
+            $iiifTypes['Text'],
+            $iiifTypes['Dataset'],
+            $iiifTypes['Model'],
+            $iiifTypes['other']
+        );
 
         // TODO Manage dataset cleanerly.
         foreach ($iiifTypes['other'] as $mediaId => $iiifType) {
