@@ -7,10 +7,21 @@
  */
 
 $plugins = $this->getHelperPluginManager();
-$iiifUrl = $plugins->get('iiifUrl');
 $translate = $plugins->get('translate');
 $escapeAttr = $plugins->get('escapeHtmlAttr');
 
+$medias = $resource->media();
+if (count($medias)) {
+    $iiifUrl = $plugins->get('iiifUrl');
+    $urlIiif = $iiifUrl($resource, '', $version);
+} else {
+    $setting = $plugins->get('setting');
+    $manifestProperty = $setting('iiifserver_manifest_external_property');
+    if (!$manifestProperty) return;
+    $urlIiif = $resource->value($manifestProperty);
+    if (!$urlIiif) return;
+}
+
 ?>
 
-<button type="button" class="iiif-copy" title="<?= $escapeAttr($translate('Copy IIIF manifest url in clipboard to use in any IIIF viewer.')) ?>" data-iiif-url="<?= $iiifUrl($resource, '', $version) ?>" data-text-copied="<?= $escapeAttr($translate('IIIF manifest url copied in clipboard!')) ?>" data-text-failed="<?= $translate('Unable to copy url in clipboard!') ?>"></button>
+<button class="iiif-copy" type="button" title="<?= $escapeAttr($translate('Copy IIIF manifest url in clipboard to use in any IIIF viewer.')) ?>" data-iiif-url="<?= $escapeAttr($urlIiif) ?>" data-text-copied="<?= $escapeAttr($translate('IIIF manifest url copied in clipboard!')) ?>" data-text-failed="<?= $translate('Unable to copy url in clipboard!') ?>"></button>
