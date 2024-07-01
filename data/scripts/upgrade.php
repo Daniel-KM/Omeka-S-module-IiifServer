@@ -395,3 +395,8 @@ if (version_compare($oldVersion, '3.6.20', '<')) {
         }
     }
 }
+
+if (version_compare($oldVersion, '3.6.21', '<')) {
+    $this->messageCors();
+    $this->messageCache();
+}
