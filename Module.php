@@ -535,7 +535,8 @@ class Module extends AbstractModule
         $assetUrl = $services->get('ViewHelperManager')->get('assetUrl');
         $checkServerUrl = $assetUrl('css/style.css', 'Omeka', false, true, true);
 
-        $headers = get_headers($checkServerUrl, version_compare(PHP_VERSION, '8.0.0', '<') ? 1 : true);
+        // Remove warning, related to proxy or specific domain issue.
+        $headers = @get_headers($checkServerUrl, version_compare(PHP_VERSION, '8.0.0', '<') ? 1 : true);
         if (!$headers) {
             return 0;
         }
