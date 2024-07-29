@@ -641,7 +641,7 @@ Notes to understand the conversion and to fix issues from the literal data:
 Take care of nested structures: items must not belong to themselves, else they
 will be managed as canvases.
 
-Of course, if the literal structure is well formed, you don't have to consider
+Of course, if the literal structure is well-formed, you don't have to consider
 these fixes.
 
 Otherwise, in IIIF v3, multiple structures are appended when there are multiple
