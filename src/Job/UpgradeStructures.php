@@ -26,7 +26,7 @@ class UpgradeStructures extends AbstractJob
         $logger = $services->get('Omeka\Logger');
         $api = $services->get('Omeka\ApiManager');
         $settings = $services->get('Omeka\Settings');
-        $easyMeta = $services->get('EasyMeta');
+        $easyMeta = $services->get('Common\EasyMeta');
         $connection = $services->get('Omeka\Connection');
 
         $plugins = $services->get('ControllerPluginManager');

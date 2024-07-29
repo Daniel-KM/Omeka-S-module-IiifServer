@@ -319,7 +319,7 @@ abstract class AbstractResourceType extends AbstractType
 
         $this->api = $this->services->get('Omeka\ApiManager');
         $this->defaultSite = $viewHelpers->get('defaultSite')();
-        $this->easyMeta = $this->services->get('EasyMeta');
+        $this->easyMeta = $this->services->get('Common\EasyMeta');
         $this->fixUtf8 = $plugins->get('fixUtf8');
         $this->iiifCleanIdentifiers = $viewHelpers->get('iiifCleanIdentifiers');
         $this->iiifMediaRelatedOcr = $viewHelpers->get('iiifMediaRelatedOcr');
