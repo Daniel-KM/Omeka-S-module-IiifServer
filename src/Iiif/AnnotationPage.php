@@ -318,7 +318,6 @@ class AnnotationPage extends AbstractResourceType
         $opts['body'] = 'TextualBody';
         $opts['target_name'] = $this->callingResource->id();
 
-
         $index = 0;
         $xpath = $imageNumber
             ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']//alto:TextLine"

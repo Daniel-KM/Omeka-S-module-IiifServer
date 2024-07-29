@@ -359,7 +359,6 @@ if (version_compare($oldVersion, '3.6.19', '<')) {
     $messenger->addWarning($message);
 }
 
-
 if (version_compare($oldVersion, '3.6.20', '<')) {
     $structureProperty = $settings->get('iiifserver_manifest_structures_property');
     $structurePropertyId = $easyMeta->propertyId($structureProperty);

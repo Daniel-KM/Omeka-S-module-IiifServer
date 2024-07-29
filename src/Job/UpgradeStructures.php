@@ -219,7 +219,7 @@ class UpgradeStructures extends AbstractJob
         }
 
         $xmlToArray = null;
-        $xmlToArray = function($xml, &$lines) use (&$xmlToArray) {
+        $xmlToArray = function ($xml, &$lines) use (&$xmlToArray): void {
             $lines[] = [
                 'name' => (string) ($xml['id'] ?? null),
                 'label' => (string) ($xml['label'] ?? null),
@@ -304,7 +304,7 @@ class UpgradeStructures extends AbstractJob
         unset($range);
 
         // Sort names by first pages for quicker process during rebuild.
-        uasort($rangesAll, function($a, $b) {
+        uasort($rangesAll, function ($a, $b) {
             $aa = reset($a);
             $bb = reset($b);
             if ($aa === $bb) {
@@ -410,7 +410,7 @@ class UpgradeStructures extends AbstractJob
     protected function storeStructureXml(array $lines): ?string
     {
         $buildXml = null;
-        $buildXml = function (array $lines, DOMDocument $dom, ?DOMElement $parent, array &$remainingLines) use (&$buildXml) {
+        $buildXml = function (array $lines, DOMDocument $dom, ?DOMElement $parent, array &$remainingLines) use (&$buildXml): void {
             foreach ($lines as $name => $line) {
                 if (!isset($remainingLines[$name])) {
                     continue;

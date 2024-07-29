@@ -101,7 +101,7 @@ trait TraitLinking
 
         // Add the link to the whole alto if any.
         if (isset($this->extraFiles['alto'][$this->resource->id()])) {
-            $altoId = $this->baseUri. '/alto/' . basename($this->extraFiles['alto'][$this->resource->id()]);
+            $altoId = $this->baseUri . '/alto/' . basename($this->extraFiles['alto'][$this->resource->id()]);
             $output[] = [
                 'id' => $altoId,
                 'type' => 'Dataset',

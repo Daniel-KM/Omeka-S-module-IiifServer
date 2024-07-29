@@ -57,7 +57,7 @@ class CacheManifests extends AbstractJob
             if ($this->shouldStop()) {
                 $this->logger->warn(
                     'The job was stopped.' // @translate
-                    );
+                );
                 return;
             }
 

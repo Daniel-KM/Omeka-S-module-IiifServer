@@ -219,7 +219,7 @@ trait TraitStructuralStructures
         }
 
         $xmlToArray = null;
-        $xmlToArray = function($xml, &$lines) use (&$xmlToArray) {
+        $xmlToArray = function ($xml, &$lines) use (&$xmlToArray): void {
             // Get ranges.
             $ranges = [];
             foreach ($xml->children() as $element) {
@@ -414,7 +414,6 @@ trait TraitStructuralStructures
         $buildStructure = function (array $rangeData, array $ascendants = [])
             /** @return Range|ReferenceCanvas|array|null */
             use ($ranges, $referencedCanvases, &$buildStructure) {
-
             $iiifItems = [];
 
             // Check if the item is in ascendants to avoid an infinite loop.
