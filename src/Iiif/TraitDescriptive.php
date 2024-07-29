@@ -397,12 +397,19 @@ trait TraitDescriptive
             }
             // Check for sound and image.
             $first = reset($this->mediaInfos);
+            // Fix when there is no resource because the media is html.
+            if (empty($first['resource'])) {
+                return null;
+            }
             $firstMediaType = (string) $first['resource']->mediaType();
             if (strtok($firstMediaType, '/') !== 'audio') {
                 return null;
             }
             $second = array_reverse($this->mediaInfos);
             $second = reset($second);
+            if (empty($second['resource'])) {
+                return null;
+            }
             $mediaAccompanying = $second['resource'];
             $secondMediaType = (string) $mediaAccompanying->mediaType();
             if (strtok($secondMediaType, '/') !== 'image') {
