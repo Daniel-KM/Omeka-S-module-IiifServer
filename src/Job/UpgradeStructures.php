@@ -39,7 +39,7 @@ class UpgradeStructures extends AbstractJob
             return;
         }
 
-        $query = $this->getArg('query');
+        $query = $this->getArg('query') ?: [];
         if ($query && !is_array($query)) {
             $queryItem = null;
             parse_str($query, $queryItem);
