@@ -162,8 +162,11 @@ trait TraitXml
      * @see \IiifSearch\View\Helper\IiifSearch::fixXmlPdf2Xml()
      * @see \IiifServer\Iiif\TraitXml::fixXmlPdf2Xml()
      */
-    protected function fixXmlPdf2Xml(string $xmlContent): string
+    protected function fixXmlPdf2Xml(?string $xmlContent): string
     {
+        if (!$xmlContent) {
+            return (string) $xmlContent;
+        }
         // When the content is not a valid unicode text, a null is output.
         // Replace all series of spaces by a single space.
         $xmlContent = preg_replace('~\s{2,}~S', ' ', $xmlContent) ?? $xmlContent;
