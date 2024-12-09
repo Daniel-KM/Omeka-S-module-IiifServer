@@ -80,7 +80,7 @@ class MediaDimensions extends AbstractJob
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
 
-        $query = $this->getArg('query', []) ?? [];
+        $query = $this->getArg('query') ?: [];
         if (is_string($query)) {
             $sQuery = [];
             parse_str($query, $sQuery);

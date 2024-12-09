@@ -230,6 +230,9 @@ class MediaDimension extends AbstractPlugin
      */
     private function fixOggDuration(array $data): array
     {
+        if (!isset($data['mime_type'])) {
+            return $data;
+        }
         if ($data['mime_type'] !== 'audio/ogg' && $data['mime_type'] !== 'video/ogg') {
             return $data;
         }
