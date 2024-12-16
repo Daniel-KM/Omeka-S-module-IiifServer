@@ -49,7 +49,7 @@ class CacheManifests extends AbstractJob
         }
 
         foreach ([2, 3] as $version) {
-            if (!$this->ensureDirectory(dirname("$basePath/iiif/$version"))) {
+            if (!$this->ensureDirectory("$basePath/iiif/$version")) {
                 $this->logger->err(
                     'Unable to create directory "{dir}".', // @translate
                     ['dir' => "/iiif/$version/"]
