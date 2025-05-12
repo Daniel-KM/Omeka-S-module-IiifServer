@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-01-06 00:00+0000\n"
+"POT-Creation-Date: 2025-05-12 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -228,51 +228,51 @@ msgid ""
 "{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:360
+#: Module.php:361
 msgid "Iiif Server: Cache manifests"
 msgstr ""
 
-#: Module.php:361
+#: Module.php:362
 msgid "Iiif Server: Store dimensions of medias"
 msgstr ""
 
-#: Module.php:362
+#: Module.php:363
 msgid ""
 "Iiif Server: Upgrade old tables of contents to new format with four columns "
 "(to do only one time for old external manifests)"
 msgstr ""
 
-#: Module.php:369
+#: Module.php:370
 msgid "Options to cache manifests"
 msgstr ""
 
-#: Module.php:380
+#: Module.php:381
 msgid "Limit cache of manifests to specific items"
 msgstr ""
 
-#: Module.php:391
+#: Module.php:392
 msgid "Options to store dimensions"
 msgstr ""
 
-#: Module.php:402
+#: Module.php:403
 msgid "Limit storage of dimensions to specific items"
 msgstr ""
 
-#: Module.php:413
+#: Module.php:414
 msgid "Options to upgrade table of contents"
 msgstr ""
 
-#: Module.php:424
+#: Module.php:425
 msgid "Limit upgrade of tables of contents to specific items"
 msgstr ""
 
-#: Module.php:563
+#: Module.php:564
 msgid ""
 "The cors headers are disabled. You shall enable them to allow other "
 "libraries to access to your manifests."
 msgstr ""
 
-#: Module.php:570
+#: Module.php:571
 msgid ""
 "The cors headers are enabled multiple times in the config of the module and "
 "in the config of Apache or in the file .htaccess. Duplicating the cors "
@@ -280,13 +280,13 @@ msgid ""
 "the module, in the Apache config or in the file .htaccess."
 msgstr ""
 
-#: Module.php:586
+#: Module.php:587
 msgid ""
 "When cache is enabled, you should recreate it each time the config is "
 "updated."
 msgstr ""
 
-#: Module.php:647
+#: Module.php:648
 msgid ""
 "Item #{item_id} / media #{media_id}: Error getting dimensions for types "
 "\"{types}\"."
