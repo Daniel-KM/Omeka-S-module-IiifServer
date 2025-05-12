@@ -737,7 +737,7 @@ class IiifManifest2 extends AbstractHelper
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
                 $vr = null;
-                return strpos($v->type(), 'resource') === 0 && ($vr = $v->valueResource())
+                return $vr = $v->valueResource()
                     ? $publicResourceUrl($vr, true)
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
@@ -761,7 +761,7 @@ class IiifManifest2 extends AbstractHelper
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
-                if (strpos($v->type(), 'resource') === 0 && ($vr = $v->valueResource())) {
+                if ($vr = $v->valueResource()) {
                     return '<a class="resource-link" href="' . $publicResourceUrl($vr, true) . '">'
                         . '<span class="resource-name">' . $vr->displayTitle() . '</span>'
                         . '</a>';
