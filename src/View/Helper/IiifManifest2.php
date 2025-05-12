@@ -1748,9 +1748,9 @@ class IiifManifest2 extends AbstractHelper
     /**
      * @todo Factorize.
      */
-    protected function seeAlso(MediaRepresentation $media, int $indexOne): ?array
+    protected function seeAlso(MediaRepresentation $media, $indexOne): ?array
     {
-        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, $indexOne);
+        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, (int) $indexOne ?: null);
         if (!$relatedMedia) {
             return null;
         }
@@ -1768,9 +1768,9 @@ class IiifManifest2 extends AbstractHelper
      * Note: multiple other content may be returned, so it's an array of arrays,
      * even if there is only one currently.
      */
-    protected function otherContents(MediaRepresentation $media, int $indexOne): ?array
+    protected function otherContents(MediaRepresentation $media, $indexOne): ?array
     {
-        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, $indexOne);
+        $relatedMedia = $this->view->iiifMediaRelatedOcr($media, (int) $indexOne ?: null);
         if (!$relatedMedia) {
             return null;
         }
@@ -1791,7 +1791,7 @@ class IiifManifest2 extends AbstractHelper
      * module Annotate. There is only one list, so don't return an array of
      * arrays.
      */
-    protected function otherContentAnnotationList(MediaRepresentation $media, int $indexOne): ?array
+    protected function otherContentAnnotationList(MediaRepresentation $media, $indexOne): ?array
     {
         static $api;
         static $oaHasSelector;
