@@ -778,7 +778,7 @@ class IiifManifest2 extends AbstractHelper
      * Create an IIIF thumbnail object from an Omeka file.
      *
      * @param MediaRepresentation $media
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifThumbnail(MediaRepresentation $media)
     {
@@ -833,7 +833,7 @@ class IiifManifest2 extends AbstractHelper
      * Create an IIIF thumbnail object from an Omeka asset file.
      *
      * @param AssetRepresentation $asset
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifThumbnailAsset(AssetRepresentation $asset)
     {
@@ -858,7 +858,7 @@ class IiifManifest2 extends AbstractHelper
      * @param string $canvasUrl Used to set the value for "on".
      * @param int $width If not set, will be calculated.
      * @param int $height If not set, will be calculated.
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifImage(MediaRepresentation $media, $index, $canvasUrl, $width = null, $height = null)
     {
@@ -950,7 +950,7 @@ class IiifManifest2 extends AbstractHelper
      *
      * @param MediaRepresentation $media
      * @param int|string $index Used to set the standard name of the image.
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifCanvasImage(MediaRepresentation $media, $index)
     {
@@ -1064,7 +1064,7 @@ class IiifManifest2 extends AbstractHelper
     /**
      * Create an IIIF canvas object for a place holder.
      *
-     * @return \stdClass
+     * @return array
      */
     protected function _iiifCanvasPlaceholder()
     {
@@ -1110,7 +1110,7 @@ class IiifManifest2 extends AbstractHelper
      *
      * @param MediaRepresentation $media
      * @param array $values
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifMediaSequencePdf(MediaRepresentation $media, $values)
     {
@@ -1220,7 +1220,7 @@ class IiifManifest2 extends AbstractHelper
      *
      * @param MediaRepresentation $media
      * @param array $values Contains: label, metadata, format, thumbnail, type.
-     * @return \stdClass|null
+     * @return array|null
      */
     protected function _iiifMediaSequenceModel(MediaRepresentation $media, $values)
     {
@@ -1243,7 +1243,7 @@ class IiifManifest2 extends AbstractHelper
      * Create an IIIF sequence object for an unsupported format.
      *
      * @param array $rendering
-     * @return \stdClass
+     * @return array
      */
     protected function _iiifSequenceUnsupported($rendering = [])
     {
