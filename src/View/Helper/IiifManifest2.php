@@ -977,13 +977,16 @@ class IiifManifest2 extends AbstractHelper
             [$width, $height] = array_values($this->getView()->imageSize($media, 'original'));
             $canvas['width'] = $width;
             $canvas['height'] = $height;
-            $seeAlso = $this->seeAlso($media, $index);
-            if ($seeAlso) {
-                $canvas['seeAlso'] = $seeAlso;
-                $otherContent = $this->otherContents($media, $index);
-                if ($otherContent) {
-                    $canvas['otherContent'] = $otherContent;
-                }
+        }
+
+        // Ocr content can be added when the image and the xml are not stored at
+        // the same place.
+        $seeAlso = $this->seeAlso($media, $index);
+        if ($seeAlso) {
+            $canvas['seeAlso'] = $seeAlso;
+            $otherContent = $this->otherContents($media, $index);
+            if ($otherContent) {
+                $canvas['otherContent'] = $otherContent;
             }
         }
 

@@ -112,7 +112,7 @@ class IiifMediaRelatedOcr extends AbstractHelper
                 $mediaType = $media->mediaType();
                 if ($mediaType === 'application/alto+xml') {
                     $xmlAltoMedias[++$xmlIndex] = $media;
-                } elseif (substr((string) $mediaType, 0, 6) === 'image/') {
+                } elseif (substr((string) $mediaType, 0, 6) === 'image/' || $media->ingester() === 'iiif') {
                     $imageMediasIndexes[$media->id()] = ++$imageIndex;
                 }
             }
