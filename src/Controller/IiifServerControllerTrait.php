@@ -225,7 +225,7 @@ trait IiifServerControllerTrait
                 }
             case 'storage_id':
                 // The storage id may contain slashs (module ArchiveRepertory).
-                $id = str_replace(['%2F', '%2f'], ['/', '/'], $id);
+                $id = strtr($id, ['%2F' => '/', '%2f' => '/']);
                 try {
                     return $this->api()->read('media', ['storageId' => $id])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
@@ -233,7 +233,7 @@ trait IiifServerControllerTrait
                 }
             case 'filename':
             case 'filename_image':
-                $id = str_replace(['%2F', '%2f'], ['/', '/'], $id);
+                $id = strtr($id, ['%2F' => '/', '%2f' => '/']);
                 $extension = (string) pathinfo($id, PATHINFO_EXTENSION);
                 $lengthExtension = strlen($extension);
                 $storageId = $lengthExtension

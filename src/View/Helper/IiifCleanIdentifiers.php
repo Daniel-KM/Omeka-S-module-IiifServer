@@ -93,9 +93,9 @@ class IiifCleanIdentifiers extends AbstractHelper
                 };
             } else {
                 $output = function ($v) {
-                    return str_replace('%3A', ':', rawurlencode(strpos($v, $this->prefix) === 0
+                    return strtr(rawurlencode(strpos($v, $this->prefix) === 0
                         ? mb_substr($v, mb_strlen($this->prefix))
-                        : $v));
+                        : $v), ['%3A' => ':']);
                 };
             }
         } elseif ($this->rawIdentifier) {
@@ -105,7 +105,7 @@ class IiifCleanIdentifiers extends AbstractHelper
         // Default options.
         else {
             // According to the specifications, the ":" should not be url encoded.
-            $output = fn ($v) => str_replace('%3A', ':', rawurlencode($v));
+            $output = fn ($v) => strtr(rawurlencode($v), ['%3A' => ':']);
         }
 
         $result = $this->getIdentifiersFromResources->__invoke($in);

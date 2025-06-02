@@ -36,7 +36,7 @@ if (!isset($prefix)) {
 }
 if ($prefix) {
     $urlEncodedPrefix = rawurlencode($prefix);
-    $constraintPrefix = $prefix . '|' . $urlEncodedPrefix . '|' . str_replace('%3A', ':', $urlEncodedPrefix);
+    $constraintPrefix = $prefix . '|' . $urlEncodedPrefix . '|' . strtr($urlEncodedPrefix, ['%3A' => ':']);
     $prefix = '[:prefix]';
 } else {
     $constraintPrefix = '';
@@ -64,7 +64,7 @@ if (!isset($prefixMedia)) {
 }
 if ($prefixMedia) {
     $urlEncodedPrefixMedia = rawurlencode($prefixMedia);
-    $constraintPrefixMedia = $prefixMedia . '|' . $urlEncodedPrefixMedia . '|' . str_replace('%3A', ':', $urlEncodedPrefixMedia);
+    $constraintPrefixMedia = $prefixMedia . '|' . $urlEncodedPrefixMedia . '|' . strtr($urlEncodedPrefixMedia, ['%3A' => ':']);
     $prefixMedia = '[:prefix]';
 } else {
     $constraintPrefixMedia = '';

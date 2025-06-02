@@ -177,7 +177,7 @@ trait TraitXml
         // <fontspec id="^C
         // <fontspec id=" " size="^P" family="PBPMTB+ArialUnicodeMS" color="#000000"/>
         $xmlContent = preg_replace('~<fontspec id=".*\n~S', '', $xmlContent) ?? $xmlContent;
-        $xmlContent = str_replace('<!doctype pdf2xml system "pdf2xml.dtd">', '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">', $xmlContent);
+        $xmlContent = strtr($xmlContent, ['<!doctype pdf2xml system "pdf2xml.dtd">' => '<!DOCTYPE pdf2xml SYSTEM "pdf2xml.dtd">']);
         return $xmlContent;
     }
 }

@@ -116,10 +116,10 @@ class IiifMediaUrl extends AbstractHelper
             $identifier = $id;
         } elseif ($this->mediaIdentifier === 'storage_id') {
             $identifier = $resource->storageId();
-            $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
+            $identifier = $identifier ? strtr($identifier, ['/' => '%2F']) : $id;
         } elseif ($this->mediaIdentifier === 'filename') {
             $identifier = $resource->filename();
-            $identifier = $identifier ? str_replace('/', '%2F', $identifier) : $id;
+            $identifier = $identifier ? strtr($identifier, ['/' => '%2F']) : $id;
         } elseif ($this->mediaIdentifier === 'filename_image') {
             $identifier = $resource->filename();
             if ($identifier) {
@@ -130,7 +130,7 @@ class IiifMediaUrl extends AbstractHelper
                 if ($mainMediaType !== 'image') {
                     $identifier = $resource->storageId() ?: (string) $id;
                 }
-                $identifier = str_replace('/', '%2F', $identifier);
+                $identifier = strtr($identifier, ['/' => '%2F']);
             } else {
                 $identifier = $id;
             }
