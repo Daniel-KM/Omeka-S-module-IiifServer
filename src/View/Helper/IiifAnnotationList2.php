@@ -68,7 +68,7 @@ class IiifAnnotationList2 extends AbstractHelper
     public function __invoke(MediaRepresentation $resource, $index)
     {
         static $api;
-        static $oaHasSelector;
+        static $oaHasSelectorId;
 
         $media = $resource;
 
@@ -78,12 +78,12 @@ class IiifAnnotationList2 extends AbstractHelper
             if (!$api) {
                 return null;
             }
-            $oaHasSelector = $api->searchOne('properties', ['term' => 'oa:hasSelector'])->getContent();
-            if (!$oaHasSelector) {
+            $easyMeta = $plugins->get('easyMeta');
+            $oaHasSelectorId = $easyMeta->propertyId('oa:hasSelector');
+            if (!$oaHasSelectorId) {
                 $api = false;
                 return null;
             }
-            $oaHasSelector = $oaHasSelector->id();
             $this->logger = $plugins->get('logger')();
         } elseif (!$api) {
             return null;
@@ -93,7 +93,7 @@ class IiifAnnotationList2 extends AbstractHelper
         // the reference to the list.
         $annotations = $api->search('annotations', [
             'property' => [[
-                'property' => $oaHasSelector,
+                'property' => $oaHasSelectorId,
                 'type' => 'res',
                 'text' => (string) $media->id(),
             ]],

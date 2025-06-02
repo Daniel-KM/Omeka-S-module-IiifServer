@@ -1486,6 +1486,7 @@ class IiifManifest2 extends AbstractHelper
 
         $id = $conn->executeQuery($qb, $bind, $types)->fetchOne();
         if ($id) {
+            // TODO Check privacy of media for user. Use read if possible.
             // Media may be private for the user, so use searchOne, not read.
             $media = $this->view->api()->searchOne('media', ['id' => $id], ['initialize' => false])->getContent();
             if ($media) {
@@ -1797,7 +1798,7 @@ class IiifManifest2 extends AbstractHelper
     protected function otherContentAnnotationList(MediaRepresentation $media, $indexOne): ?array
     {
         static $api;
-        static $oaHasSelector;
+        static $oaHasSelectorId;
 
         if ($api === null) {
             $plugins = $this->view->getHelperPluginManager();
@@ -1805,12 +1806,12 @@ class IiifManifest2 extends AbstractHelper
             if (!$api) {
                 return null;
             }
-            $oaHasSelector = $api->searchOne('properties', ['term' => 'oa:hasSelector'])->getContent();
-            if (!$oaHasSelector) {
+            $easyMeta = $plugins->get('easyMeta');
+            $oaHasSelectorId = $easyMeta->propertyId('oa:hasSelector');
+            if (!$oaHasSelectorId) {
                 $api = false;
                 return null;
             }
-            $oaHasSelector = $oaHasSelector->id();
         } elseif (!$api) {
             return null;
         }
@@ -1819,7 +1820,7 @@ class IiifManifest2 extends AbstractHelper
         // the reference to the list.
         $has = $api->search('annotations', [
             'property' => [[
-                'property' => $oaHasSelector,
+                'property' => $oaHasSelectorId,
                 'type' => 'res',
                 'text' => (string) $media->id(),
             ]],

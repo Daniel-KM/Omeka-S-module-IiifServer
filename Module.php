@@ -593,6 +593,8 @@ class Module extends AbstractModule
     /**
      * Only unsized medias are dimensionned.
      *
+     * @todo Get size for external media iiif?
+     *
      * @see \IiifServer\Module::prepareSizeItem()
      * @see \IiifServer\Job\MediaDimensions::prepareSize()
      */
