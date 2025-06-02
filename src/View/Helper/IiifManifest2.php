@@ -736,9 +736,9 @@ class IiifManifest2 extends AbstractHelper
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
             $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
-                $vr = null;
-                return $vr = $v->valueResource()
-                    ? $publicResourceUrl($vr, true)
+                $vr = $v->valueResource();
+                return $vr
+                    ? sprintf('%1$s (%2$s)', $vr->displayTitle, $publicResourceUrl($vr, true))
                     : (string) $v;
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
