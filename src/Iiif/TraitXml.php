@@ -81,6 +81,16 @@ trait TraitXml
      */
     protected function loadXmlFromFilepath(string $filepath, bool $isPdf2Xml = false, ?int $mediaId = null): ?SimpleXMLElement
     {
+        if (!$filepath || !file_exists($filepath)) {
+            $filename = explode('/original/', $filepath);
+            $filename = 'original/' . array_pop($filename);
+            $this->logger->err(
+                'Error: filepath {filepath} for xml media #{media_id} does not exist.', // @translate
+                ['filepth' => $filename, 'media_id' => $mediaId]
+            );
+            return null;
+        }
+
         $xmlContent = file_get_contents($filepath);
 
         try {
