@@ -133,8 +133,10 @@ class PresentationController extends AbstractActionController
             $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
             if (file_exists($filepath) && is_readable($filepath)) {
                 $manifest = file_get_contents($filepath);
-                $manifest = json_decode($manifest, true);
-                return $this->iiifJsonLd($manifest, $version);
+                $manifest = $manifest !== false ? json_decode($manifest, true) : null;
+                if (is_array($manifest)) {
+                    return $this->iiifJsonLd($manifest, $version);
+                }
             }
             $toCache = true;
         }
@@ -150,8 +152,10 @@ class PresentationController extends AbstractActionController
                 $filepath = $basePath . '/' . $derivative[$type]['file'];
                 if ($derivative[$type]['ready']) {
                     $manifest = file_get_contents($filepath);
-                    $manifest = json_decode($manifest, true);
-                    return $this->iiifJsonLd($manifest, $version);
+                    $manifest = $manifest !== false ? json_decode($manifest, true) : null;
+                    if (is_array($manifest)) {
+                        return $this->iiifJsonLd($manifest, $version);
+                    }
                 }
                 if (!$derivative[$type]['in_progress']) {
                     $toCache = true;
@@ -181,7 +185,7 @@ class PresentationController extends AbstractActionController
             // encoding, here and in iiifJsonLd,
             $jsonEncoded = json_encode($manifest, $prettyJson);
             @file_put_contents($filepath, $jsonEncoded);
-            $manifest = json_decode($jsonEncoded, true);
+            $manifest = json_decode($jsonEncoded, true) ?? $manifest;
         }
 
         return $this->iiifJsonLd($manifest, $version);
