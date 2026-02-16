@@ -39,7 +39,7 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
 }
 
 if (version_compare($oldVersion, '3.5.1', '<')) {
-    $this->createTilesMainDir($services);
+    // The method createTilesMainDir() was removed: tiles are now managed by module ImageServer.
     $settings->set(
         'iiifserver_image_tile_dir',
         $defaultSettings['iiifserver_image_tile_dir']
@@ -152,7 +152,7 @@ if (version_compare($oldVersion, '3.6.0', '<')) {
     $settings->delete('iiifserver_manifest_license_default');
 
     $settings->set('iiifserver_manifest_default_version', $settings->get('iiifserver_manifest_version', '2'));
-    $settings->delete('iiifserver_manifest_default_version');
+    $settings->delete('iiifserver_manifest_version');
     $settings->set('iiifserver_url_version_add', $settings->get('iiifserver_manifest_version_append', false));
     $settings->delete('iiifserver_manifest_version_append');
     $settings->set('iiifserver_identifier_clean', $settings->get('iiifserver_manifest_clean_identifier', true));
@@ -398,4 +398,11 @@ if (version_compare($oldVersion, '3.6.20', '<')) {
 if (version_compare($oldVersion, '3.6.21', '<')) {
     $this->messageCors();
     $this->messageCache();
+}
+
+if (version_compare($oldVersion, '3.6.27', '<')) {
+    // To keep existing config for apache.
+    if ($settings->get('iiifserver_identifier_apache_preencoding') === null) {
+        $settings->set('iiifserver_identifier_apache_preencoding', true);
+    }
 }
