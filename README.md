@@ -669,6 +669,19 @@ Note: with a collection list, the parameter `resource` is an array of resources.
 All the combinations are possible: external manifest for items, iiif image for
 external medias, a local standard media file with module Image Server.
 
+### Options for writing urls
+
+Depending on infrastructure, proxy, etc., some options allow to modify the urls
+used.
+
+- Allow raw identifier: needed to use ark identifier, so the identifier will be
+  available as "ark:/12345/betz" and "ark:%2F12345%2Fbetz".
+- Pre-encode slashes for web server apache: Enable this option only when using
+  an apache config with mod_rewrite that automatically decodes urls. When
+  enabled, "/" is pre-encoded to "%2F", resulting in "%252F" in the final URL.
+  Apache will decode it once back to "%2F" automatically, resulting in the right
+  url. This option is useless in other cases or with most of the proxies.
+
 
 Routes and urls
 ---------------
@@ -788,7 +801,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2015-2025 (see [Daniel-KM])
+* Copyright Daniel Berthereau, 2015-2026 (see [Daniel-KM])
 * Copyright BibLibre, 2016-2017
 * Copyright Régis Robineau, 2019 (see [regisrob])
 * Copyright Satoru Nakamura, 2021 (see [nakamura196])
