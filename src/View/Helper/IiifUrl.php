@@ -186,6 +186,11 @@ class IiifUrl extends AbstractHelper
                 : $this->baseUrlPath . substr($urlIiif, 5);
         }
 
+        // Restore literal slashes in identifiers (like ark:/xxx/xxx) to avoid
+        // reverse proxy rejection of %2F. The route listener
+        // Module::reencodeArkIdentifiers() will re-encode them for matching.
+        $urlIiif = strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
+
         return $this->forceToIfRequired($urlIiif);
     }
 

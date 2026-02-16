@@ -78,6 +78,53 @@ class Module extends AbstractModule
                     \IiifServer\Controller\PresentationController::class,
                 ]
             );
+
+        // Re-encode ark identifiers that Apache may have decoded (%2F → /).
+        $event->getApplication()->getEventManager()
+            ->attach(MvcEvent::EVENT_ROUTE, [$this, 'reencodeArkIdentifiers'], 1000);
+    }
+
+    /**
+     * Re-encode decoded ark identifiers in IIIF URLs.
+     *
+     * When Apache does not have "AllowEncodedSlashes NoDecode", it decodes
+     * %2F to / in URLs. This breaks routing for ark identifiers like
+     * "ark:/83011/FLMjo213509" because the "/" is interpreted as a path
+     * separator. This listener re-encodes the slashes within ark identifiers
+     * so the standard Segment routes can match correctly.
+     *
+     * This is a no-op when Apache has "AllowEncodedSlashes NoDecode" (the
+     * path contains "ark:%2F", not "ark:/") or when arks are not used.
+     */
+    public function reencodeArkIdentifiers(MvcEvent $event): void
+    {
+        $request = $event->getRequest();
+        if (!$request instanceof \Laminas\Http\PhpEnvironment\Request) {
+            return;
+        }
+
+        $path = $request->getUri()->getPath();
+
+        // Quick check: only process IIIF paths that contain a decoded ark.
+        if (strpos($path, '/iiif/') === false
+            || strpos($path, 'ark:/') === false
+        ) {
+            return;
+        }
+
+        // Re-encode ark identifiers: ark:/NAAN/Name → ark:%2FNAAN%2FName.
+        // ARK format: ark:/{NAAN}/{Name} where NAAN is numeric.
+        $newPath = preg_replace_callback(
+            '#ark:/(\d+)/([^/]+)#',
+            function ($m) {
+                return 'ark:%2F' . $m[1] . '%2F' . $m[2];
+            },
+            $path
+        );
+
+        if ($newPath !== $path) {
+            $request->getUri()->setPath($newPath);
+        }
     }
 
     protected function preInstall(): void
