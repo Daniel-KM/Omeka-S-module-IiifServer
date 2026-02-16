@@ -294,22 +294,23 @@ class AnnotationPage extends AbstractResourceType
         // It allows to fix refactored images and alto extracted from pdf via
         // the module Extract Ocr.
         [$widthImage, $heightImage] = array_values($this->imageSize->__invoke($this->callingResource));
-        $xpath = $imageNumber
-            ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@WIDTH"
-            : '/alto:alto/alto:Layout/alto:Page/@WIDTH';
-        $widthLayout = $xml->xpath($xpath);
-        $widthLayout = (string) reset($widthLayout);
-        $xpath = $imageNumber
-            ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@HEIGHT"
-            : '/alto:alto/alto:Layout/alto:Page/@HEIGHT';
-        $heightLayout = $xml->xpath($xpath);
-        $heightLayout = (string) reset($heightLayout);
-        if ($widthImage && $heightImage && $widthLayout && $heightLayout) {
-            $widthCoef = $widthImage / $widthLayout;
-            $heightCoef = $heightImage / $heightLayout;
-        } else {
-            $widthCoef = 1;
-            $heightCoef = 1;
+        $widthCoef = 1;
+        $heightCoef = 1;
+        if ($widthImage && $heightImage) {
+            $xpath = $imageNumber
+                ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@WIDTH"
+                : '/alto:alto/alto:Layout/alto:Page/@WIDTH';
+            $widthLayout = $xml->xpath($xpath);
+            $widthLayout = (string) reset($widthLayout);
+            $xpath = $imageNumber
+                ? "/alto:alto/alto:Layout/alto:Page[@PHYSICAL_IMG_NR='$imageNumber']/@HEIGHT"
+                : '/alto:alto/alto:Layout/alto:Page/@HEIGHT';
+            $heightLayout = $xml->xpath($xpath);
+            $heightLayout = (string) reset($heightLayout);
+            if ($widthLayout && $heightLayout) {
+                $widthCoef = $widthImage / $widthLayout;
+                $heightCoef = $heightImage / $heightLayout;
+            }
         }
 
         $opts = [];
