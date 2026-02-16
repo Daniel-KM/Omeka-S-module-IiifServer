@@ -4,11 +4,11 @@
     xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/4.5/phpunit.xsd"
     colors="true"
     backupGlobals="false"
-    bootstrap="./bootstrap.php"
+    bootstrap="./tests/bootstrap.php"
     >
     <testsuites>
         <testsuite name="IiifServerTest">
-            <directory>./IiifServerTest</directory>
+            <directory suffix="Test.php">./tests/IiifServerTest</directory>
         </testsuite>
     </testsuites>
 </phpunit>

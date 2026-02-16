@@ -6,7 +6,8 @@ class PresentationControllerTest extends IiifServerControllerTestCase
 {
     public function testIndexActionCanBeAccessed(): void
     {
-        $this->dispatch('/iiif/' . $this->item->id());
+        $item = $this->createItem();
+        $this->dispatch('/iiif/' . $item->id());
         $this->assertResponseStatusCode(200);
     }
 
@@ -18,7 +19,8 @@ class PresentationControllerTest extends IiifServerControllerTestCase
 
     public function testManifestActionCanBeAccessed(): void
     {
-        $this->dispatch('/iiif/' . $this->item->id() . '/manifest');
+        $item = $this->createItem();
+        $this->dispatch('/iiif/' . $item->id() . '/manifest');
         $this->assertResponseStatusCode(200);
     }
 
@@ -30,7 +32,8 @@ class PresentationControllerTest extends IiifServerControllerTestCase
 
     public function testCollectionActionCanBeAccessed(): void
     {
-        $this->dispatch('/iiif/collection/' . $this->itemSet->id());
+        $itemSet = $this->createItemSet();
+        $this->dispatch('/iiif/collection/' . $itemSet->id());
         $this->assertResponseStatusCode(200);
     }
 
@@ -42,13 +45,16 @@ class PresentationControllerTest extends IiifServerControllerTestCase
 
     public function testListActionCanBeAccessed(): void
     {
-        $this->dispatch('/iiif/collection/' . $this->itemSet->id() . ',' . $this->item->id());
+        $item = $this->createItem();
+        $itemSet = $this->createItemSet();
+        $this->dispatch('/iiif/collection/' . $itemSet->id() . ',' . $item->id());
         $this->assertResponseStatusCode(200);
     }
 
     public function testListActionWithOneIdCanBeAccessed(): void
     {
-        $this->dispatch('/iiif/collection/' . $this->itemSet->id() . ',');
+        $itemSet = $this->createItemSet();
+        $this->dispatch('/iiif/collection/' . $itemSet->id() . ',');
         $this->assertResponseStatusCode(200);
     }
 }

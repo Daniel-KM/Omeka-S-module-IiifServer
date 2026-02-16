@@ -1,7 +1,7 @@
 {
-    "name": "daniel-km/iiif-server",
+    "name": "daniel-km/omeka-s-module-iiif-server",
     "type": "library",
-    "description": "Integrates the IIIF specifications to share images, audio and video in a normalized way.",
+    "description": "Module for Omeka S that integrates the IIIF specifications to share images, audio and video in a normalized way.",
     "license": "CECILL-2.1",
     "minimum-stability": "beta",
     "prefer-stable": true,
@@ -11,17 +11,17 @@
     "provide": {
         "doctrine/inflector": "*"
     },
-    "require-dev": {
-        "biblibre/omeka-s-test-helper": "dev-master"
-    },
     "autoload-dev": {
         "psr-4": {
-            "IiifServerTest\\": "test/IiifServerTest/"
+            "IiifServerTest\\": "tests/IiifServerTest/"
         }
     },
     "config": {
         "platform": {
             "php": "7.4"
         }
+    },
+    "extra": {
+        "installer-name": "IiifServer"
     }
 }
