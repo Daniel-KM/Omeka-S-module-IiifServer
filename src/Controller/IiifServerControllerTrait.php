@@ -281,14 +281,14 @@ trait IiifServerControllerTrait
 
         $acceptHeader = $this->getRequest()->getHeaders()->get('Accept');
         $accept = $acceptHeader ? $acceptHeader->toString() : '';
-        if (strpos($accept, 'iiif.io/api/presentation/3/context.json')
-            || strpos($accept, 'iiif.io/api/image/3/context.json')
+        if (str_contains($accept, 'iiif.io/api/presentation/3/context.json')
+            || str_contains($accept, 'iiif.io/api/image/3/context.json')
         ) {
             return '3';
         }
 
-        if (strpos($accept, 'iiif.io/api/presentation/2/context.json')
-            || strpos($accept, 'iiif.io/api/image/2/context.json')
+        if (str_contains($accept, 'iiif.io/api/presentation/2/context.json')
+            || str_contains($accept, 'iiif.io/api/image/2/context.json')
         ) {
             return '2';
         }
@@ -309,9 +309,9 @@ trait IiifServerControllerTrait
 
         $acceptHeader = $this->getRequest()->getHeaders()->get('Accept');
         $accept = $acceptHeader ? $acceptHeader->toString() : '';
-        if (strpos($accept, 'iiif.io/api/image/3/context.json')) {
+        if (str_contains($accept, 'iiif.io/api/image/3/context.json')) {
             $this->requestedApiVersion = '3';
-        } elseif (strpos($accept, 'iiif.io/api/image/2/context.json')) {
+        } elseif (str_contains($accept, 'iiif.io/api/image/2/context.json')) {
             $this->requestedApiVersion = '2';
         } else {
             $this->requestedApiVersion = $this->settings()->get('iiifserver_media_api_default_version', '2') ?: '2';
