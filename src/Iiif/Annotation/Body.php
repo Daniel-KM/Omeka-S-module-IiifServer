@@ -256,6 +256,7 @@ class Body extends AbstractResourceType
     {
         $contexts = [
             'http://library.stanford.edu/iiif/image-api/context.json' => 'ImageService1',
+            'http://library.stanford.edu/iiif/image-api/1.0/context.json' => 'ImageService1',
             'http://library.stanford.edu/iiif/image-api/1.1/context.json' => 'ImageService1',
             'http://iiif.io/api/image/2/context.json' => 'ImageService2',
             'http://iiif.io/api/image/3/context.json' => 'ImageService3',

@@ -143,6 +143,8 @@ trait TraitDescriptiveThumbnail
         if ($complianceLevel != 'level0') {
             switch ($contextUri) {
                 case '1.1':
+                case 'http://library.stanford.edu/iiif/image-api/context.json':
+                case 'http://library.stanford.edu/iiif/image-api/1.0/context.json':
                 case 'http://library.stanford.edu/iiif/image-api/1.1/context.json':
                     return $baseUri . '/full/,' . $this->defaultHeight . '/0/native.jpg';
                 case '2':

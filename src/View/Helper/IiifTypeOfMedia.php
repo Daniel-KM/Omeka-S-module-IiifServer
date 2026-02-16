@@ -241,10 +241,14 @@ class IiifTypeOfMedia extends AbstractHelper
      */
     protected $iiifProfileToTypes = [
         'http://iiif.io/api/image' => 'Image',
-        // The context does not exsit for 1, but improve compatibility.
+        // The context does not exist for 1, but improve compatibility.
         'http://iiif.io/api/image/1/context.json' => 'Image',
         'http://iiif.io/api/image/2/context.json' => 'Image',
         'http://iiif.io/api/image/3/context.json' => 'Image',
+        // Legacy Stanford IIIF Image API 1.x contexts, used by Gallica/BnF, etc.
+        'http://library.stanford.edu/iiif/image-api/context.json' => 'Image',
+        'http://library.stanford.edu/iiif/image-api/1.0/context.json' => 'Image',
+        'http://library.stanford.edu/iiif/image-api/1.1/context.json' => 'Image',
     ];
 
     public function __invoke(MediaRepresentation $media): ?string
