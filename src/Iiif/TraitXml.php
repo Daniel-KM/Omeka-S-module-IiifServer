@@ -86,7 +86,7 @@ trait TraitXml
             $filename = 'original/' . array_pop($filename);
             $this->logger->err(
                 'Error: filepath {filepath} for xml media #{media_id} does not exist.', // @translate
-                ['filepth' => $filename, 'media_id' => $mediaId]
+                ['filepath' => $filename, 'media_id' => $mediaId]
             );
             return null;
         }
