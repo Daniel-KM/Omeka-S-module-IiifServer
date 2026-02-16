@@ -79,24 +79,29 @@ class Module extends AbstractModule
                 ]
             );
 
-        // Re-encode ark identifiers that Apache may have decoded (%2F → /).
+        // Re-encode decoded slashes in identifiers so Segment routes match.
         $event->getApplication()->getEventManager()
-            ->attach(MvcEvent::EVENT_ROUTE, [$this, 'reencodeArkIdentifiers'], 1000);
+            ->attach(MvcEvent::EVENT_ROUTE, [$this, 'reencodeIdentifierSlashes'], 1000);
     }
 
     /**
-     * Re-encode decoded ark identifiers in IIIF URLs.
+     * Re-encode decoded slashes in iiif url identifiers.
      *
-     * When Apache does not have "AllowEncodedSlashes NoDecode", it decodes
-     * %2F to / in URLs. This breaks routing for ark identifiers like
-     * "ark:/83011/FLMjo213509" because the "/" is interpreted as a path
-     * separator. This listener re-encodes the slashes within ark identifiers
-     * so the standard Segment routes can match correctly.
+     * When apache or a reverse proxy does not preserve encoded slashes
+     * (%2F), they get decoded to "/" in the path, breaking segment routes
+     * that expect the identifier as a single path segment. This listener
+     * detects where the identifier ends by looking for known iiif keywords
+     * (manifest, canvas, info.json, etc.) from the right of the path, then
+     * re-encodes all "/" within the identifier portion.
      *
-     * This is a no-op when Apache has "AllowEncodedSlashes NoDecode" (the
-     * path contains "ark:%2F", not "ark:/") or when arks are not used.
+     * This is a no-op when identifiers contain no decoded slashes (e.g.
+     * simple numeric ids or already-encoded identifiers).
+     *
+     * @see https://iiif.io/api/presentation/3.0/
+     * @see https://iiif.io/api/presentation/2.1/
+     * @see https://iiif.io/api/image/3.0/
      */
-    public function reencodeArkIdentifiers(MvcEvent $event): void
+    public function reencodeIdentifierSlashes(MvcEvent $event): void
     {
         $request = $event->getRequest();
         if (!$request instanceof \Laminas\Http\PhpEnvironment\Request) {
@@ -105,22 +110,97 @@ class Module extends AbstractModule
 
         $path = $request->getUri()->getPath();
 
-        // Quick check: only process IIIF paths that contain a decoded ark.
-        if (strpos($path, '/iiif/') === false
-            || strpos($path, 'ark:/') === false
-        ) {
+        // Quick check: only process iiif presentation/image/media paths.
+        if (strpos($path, '/iiif/') === false) {
             return;
         }
 
-        // Re-encode ark identifiers: ark:/NAAN/Name → ark:%2FNAAN%2FName.
-        // ARK format: ark:/{NAAN}/{Name} where NAAN is numeric.
-        $newPath = preg_replace_callback(
-            '#ark:/(\d+)/([^/]+)#',
-            function ($m) {
-                return 'ark:%2F' . $m[1] . '%2F' . $m[2];
-            },
-            $path
-        );
+        // Skip fixed literal routes (e.g. ixif placeholder).
+        if (strpos($path, 'ixif-message') !== false) {
+            return;
+        }
+
+        // Parse: /iiif[/version][/collection|set]/{identifier}[/suffix]
+        // Version is any single digit to be future-proof (v2, v3, v4…).
+        if (!preg_match('#^(/iiif(?:/\d+)?)(?:(/collection|/set))?(/[^?]*)$#', $path, $matches)) {
+            return;
+        }
+
+        $iiifBase = $matches[1];
+        $routePrefix = $matches[2] ?? '';
+        $remainder = $matches[3] ?? '';
+
+        if ($remainder === '' || $remainder === '/') {
+            return;
+        }
+
+        // Remove leading slash.
+        $remainder = substr($remainder, 1);
+        $segments = explode('/', $remainder);
+        $count = count($segments);
+
+        // A single segment means no slashes in the identifier.
+        if ($count <= 1) {
+            return;
+        }
+
+        // Known iiif presentation types and keywords that appear after the
+        // identifier in the URL path. Used as anchors to detect where the
+        // identifier portion ends.
+        // @see IiifServer config: route "uri" type constraint.
+        static $iiifKeywords = [
+            'manifest' => true,
+            'info.json' => true,
+            'annotation-page' => true,
+            'annotation-collection' => true,
+            'annotation-list' => true,
+            'annotation' => true,
+            'canvas-segment' => true,
+            'canvas' => true,
+            'collection' => true,
+            'content-resource' => true,
+            'range' => true,
+            // Iiif presentation 2.1 types.
+            'sequence' => true,
+            'layer' => true,
+            'list' => true,
+            'res' => true,
+        ];
+
+        // Scan from the right to find the first iiif keyword.
+        // Start at index 1 (the identifier needs at least one segment).
+        $suffixCount = 0;
+        for ($i = $count - 1; $i >= 1; $i--) {
+            if (isset($iiifKeywords[$segments[$i]])) {
+                $suffixCount = $count - $i;
+                break;
+            }
+        }
+
+        // If no keyword found, check for Image API request pattern:
+        // {id}/{region}/{size}/{rotation}/{quality}.{format}
+        // where quality is one of: default, color, gray, bitonal.
+        if ($suffixCount === 0 && $count >= 5) {
+            if (preg_match('/^(?:default|color|gray|bitonal)\.\w+$/', $segments[$count - 1])) {
+                $suffixCount = 4;
+            }
+        }
+
+        $identifierCount = $count - $suffixCount;
+        if ($identifierCount <= 1) {
+            return;
+        }
+
+        // Re-encode slashes within the identifier portion.
+        $identifierParts = array_slice($segments, 0, $identifierCount);
+        $encodedIdentifier = implode('%2F', $identifierParts);
+
+        $suffixParts = array_slice($segments, $identifierCount);
+        $newRemainder = $suffixParts
+            ? $encodedIdentifier . '/' . implode('/', $suffixParts)
+            : $encodedIdentifier;
+
+        $newPath = $iiifBase . $routePrefix . '/' . $newRemainder;
 
         if ($newPath !== $path) {
             $request->getUri()->setPath($newPath);
