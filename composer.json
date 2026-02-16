@@ -1,15 +1,41 @@
 {
     "name": "daniel-km/omeka-s-module-iiif-server",
-    "type": "library",
-    "description": "Module for Omeka S that integrates the IIIF specifications to share images, audio and video in a normalized way.",
+    "type": "omeka-s-module",
+    "description": "Module for Omeka S: Integrates the IIIF specifications to allow to share instantly images, audio and video.",
+    "keywords": [
+        "Omeka S",
+        "Omeka S module",
+        "iiif",
+        "specification",
+        "standard",
+        "share"
+    ],
     "license": "CECILL-2.1",
-    "minimum-stability": "beta",
-    "prefer-stable": true,
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer",
+    "authors": [
+        {
+            "name": "Daniel Berthereau",
+            "email": "Daniel.packagist@Berthereau.net"
+        }
+    ],
+    "support": {
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues",
+        "forum": "https://forum.omeka.org/"
+    },
+    "_require (not set until Omeka S merges PR #2412)": {
+        "omeka/omeka-s": "^4.0",
+        "daniel-km/omeka-s-module-common": "*"
+    },
     "require": {
-        "james-heinrich/getid3": "^2.0"
+        "james-heinrich/getid3": "^2.0.0-beta"
     },
     "provide": {
         "doctrine/inflector": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "IiifServer\\": "src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -22,6 +48,7 @@
         }
     },
     "extra": {
-        "installer-name": "IiifServer"
+        "installer-name": "IiifServer",
+        "configurable": true
     }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "747ab9ec71d80f8a228c125cd203df52",
+    "content-hash": "7a4ac7edfffb5ea8d80998bff08bbf30",
     "packages": [
         {
             "name": "james-heinrich/getid3",
@@ -92,54 +92,13 @@
             "time": "2023-11-02T19:40:57+00:00"
         }
     ],
-    "packages-dev": [
-        {
-            "name": "biblibre/omeka-s-test-helper",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/biblibre/omeka-s-test-helper.git",
-                "reference": "a02c8dc4259365f7de1d09626a97347ba19cbf6e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/biblibre/omeka-s-test-helper/zipball/a02c8dc4259365f7de1d09626a97347ba19cbf6e",
-                "reference": "a02c8dc4259365f7de1d09626a97347ba19cbf6e",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.5.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "OmekaTestHelper\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "description": "Test helpers for Omeka S",
-            "homepage": "https://github.com/biblibre/omeka-s-test-helper",
-            "keywords": [
-                "omeka",
-                "test"
-            ],
-            "support": {
-                "issues": "https://github.com/biblibre/omeka-s-test-helper/issues",
-                "source": "https://github.com/biblibre/omeka-s-test-helper/tree/master"
-            },
-            "time": "2016-09-22T16:40:26+00:00"
-        }
-    ],
+    "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "stability-flags": {
-        "biblibre/omeka-s-test-helper": 20
+        "james-heinrich/getid3": 10
     },
-    "prefer-stable": true,
+    "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {},
     "platform-dev": {},
