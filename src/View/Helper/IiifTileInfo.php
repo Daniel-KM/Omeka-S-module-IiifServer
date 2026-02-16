@@ -86,7 +86,10 @@ class IiifTileInfo extends AbstractHelper
 
         $scaleFactors = [];
         $maxSize = max($tileInfo['source']['width'], $tileInfo['source']['height']);
-        $tileSize = $tileInfo['size'];
+        $tileSize = $tileInfo['size'] ?? 0;
+        if (!$tileSize) {
+            return null;
+        }
         $total = (int) ceil($maxSize / $tileSize);
         $factor = 1;
         while ($factor / 2 <= $total) {

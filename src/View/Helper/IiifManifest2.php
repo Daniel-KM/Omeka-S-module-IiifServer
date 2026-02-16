@@ -791,7 +791,7 @@ class IiifManifest2 extends AbstractHelper
         if ($media->hasThumbnails()) {
             $imageUrl = $media->thumbnailUrl('medium');
             $size = $this->getView()->imageSize($media, 'medium');
-            if ($size['width']) {
+            if ($size && $size['width']) {
                 $thumbnail = [
                     '@id' => $imageUrl,
                     '@type' => 'dctypes:Image',
@@ -807,6 +807,13 @@ class IiifManifest2 extends AbstractHelper
         if ($media->ingester() === 'iiif') {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
+            if (empty($mediaData)
+                || !isset($mediaData['@context'])
+                || !isset($mediaData['profile'])
+                || (empty($mediaData['@id']) && empty($mediaData['id']))
+            ) {
+                return null;
+            }
             // In 3.0, the "@id" property becomes "id".
             $imageBaseUri = $mediaData['@id'] ?? $mediaData['id'];
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
@@ -819,10 +826,12 @@ class IiifManifest2 extends AbstractHelper
                 'id' => $imageUrl,
                 '@type' => 'dctypes:Image',
                 'format' => 'image/jpeg',
-                'width' => $mediaData['width'] * $mediaData['height'] / $this->defaultHeight,
-                'height' => $this->defaultHeight,
-                'service' => $service,
             ];
+            if (!empty($mediaData['width']) && !empty($mediaData['height'])) {
+                $thumbnail['width'] = $mediaData['width'] * $mediaData['height'] / $this->defaultHeight;
+                $thumbnail['height'] = $this->defaultHeight;
+            }
+            $thumbnail['service'] = $service;
             return $thumbnail;
         }
 
@@ -838,7 +847,7 @@ class IiifManifest2 extends AbstractHelper
     protected function _iiifThumbnailAsset(AssetRepresentation $asset)
     {
         $size = $this->view->imageSize($asset);
-        if ($size['width']) {
+        if ($size && $size['width']) {
             $thumbnail = [
                 '@id' => $asset->assetUrl(),
                 '@type' => 'dctypes:Image',

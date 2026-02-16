@@ -96,6 +96,13 @@ trait TraitDescriptiveThumbnail
         if ($primaryMedia->ingester() === 'iiif') {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $primaryMedia->mediaData();
+            if (empty($mediaData)
+                || !isset($mediaData['@context'])
+                || !isset($mediaData['profile'])
+                || (empty($mediaData['id']) && empty($mediaData['@id']))
+            ) {
+                return null;
+            }
             // Before 3.0, the "id" property was "@id".
             $imageBaseUri = $mediaData['id'] ?? $mediaData['@id'];
             // In Image API 3.0, @context can be a list, https://iiif.io/api/image/3.0/#52-technical-properties.
@@ -108,10 +115,12 @@ trait TraitDescriptiveThumbnail
                 'id' => $imageUrl,
                 'type' => 'Image',
                 'format' => 'image/jpeg',
-                'width' => $mediaData['width'] * $mediaData['height'] / $this->defaultHeight,
-                'height' => $this->defaultHeight,
-                'service' => $thumbnailService,
             ];
+            if (!empty($mediaData['width']) && !empty($mediaData['height'])) {
+                $thumbnail['width'] = $mediaData['width'] * $mediaData['height'] / $this->defaultHeight;
+                $thumbnail['height'] = $this->defaultHeight;
+            }
+            $thumbnail['service'] = $thumbnailService;
             return [
                 $thumbnail,
             ];

@@ -111,7 +111,7 @@ class Body extends AbstractResourceType
     {
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
-            return $mediaData['id'] ?? $mediaData['@id'];
+            return $mediaData['id'] ?? $mediaData['@id'] ?? null;
         }
 
         if ($this->contentResource->isImage()) {
@@ -182,8 +182,10 @@ class Body extends AbstractResourceType
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
             $imageResourceServices = [];
-            $context = is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'];
-            $id = $mediaData['id'] ?? $mediaData['@id'];
+            $context = isset($mediaData['@context'])
+                ? (is_array($mediaData['@context']) ? array_pop($mediaData['@context']) : $mediaData['@context'])
+                : null;
+            $id = $mediaData['id'] ?? $mediaData['@id'] ?? null;
             $type = $this->iiifImageServiceType($context);
             $profile = $this->iiifComplianceLevel($mediaData['profile']);
             if (!$id || !$type || !$profile) {
