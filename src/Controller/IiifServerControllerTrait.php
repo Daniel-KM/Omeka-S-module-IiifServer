@@ -279,7 +279,8 @@ trait IiifServerControllerTrait
             return $version;
         }
 
-        $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
+        $acceptHeader = $this->getRequest()->getHeaders()->get('Accept');
+        $accept = $acceptHeader ? $acceptHeader->toString() : '';
         if (strpos($accept, 'iiif.io/api/presentation/3/context.json')
             || strpos($accept, 'iiif.io/api/image/3/context.json')
         ) {
@@ -306,7 +307,8 @@ trait IiifServerControllerTrait
             return $this->requestedApiVersion;
         }
 
-        $accept = $this->getRequest()->getHeaders()->get('Accept')->toString();
+        $acceptHeader = $this->getRequest()->getHeaders()->get('Accept');
+        $accept = $acceptHeader ? $acceptHeader->toString() : '';
         if (strpos($accept, 'iiif.io/api/image/3/context.json')) {
             $this->requestedApiVersion = '3';
         } elseif (strpos($accept, 'iiif.io/api/image/2/context.json')) {
