@@ -591,6 +591,11 @@ return [
             'iiifserver_identifier_clean' => true,
             'iiifserver_identifier_prefix' => '',
             'iiifserver_identifier_raw' => false,
+            // Pre-encode slashes for apache mod_rewrite that auto-decodes urls.
+            // When enabled, "/" is encoded to "%2F" before url building, resulting
+            // in "%252F" in the final url. Apache will decode it once to "%2F".
+            // This option is useless when a proxy is used or in other infrastructures.
+            'iiifserver_identifier_apache_preencoding' => false,
             // These options allows to bypass a proxy issue.
             'iiifserver_url_force_from' => '',
             'iiifserver_url_force_to' => '',

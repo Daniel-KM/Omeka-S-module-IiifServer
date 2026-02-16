@@ -65,6 +65,11 @@ class IiifMediaUrl extends AbstractHelper
      */
     protected $supportNonImages;
 
+    /**
+     * @var bool
+     */
+    protected $apachePreencoding;
+
     public function __construct(
         Url $url,
         IiifCleanIdentifiers $iiifCleanIdentifiers,
@@ -76,7 +81,8 @@ class IiifMediaUrl extends AbstractHelper
         ?string $forceUrlTo,
         ?string $mediaIdentifier,
         ?string $prefix,
-        bool $supportNonImages
+        bool $supportNonImages,
+        bool $apachePreencoding
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
@@ -89,6 +95,7 @@ class IiifMediaUrl extends AbstractHelper
         $this->mediaIdentifier = $mediaIdentifier;
         $this->prefix = $prefix;
         $this->supportNonImages = $supportNonImages;
+        $this->apachePreencoding = $apachePreencoding;
     }
 
     /**
@@ -115,11 +122,19 @@ class IiifMediaUrl extends AbstractHelper
         if ($this->mediaIdentifier === 'media_id') {
             $identifier = $id;
         } elseif ($this->mediaIdentifier === 'storage_id') {
-            $identifier = $resource->storageId();
-            $identifier = $identifier ? strtr($identifier, ['/' => '%2F']) : $id;
+            $identifier = $resource->storageId() ?: $id;
+            // Pre-encode slashes only when apache pre-encoding is enabled.
+            // By default, the url helper will encode "/" to "%2F" once.
+            // With apache pre-encoding, "/" is pre-encoded to "%2F", then the
+            // url helper encodes to "%252F". Apache decodes once to "%2F".
+            if ($this->apachePreencoding && is_string($identifier)) {
+                $identifier = strtr($identifier, ['/' => '%2F']);
+            }
         } elseif ($this->mediaIdentifier === 'filename') {
-            $identifier = $resource->filename();
-            $identifier = $identifier ? strtr($identifier, ['/' => '%2F']) : $id;
+            $identifier = $resource->filename() ?: $id;
+            if ($this->apachePreencoding && is_string($identifier)) {
+                $identifier = strtr($identifier, ['/' => '%2F']);
+            }
         } elseif ($this->mediaIdentifier === 'filename_image') {
             $identifier = $resource->filename();
             if ($identifier) {
@@ -130,7 +145,10 @@ class IiifMediaUrl extends AbstractHelper
                 if ($mainMediaType !== 'image') {
                     $identifier = $resource->storageId() ?: (string) $id;
                 }
-                $identifier = strtr($identifier, ['/' => '%2F']);
+                // Pre-encode slashes only when apache pre-encoding is enabled.
+                if ($this->apachePreencoding) {
+                    $identifier = strtr($identifier, ['/' => '%2F']);
+                }
             } else {
                 $identifier = $id;
             }

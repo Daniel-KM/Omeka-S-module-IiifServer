@@ -865,6 +865,17 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_identifier_raw',
                 ],
             ])
+            ->add([
+                'name' => 'iiifserver_identifier_apache_preencoding',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'label' => 'Pre-encode slashes for web server apache', // @translate
+                    'info' => 'Enable this option only when using an apache config with mod_rewrite that automatically decodes urls. When enabled, "/" is pre-encoded to "%2F", resulting in "%252F" in the final URL. Apache will decode it once back to "%2F".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_identifier_apache_preencoding',
+                ],
+            ])
 
             ->add([
                 'name' => 'iiifserver_url_force_from',
