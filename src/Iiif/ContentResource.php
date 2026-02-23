@@ -51,6 +51,11 @@ class ContentResource extends AbstractResourceType
     protected $id = null;
 
     /**
+     * @var bool
+     */
+    protected $idPrepared = false;
+
+    /**
      * This is not the real type and must be set more precisely.
      *
      * @var string
@@ -129,18 +134,25 @@ class ContentResource extends AbstractResourceType
 
         $this->type = $this->iiifTypeOfMedia->__invoke($resource);
 
-        $this->prepareMediaId();
-
         return $this;
     }
 
     public function hasIdAndType(): bool
     {
+        if (!$this->idPrepared) {
+            $this->prepareMediaId();
+            $this->idPrepared = true;
+        }
         return $this->id && $this->type;
     }
 
     public function id(): ?string
     {
+        if (!$this->idPrepared) {
+            $this->prepareMediaId();
+            $this->idPrepared = true;
+        }
+
         if ($this->id) {
             return $this->id;
         }
