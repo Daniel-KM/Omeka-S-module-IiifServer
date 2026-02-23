@@ -173,12 +173,28 @@ class ImageSize extends AbstractPlugin
 
     /**
      * Helper to get width and height of an image url.
+     *
+     * Try getimagesize() on the url first: it reads only the image header
+     * over HTTP, which is much faster than downloading the whole file,
+     * especially for remote storage (S3, etc.).
+     * Fall back to a full download only when the direct call fails (e.g.
+     * allow_url_fopen off, authenticated url, or unsupported format).
      */
     protected function getWidthAndHeightUrl(string $url): array
     {
-        $width = null;
-        $height = null;
+        // Fast path: getimagesize() reads only the image header via HTTP.
+        $result = @getimagesize($url);
+        if ($result) {
+            [$width, $height] = $result;
+            if ($width && $height) {
+                return [
+                    'width' => $width,
+                    'height' => $height,
+                ];
+            }
+        }
 
+        // Slow path: download the full file then check dimensions locally.
         $tempFile = $this->tempFileFactory->build();
         $tempPath = $tempFile->getTempPath();
         $tempFile->delete();
@@ -190,14 +206,16 @@ class ImageSize extends AbstractPlugin
                 $result = getimagesize($tempPath);
                 if ($result) {
                     [$width, $height] = $result;
+                    unlink($tempPath);
+                    return [
+                        'width' => $width,
+                        'height' => $height,
+                    ];
                 }
             }
             unlink($tempPath);
         }
 
-        return [
-            'width' => $width,
-            'height' => $height,
-        ];
+        return $this->emptySize;
     }
 }

@@ -155,12 +155,34 @@ class MediaDimension extends AbstractPlugin
         return $cache[$filepath];
     }
 
+    /**
+     * For images, try getimagesize() on the url first: it reads only the
+     * image header over HTTP, which is much faster than downloading the
+     * whole file, especially for remote storage (S3, etc.).
+     * For audio/video, a full download is required for GetId3 analysis.
+     */
     protected function getDimensionsUrl(?string $url, ?string $mainMediaType = null): array
     {
         if (empty($url)) {
             return $this->emptyDimensions;
         }
 
+        // Fast path for images: read only the header via HTTP.
+        if ($mainMediaType === 'image') {
+            $result = @getimagesize($url);
+            if ($result) {
+                [$width, $height] = $result;
+                if ($width && $height) {
+                    return [
+                        'width' => (int) $width,
+                        'height' => (int) $height,
+                        'duration' => null,
+                    ];
+                }
+            }
+        }
+
+        // Slow path: download the full file then analyze locally.
         $tempFile = $this->tempFileFactory->build();
         $tempPath = $tempFile->getTempPath();
         $tempFile->delete();
