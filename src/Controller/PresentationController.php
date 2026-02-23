@@ -105,16 +105,19 @@ class PresentationController extends AbstractActionController
             }
         }
 
-        // Check rights for Access.
-        // Warning: there are checks for media (option iiifserver_access_resource_skip).
+        // Check rights for Access. Warning: there are checks for media (option
+        // iiifserver_access_resource_skip).
         /** @see \IiifServer\Controller\MediaController::fetchAction() */
-        if ($this->getPluginManager()->has('accessLevel')) {
-            /** @var \Access\Mvc\Controller\Plugin\AccessLevel $accessLevel */
+        $hasAccessModule = $this->getPluginManager()->has('accessLevel');
+        if ($hasAccessModule) {
             $accessLevelResource = $this->accessLevel($resource);
-            if (accessLevelResource === 'forbidden') {
-                return $this->jsonError(new OmekaException\PermissionDeniedException, \Laminas\Http\Response::STATUS_CODE_403);
+            if ($accessLevelResource === 'forbidden') {
+                return $this->jsonError(
+                    new OmekaException\PermissionDeniedException,
+                    \Laminas\Http\Response::STATUS_CODE_403
+                );
             }
-            // TODO Manage level reserved. For now, only on media level.
+            // TODO Manage level reserved.
         }
 
         // Version may be 2 or 3.
@@ -127,8 +130,14 @@ class PresentationController extends AbstractActionController
 
         // Don't use cache for privileged users: they should see private media
         // in fresh manifests. Cached manifests only contain public media.
-        $acl = $resource->getServiceLocator()->get('Omeka\Acl');
-        $skipCache = $acl->userIsAllowed('Omeka\Entity\Resource', 'view-all');
+        $skipCache = $this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
+
+        // When the Access module is active, authenticated users may have
+        // intermediate permissions (reserved media), so skip cache for all
+        // authenticated users.
+        if (!$skipCache && $hasAccessModule) {
+            $skipCache = (bool) $this->identity();
+        }
 
         $useCache = !$skipCache && (bool) $settings->get('iiifserver_manifest_cache', false);
         if ($useCache) {
