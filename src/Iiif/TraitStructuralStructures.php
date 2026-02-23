@@ -67,6 +67,10 @@ trait TraitStructuralStructures
 
         // Don't loop on media_info directly.
         foreach ($this->resource->media() as $media) {
+            // Skip private media for anonymous or unprivileged users (#34).
+            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+                continue;
+            }
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
                 ++$total;
@@ -133,6 +137,10 @@ trait TraitStructuralStructures
 
         // Don't loop on media_info directly.
         foreach ($this->resource->media() as $media) {
+            // Skip private media for anonymous or unprivileged users (#34).
+            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+                continue;
+            }
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
                 $canvas = new ReferencedCanvas();

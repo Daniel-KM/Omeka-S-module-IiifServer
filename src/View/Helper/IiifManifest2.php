@@ -95,14 +95,21 @@ class IiifManifest2 extends AbstractHelper
      */
     protected $resource;
 
+    /**
+     * @var bool
+     */
+    protected $isAllowedViewAll = false;
+
     public function __construct(
         Settings $settings,
         TempFileFactory $tempFileFactory,
-        ?string $basePath
+        ?string $basePath,
+        bool $isAllowedViewAll = false
     ) {
         $this->settings = $settings;
         $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
+        $this->isAllowedViewAll = $isAllowedViewAll;
     }
 
     /**
@@ -279,7 +286,10 @@ class IiifManifest2 extends AbstractHelper
         $canvases = [];
 
         // Get all images and non-images and detect 3D models.
-        $medias = $item->media();
+        // Filter out private media for anonymous or unprivileged users (#34).
+        $medias = $this->isAllowedViewAll
+            ? $item->media()
+            : array_filter($item->media(), fn ($m) => $m->isPublic());
         $images = [];
         $nonImages = [];
         $mediaMain3d = null;

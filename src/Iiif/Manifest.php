@@ -188,6 +188,10 @@ class Manifest extends AbstractResourceType
         $siteSlug = $this->defaultSite ? $this->defaultSite->slug() : null;
         $allMediaTypes = in_array('all', $mediaTypes);
         foreach ($this->resource->media() as $media) {
+            // Skip private media for anonymous or unprivileged users (#34).
+            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+                continue;
+            }
             if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
                 continue;
             }
@@ -230,6 +234,10 @@ class Manifest extends AbstractResourceType
         $items = [];
         // Don't loop media info directly.
         foreach ($this->resource->media() as $media) {
+            // Skip private media for anonymous or unprivileged users (#34).
+            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+                continue;
+            }
             $mediaInfo = $this->mediaInfo($media);
             if ($mediaInfo && !empty($mediaInfo['painting'])) {
                 $canvas = new Canvas();

@@ -12,10 +12,13 @@ class IiifManifest2Factory implements FactoryInterface
     {
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+        $isAllowedViewAll = $services->get('Omeka\Acl')
+            ->userIsAllowed('Omeka\Entity\Resource', 'view-all');
         return new IiifManifest2(
             $services->get('Omeka\Settings'),
             $services->get('Omeka\File\TempFileFactory'),
-            $basePath
+            $basePath,
+            $isAllowedViewAll
         );
     }
 }

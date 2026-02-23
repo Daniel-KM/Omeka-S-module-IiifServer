@@ -244,6 +244,13 @@ abstract class AbstractResourceType extends AbstractType
     protected $isAllowedMediaContent;
 
     /**
+     * Whether the current user can view all (including private) resources.
+     *
+     * @var bool
+     */
+    protected $isAllowedViewAll = false;
+
+    /**
      * @var \Laminas\Log\Logger
      */
     protected $logger;
@@ -329,6 +336,8 @@ abstract class AbstractResourceType extends AbstractType
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->imageSize = $plugins->get('imageSize');
         $this->isAllowedMediaContent = $this->hasModuleAccess ? $plugins->get('isAllowedMediaContent') : null;
+        $this->isAllowedViewAll = $this->services->get('Omeka\Acl')
+            ->userIsAllowed('Omeka\Entity\Resource', 'view-all');
         $this->logger = $this->services->get('Omeka\Logger');
         $this->mediaDimension = $viewHelpers->get('mediaDimension');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');

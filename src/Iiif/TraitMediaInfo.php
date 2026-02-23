@@ -147,6 +147,10 @@ trait TraitMediaInfo
         $mediaIds = [];
         $medias = $this->resource->media();
         foreach ($medias as $media) {
+            // Skip private media for anonymous or unprivileged users (#34).
+            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+                continue;
+            }
             $mediaId = $media->id();
             $mediaIds[] = $mediaId;
             $this->mediaInfos[$mediaId] = null;
