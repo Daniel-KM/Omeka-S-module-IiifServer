@@ -88,7 +88,7 @@ class NoopServerController extends AbstractActionController
         $headers = $response->getHeaders();
 
         // Header for CORS, required for access.
-        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
             $headers
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }

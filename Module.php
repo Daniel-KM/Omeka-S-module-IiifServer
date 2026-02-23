@@ -260,7 +260,7 @@ class Module extends AbstractModule
 
         // Set default setting for cors according to the config of the server.
         $corsHeaders = $this->checkCorsHeaders();
-        $settings->set('iiifserver_manifest_append_cors_headers', !$corsHeaders);
+        $settings->set('iiifserver_append_cors_headers', !$corsHeaders);
         if ($corsHeaders > 1) {
             $this->messageCors();
         }
@@ -277,7 +277,7 @@ class Module extends AbstractModule
         $corsHeaders = $this->checkCorsHeaders();
         if ($corsHeaders) {
             $settings = $this->getServiceLocator()->get('Omeka\Settings');
-            $settings->set('iiifserver_manifest_append_cors_headers', false);
+            $settings->set('iiifserver_append_cors_headers', false);
         }
         $this->messageCors();
 
@@ -355,7 +355,7 @@ class Module extends AbstractModule
         $corsHeaders = $this->checkCorsHeaders();
         if ($corsHeaders) {
             $settings = $this->getServiceLocator()->get('Omeka\Settings');
-            $settings->set('iiifserver_manifest_append_cors_headers', false);
+            $settings->set('iiifserver_append_cors_headers', false);
         }
         $this->messageCors();
 
@@ -711,7 +711,7 @@ class Module extends AbstractModule
 
         /** @var \Omeka\Settings\Settings $settings */
         $settings = $services->get('Omeka\Settings');
-        $appendCorsHeaders = (bool) $settings->get('iiifserver_manifest_append_cors_headers');
+        $appendCorsHeaders = (bool) $settings->get('iiifserver_append_cors_headers');
 
         $plugins = $services->get('ControllerPluginManager');
         $messenger = $plugins->get('messenger');

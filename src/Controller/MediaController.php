@@ -133,7 +133,7 @@ class MediaController extends AbstractActionController
                 ->addHeaderLine('Content-Type', $mediaType);
 
             // Header for cors, required for access of iiif.
-            if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            if ($this->settings()->get('iiifserver_append_cors_headers')) {
                 $headers
                     ->addHeaderLine('Access-Control-Allow-Origin', '*');
             }
@@ -158,7 +158,7 @@ class MediaController extends AbstractActionController
         // TODO Check if the external url is not empty.
 
         // Header for cors, required for access of iiif.
-        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
             $headers
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }

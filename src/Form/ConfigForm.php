@@ -56,7 +56,7 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'iiifserver_manifest_append_cors_headers',
+                'name' => 'iiifserver_append_cors_headers',
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'label' => 'Append CORS headers to web server response', // @translate
@@ -64,7 +64,7 @@ class ConfigForm extends Form
                     'documentation' => 'https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#CORS-Cross-Origin-Resource-Sharing)', // @translate
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_manifest_append_cors_headers',
+                    'id' => 'iiifserver_append_cors_headers',
                 ],
             ])
 

@@ -130,7 +130,7 @@ trait IiifServerControllerTrait
         $headers = $response->getHeaders();
         $headers->addHeaderLine('Location', $url);
         // Header for cors, required for access of iiif.
-        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
             $headers
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }
@@ -338,7 +338,7 @@ trait IiifServerControllerTrait
         $response = $this->getResponse();
         $response->setStatusCode($statusCode);
         // Header for cors, required for access of iiif.
-        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
             $response->getHeaders()
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }
@@ -357,7 +357,7 @@ trait IiifServerControllerTrait
         $response = $this->getResponse();
         $response->setStatusCode($statusCode);
         // Header for cors, required for access of iif.
-        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
             $response->getHeaders()
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }

@@ -68,7 +68,7 @@ class IiifImageJsonLd extends AbstractPlugin
         }
 
         // Header for CORS, required for access of IIIF.
-        if ($controller->settings()->get('iiifserver_manifest_append_cors_headers')) {
+        if ($controller->settings()->get('iiifserver_append_cors_headers')) {
             $headers
                 ->addHeaderLine('Access-Control-Allow-Origin', '*');
         }
