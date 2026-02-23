@@ -127,8 +127,13 @@ trait IiifServerControllerTrait
         ];
         $url = $iiifMediaUrl($resource, null, $version, $params);
         $response = $this->getResponse();
-        $response
-            ->getHeaders()->addHeaderLine('Location', $url);
+        $headers = $response->getHeaders();
+        $headers->addHeaderLine('Location', $url);
+        // Header for cors, required for access of iiif.
+        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $headers
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
         // The iiif image api specification recommends 303, not 302.
         return $response
             ->setStatusCode(\Laminas\Http\Response::STATUS_CODE_303);
@@ -330,7 +335,13 @@ trait IiifServerControllerTrait
      */
     protected function jsonError($exceptionOrMessage, $statusCode = 500): JsonModel
     {
-        $this->getResponse()->setStatusCode($statusCode);
+        $response = $this->getResponse();
+        $response->setStatusCode($statusCode);
+        // Header for cors, required for access of iiif.
+        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $response->getHeaders()
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
         return new JsonModel([
             'status' => 'error',
             'message' => $this->viewMessage($exceptionOrMessage),
@@ -343,7 +354,13 @@ trait IiifServerControllerTrait
      */
     protected function viewError($exceptionOrMessage, $statusCode = 500): ViewModel
     {
-        $this->getResponse()->setStatusCode($statusCode);
+        $response = $this->getResponse();
+        $response->setStatusCode($statusCode);
+        // Header for cors, required for access of iif.
+        if ($this->settings()->get('iiifserver_manifest_append_cors_headers')) {
+            $response->getHeaders()
+                ->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
         $view = new ViewModel([
             'message' => $this->viewMessage($exceptionOrMessage),
         ]);
