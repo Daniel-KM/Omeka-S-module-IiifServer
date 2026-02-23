@@ -187,29 +187,28 @@ class Manifest extends AbstractResourceType
         $renderings = [];
         $siteSlug = $this->defaultSite ? $this->defaultSite->slug() : null;
         $allMediaTypes = in_array('all', $mediaTypes);
-        foreach ($this->resource->media() as $media) {
-            // Skip private media for anonymous or unprivileged users (#34).
-            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+        // Use mediaInfos directly: it preserves insertion order, already
+        // excludes private media, and avoids rebuilding representations.
+        foreach ($this->mediaInfos as $mediaInfo) {
+            if (empty($mediaInfo) || ($mediaInfo['on'] ?? null) !== 'Manifest') {
                 continue;
             }
+            $media = $mediaInfo['resource'];
             if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
                 continue;
             }
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['on'] === 'Manifest') {
-                $rendering = new Rendering();
-                $rendering
-                    // TODO Options should be set first for now for init, done in setResource().
-                    ->setOptions([
-                        'index' => $media->id(),
-                        'siteSlug' => $siteSlug,
-                        'content' => $mediaInfo['content'],
-                        'on' => 'Manifest',
-                    ])
-                    ->setResource($media);
-                if ($rendering->id() && $rendering->type()) {
-                    $renderings[] = $rendering;
-                }
+            $rendering = new Rendering();
+            $rendering
+                // TODO Options should be set first for now for init, done in setResource().
+                ->setOptions([
+                    'index' => $media->id(),
+                    'siteSlug' => $siteSlug,
+                    'content' => $mediaInfo['content'],
+                    'on' => 'Manifest',
+                ])
+                ->setResource($media);
+            if ($rendering->id() && $rendering->type()) {
+                $renderings[] = $rendering;
             }
         }
         return $renderings;
@@ -232,36 +231,34 @@ class Manifest extends AbstractResourceType
     public function items(): array
     {
         $items = [];
-        // Don't loop media info directly.
-        foreach ($this->resource->media() as $media) {
-            // Skip private media for anonymous or unprivileged users (#34).
-            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+        // Use mediaInfos directly: it preserves insertion order, already
+        // excludes private media, and avoids rebuilding representations.
+        foreach ($this->mediaInfos as $mediaInfo) {
+            if (empty($mediaInfo) || empty($mediaInfo['painting'])) {
                 continue;
             }
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && !empty($mediaInfo['painting'])) {
-                $canvas = new Canvas();
-                $canvas
-                    // TODO Options should be set first for now for init, done in setResource().
-                    ->setOptions([
-                        'index' => $mediaInfo['index'] ?? null,
-                        'content' => $mediaInfo['content'],
-                        'key' => $mediaInfo['key'],
-                        'motivation' => $mediaInfo['motivation'],
-                        // The full media infos should be passed for SeeAlso and
-                        // Annotations.
-                        'mediaInfos' => [
-                            'indexes' => array_column(array_filter($this->mediaInfos), 'index', 'id'),
-                            'seeAlso' => array_filter($this->mediaInfos, fn ($v) => ($v['key'] ?? null) === 'seeAlso'),
-                            'annotation' => array_filter($this->mediaInfos, fn ($v) => $v['relatedMediaOcr'] ?? false),
-                            'extraFiles' => [
-                                'alto' => $this->extraFiles['alto'][$this->resource->id()] ?? null,
-                            ],
+            $media = $mediaInfo['resource'];
+            $canvas = new Canvas();
+            $canvas
+                // TODO Options should be set first for now for init, done in setResource().
+                ->setOptions([
+                    'index' => $mediaInfo['index'] ?? null,
+                    'content' => $mediaInfo['content'],
+                    'key' => $mediaInfo['key'],
+                    'motivation' => $mediaInfo['motivation'],
+                    // The full media infos should be passed for SeeAlso and
+                    // Annotations.
+                    'mediaInfos' => [
+                        'indexes' => array_column(array_filter($this->mediaInfos), 'index', 'id'),
+                        'seeAlso' => array_filter($this->mediaInfos, fn ($v) => ($v['key'] ?? null) === 'seeAlso'),
+                        'annotation' => array_filter($this->mediaInfos, fn ($v) => $v['relatedMediaOcr'] ?? false),
+                        'extraFiles' => [
+                            'alto' => $this->extraFiles['alto'][$this->resource->id()] ?? null,
                         ],
-                    ])
-                    ->setResource($media);
-                $items[] = $canvas;
-            }
+                    ],
+                ])
+                ->setResource($media);
+            $items[] = $canvas;
         }
         return $items;
     }

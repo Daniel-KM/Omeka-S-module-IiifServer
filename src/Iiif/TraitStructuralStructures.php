@@ -63,16 +63,11 @@ trait TraitStructuralStructures
     public function structures(): array
     {
         // Count number of available medias.
+        // Use mediaInfos directly: it preserves insertion order, already
+        // excludes private media, and avoids rebuilding representations.
         $total = 0;
-
-        // Don't loop on media_info directly.
-        foreach ($this->resource->media() as $media) {
-            // Skip private media for anonymous or unprivileged users (#34).
-            if (!$media->isPublic() && !$this->isAllowedViewAll) {
-                continue;
-            }
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
+        foreach ($this->mediaInfos as $mediaInfo) {
+            if (!empty($mediaInfo) && ($mediaInfo['motivation'] ?? null) === 'painting') {
                 ++$total;
             }
         }
@@ -133,25 +128,21 @@ trait TraitStructuralStructures
     protected function defaultStructure(): ?Range
     {
         // Take iiif media in the order they are.
+        // Use mediaInfos directly: it preserves insertion order, already
+        // excludes private media, and avoids rebuilding representations.
         $canvases = [];
-
-        // Don't loop on media_info directly.
-        foreach ($this->resource->media() as $media) {
-            // Skip private media for anonymous or unprivileged users (#34).
-            if (!$media->isPublic() && !$this->isAllowedViewAll) {
+        foreach ($this->mediaInfos as $mediaInfo) {
+            if (empty($mediaInfo) || ($mediaInfo['motivation'] ?? null) !== 'painting') {
                 continue;
             }
-            $mediaInfo = $this->mediaInfo($media);
-            if ($mediaInfo && $mediaInfo['motivation'] === 'painting') {
-                $canvas = new ReferencedCanvas();
-                $canvas
-                    // TODO Options should be set first for now for init, done in setResource().
-                    ->setOptions([
-                        'index' => $mediaInfo['index'] ?? null,
-                    ])
-                    ->setResource($mediaInfo['content']->getResource());
-                $canvases[] = $canvas;
-            }
+            $canvas = new ReferencedCanvas();
+            $canvas
+                // TODO Options should be set first for now for init, done in setResource().
+                ->setOptions([
+                    'index' => $mediaInfo['index'] ?? null,
+                ])
+                ->setResource($mediaInfo['content']->getResource());
+            $canvases[] = $canvas;
         }
 
         $range = new Range();
