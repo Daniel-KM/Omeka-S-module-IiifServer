@@ -230,9 +230,9 @@ class ConfigForm extends Form
                                 'https://creativecommons.org/licenses/by-nd/4.0' => 'Creative Commons Attribution-NoDerivatives 4.0 International', // @translate
                             ],
                         ],
-                        // RigthsStatements.
-                        'rigths-statements' => [
-                            'label' => 'Rigths Statements', // @translate
+                        // RightsStatements.
+                        'rights-statements' => [
+                            'label' => 'Rights Statements', // @translate
                             'options' => [
                                 'https://rightsstatements.org/vocab/InC/1.0/' => 'In Copyright', // @translate
                                 'https://rightsstatements.org/vocab/InC-RUU/1.0/' => 'In Copyright - Rights-holder(s) Unlocatable or Unidentifiable', // @translate
