@@ -143,7 +143,11 @@ class ValueLanguage implements JsonSerializable
                                     . '<span class="resource-name">' . $escape($vr->displayTitle()) . '</span>'
                                     . '</a>';
                             } else {
-                                $html = $value->asHtml();
+                                try {
+                                    $html = $value->asHtml();
+                                } catch (\Throwable $e) {
+                                    $html = (string) $value->value();
+                                }
                             }
                             $this->output[$lang][] = $html;
                         }

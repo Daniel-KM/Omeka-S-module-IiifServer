@@ -365,7 +365,11 @@ class IiifCollection2 extends AbstractHelper
                         . '<span class="resource-name">' . $vr->displayTitle() . '</span>'
                         . '</a>';
                 }
-                return $v->asHtml();
+                try {
+                    return $v->asHtml();
+                } catch (\Throwable $e) {
+                    return (string) $v->value();
+                }
             }, $propertyData['values']), 'strlen');
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
             $metadata[] = $valueMetadata;
