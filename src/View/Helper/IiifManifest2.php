@@ -100,6 +100,11 @@ class IiifManifest2 extends AbstractHelper
      */
     protected $isAllowedViewAll = false;
 
+    /**
+     * @var array|null
+     */
+    protected $annotatedMediaIds;
+
     public function __construct(
         Settings $settings,
         TempFileFactory $tempFileFactory,
@@ -385,6 +390,9 @@ class IiifManifest2 extends AbstractHelper
         if (in_array($viewingHint, $allowedViewingHintManifest)) {
             $manifest['viewingHint'] = $viewingHint;
         }
+
+        // Prepare annotation lookup for all images in a single query.
+        $this->prepareAnnotatedMediaIds($images);
 
         // Process images, except if they belong to a 3D model.
         if (!$is3dModel) {
@@ -1818,43 +1826,88 @@ class IiifManifest2 extends AbstractHelper
     }
 
     /**
+     * Prepare the list of media IDs that have annotations from module Annotate,
+     * using a single batch query instead of one query per media.
+     *
+     * @param MediaRepresentation[] $images
+     */
+    protected function prepareAnnotatedMediaIds(array $images): self
+    {
+        $this->annotatedMediaIds = [];
+        if (!$images) {
+            return $this;
+        }
+
+        $plugins = $this->view->getHelperPluginManager();
+        if (!$plugins->has('annotations')) {
+            return $this;
+        }
+
+        $easyMeta = $plugins->get('easyMeta');
+        $oaHasSelectorId = $easyMeta->propertyId('oa:hasSelector');
+        if (!$oaHasSelectorId) {
+            return $this;
+        }
+
+        $mediaIds = array_map(function ($image) {
+            return $image->id();
+        }, $images);
+
+        try {
+            $api = $plugins->get('api');
+            // Single batch query: the Annotate module's QueryPropertiesTrait
+            // supports arrays for type "res", producing an IN() clause.
+            $total = $api->search('annotations', [
+                'property' => [[
+                    'property' => $oaHasSelectorId,
+                    'type' => 'res',
+                    'text' => $mediaIds,
+                ]],
+                'limit' => 0,
+            ], ['initialize' => false, 'finalize' => false])->getTotalResults();
+
+            if (!$total) {
+                return $this;
+            }
+
+            // Fetch annotations and determine which media IDs are annotated.
+            $annotations = $api->search('annotations', [
+                'property' => [[
+                    'property' => $oaHasSelectorId,
+                    'type' => 'res',
+                    'text' => $mediaIds,
+                ]],
+            ], ['initialize' => false, 'finalize' => false])->getContent();
+
+            $mediaIdsFlipped = array_flip($mediaIds);
+            foreach ($annotations as $annotation) {
+                foreach ($annotation->targets() as $target) {
+                    foreach ($target->sources() as $source) {
+                        if ($source) {
+                            $id = $source->id();
+                            if (isset($mediaIdsFlipped[$id])) {
+                                $this->annotatedMediaIds[$id] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Module Annotate not available or other error.
+        }
+
+        return $this;
+    }
+
+    /**
      * The annotation list is a reference to the list of the annotations of the
      * module Annotate. There is only one list, so don't return an array of
      * arrays.
      */
     protected function otherContentAnnotationList(MediaRepresentation $media, $indexOne): ?array
     {
-        static $api;
-        static $oaHasSelectorId;
-
-        if ($api === null) {
-            $plugins = $this->view->getHelperPluginManager();
-            $api = $plugins->has('annotations') ? $plugins->get('api') : false;
-            if (!$api) {
-                return null;
-            }
-            $easyMeta = $plugins->get('easyMeta');
-            $oaHasSelectorId = $easyMeta->propertyId('oa:hasSelector');
-            if (!$oaHasSelectorId) {
-                $api = false;
-                return null;
-            }
-        } elseif (!$api) {
-            return null;
-        }
-
-        // Check if media has at least one annotation via oa:hasSelector to set
-        // the reference to the list.
-        $has = $api->search('annotations', [
-            'property' => [[
-                'property' => $oaHasSelectorId,
-                'type' => 'res',
-                'text' => (string) $media->id(),
-            ]],
-            'limit' => 0,
-        ], ['initialize' => false, 'finalize' => false])->getTotalResults();
-
-        if (!$has) {
+        // Use the pre-built cache from prepareAnnotatedMediaIds().
+        if (!isset($this->annotatedMediaIds[$media->id()])) {
             return null;
         }
 
