@@ -194,7 +194,7 @@ class Body extends AbstractResourceType
             $type = $this->iiifImageServiceType($context);
             $profile = $this->iiifComplianceLevel($mediaData['profile']);
             if (!$id || !$type || !$profile) {
-                return null;
+                return [];
             }
             $imageResourceServices[] = [
                 'id' => $id,
@@ -229,7 +229,7 @@ class Body extends AbstractResourceType
                     'type' => 'ImageService' . $service,
                     'profile' => 'level' . $level,
                 ];
-                $imageResourceService += $imageResourceService;
+                $imageResourceService += $resourceIiifTileInfo;
                 $imageResourceServices[] = $imageResourceService;
             }
 
