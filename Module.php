@@ -272,6 +272,15 @@ class Module extends AbstractModule
     protected function postUpgrade(?string $oldVersion, ?string $newVersion): void
     {
         $this->postUpgradeAuto($oldVersion, $newVersion);
+
+        // Auto-configure CORS setting according to the current server config.
+        $corsHeaders = $this->checkCorsHeaders();
+        if ($corsHeaders) {
+            $settings = $this->getServiceLocator()->get('Omeka\Settings');
+            $settings->set('iiifserver_manifest_append_cors_headers', false);
+        }
+        $this->messageCors();
+
         $this->messageEncodedSlashes();
         $this->messageExternalImageServer();
     }
@@ -342,6 +351,14 @@ class Module extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
+        // Auto-configure CORS setting according to the current server config.
+        $corsHeaders = $this->checkCorsHeaders();
+        if ($corsHeaders) {
+            $settings = $this->getServiceLocator()->get('Omeka\Settings');
+            $settings->set('iiifserver_manifest_append_cors_headers', false);
+        }
+        $this->messageCors();
+
         $this->messageCache();
         $this->messageEncodedSlashes();
         $this->messageExternalImageServer();
