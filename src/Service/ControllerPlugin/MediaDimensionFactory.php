@@ -18,7 +18,8 @@ class MediaDimensionFactory implements FactoryInterface
         return new MediaDimension(
             $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
             $services->get('Omeka\File\TempFileFactory'),
-            $services->get('Omeka\ApiAdapterManager')->get('media')
+            $services->get('Omeka\ApiAdapterManager')->get('media'),
+            $services->get('Omeka\Connection')
         );
     }
 }

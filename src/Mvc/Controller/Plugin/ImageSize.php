@@ -2,6 +2,7 @@
 
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use Doctrine\DBAL\Connection;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 use Omeka\Api\Adapter\Manager as AdapterManager;
 use Omeka\Api\Representation\AssetRepresentation;
@@ -28,6 +29,11 @@ class ImageSize extends AbstractPlugin
     protected $adapterManager;
 
     /**
+     * @var Connection
+     */
+    protected $connection;
+
+    /**
      * The default output when the file is unavailable or unknown.
      *
      * @var array
@@ -40,11 +46,13 @@ class ImageSize extends AbstractPlugin
     public function __construct(
         ?string $basePath,
         TempFileFactory $tempFileFactory,
-        AdapterManager $adapterManager
+        AdapterManager $adapterManager,
+        Connection $connection
     ) {
         $this->basePath = $basePath;
         $this->tempFileFactory = $tempFileFactory;
         $this->adapterManager = $adapterManager;
+        $this->connection = $connection;
     }
 
     /**
@@ -106,16 +114,23 @@ class ImageSize extends AbstractPlugin
         if ($type === 'original') {
             $storagePath = $this->getStoragePath($type, $media->filename());
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            return file_exists($filepath)
+            $result = file_exists($filepath)
                 ? $this->getWidthAndHeightLocal($filepath)
                 : $this->getWidthAndHeightUrl($media->originalUrl());
+        } else {
+            $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
+            $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+            $result = file_exists($filepath)
+                ? $this->getWidthAndHeightLocal($filepath)
+                : $this->getWidthAndHeightUrl($media->thumbnailUrl($type));
         }
 
-        $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
-        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        return file_exists($filepath)
-            ? $this->getWidthAndHeightLocal($filepath)
-            : $this->getWidthAndHeightUrl($media->thumbnailUrl($type));
+        // Cache dimensions in media data to avoid computation on next request.
+        if ($result['width'] && $result['height']) {
+            $this->cacheMediaDimensions($media->id(), $type, $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -217,5 +232,41 @@ class ImageSize extends AbstractPlugin
         }
 
         return $this->emptySize;
+    }
+
+    /**
+     * Store computed dimensions into media data.
+     *
+     * Omeka require mysl 5, so a single sql with json_set cannot be used.
+     */
+    protected function cacheMediaDimensions(
+        int $mediaId,
+        string $type,
+        array $dimensions
+    ): void {
+        // Only safe type values (original, large, medium, square).
+        if (!preg_match('/^[a-zA-Z][\w-]*$/', $type)) {
+            return;
+        }
+        try {
+            $raw = $this->connection->fetchOne(
+                'SELECT `data` FROM `media` WHERE `id` = ?',
+                [$mediaId]
+            );
+            $mediaData = $raw ? json_decode($raw, true) : [];
+            if (!is_array($mediaData)) {
+                $mediaData = [];
+            }
+            $mediaData['dimensions'][$type] = [
+                'width' => $dimensions['width'] ? (int) $dimensions['width'] : null,
+                'height' => $dimensions['height'] ? (int) $dimensions['height'] : null,
+            ];
+            $this->connection->executeStatement(
+                'UPDATE `media` SET `data` = ? WHERE `id` = ?',
+                [json_encode($mediaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $mediaId]
+            );
+        } catch (\Exception $e) {
+            // Retry later.
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace IiifServer\Mvc\Controller\Plugin;
 
+use Doctrine\DBAL\Connection;
 use finfo;
 use JamesHeinrich\GetID3\GetId3;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
@@ -29,6 +30,11 @@ class MediaDimension extends AbstractPlugin
     protected $mediaAdapter;
 
     /**
+     * @var Connection
+     */
+    protected $connection;
+
+    /**
      * The default output when the file is unavailable or unknown.
      *
      * @var array
@@ -42,11 +48,13 @@ class MediaDimension extends AbstractPlugin
     public function __construct(
         ?string $basePath,
         TempFileFactory $tempFileFactory,
-        MediaAdapter $mediaAdapter
+        MediaAdapter $mediaAdapter,
+        Connection $connection
     ) {
         $this->basePath = $basePath;
         $this->tempFileFactory = $tempFileFactory;
         $this->mediaAdapter = $mediaAdapter;
+        $this->connection = $connection;
     }
 
     /**
@@ -110,16 +118,23 @@ class MediaDimension extends AbstractPlugin
         if ($type === 'original') {
             $storagePath = $this->getStoragePath($type, $media->filename());
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            return file_exists($filepath)
+            $result = file_exists($filepath)
                 ? $this->getDimensionsLocal($filepath, $mainMediaType)
                 : $this->getDimensionsUrl($media->originalUrl(), $mainMediaType);
+        } else {
+            $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
+            $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+            $result = file_exists($filepath)
+                ? $this->getDimensionsLocal($filepath, $mainMediaType)
+                : $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
         }
 
-        $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
-        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        return file_exists($filepath)
-            ? $this->getDimensionsLocal($filepath, $mainMediaType)
-            : $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
+        // Cache dimensions in media data to avoid computation on next request.
+        if ($result['width'] || $result['height'] || $result['duration']) {
+            $this->cacheMediaDimensions($media->id(), $type, $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -269,5 +284,42 @@ class MediaDimension extends AbstractPlugin
             ?? (($data['ogg']['pageheader']['theora']['frame_rate_numerator'] ?? 25) / ($data['ogg']['pageheader']['theora']['frame_rate_denominator'] ?? 1));
         $data['playtime_seconds'] = ceil($frames / ($frameRate ?: 1));
         return $data;
+    }
+
+    /**
+     * Store computed dimensions into media data.
+     *
+     * Omeka require mysl 5, so a single sql with json_set cannot be used.
+     */
+    protected function cacheMediaDimensions(
+        int $mediaId,
+        string $type,
+        array $dimensions
+    ): void {
+        // Only safe type values (original, large, medium, square).
+        if (!preg_match('/^[a-zA-Z][\w-]*$/', $type)) {
+            return;
+        }
+        try {
+            $raw = $this->connection->fetchOne(
+                'SELECT `data` FROM `media` WHERE `id` = ?',
+                [$mediaId]
+            );
+            $mediaData = $raw ? json_decode($raw, true) : [];
+            if (!is_array($mediaData)) {
+                $mediaData = [];
+            }
+            $mediaData['dimensions'][$type] = [
+                'width' => $dimensions['width'] ? (int) $dimensions['width'] : null,
+                'height' => $dimensions['height'] ? (int) $dimensions['height'] : null,
+                'duration' => $dimensions['duration'] !== null ? (float) $dimensions['duration'] : null,
+            ];
+            $this->connection->executeStatement(
+                'UPDATE `media` SET `data` = ? WHERE `id` = ?',
+                [json_encode($mediaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $mediaId]
+            );
+        } catch (\Exception $e) {
+            // Retry later.
+        }
     }
 }

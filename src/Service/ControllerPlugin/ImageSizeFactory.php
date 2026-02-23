@@ -12,7 +12,8 @@ class ImageSizeFactory implements FactoryInterface
         return new ImageSize(
             $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
             $services->get('Omeka\File\TempFileFactory'),
-            $services->get('Omeka\ApiAdapterManager')
+            $services->get('Omeka\ApiAdapterManager'),
+            $services->get('Omeka\Connection')
         );
     }
 }

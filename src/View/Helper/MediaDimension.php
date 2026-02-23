@@ -39,7 +39,7 @@ class MediaDimension extends AbstractHelper
     public function __invoke($media, string $type = 'original'): array
     {
         try {
-            return $this->mediaDimensionPlugin->__invoke($media);
+            return $this->mediaDimensionPlugin->__invoke($media, $type);
         } catch (RuntimeException $e) {
             throw new Exception\RuntimeException($e->getMessage());
         }
