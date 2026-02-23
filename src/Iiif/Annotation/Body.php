@@ -115,6 +115,11 @@ class Body extends AbstractResourceType
         }
 
         if ($this->contentResource->isImage()) {
+            // When there is no image server, use the original file url.
+            if (!$this->iiifImageApiVersion) {
+                return $this->resource->originalUrl();
+            }
+
             // According to https://iiif.io/api/presentation/3.0/#57-content-resources,
             // "the URL may be the complete URL to a particular size of the image
             // content", so the large one here, and it's always a jpeg.
@@ -214,6 +219,10 @@ class Body extends AbstractResourceType
             $imageResourceServices = [];
             foreach ($this->iiifImageApiSupportedVersions as $supportedVersion) {
                 $service = strtok($supportedVersion, '/');
+                // Skip version "0" (no image server).
+                if (!$service) {
+                    continue;
+                }
                 $level = strtok('/') ?: '0';
                 $imageResourceService = [
                     'id' => $this->iiifMediaUrl->__invoke($this->resource, 'imageserver/id', $service),
