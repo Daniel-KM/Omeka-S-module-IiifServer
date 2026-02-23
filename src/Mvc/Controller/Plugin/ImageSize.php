@@ -100,12 +100,21 @@ class ImageSize extends AbstractPlugin
             }
         }
 
+        // In-memory cache to avoid redundant lookups within the same request
+        // (the DB-cached mediaData may not reflect a just-written value).
+        static $cache = [];
+        $cacheKey = $media->id() . '/' . $type;
+        if (!$force && isset($cache[$cacheKey])) {
+            return $cache[$cacheKey];
+        }
+
         // Check if size is already stored. The stored dimension may be null.
         if (!$force) {
             $mediaData = $media->mediaData();
             if (is_array($mediaData)
                 && !empty($mediaData['dimensions'][$type])
             ) {
+                $cache[$cacheKey] = $mediaData['dimensions'][$type];
                 return $mediaData['dimensions'][$type];
             }
         }
@@ -128,6 +137,7 @@ class ImageSize extends AbstractPlugin
         // Cache dimensions in media data to avoid computation on next request.
         if ($result['width'] && $result['height']) {
             $this->cacheMediaDimensions($media->id(), $type, $result);
+            $cache[$cacheKey] = $result;
         }
 
         return $result;
