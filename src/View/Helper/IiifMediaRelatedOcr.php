@@ -133,8 +133,15 @@ class IiifMediaRelatedOcr extends AbstractHelper
     protected function relatedMediaBasename(MediaRepresentation $callingResource): ?MediaRepresentation
     {
         $callingResourceId = $callingResource->id();
-        $callingResourceBasename = pathinfo((string) $callingResource->source(), PATHINFO_FILENAME);
-        if (!strlen((string) $callingResourceBasename)) {
+        $source = (string) $callingResource->source();
+        $callingResourceBasename = pathinfo($source, PATHINFO_FILENAME);
+        // For iiif images, the source is a url like …/f1/info.json, so pathinfo
+        // returns "info". Use the parent path segment as the meaningful
+        // identifier instead.
+        if ($callingResourceBasename === 'info') {
+            $callingResourceBasename = basename(dirname($source));
+        }
+        if (!strlen($callingResourceBasename)) {
             return null;
         }
 
