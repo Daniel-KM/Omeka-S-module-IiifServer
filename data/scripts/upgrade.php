@@ -35,7 +35,8 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
         $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
         'Common', '3.4.80'
     );
-    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+    $messenger->addError($message);
+    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
 }
 
 if (version_compare($oldVersion, '3.5.1', '<')) {
@@ -299,7 +300,8 @@ if (version_compare($oldVersion, '3.6.18', '<')) {
             $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
             'Derivative Media', '3.4.10'
         );
-        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        $messenger->addError($message);
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
     }
 
     // Fix previous upgrade.
@@ -342,7 +344,8 @@ if (version_compare($oldVersion, '3.6.19', '<')) {
             $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
             'ImageServer', '3.6.16'
         );
-        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        $messenger->addError($message);
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
     }
 
     $settings->set('iiifserver_manifest_summary_property', $settings->get('iiifserver_manifest_description_property', 'template'));
@@ -405,4 +408,25 @@ if (version_compare($oldVersion, '3.6.27', '<')) {
     if ($settings->get('iiifserver_identifier_apache_preencoding') === null) {
         $settings->set('iiifserver_identifier_apache_preencoding', true);
     }
+}
+
+if (version_compare($oldVersion, '3.6.28', '<')) {
+    $value = $settings->get('iiifserver_manifest_append_cors_headers');
+    if ($value !== null) {
+        $settings->set('iiifserver_append_cors_headers', $value);
+        $settings->delete('iiifserver_manifest_append_cors_headers');
+    }
+
+    // Migrate deprecated settings to the new encode_slash setting.
+    // If apache preencoding was enabled, the server likely supports
+    // encoded slashes, so enable the new setting.
+    $apachePreencoding = (bool) $settings->get('iiifserver_identifier_apache_preencoding', false);
+    $settings->set('iiifserver_identifier_encode_slash', $apachePreencoding);
+    $settings->delete('iiifserver_identifier_raw');
+    $settings->delete('iiifserver_identifier_apache_preencoding');
+
+    $message = new PsrMessage(
+        'The settings "iiifserver_identifier_raw" and "iiifserver_identifier_apache_preencoding" have been replaced by "iiifserver_identifier_encode_slash" (auto-detected on config save).' // @translate
+    );
+    $messenger->addWarning($message);
 }
