@@ -110,9 +110,8 @@ class PresentationController extends AbstractActionController
         /** @see \IiifServer\Controller\MediaController::fetchAction() */
         if ($this->getPluginManager()->has('accessLevel')) {
             /** @var \Access\Mvc\Controller\Plugin\AccessLevel $accessLevel */
-            $accessLevel = $this->getPluginManager()->get('accessLevel');
-            $accessLevel = $this->accessLevel($resource);
-            if ($accessLevel === 'forbidden') {
+            $accessLevelResource = $this->accessLevel($resource);
+            if (accessLevelResource === 'forbidden') {
                 return $this->jsonError(new OmekaException\PermissionDeniedException, \Laminas\Http\Response::STATUS_CODE_403);
             }
             // TODO Manage level reserved. For now, only on media level.
@@ -125,7 +124,13 @@ class PresentationController extends AbstractActionController
         $toCache = false;
 
         $settings = $this->settings();
-        $useCache = (bool) $settings->get('iiifserver_manifest_cache', false);
+
+        // Don't use cache for privileged users: they should see private media
+        // in fresh manifests. Cached manifests only contain public media.
+        $acl = $resource->getServiceLocator()->get('Omeka\Acl');
+        $skipCache = $acl->userIsAllowed('Omeka\Entity\Resource', 'view-all');
+
+        $useCache = !$skipCache && (bool) $settings->get('iiifserver_manifest_cache', false);
         if ($useCache) {
             $itemId = $resource->id();
             $config = $resource->getServiceLocator()->get('Config');
@@ -142,7 +147,7 @@ class PresentationController extends AbstractActionController
         }
 
         // Compatibility with old version of DerivativeMedia.
-        $useCache = !$toCache && $settings->get('iiifserver_manifest_cache_media', false);
+        $useCache = !$skipCache && !$toCache && $settings->get('iiifserver_manifest_cache_media', false);
         if ($useCache && $viewHelpers->has('derivativeList')) {
             $type = 'iiif-' . (int) $version;
             $derivative = $viewHelpers->get('derivativeList')->__invoke($resource, ['type' => $type]);

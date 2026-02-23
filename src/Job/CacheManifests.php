@@ -48,6 +48,12 @@ class CacheManifests extends AbstractJob
             return;
         }
 
+        // Clear authentication identity so manifests are generated as anonymous
+        // user: cached manifests should only contain public media, not private
+        // ones.
+        $auth = $services->get('Omeka\AuthenticationService');
+        $auth->clearIdentity();
+
         foreach ([2, 3] as $version) {
             if (!$this->ensureDirectory("$basePath/iiif/$version")) {
                 $this->logger->err(
