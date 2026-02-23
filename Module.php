@@ -266,6 +266,14 @@ class Module extends AbstractModule
         }
 
         $this->messageEncodedSlashes();
+        $this->messageExternalImageServer();
+    }
+
+    protected function postUpgrade(?string $oldVersion, ?string $newVersion): void
+    {
+        $this->postUpgradeAuto($oldVersion, $newVersion);
+        $this->messageEncodedSlashes();
+        $this->messageExternalImageServer();
     }
 
     protected function postUninstall(): void
@@ -320,6 +328,7 @@ class Module extends AbstractModule
     {
         $this->messageCors();
         $this->messageEncodedSlashes();
+        $this->messageExternalImageServer();
 
         $translate = $renderer->plugin('translate');
         return '<p>'
@@ -335,6 +344,7 @@ class Module extends AbstractModule
     {
         $this->messageCache();
         $this->messageEncodedSlashes();
+        $this->messageExternalImageServer();
 
         /**
          * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
@@ -839,6 +849,147 @@ class Module extends AbstractModule
         $settings = $services->get('Omeka\Settings');
         $prefix = $settings->get('iiifserver_identifier_prefix', '');
         return strpos($prefix, '/') !== false;
+    }
+
+    /**
+     * Check if an external IIIF image server handles image requests.
+     *
+     * Uses a self-request to a IIIF image info endpoint and analyzes
+     * response headers and content. Detection works regardless of which
+     * proxy (Apache, nginx, Traefik) sits in front of the image server.
+     *
+     * Known servers detected by name: Cantaloupe, IIPImage.
+     * Any other external server (Loris, serverless-iiif, RAIS, Digilib,
+     * SIPI, Go IIIF, Riiif, etc.) is detected generically via header and
+     * content analysis.
+     *
+     * @see https://iiif.io/get-started/image-servers/
+     *
+     * @return array With keys "external" (bool) and "server" (string|null:
+     * "cantaloupe", "iipimage", "unknown", or null).
+     */
+    protected function checkExternalImageServer(): array
+    {
+        $result = ['external' => false, 'server' => null];
+
+        $services = $this->getServiceLocator();
+        $helpers = $services->get('ViewHelperManager');
+        $serverUrl = $helpers->get('ServerUrl')->__invoke();
+        $basePath = $helpers->get('BasePath')->__invoke();
+
+        // Request a non-existent media info.json. If an external server
+        // intercepts /iiif/ requests, the response will differ from the
+        // Omeka IiifServer module response.
+        $testUrl = $serverUrl . $basePath . '/iiif/3/0/info.json';
+
+        $context = @stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 5,
+                'follow_location' => 0,
+                'ignore_errors' => true,
+            ],
+        ]);
+        $response = @file_get_contents($testUrl, false, $context);
+
+        if (!isset($http_response_header) || !is_array($http_response_header)) {
+            // Self-request failed. Fallback: check the media api url setting.
+            $settings = $services->get('Omeka\Settings');
+            $mediaApiUrl = $settings->get('iiifserver_media_api_url', '');
+            if ($mediaApiUrl) {
+                $result['external'] = true;
+                $result['server'] = 'unknown';
+            }
+            return $result;
+        }
+
+        $headers = implode("\n", $http_response_header);
+
+        // 1. Try to identify the server by name from headers.
+        if (stripos($headers, 'Cantaloupe') !== false
+            || preg_match('/Server:\s*Jetty/i', $headers)
+        ) {
+            return ['external' => true, 'server' => 'cantaloupe'];
+        }
+
+        if (stripos($headers, 'IIPImage') !== false
+            || stripos($headers, 'iipsrv') !== false
+        ) {
+            return ['external' => true, 'server' => 'iipimage'];
+        }
+
+        // 2. Check for non-Apache/PHP server headers (covers nginx,
+        // Caddy, Traefik, CloudFront, gunicorn, Puma, etc.).
+        if (!preg_match('/Server:\s*Apache/i', $headers)
+            && !preg_match('/X-Powered-By:\s*PHP/i', $headers)
+            && preg_match('/^Server:\s*\S/im', $headers)
+        ) {
+            return ['external' => true, 'server' => 'unknown'];
+        }
+
+        // 3. Headers look like Apache/PHP (e.g. external server behind
+        // an Apache reverse proxy). Fall back to content analysis:
+        // IiifServer always returns JSON for errors (Omeka error format
+        // with "errors" key). External servers return plain text, HTML,
+        // or a different JSON structure.
+        if ($response !== false && $response !== '') {
+            $json = @json_decode($response, true);
+            if ($json === null) {
+                // Non-JSON response on a .json endpoint -> external.
+                return ['external' => true, 'server' => 'unknown'];
+            }
+            if (is_array($json) && !isset($json['errors'])) {
+                // JSON but not Omeka error format. Check for IIIF Image
+                // API keys that IiifServer would not return for a
+                // non-existent media.
+                if (isset($json['protocol']) || isset($json['tiles'])
+                    || isset($json['extraQualities'])
+                ) {
+                    return ['external' => true, 'server' => 'unknown'];
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Display a message about external image server detection and auto-update
+     * the setting iiifserver_media_api_identifier when needed.
+     */
+    protected function messageExternalImageServer(): void
+    {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $plugins = $services->get('ControllerPluginManager');
+        $messenger = $plugins->get('messenger');
+
+        $check = $this->checkExternalImageServer();
+
+        $identifier = $settings->get('iiifserver_media_api_identifier', 'media_id');
+
+        if ($check['external']) {
+            $serverLabel = $check['server'] === 'cantaloupe'
+                ? 'Cantaloupe'
+                : ($check['server'] === 'iipimage' ? 'IIPImage' : 'an external IIIF image server');
+
+            if (in_array($identifier, ['media_id', 'default'])) {
+                // Auto-configure: external server with filesystem source
+                // needs the filename, not the numeric media id.
+                $settings->set('iiifserver_media_api_identifier', 'filename_image');
+                $message = new PsrMessage(
+                    'An external IIIF image server was detected ({server_label}). The media identifier has been set to "filename with extension (image only)" for compatibility. The option can be changed in the config form.', // @translate
+                    ['server_label' => $serverLabel]
+                );
+                $messenger->addSuccess($message);
+            } else {
+                $message = new PsrMessage(
+                    'An external IIIF image server was detected ({server_label}). The current media identifier setting "{identifier}" is already set and likely compatible. If images don’t display, check the config form.', // @translate
+                    ['server_label' => $serverLabel, 'identifier' => $identifier]
+                );
+                $messenger->addNotice($message);
+            }
+        }
     }
 
     /**
