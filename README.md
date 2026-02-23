@@ -5,24 +5,24 @@ IIIF Server (module for Omeka S)
 > are available on [GitLab], which seems to respect users and privacy better
 > than the previous repository.__
 
-[![Build Status](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer.svg?branch=master)](https://travis-ci.org/Daniel-KM/Omeka-S-module-IiifServer)
-
 [IIIF Server] is a module for [Omeka S] that integrates the [IIIF specifications]
 to allow to process and share instantly images of any size and medias (pdf,
-audio, video, 3D…) in the desired formats. It can use any image server to display
-images and media, like the module [Image Server], but you can use any other
-external one, like [Cantaloupe] or [IIP Image].
+audio, video, 3D…) in the desired formats. It can use any image server to
+display images and media, like the module [Image Server], but you can use any
+other external one, like [Cantaloupe] or [IIP Image].
 
 The full specifications of the [International Image Interoperability Framework]
-standard are supported (service 2 or 3, level 2), so any widget that supports it
-can use it. Rotation, zoom, inside search, text overlay, etc. may be managed
-too. Dynamic lists of records may be created, for example for browse pages.
+standard are supported (service 2 or 3, level 2), so any web or desktop viewer
+that supports it can use it. Rotation, zoom, inside search, text overlay, etc.
+may be managed too. Dynamic lists of records may be created, for example for
+browse pages.
 
 The IIIF manifests can be displayed with many viewers, the integrated [OpenSeadragon],
 the [Universal Viewer], the advanced [Mirador], or the lighter and themable [Diva],
 or any other IIIF compatible viewer.
 
-The search is provided by the module [Iiif Search] for common xml formats.
+The search is provided by the module [Iiif Search] for common formats (xml [alto]
+(recommended), xml [pdf2xml], html [hocr]).
 
 
 Installation
@@ -60,10 +60,7 @@ before enabling of IiifServer. Else, simply set them in the config form.
 ### PHP
 
 PHP should be installed with the extension `exif` in order to get the size of
-images. This is the case for all major distributions and providers. At least one
-of the php extensions [GD] or [Imagick] are recommended. They are installed by
-default in most servers. If not, the image server will use the command line
-[ImageMagick] tool `convert` automatically.
+images. This is the case for all major distributions and providers.
 
 ### Web server and identifiers containing `/`
 
@@ -94,14 +91,14 @@ config of the module :
 
 To be able to share manifests and contents with other IIIF servers, the server
 should allow [CORS]. This feature can be enable in the config of the module, in
-the config of the server or in the file `.htaccess`.
+the config of the server, or in the file `.htaccess`.
 
 **Warning**: the cors headers should be set one time only. If it is set multiple
 times, it will be disabled. This is the purpose of the option in the main config
 of the module.
 
 If you prefer to append cors via the config the server, disable the option in
-the config first. On Apache 2.4, the module "headers" should be enabled:
+the config first. On Apache 2.4, the module "headers" must be enabled:
 
 ```sh
 a2enmod headers
@@ -123,13 +120,13 @@ Then, you have to add the following rules, adapted to your needs, to the file
 It is recommended to use the main config of the server, for example  with the
 directive `<Directory>`.
 
-To fix Amazon cors issues, see the [aws documentation].
+To fix Amazon issues with cors, see the [aws documentation].
 
 ### Cache
 
 When your documents are big (more than 100 to 1000 pages, depending on your
 server, your network and your public), you may want to cache manifests in order
-to delivrate them instantly. In that case, check the option in the config.
+to deliver them instantly. In that case, check the option in the config.
 
 ### Local access to iiif source
 
@@ -146,20 +143,31 @@ view helper in your theme:
 <?= $this->iiifManifestLink($item) ?>
 ```
 
+* For test
+
+The module includes a comprehensive test suite with unit and functional tests.
+Run them from the root of Omeka:
+
+```sh
+vendor/bin/phpunit -c modules/IiifServer/phpunit.xml --testdox
+```
+
 
 Image server
 ------------
 
 Except if all your manifests are external or if you have no media, you will need
-a IIIF image server. It can be the module [Image Server] or an external server,
-like [Cantaloupe] or [IIP Image]. The image server may be used to display audio
-and video files too, if it supports them, else they will be served by Omeka.
+an image server that supports the standard IIIF . It can be the module [Image Server]
+or an external server, like [Cantaloupe], [IIP Image] or [many others]. The
+image server may be used to display audio and video files too, if it supports
+them, else they will be served by Omeka.
 
 ### Module Image Server
 
 The module [Image Server] serves original images and can create tile statically
 or dynamically. This is the simplest way to get instant big images with Omeka.
-The images are the original ones, stored by Omeka.
+The images are the original ones, stored by Omeka. And if you use [vips] as
+backend, the performance will be similar to specialized tools.
 
 ### External images servers
 
@@ -190,6 +198,14 @@ image server to be on the same server than Omeka, or at least that the image
 server can access the original directory via the file system of via http, or any
 another protocol.
 
+Note that for performance, it is recommended that the image server uses the same
+file system than the web server (Omeka), so they should be on the same server or
+the directory `files/original/` should be shared, so the image server can access
+directly to files on the filesystem, that is the quickest. The directory can be
+changed on Omeka in the config local.config.php (keys `['file_store']['local']['base_path']
+and ['base_uri'], or in the config of the external server. It can be done via
+volumes too if the infrastructure is containerized.
+
 Three params should be set:
 - set the original directory as the base path in your image server (option "FilesystemSource.BasicLookupStrategy.path_prefix"
   for Cantaloupe);
@@ -200,8 +216,8 @@ Three params should be set:
 
 #### Note for Cantaloupe
 
-In some cases or if not configured, Image Api v3 does not work and images are
-not displayed, so keep Image Api v2 in that case.
+Since 2020 (v5), Cantaloupe supports IIIF Image Api v3. If you use an older
+version, keep Image Api v2.
 
 
 Notes
@@ -674,13 +690,10 @@ external medias, a local standard media file with module Image Server.
 Depending on infrastructure, proxy, etc., some options allow to modify the urls
 used.
 
-- Allow raw identifier: needed to use ark identifier, so the identifier will be
-  available as "ark:/12345/betz" and "ark:%2F12345%2Fbetz".
-- Pre-encode slashes for web server apache: Enable this option only when using
-  an apache config with mod_rewrite that automatically decodes urls. When
-  enabled, "/" is pre-encoded to "%2F", resulting in "%252F" in the final URL.
-  Apache will decode it once back to "%2F" automatically, resulting in the right
-  url. This option is useless in other cases or with most of the proxies.
+- Encode slash in identifiers: When enabled, forward slashes `/` in identifiers
+  are encoded as `%2F` in IIIF urls. This is required by the IIIF Image API
+  specification and needed when using identifiers that contain slashes (like Ark).
+  The option is auto-detected on config save based on the server capabilities.
 
 
 Routes and urls
@@ -738,17 +751,16 @@ TODO / Bugs
 - [x] Type of manifest: Include pdf as rendering.
 - [ ] Structure: Clarify names of canvases and referenced canvas in the table of contents and list of items.
 - [ ] Structure: Implements recursive ranges in structures for IIIF v2.
-- [ ] Structure: Normalize the format of the structure: csv? ini? yaml? xml? Provide an automatic upgrade too.
+- [ ] Structure: Normalize the format of the structure. Currently, csv and xml are supported. Add json.
 - [ ] Structure: Convert structure v3 to v2 and vice-versa.
 - [x] Structure: Fully support alphanumeric name for canvas id.
 - [ ] Structure: Support translation of structure (use the language of the value?).
-- [ ] Structure: Full support of named canvases.
+- [x] Structure: Full support of named canvases.
 - [ ] Use the option "no storage" for url of a media for external server.
 - [ ] Manage url prefix.
-- [ ] When a item set contains non image items, the left panel with the index is displayed only when the first item contains an image (UV).
+- [x] When a item set contains non image items, the left panel with the index is displayed only when the first item contains an image (UV). Fixed in recent versions of UV.
 - [ ] Job to update data of [IIIF Image].
 - [x] Create a way to cache big iiif manifests (useless for image info.json).
-- [ ] Always return a thumbnail in iiif v3.
 - [ ] Include thumbnails in canvas to avoid fetching info.json (so cache whole manifest).
 - [x] Check if multiple roots is working for structures in iiif v3. (yes, as multiple structures).
 - [x] Store dimensions on item/media save.
@@ -808,8 +820,8 @@ Copyright
 
 First version of this plugin was built for the [Bibliothèque patrimoniale] of
 [Mines ParisTech]. This [Omeka S] module is a rewrite of the [Universal Viewer plugin for Omeka]
-by [BibLibre] with the same features. Next, it was , but separated into three
-modules: the IIIF server, the [Image Server] and the viewer [Universal Viewer].
+by [BibLibre] with the same features. Then it was separated into three modules:
+the IIIF server, the [Image Server] and the viewer [Universal Viewer].
 This viewer integrates the tiler [Zoomify] that was used the plugin [OpenLayers Zoom]
 for [Omeka Classic] and another tiler to support the [Deep Zoom Image] tile
 format.
@@ -821,7 +833,8 @@ format.
 [International Image Interoperability Framework]: http://iiif.io
 [IIIF specifications]: http://iiif.io/api/
 [Cantaloupe]: https://cantaloupe-project.github.io
-[IIP Image]: http://iipimage.sourceforge.net
+[IIP Image]: https://iipimage.sourceforge.io
+[many others]: https://iiif.io/get-started/image-servers
 [OpenSeadragon]: https://openseadragon.github.io
 [Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
 [Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
