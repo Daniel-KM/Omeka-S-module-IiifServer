@@ -896,8 +896,8 @@ class ConfigForm extends Form
                 'name' => 'iiifserver_media_api_url',
                 'type' => Element\Url::class,
                 'options' => [
-                    'label' => 'External image server base url', // @translate
-                    'info' => 'This url may be used by external modules when the images are provided via an external server.', // @translate
+                    'label' => 'External image server base url (required to use an external server)', // @translate
+                    'info' => 'When using an external server like Cantaloupe or IIPImage. this url must be set, for example: https://iiif.example.org/iiif. All IIIF image urls will be rewritten to use this base instead of the Omeka one.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_url',

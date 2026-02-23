@@ -164,6 +164,8 @@ trait TraitDescriptiveThumbnail
                     return $baseUri . '/full/,' . $this->defaultHeight . '/0/default.jpg';
             }
         }
+
+        return '';
     }
 
     /**

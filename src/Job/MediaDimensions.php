@@ -78,6 +78,7 @@ class MediaDimensions extends AbstractJob
     {
         /** @var \Omeka\Api\Manager $api */
         $services = $this->getServiceLocator();
+        $this->logger = $services->get('Omeka\Logger');
         $api = $services->get('Omeka\ApiManager');
 
         $query = $this->getArg('query') ?: [];

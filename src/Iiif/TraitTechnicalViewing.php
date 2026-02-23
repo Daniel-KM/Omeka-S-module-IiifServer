@@ -45,6 +45,7 @@ trait TraitTechnicalViewing
 
     public function viewingDirection(): ?string
     {
+        $viewingDirection = '';
         $viewingDirectionProperty = $this->settings->get('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {
             $viewingDirection = strip_tags((string) $this->resource->value($viewingDirectionProperty));

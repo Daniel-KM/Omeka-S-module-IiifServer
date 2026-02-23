@@ -101,26 +101,19 @@ class MediaController extends AbstractActionController
             // Manage custom asset file from the theme.
             $mediaType = $media ? $media->mediaType() : 'image/png';
             $mediaTypeMain = strtok($mediaType, '/');
-            switch ($mediaType) {
-                case $mediaTypeMain === 'image':
-                    $mediaType = 'image/png';
-                    $file = 'img/locked-file.png';
-                    break;
-                case 'application/pdf':
-                    $file = 'img/locked-file.pdf';
-                    break;
-                case $mediaTypeMain === 'audio':
-                case $mediaTypeMain === 'video':
-                    $mediaType = 'video/mp4';
-                    $file = 'img/locked-file.mp4';
-                    break;
-                case 'application/vnd.oasis.opendocument.text':
-                    $file = 'img/locked-file.odt';
-                    break;
-                default:
-                    $mediaType = 'image/png';
-                    $file = 'img/locked-file.png';
-                    break;
+            if ($mediaTypeMain === 'image') {
+                $mediaType = 'image/png';
+                $file = 'img/locked-file.png';
+            } elseif ($mediaType === 'application/pdf') {
+                $file = 'img/locked-file.pdf';
+            } elseif ($mediaTypeMain === 'audio' || $mediaTypeMain === 'video') {
+                $mediaType = 'video/mp4';
+                $file = 'img/locked-file.mp4';
+            } elseif ($mediaType === 'application/vnd.oasis.opendocument.text') {
+                $file = 'img/locked-file.odt';
+            } else {
+                $mediaType = 'image/png';
+                $file = 'img/locked-file.png';
             }
 
             $viewHelpers = $this->viewHelpers();

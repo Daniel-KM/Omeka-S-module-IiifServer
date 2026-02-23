@@ -381,7 +381,7 @@ trait TraitLinking
             }
         }
 
-        if (!$usePrimaryMedia) {
+        if ($usePrimaryMedia) {
             $media = $this->resource->primaryMedia();
             $id = $canvasId($media);
             if ($id) {

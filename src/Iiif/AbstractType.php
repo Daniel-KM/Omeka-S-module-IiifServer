@@ -115,7 +115,7 @@ abstract class AbstractType extends ArrayObject implements JsonSerializable
      * This method is used to adapt, complete or skip property requirements, for
      * example for an extra service. It is not used internally.
      */
-    public function setPropertyRequirements(array $propertyRequirements): array
+    public function setPropertyRequirements(array $propertyRequirements): self
     {
         $this->propertyRequirements = $propertyRequirements;
         return $this;

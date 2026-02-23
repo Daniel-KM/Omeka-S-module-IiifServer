@@ -235,10 +235,7 @@ class IiifCanvas2 extends AbstractHelper
         $thumbnailServiceUrl = $view->iiifMediaUrl($media, 'imageserver/id', '2');
         $thumbnailService['@id'] = $thumbnailServiceUrl;
         $thumbnailService['profile'] = 'http://iiif.io/api/image/2/level2.json';
-        $thumbnailService = $thumbnailService;
-
         $thumbnail['service'] = $thumbnailService;
-        $thumbnail = $thumbnail;
 
         return $thumbnail;
     }
@@ -304,9 +301,7 @@ class IiifCanvas2 extends AbstractHelper
             $imageResourceService['height'] = $height;
         }
 
-        $imageResourceService = $imageResourceService;
         $imageResource['service'] = $imageResourceService;
-        $imageResource = $imageResource;
 
         $image['resource'] = $imageResource;
         $image['on'] = $canvasUrl;

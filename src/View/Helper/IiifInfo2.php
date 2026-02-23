@@ -225,7 +225,7 @@ class IiifInfo2 extends AbstractHelper
                 // if ($this->context() === 'http://iiif.io/api/presentation/3/context.json') {
                 //     return null;
                 // }
-                $url = $setting($this->hasModuleImageServer ? 'imageserver_info_rights_text' : 'iifserver_manifest_rights_text');
+                $url = $setting($this->hasModuleImageServer ? 'imageserver_info_rights_text' : 'iiifserver_manifest_rights_text');
                 break;
             case 'url':
                 if ($this->hasModuleImageServer) {

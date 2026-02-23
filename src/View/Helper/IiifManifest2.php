@@ -230,6 +230,7 @@ class IiifManifest2 extends AbstractHelper
         $isLicenseUrl = $license
             && (substr($license, 0, 8) === 'https://' || substr($license, 0, 7) === 'http://');
 
+        $attribution = '';
         $attributionProperty = $this->setting->__invoke('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags((string) $item->value($attributionProperty, ['default' => '']));
@@ -362,6 +363,7 @@ class IiifManifest2 extends AbstractHelper
         $manifest['thumbnail'] = $this->_mainThumbnail($item, $is3dModel);
 
         // The viewing direction and hint can be set in manifest and sequence.
+        $viewingDirection = '';
         $viewingDirectionProperty = $this->setting->__invoke('iiifserver_manifest_viewing_direction_property');
         if ($viewingDirectionProperty) {
             $viewingDirection = strip_tags((string) $item->value($viewingDirectionProperty));
@@ -374,6 +376,7 @@ class IiifManifest2 extends AbstractHelper
         }
 
         $allowedViewingHintManifest = ['individuals', 'paged', 'continuous'];
+        $viewingHint = '';
         $viewingHintProperty = $this->setting->__invoke('iiifserver_manifest_behavior_property');
         if ($viewingHintProperty) {
             $viewingHint = strip_tags((string) $item->value($viewingHintProperty));
@@ -491,46 +494,34 @@ class IiifManifest2 extends AbstractHelper
         else {
             foreach ($nonImages as $media) {
                 $mediaType = $media->mediaType();
-                switch ($mediaType) {
-                    case '':
-                        break;
-
-                    case 'application/pdf':
-                        $mediaSequenceElement = $this->_iiifMediaSequencePdf(
-                            $media,
-                            ['label' => $label, 'metadata' => $metadata]
-                        );
-                        $mediaSequencesElements[] = $mediaSequenceElement;
-                        // TODO Add the file for download (no rendering)? The
-                        // file is already available for download in the pdf viewer.
-                        break;
-
-                    case substr($mediaType, 0, 6) === 'audio/':
-                    // case 'audio/ogg':
-                    // case 'audio/mp3':
-                        $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
-                            $media,
-                            ['label' => $label, 'metadata' => $metadata]
-                        );
-                        $mediaSequencesElements[] = $mediaSequenceElement;
-                        // Rendering files are automatically added for download.
-                        break;
-
+                $mediaTypeMain = strtok((string) $mediaType, '/');
+                if ($mediaType === '') {
+                    // Nothing to do.
+                } elseif ($mediaType === 'application/pdf') {
+                    $mediaSequenceElement = $this->_iiifMediaSequencePdf(
+                        $media,
+                        ['label' => $label, 'metadata' => $metadata]
+                    );
+                    $mediaSequencesElements[] = $mediaSequenceElement;
+                    // TODO Add the file for download (no rendering)? The
+                    // file is already available for download in the pdf viewer.
+                } elseif ($mediaTypeMain === 'audio') {
+                    $mediaSequenceElement = $this->_iiifMediaSequenceAudio(
+                        $media,
+                        ['label' => $label, 'metadata' => $metadata]
+                    );
+                    $mediaSequencesElements[] = $mediaSequenceElement;
+                    // Rendering files are automatically added for download.
                     // TODO Check/support the media type "application/octet-stream".
-                    // case 'application/octet-stream':
-                    case substr($mediaType, 0, 6) === 'video/':
-                    // case 'video/webm':
-                        $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
-                            $media,
-                            ['label' => $label, 'metadata' => $metadata]
-                        );
-                        $mediaSequencesElements[] = $mediaSequenceElement;
-                        // Rendering files are automatically added for download.
-                        break;
-
-                    // TODO Add other content.
-                    default:
+                } elseif ($mediaTypeMain === 'video') {
+                    $mediaSequenceElement = $this->_iiifMediaSequenceVideo(
+                        $media,
+                        ['label' => $label, 'metadata' => $metadata]
+                    );
+                    $mediaSequencesElements[] = $mediaSequenceElement;
+                    // Rendering files are automatically added for download.
                 }
+                // TODO Add other content.
 
                 // TODO Add other files as resources of the current element.
             }
@@ -1540,7 +1531,7 @@ class IiifManifest2 extends AbstractHelper
             $tempFile = $this->tempFileFactory->build();
             $tempPath = $tempFile->getTempPath();
             $tempFile->delete();
-            $result = file_put_contents($tempPath, $filepath);
+            $result = file_put_contents($tempPath, file_get_contents($filepath));
             if ($result !== false) {
                 $result = getimagesize($tempPath);
                 if ($result) {
@@ -1724,7 +1715,7 @@ class IiifManifest2 extends AbstractHelper
             'http://iiif.io/api/image/3/context.json' => [
                 '0' => 'level0',
                 '1' => 'level1',
-                '2' => 'level3',
+                '2' => 'level2',
             ],
         ];
         if (!is_numeric($level)) {

@@ -72,6 +72,7 @@ trait TraitTechnicalBehavior
      */
     public function behavior(): array
     {
+        $behaviors = [];
         $behaviorProperty = $this->settings->get('iiifserver_manifest_behavior_property', []);
         if ($behaviorProperty) {
             $behaviors = $this->resource->value($behaviorProperty, ['all' => true]);

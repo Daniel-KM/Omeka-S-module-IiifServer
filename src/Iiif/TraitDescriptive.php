@@ -153,7 +153,6 @@ trait TraitDescriptive
      */
     public function requiredStatement(): ?array
     {
-        $requiredStatement = [];
         $requiredStatement = $this->settings->get('iiifserver_manifest_attribution_property');
         if ($requiredStatement) {
             $requiredStatement = $this->resource->value($requiredStatement, ['all' => true]);
@@ -216,7 +215,7 @@ trait TraitDescriptive
         }
 
         $onlyPropertyOrSimple = isset($providersAll['property_or_simple']);
-        if ($onlyPropertyOrAgent) {
+        if ($onlyPropertyOrSimple) {
             $providersAll['property'] ??= false;
             $providersAll['simple'] ??= false;
             unset($providersAll['property_or_simple']);

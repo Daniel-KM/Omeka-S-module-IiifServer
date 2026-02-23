@@ -114,6 +114,7 @@ class IiifCollection2 extends AbstractHelper
         $metadata = $this->iiifMetadata($resource);
         $manifest['metadata'] = $metadata;
 
+        $description = '';
         $descriptionProperty = $this->settings->get('iiifserver_manifest_summary_property');
         if ($descriptionProperty) {
             $description = $descriptionProperty === 'template'
@@ -127,6 +128,7 @@ class IiifCollection2 extends AbstractHelper
             $manifest['license'] = $license;
         }
 
+        $attribution = '';
         $attributionProperty = $this->settings->get('iiifserver_manifest_attribution_property');
         if ($attributionProperty) {
             $attribution = strip_tags((string) $resource->value($attributionProperty, ['default' => '']));

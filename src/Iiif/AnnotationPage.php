@@ -332,8 +332,8 @@ class AnnotationPage extends AbstractResourceType
             $attributes = $xmlTextLine->attributes();
             $zone = [];
             $zone['left'] = (int) (@$attributes->HPOS * $widthCoef);
-            $zone['top'] = (int) (@$attributes->VPOS * $widthCoef);
-            $zone['width'] = (int) (@$attributes->WIDTH * $heightCoef);
+            $zone['top'] = (int) (@$attributes->VPOS * $heightCoef);
+            $zone['width'] = (int) (@$attributes->WIDTH * $widthCoef);
             $zone['height'] = (int) (@$attributes->HEIGHT * $heightCoef);
             $opts['target_fragment'] = 'xywh=' . implode(',', $zone);
             $value = '';

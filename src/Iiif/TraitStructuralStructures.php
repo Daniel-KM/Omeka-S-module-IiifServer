@@ -365,7 +365,7 @@ trait TraitStructuralStructures
                     $isFirst = false;
                     continue;
                 }
-                if ($rangeData['label'] === null && $rangeData['label'] === '' || !$rangeData['views']) {
+                if (($rangeData['label'] === null || $rangeData['label'] === '') && !$rangeData['views']) {
                     continue;
                 }
                 $iiifItems = array_intersect_key($referencedCanvases, array_flip($rangeData['views']));
@@ -377,7 +377,7 @@ trait TraitStructuralStructures
                     ->setOptions([
                         'index' => $rangeData['name'],
                         'label' => $rangeData['label'] === null || $rangeData['label'] === ''
-                            ? sprintf($this->view->translate('[View %s]'), key($iiifItems)) // @translate
+                            ? sprintf($this->translator->translate('[View %s]'), key($iiifItems)) // @translate
                             : $rangeData['label'],
                         'items' => $iiifItems,
                         'skip' => ['@context' => true],
@@ -398,7 +398,7 @@ trait TraitStructuralStructures
                 ->setOptions([
                     'index' => $rangeData['name'],
                     'label' => $rangeData['label'] === null || $rangeData['label'] === ''
-                        ? $this->view->translate('[Content]') // @translate
+                        ? $this->translator->translate('[Content]') // @translate
                         : $rangeData['label'],
                     'items' => $mainIiifItems,
                     'skip' => ['@context' => true],
