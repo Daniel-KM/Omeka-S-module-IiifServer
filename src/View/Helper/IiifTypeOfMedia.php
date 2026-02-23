@@ -106,6 +106,7 @@ class IiifTypeOfMedia extends AbstractHelper
         'application/xml' => 'Dataset',
         'text/html' => 'Text',
         'text/xml' => 'Dataset',
+        'text/vnd.hocr+html' => 'Text',
 
         'application/x-gzip' => null,
         'application/x-ms-wmp' => null,
@@ -148,7 +149,11 @@ class IiifTypeOfMedia extends AbstractHelper
     ];
 
     /**
-     * Some labels for common formats.
+     * Human-readable labels for media types.
+     *
+     * Adapted:
+     * @see \IiifServer\Iiif\AbstractResourceType::$mediaLabels
+     * @see \IiifServer\View\Helper\IiifTypeOfMedia::$mediaLabels
      *
      * @var array
      */
@@ -181,8 +186,9 @@ class IiifTypeOfMedia extends AbstractHelper
         'application/xml' => 'XML',
         'text/html' => 'Web page',
         'text/xml' => 'XML',
+        'text/vnd.hocr+html' => 'hOCR',
 
-        'application/x-gzip' => 'Achive Zip',
+        'application/x-gzip' => 'Archive Zip',
         'application/x-ms-wmp' => 'Video Windows',
         'application/x-msdownload' => 'File Windows',
         'application/x-shockwave-flash' => 'Flash',

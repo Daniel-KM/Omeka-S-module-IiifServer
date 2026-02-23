@@ -256,6 +256,83 @@ abstract class AbstractResourceType extends AbstractType
     protected $logger;
 
     /**
+     * Human-readable labels for media types.
+     *
+     * Adapted:
+     * @see \IiifServer\Iiif\AbstractResourceType::$mediaLabels
+     * @see \IiifServer\View\Helper\IiifTypeOfMedia::$mediaLabels
+     *
+     * @var array
+     */
+    protected $mediaLabels = [
+        'application/msword' => 'Document Word',
+        'application/ogg' => 'Sound OGG',
+        'application/pdf' => 'Document PDF',
+        'application/rtf' => 'Document RTF',
+
+        'application/vnd.ms-access' => 'Database Access',
+        'application/vnd.ms-excel' => 'Spreadsheet Excel',
+        'application/vnd.ms-powerpoint' => 'Presentation Powerpoint',
+        'application/vnd.ms-project' => 'Microsoft Project',
+        'application/vnd.ms-write' => 'Document Write',
+        'application/vnd.oasis.opendocument.chart' => 'Chart OpenDocument',
+        'application/vnd.oasis.opendocument.database' => 'Database OpenDocument',
+        'application/vnd.oasis.opendocument.formula' => 'Formula OpenDocument',
+        'application/vnd.oasis.opendocument.graphics' => 'Graphics OpenDocument',
+        'application/vnd.oasis.opendocument.presentation' => 'Presentation OpenDocument',
+        'application/vnd.oasis.opendocument.presentation-flat-xml' => 'Presentation OpenDocument',
+        'application/vnd.oasis.opendocument.spreadsheet' => 'Spreadsheet OpenDocument',
+        'application/vnd.oasis.opendocument.spreadsheet-flat-xml' => 'Spreadsheet OpenDocument',
+        'application/vnd.oasis.opendocument.text' => 'Document OpenDocument',
+        'application/vnd.oasis.opendocument.text-flat-xml' => 'Document OpenDocument',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Document Word',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'Presentation Powerpoint',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Spreadsheet Excel',
+
+        'application/xhtml+xml' => 'Web page',
+        'application/xml' => 'XML',
+        'text/html' => 'Web page',
+        'text/xml' => 'XML',
+        'text/vnd.hocr+html' => 'hOCR',
+
+        'application/x-gzip' => 'Archive Zip',
+        'application/x-ms-wmp' => 'Video Windows',
+        'application/x-msdownload' => 'File Windows',
+        'application/x-shockwave-flash' => 'Flash',
+        'application/x-tar' => 'Archive Tar',
+        'application/zip' => 'Archive Zip',
+
+        'image/svg+xml' => 'Image SVG',
+
+        'application/vnd.alto+xml' => 'ALTO XML', // Deprecated in 2017.
+        'application/alto+xml' => 'ALTO XML',
+        'application/vnd.bnf.refnum+xml' => 'BnF RefNum XML',
+        'application/vnd.iccu.mag+xml' => 'MAG XML',
+        'application/vnd.marc21+xml' => 'MARC21', // Deprecated in 2011.
+        'application/marcxml+xml' => 'MARC XML',
+        'application/vnd.mets+xml' => 'METS XML', // Deprecated in 2011.
+        'application/mets+xml' => 'METS XML',
+        'application/vnd.mods+xml' => 'MODS XML', // Deprecated in 2011.
+        'application/mods+xml' => 'MODS XML',
+        'application/vnd.mei+xml' => 'Music MEI',
+        'application/vnd.recordare.musicxml' => 'MusicXML',
+        'application/vnd.recordare.musicxml+xml' => 'MusicXML',
+        'application/vnd.openarchives.oai-pmh+xml' => 'OAI-PMH',
+        'application/vnd.tei+xml' => 'TEI XML', // Deprecated in 2011.
+        'application/tei+xml' => 'TEI XML',
+
+        'application/vnd.threejs+json' => 'Model ThreeJS',
+        'model/vnd.collada+xml' => 'Model Collada',
+
+        'application/atom+xml' => 'Atom feed',
+        'application/rss+xml' => 'RSS feed',
+
+        'application/vnd.pdf2xml+xml' => 'Document PDF/XML',
+
+        'text/vnd.omeka+xml' => 'Omeka Resource',
+    ];
+
+    /**
      * @var \IiifServer\View\Helper\MediaDimension
      */
     protected $mediaDimension;
