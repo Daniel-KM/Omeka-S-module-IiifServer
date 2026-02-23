@@ -262,7 +262,10 @@ class AnnotationPage extends AbstractResourceType
             $this->initAnnotationPageLines($filepath, $imageNumber);
         }
 
-        if (!count($this->cache['items'])) {
+        // When dereferenced (standalone request), clear cache if no items could
+        // be parsed. When referenced (in manifest), keep the id/type so the
+        // annotation page link is included.
+        if ($this->isDereferenced && !count($this->cache['items'])) {
             $this->cache = [];
         }
 
