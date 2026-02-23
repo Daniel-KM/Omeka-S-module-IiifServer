@@ -119,19 +119,21 @@ class ImageSize extends AbstractPlugin
             }
         }
 
-        // In order to manage external storage, check if the file is local.
+        // Try local file first, fall back to URL for external storage.
         if ($type === 'original') {
             $storagePath = $this->getStoragePath($type, $media->filename());
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            $result = file_exists($filepath)
-                ? $this->getWidthAndHeightLocal($filepath)
-                : $this->getWidthAndHeightUrl($media->originalUrl());
+            $result = $this->getWidthAndHeightLocal($filepath);
+            if (!$result['width']) {
+                $result = $this->getWidthAndHeightUrl($media->originalUrl());
+            }
         } else {
             $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            $result = file_exists($filepath)
-                ? $this->getWidthAndHeightLocal($filepath)
-                : $this->getWidthAndHeightUrl($media->thumbnailUrl($type));
+            $result = $this->getWidthAndHeightLocal($filepath);
+            if (!$result['width']) {
+                $result = $this->getWidthAndHeightUrl($media->thumbnailUrl($type));
+            }
         }
 
         // Cache dimensions in media data to avoid computation on next request.
@@ -151,9 +153,11 @@ class ImageSize extends AbstractPlugin
         // The storage adapter should be checked for external storage.
         $storagePath = $this->getStoragePath('asset', $asset->filename());
         $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-        return file_exists($filepath)
-            ? $this->getWidthAndHeightLocal($filepath)
-            : $this->getWidthAndHeightUrl($asset->assetUrl());
+        $result = $this->getWidthAndHeightLocal($filepath);
+        if ($result['width']) {
+            return $result;
+        }
+        return $this->getWidthAndHeightUrl($asset->assetUrl());
     }
 
     /**
@@ -174,18 +178,18 @@ class ImageSize extends AbstractPlugin
             return $this->getWidthAndHeightUrl($filepath);
         }
         // A normal path.
-        if (file_exists($filepath) && is_file($filepath) && is_readable($filepath) && filesize($filepath)) {
-            return $this->getWidthAndHeightLocal($filepath);
-        }
-        return $this->emptySize;
+        return $this->getWidthAndHeightLocal($filepath);
     }
 
     /**
-     * Helper to get width and height of an image (path is already checked).
+     * Helper to get width and height of a local image file.
+     *
+     * Handles missing or unreadable files gracefully: @getimagesize()
+     * returns false and the method returns $this->emptySize.
      */
     protected function getWidthAndHeightLocal(string $filepath): array
     {
-        $result = getimagesize($filepath);
+        $result = @getimagesize($filepath);
         if (!$result) {
             return $this->emptySize;
         }

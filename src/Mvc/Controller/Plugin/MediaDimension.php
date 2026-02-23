@@ -114,19 +114,36 @@ class MediaDimension extends AbstractPlugin
             }
         }
 
-        // In order to manage external storage, check if the file is local.
+        // Try local file first, fall back to URL for external storage.
+        // For images, skip file_exists(): @getimagesize() handles missing
+        // files. For audio/video, keep file_exists(): GetId3 does its own
+        // check, so skipping ours would just add init overhead for nothing.
         if ($type === 'original') {
             $storagePath = $this->getStoragePath($type, $media->filename());
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            $result = file_exists($filepath)
-                ? $this->getDimensionsLocal($filepath, $mainMediaType)
-                : $this->getDimensionsUrl($media->originalUrl(), $mainMediaType);
+            if ($mainMediaType === 'image') {
+                $result = $this->getDimensionsLocal($filepath, $mainMediaType);
+                if (!$result['width']) {
+                    $result = $this->getDimensionsUrl($media->originalUrl(), $mainMediaType);
+                }
+            } else {
+                $result = file_exists($filepath)
+                    ? $this->getDimensionsLocal($filepath, $mainMediaType)
+                    : $this->getDimensionsUrl($media->originalUrl(), $mainMediaType);
+            }
         } else {
             $storagePath = $this->getStoragePath($type, $media->storageId(), 'jpg');
             $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
-            $result = file_exists($filepath)
-                ? $this->getDimensionsLocal($filepath, $mainMediaType)
-                : $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
+            if ($mainMediaType === 'image') {
+                $result = $this->getDimensionsLocal($filepath, $mainMediaType);
+                if (!$result['width']) {
+                    $result = $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
+                }
+            } else {
+                $result = file_exists($filepath)
+                    ? $this->getDimensionsLocal($filepath, $mainMediaType)
+                    : $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
+            }
         }
 
         // Cache dimensions in media data to avoid computation on next request.
@@ -231,7 +248,7 @@ class MediaDimension extends AbstractPlugin
         }
 
         if ($mainMediaType === 'image') {
-            $result = getimagesize($filepath);
+            $result = @getimagesize($filepath);
             if ($result) {
                 [$width, $height] = $result;
                 return [
