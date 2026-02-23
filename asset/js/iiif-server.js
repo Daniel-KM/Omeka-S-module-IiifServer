@@ -8,13 +8,13 @@ $(document).ready(function () {
             navigator.clipboard
                 .writeText(iiifUrl)
                 .then(() => {
-                    alert(button.data('textCopied') ? button.data('textCopied') : 'Url of the IIIF manifest copied in clipboard!');
+                    CommonDialog.dialogAlert({message: button.data('textCopied') || 'Url of the IIIF manifest copied in clipboard!'});
                 })
                 .catch(() => {
-                    alert(button.data('textFailed') ? button.data('textFailed') : 'Unable to copy url in clipboard!');
+                    CommonDialog.dialogAlert({message: button.data('textFailed') || 'Unable to copy url in clipboard!'});
                 });
         } else {
-            alert(iiifUrl);
+            CommonDialog.dialogAlert({message: iiifUrl});
         }
     });
 

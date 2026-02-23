@@ -37,8 +37,10 @@ class IiifManifestLink extends AbstractHelper
 
         $assetUrl = $view->plugin('assetUrl');
         $view->headLink()
-            ->prependStylesheet($assetUrl('css/iiif-server.css', 'IiifServer'));
+            ->prependStylesheet($assetUrl('css/iiif-server.css', 'IiifServer'))
+            ->prependStylesheet($assetUrl('css/common-dialog.css', 'Common'));
         $view->headScript()
+            ->appendFile($assetUrl('js/common-dialog.js', 'Common'), 'text/javascript', ['defer' => 'defer'])
             ->appendFile($assetUrl('js/iiif-server.js', 'IiifServer'), 'text/javascript', ['defer' => 'defer']);
 
         $template = $options['template'] ?? self::PARTIAL_NAME;
