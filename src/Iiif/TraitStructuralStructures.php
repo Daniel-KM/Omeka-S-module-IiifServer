@@ -212,7 +212,7 @@ trait TraitStructuralStructures
 
         // Nested xml requires SimpleXML, because the sub-sections are not set
         // as attributes.
-        $xml = simplexml_load_string($literalStructure);
+        $xml = simplexml_load_string($literalStructure, null, LIBXML_NONET);
         if (!$xml) {
             return null;
         }

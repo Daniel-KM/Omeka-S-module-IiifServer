@@ -208,7 +208,7 @@ class UpgradeStructures extends AbstractJob
             return count($lines4) === ($total - $empty) ? null : $lines3;
         }
 
-        $xml = simplexml_load_string($literalStructure);
+        $xml = simplexml_load_string($literalStructure, null, LIBXML_NONET);
         if (!$xml) {
             return null;
         }
@@ -434,7 +434,6 @@ class UpgradeStructures extends AbstractJob
         $dom = new DOMDocument('1.1', 'UTF-8');
         $buildXml($lines, $dom, null, $lines);
         $dom->xmlStandalone = true;
-        $dom->substituteEntities = true;
         $dom->formatOutput = true;
         $output = $dom->saveXml();
         return mb_substr($output, mb_strpos($output, '<', 1));

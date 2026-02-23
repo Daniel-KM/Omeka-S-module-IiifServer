@@ -104,7 +104,7 @@ trait TraitXml
                 if ($isPdf2Xml) {
                     $xmlContent = $this->fixXmlPdf2Xml($xmlContent);
                 }
-                $currentXml = @simplexml_load_string($xmlContent);
+                $currentXml = @simplexml_load_string($xmlContent, null, LIBXML_NONET);
             } elseif ($this->xmlFixMode === 'all') {
                 $xmlContent = $this->fixUtf8->__invoke($xmlContent);
                 if ($isPdf2Xml) {
@@ -115,7 +115,7 @@ trait TraitXml
                 if ($isPdf2Xml) {
                     $xmlContent = $this->fixXmlPdf2Xml($xmlContent);
                 }
-                $currentXml = @simplexml_load_string($xmlContent);
+                $currentXml = @simplexml_load_string($xmlContent, null, LIBXML_NONET);
             }
         } catch (\Exception $e) {
             $this->logger->err(
@@ -154,7 +154,7 @@ trait TraitXml
         $dom->validateOnParse = false;
         $dom->recover = true;
         try {
-            $result = $dom->loadXML($xmlContent);
+            $result = $dom->loadXML($xmlContent, LIBXML_NONET);
             $result = $result ? simplexml_import_dom($dom) : null;
         } catch (Exception $e) {
             $result = null;
