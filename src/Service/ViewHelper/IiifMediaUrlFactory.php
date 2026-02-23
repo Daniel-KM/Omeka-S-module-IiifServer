@@ -25,7 +25,7 @@ class IiifMediaUrlFactory implements FactoryInterface
             $settings->get('iiifserver_media_api_identifier', ''),
             $settings->get('iiifserver_identifier_prefix', ''),
             (bool) $settings->get('iiifserver_media_api_support_non_image', false),
-            (bool) $settings->get('iiifserver_identifier_apache_preencoding', false)
+            (bool) $settings->get('iiifserver_identifier_encode_slash', false)
         );
     }
 }

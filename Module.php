@@ -264,6 +264,8 @@ class Module extends AbstractModule
         if ($corsHeaders > 1) {
             $this->messageCors();
         }
+
+        $this->messageEncodedSlashes();
     }
 
     protected function postUninstall(): void
@@ -317,6 +319,7 @@ class Module extends AbstractModule
     public function getConfigForm(PhpRenderer $renderer)
     {
         $this->messageCors();
+        $this->messageEncodedSlashes();
 
         $translate = $renderer->plugin('translate');
         return '<p>'
@@ -331,6 +334,7 @@ class Module extends AbstractModule
     public function handleConfigForm(AbstractController $controller)
     {
         $this->messageCache();
+        $this->messageEncodedSlashes();
 
         /**
          * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
@@ -715,6 +719,126 @@ class Module extends AbstractModule
             );
             $messenger->addWarning($message);
         }
+    }
+
+    /**
+     * Check if the server supports encoded slashes (%2F) in URLs.
+     *
+     * Uses the same self-request pattern as checkCorsHeaders().
+     *
+     * @return int 0 = test impossible, 1 = %2F accepted, 2 = %2F rejected.
+     */
+    protected function checkEncodedSlashes(): int
+    {
+        $services = $this->getServiceLocator();
+        $helpers = $services->get('ViewHelperManager');
+        $serverUrl = $helpers->get('ServerUrl')->__invoke();
+        $basePath = $helpers->get('BasePath')->__invoke();
+
+        // Request a URL with %2F in the path. Use the Omeka API endpoint
+        // which always returns JSON. If Apache rejects %2F with a 400,
+        // we know AllowEncodedSlashes is Off (default).
+        $testUrl = $serverUrl . $basePath . '/api/items%2F0';
+
+        $context = @stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 5,
+                'follow_location' => 0,
+            ],
+        ]);
+        $response = @file_get_contents($testUrl, false, $context);
+
+        // Check the HTTP response code from $http_response_header.
+        if (!isset($http_response_header) || !is_array($http_response_header)) {
+            return 0;
+        }
+
+        $statusLine = $http_response_header[0] ?? '';
+        if (!preg_match('/\s(\d{3})\s/', $statusLine, $m)) {
+            return 0;
+        }
+
+        $statusCode = (int) $m[1];
+        // Apache returns 400 (or 404 with "not found") when %2F is rejected.
+        // When accepted, Omeka processes the request and returns JSON
+        // (typically 404 with a JSON error body for a non-existent item).
+        if ($statusCode === 400) {
+            return 2;
+        }
+
+        // Any Omeka-processed response (200, 404 with JSON, etc.) means
+        // the %2F was accepted by the server.
+        return 1;
+    }
+
+    /**
+     * Display a message about encoded slashes support and auto-update the
+     * setting iiifserver_identifier_encode_slash.
+     */
+    protected function messageEncodedSlashes(): void
+    {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $plugins = $services->get('ControllerPluginManager');
+        $messenger = $plugins->get('messenger');
+
+        // Check if there are identifiers with "/" (ARK-style).
+        $hasSlashIdentifiers = $this->hasIdentifiersWithSlash();
+        if (!$hasSlashIdentifiers) {
+            return;
+        }
+
+        $check = $this->checkEncodedSlashes();
+
+        if ($check === 1) {
+            // Server supports %2F: enable spec-compliant encoding.
+            $settings->set('iiifserver_identifier_encode_slash', true);
+            $message = new PsrMessage(
+                'The server supports encoded slashes (AllowEncodedSlashes). IIIF URLs will use spec-compliant %%2F encoding for identifiers with "/". The option can be changed in the config form.' // @translate
+            );
+            $messenger->addSuccess($message);
+        } elseif ($check === 2) {
+            // Server rejects %2F: disable encoding, use literal slashes.
+            $settings->set('iiifserver_identifier_encode_slash', false);
+            $message = new PsrMessage(
+                'The server rejects encoded slashes (%%2F) in URLs (Apache default). IIIF URLs will use literal slashes in identifiers, which is functional but not fully IIIF-spec-compliant. To enable compliant URLs, add "AllowEncodedSlashes NoDecode" to your Apache VirtualHost config, or use a prefix, or use numeric identifiers.' // @translate
+            );
+            $messenger->addWarning($message);
+        }
+        // check === 0: test impossible, don't change the setting.
+    }
+
+    /**
+     * Check if any resources use identifiers containing "/".
+     */
+    protected function hasIdentifiersWithSlash(): bool
+    {
+        $services = $this->getServiceLocator();
+
+        // Check via CleanUrl module if available.
+        $moduleManager = $services->get('Omeka\ModuleManager');
+        $cleanUrlModule = $moduleManager->getModule('CleanUrl');
+        $hasCleanUrl = $cleanUrlModule
+            && $cleanUrlModule->getState() === \Omeka\Module\Manager::STATE_ACTIVE;
+
+        if ($hasCleanUrl) {
+            /** @var \Doctrine\DBAL\Connection $connection */
+            $connection = $services->get('Omeka\Connection');
+            try {
+                $result = $connection->executeQuery(
+                    "SELECT 1 FROM clean_url WHERE identifier LIKE '%/%' LIMIT 1"
+                )->fetchOne();
+                return (bool) $result;
+            } catch (\Exception $e) {
+                // Table may not exist; fall through.
+            }
+        }
+
+        // Fallback: check if the prefix setting contains "/".
+        $settings = $services->get('Omeka\Settings');
+        $prefix = $settings->get('iiifserver_identifier_prefix', '');
+        return strpos($prefix, '/') !== false;
     }
 
     /**

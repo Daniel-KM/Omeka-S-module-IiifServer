@@ -854,28 +854,10 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_identifier_prefix',
                 ],
             ])
-            ->add([
-                'name' => 'iiifserver_identifier_raw',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'Allow raw identifier', // @translate
-                    'info' => 'So an ark identifier will be available as "ark:/12345/betz" and "ark:%2F12345%2Fbetz".', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_identifier_raw',
-                ],
-            ])
-            ->add([
-                'name' => 'iiifserver_identifier_apache_preencoding',
-                'type' => Element\Checkbox::class,
-                'options' => [
-                    'label' => 'Pre-encode slashes for web server apache', // @translate
-                    'info' => 'Enable this option only when using an apache config with mod_rewrite that automatically decodes urls. When enabled, "/" is pre-encoded to "%2F", resulting in "%252F" in the final URL. Apache will decode it once back to "%2F".', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_identifier_apache_preencoding',
-                ],
-            ])
+            // The settings "iiifserver_identifier_raw" and
+            // "iiifserver_identifier_apache_preencoding" have been removed.
+            // The setting "iiifserver_identifier_encode_slash" is auto-detected
+            // and does not need a form element.
 
             ->add([
                 'name' => 'iiifserver_url_force_from',

@@ -21,7 +21,8 @@ class IiifUrlFactory implements FactoryInterface
             $settings->get('iiifserver_manifest_default_version', '2'),
             $settings->get('iiifserver_url_force_from'),
             $settings->get('iiifserver_url_force_to'),
-            $settings->get('iiifserver_identifier_prefix', '')
+            $settings->get('iiifserver_identifier_prefix', ''),
+            (bool) $settings->get('iiifserver_identifier_encode_slash', false)
         );
     }
 }

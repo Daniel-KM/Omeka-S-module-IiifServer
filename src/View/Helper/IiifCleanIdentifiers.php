@@ -25,27 +25,20 @@ class IiifCleanIdentifiers extends AbstractHelper
     protected $prefix;
 
     /**
-     * @var bool
-     */
-    protected $rawIdentifier;
-
-    /**
      * Construct the helper.
      *
-     * @todo Manage new CleanUrl.
+     * Identifiers are always returned raw (unencoded). The Laminas router
+     * handles percent-encoding, and IiifUrl/IiifMediaUrl conditionally
+     * restore literal slashes based on the encode_slash setting.
      *
-     * @param GetIdentifiersFromResources $getIdentifiersFromResources
-     * @param bool $prefix
-     * @param bool $rawIdentifier
+     * @todo Manage new CleanUrl.
      */
     public function __construct(
         GetIdentifiersFromResources $getIdentifiersFromResources = null,
-        $prefix,
-        $rawIdentifier
+        $prefix
     ) {
         $this->getIdentifiersFromResources = $getIdentifiersFromResources;
         $this->prefix = $prefix;
-        $this->rawIdentifier = $rawIdentifier;
     }
 
     /**
@@ -84,28 +77,17 @@ class IiifCleanIdentifiers extends AbstractHelper
                 : array_map($returnId, $in);
         }
 
+        // Always return raw identifiers: the Laminas router handles
+        // percent-encoding, and IiifUrl/IiifMediaUrl conditionally restore
+        // literal slashes based on the encode_slash setting.
         if ($this->prefix) {
-            if ($this->rawIdentifier) {
-                $output = function ($v) {
-                    return strpos($v, $this->prefix) === 0
-                        ? mb_substr($v, mb_strlen($this->prefix))
-                        : $v;
-                };
-            } else {
-                $output = function ($v) {
-                    return strtr(rawurlencode(strpos($v, $this->prefix) === 0
-                        ? mb_substr($v, mb_strlen($this->prefix))
-                        : $v), ['%3A' => ':']);
-                };
-            }
-        } elseif ($this->rawIdentifier) {
-            // Fake function for simplicity.
+            $output = function ($v) {
+                return strpos($v, $this->prefix) === 0
+                    ? mb_substr($v, mb_strlen($this->prefix))
+                    : $v;
+            };
+        } else {
             $output = fn ($v) => $v;
-        }
-        // Default options.
-        else {
-            // According to the specifications, the ":" should not be url encoded.
-            $output = fn ($v) => strtr(rawurlencode($v), ['%3A' => ':']);
         }
 
         $result = $this->getIdentifiersFromResources->__invoke($in);

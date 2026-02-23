@@ -76,6 +76,11 @@ class IiifUrl extends AbstractHelper
     protected $forceUrlTo;
 
     /**
+     * @var bool
+     */
+    protected $encodeSlash;
+
+    /**
      * @param Url $url
      * @param IiifCleanIdentifiers $iiifCleanIdentifiers
      * @param IiifMediaUrl $iifImageUrl
@@ -84,6 +89,7 @@ class IiifUrl extends AbstractHelper
      * @param string $forceUrlFrom
      * @param string $forceUrlTo
      * @param string $prefix
+     * @param bool $encodeSlash
      */
     public function __construct(
         Url $url,
@@ -93,7 +99,8 @@ class IiifUrl extends AbstractHelper
         $defaultVersion,
         $forceUrlFrom,
         $forceUrlTo,
-        $prefix
+        $prefix,
+        bool $encodeSlash = false
     ) {
         $this->url = $url;
         $this->iiifCleanIdentifiers = $iiifCleanIdentifiers;
@@ -103,6 +110,7 @@ class IiifUrl extends AbstractHelper
         $this->forceUrlFrom = $forceUrlFrom;
         $this->forceUrlTo = $forceUrlTo;
         $this->prefix = $prefix;
+        $this->encodeSlash = $encodeSlash;
     }
 
     /**
@@ -186,10 +194,13 @@ class IiifUrl extends AbstractHelper
                 : $this->baseUrlPath . substr($urlIiif, 5);
         }
 
-        // Restore literal slashes in identifiers (like ark:/xxx/xxx) to avoid
-        // reverse proxy rejection of %2F. The route listener
-        // Module::reencodeArkIdentifiers() will re-encode them for matching.
-        $urlIiif = strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
+        // When the server does not support encoded slashes, restore literal
+        // slashes so URLs remain functional (non-spec-compliant fallback).
+        // The route listener reencodeIdentifierSlashes() will re-encode
+        // them on reception for route matching.
+        if (!$this->encodeSlash) {
+            $urlIiif = strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
+        }
 
         return $this->forceToIfRequired($urlIiif);
     }
