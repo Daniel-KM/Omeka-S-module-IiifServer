@@ -194,6 +194,12 @@ class ImageSize extends AbstractPlugin
             return $this->emptySize;
         }
         [$width, $height] = $result;
+        // EXIF orientations 5-8 indicate a 90° or 270° rotation,
+        // so width and height must be swapped.
+        $exif = @exif_read_data($filepath);
+        if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
+            [$width, $height] = [$height, $width];
+        }
         return [
             'width' => $width,
             'height' => $height,
@@ -216,6 +222,11 @@ class ImageSize extends AbstractPlugin
         if ($result) {
             [$width, $height] = $result;
             if ($width && $height) {
+                // Check EXIF orientation for 90°/270° rotated images.
+                $exif = @exif_read_data($url);
+                if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
+                    [$width, $height] = [$height, $width];
+                }
                 return [
                     'width' => $width,
                     'height' => $height,
@@ -223,7 +234,7 @@ class ImageSize extends AbstractPlugin
             }
         }
 
-        // Slow path: download the full file then check dimensions locally.
+        // Slow path: download the full file then check locally.
         $tempFile = $this->tempFileFactory->build();
         $tempPath = $tempFile->getTempPath();
         $tempFile->delete();
@@ -232,15 +243,9 @@ class ImageSize extends AbstractPlugin
             $result = file_put_contents($tempPath, $handle);
             @fclose($handle);
             if ($result) {
-                $result = getimagesize($tempPath);
-                if ($result) {
-                    [$width, $height] = $result;
-                    unlink($tempPath);
-                    return [
-                        'width' => $width,
-                        'height' => $height,
-                    ];
-                }
+                $size = $this->getWidthAndHeightLocal($tempPath);
+                unlink($tempPath);
+                return $size;
             }
             unlink($tempPath);
         }
