@@ -246,7 +246,9 @@ class MediaDimensions extends AbstractJob
 
         $failedTypes = [];
         foreach ($mainMediaType === 'image' ? $this->imageTypes : ['original'] as $imageType) {
-            $result = $this->mediaDimension->__invoke($media, $imageType);
+            // Force recalculation from file: the representation
+            // still holds stale data after entity reset above.
+            $result = $this->mediaDimension->__invoke($media, $imageType, true);
             if (!array_filter($result)) {
                 $failedTypes[] = $imageType;
             }
