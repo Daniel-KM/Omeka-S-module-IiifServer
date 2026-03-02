@@ -32,6 +32,7 @@ class CacheManifests extends AbstractJob
         // The reference id is the job id for now.
         $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
         $referenceIdProcessor->setReferenceId('derivative/item/job_' . $this->job->getId());
+        $this->logger->addProcessor($referenceIdProcessor);
 
         $query = $this->getArg('query') ?: [];
         if (is_string($query)) {

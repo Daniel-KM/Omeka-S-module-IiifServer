@@ -79,6 +79,9 @@ class MediaDimensions extends AbstractJob
         /** @var \Omeka\Api\Manager $api */
         $services = $this->getServiceLocator();
         $this->logger = $services->get('Omeka\Logger');
+        $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
+        $referenceIdProcessor->setReferenceId('iiifserver/media-dimensions/job_' . $this->job->getId());
+        $this->logger->addProcessor($referenceIdProcessor);
         $api = $services->get('Omeka\ApiManager');
 
         $query = $this->getArg('query') ?: [];

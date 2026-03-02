@@ -24,6 +24,9 @@ class UpgradeStructures extends AbstractJob
          */
         $services = $this->getServiceLocator();
         $logger = $services->get('Omeka\Logger');
+        $referenceIdProcessor = new \Laminas\Log\Processor\ReferenceId();
+        $referenceIdProcessor->setReferenceId('iiifserver/upgrade-structures/job_' . $this->job->getId());
+        $logger->addProcessor($referenceIdProcessor);
         $api = $services->get('Omeka\ApiManager');
         $settings = $services->get('Omeka\Settings');
         $easyMeta = $services->get('Common\EasyMeta');
