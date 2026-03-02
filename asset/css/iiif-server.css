@@ -5,8 +5,10 @@
     display: inline-block;
     width: 45px;
     height: 45px;
-    background: url(../img/iiif.png) no-repeat;
-    background-size: cover;
+    padding: unset;
+    margin: unset;
+    border: unset;
+    background: white url(../img/iiif.png) center / contain no-repeat;
     -webkit-filter: grayscale(1);
     filter: grayscale(1);
 }
