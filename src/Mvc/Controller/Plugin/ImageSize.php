@@ -103,7 +103,8 @@ class ImageSize extends AbstractPlugin
         // In-memory cache to avoid redundant lookups within the same request
         // (the DB-cached mediaData may not reflect a just-written value).
         static $cache = [];
-        $cacheKey = $media->id() . '/' . $type;
+        $mediaId = $media->id();
+        $cacheKey = ($mediaId ?? spl_object_id($media)) . '/' . $type;
         if (!$force && isset($cache[$cacheKey])) {
             return $cache[$cacheKey];
         }
@@ -137,8 +138,8 @@ class ImageSize extends AbstractPlugin
         }
 
         // Cache dimensions in media data to avoid computation on next request.
-        if ($result['width'] && $result['height']) {
-            $this->cacheMediaDimensions($media->id(), $type, $result);
+        if ($result['width'] && $result['height'] && $mediaId) {
+            $this->cacheMediaDimensions($mediaId, $type, $result);
             $cache[$cacheKey] = $result;
         }
 
