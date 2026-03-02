@@ -30,6 +30,72 @@ $entityManager = $services->get('Omeka\EntityManager');
 $defaultConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 $defaultSettings = $defaultConfig['iiifserver']['config'];
 
+/**
+ * Dispatch a background job during module upgrade.
+ *
+ * During upgrade, module classes are not yet available to
+ * the background process because the module state in the
+ * database is still "needs_upgrade". This function
+ * temporarily sets the module version and active flag so
+ * the spawned process can bootstrap the module, waits for
+ * the job to start, then restores the original state. The
+ * Module Manager will set the real version and state once
+ * upgrade() returns.
+ */
+$dispatchJobDuringUpgrade = function (string $jobClass, array $args = [])
+    use ($services, $connection, $newVersion, $messenger): \Omeka\Entity\Job {
+    $moduleId = 'IiifServer';
+
+    $shortClass = substr(strrchr('\\' . $jobClass, '\\'), 1);
+    require_once dirname(__DIR__, 2) . '/src/Job/' . $shortClass . '.php';
+
+    // Read current state.
+    $moduleRow = $connection->executeQuery(
+        'SELECT is_active FROM module WHERE id = :id',
+        ['id' => $moduleId]
+    )->fetchAssociative();
+    $wasActive = (bool) ($moduleRow['is_active'] ?? false);
+
+    // Temporarily mark the module as active with the new
+    // version so the background process bootstraps it.
+    $connection->executeStatement(
+        'UPDATE module SET version = :version, is_active = 1 WHERE id = :id',
+        ['version' => $newVersion, 'id' => $moduleId]
+    );
+
+    $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+    $job = $dispatcher->dispatch($jobClass, $args);
+
+    // Wait for the background process to bootstrap (read
+    // the module state) before restoring.
+    sleep(5);
+
+    // Check whether the job actually started.
+    $jobId = $job->getId();
+    $status = $connection->executeQuery(
+        'SELECT status FROM job WHERE id = :id',
+        ['id' => $jobId]
+    )->fetchOne();
+    if ($status === \Omeka\Entity\Job::STATUS_STARTING) {
+        $messenger->addWarning(new PsrMessage(
+            'The job #{job_id} is still starting after the sleep delay. It may need to be relaunched manually.', // @translate
+            ['job_id' => $jobId]
+        ));
+    }
+
+    // Restore is_active if the module was inactive. The
+    // version is not restored: the Module Manager overwrites
+    // it after upgrade() returns.
+    if (!$wasActive) {
+        $connection->executeStatement(
+            'UPDATE module SET is_active = 0 WHERE id = :id',
+            ['id' => $moduleId]
+        );
+    }
+
+    return $job;
+};
+
 if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.80')) {
     $message = new \Omeka\Stdlib\Message(
         $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
@@ -366,7 +432,6 @@ if (version_compare($oldVersion, '3.6.20', '<')) {
     $structureProperty = $settings->get('iiifserver_manifest_structures_property');
     $structurePropertyId = $easyMeta->propertyId($structureProperty);
     if ($structurePropertyId) {
-        // Module classes are not available during upgrade.
         $qb = $connection->createQueryBuilder();
         $qb
             ->select('COUNT(value.id)')
@@ -378,11 +443,9 @@ if (version_compare($oldVersion, '3.6.20', '<')) {
             ->orderBy('value.id', 'asc');
         $structures = $connection->executeQuery($qb)->fetchOne();
         if ($structures) {
-            require_once dirname(__DIR__, 2) . '/src/Job/UpgradeStructures.php';
-            $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
-            $job = $dispatcher->dispatch(\IiifServer\Job\UpgradeStructures::class);
+            $job = $dispatchJobDuringUpgrade(\IiifServer\Job\UpgradeStructures::class);
             $message = new PsrMessage(
-                'A job was launched to upgrade the format of "table of contents". Replaced tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate' // @translate
+                'A job was launched to upgrade the format of "table of contents". Replaced tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
                 [
                     'link' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
                     'job_id' => $job->getId(),
@@ -429,4 +492,26 @@ if (version_compare($oldVersion, '3.6.28', '<')) {
         'The settings "iiifserver_identifier_raw" and "iiifserver_identifier_apache_preencoding" have been replaced by "iiifserver_identifier_encode_slash" (auto-detected on config save).' // @translate
     );
     $messenger->addWarning($message);
+}
+
+if (version_compare($oldVersion, '3.6.29', '<')) {
+    // Recompute all media dimensions to fix EXIF orientation.
+    $args = [
+        'query' => [],
+        'filter' => 'all',
+    ];
+    $job = $dispatchJobDuringUpgrade(\IiifServer\Job\MediaDimensions::class, $args);
+    $message = new PsrMessage(
+        'A job was launched to recompute all media dimensions with EXIF orientation fix ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
+        [
+            'link' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
+            'job_id' => $job->getId(),
+            'link_end' => '</a>',
+            'link_log' => class_exists('Log\Module', false)
+                ? sprintf('<a href="%1$s">', $urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]]))
+                : sprintf('<a href="%1$s" target="_blank">', $urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()])),
+        ]
+    );
+    $message->setEscapeHtml(false);
+    $messenger->addSuccess($message);
 }

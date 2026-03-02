@@ -54,10 +54,6 @@ class Module extends AbstractModule
 
     const NAMESPACE = __NAMESPACE__;
 
-    protected $dependencies = [
-        'Common',
-    ];
-
     public function init(ModuleManager $moduleManager): void
     {
         // The autoload doesn’t work with GetId3.
