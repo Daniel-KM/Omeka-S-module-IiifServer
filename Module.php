@@ -986,7 +986,7 @@ class Module extends AbstractModule
         if ($check['external']) {
             $serverLabel = $check['server'] === 'cantaloupe'
                 ? 'Cantaloupe'
-                : ($check['server'] === 'iipimage' ? 'IIPImage' : 'an external IIIF image server');
+                : ($check['server'] === 'iipimage' ? 'IIPImage' : $plugins->translate('unknown'));
 
             if (in_array($identifier, ['media_id', 'default'])) {
                 // Auto-configure: external server with filesystem source
