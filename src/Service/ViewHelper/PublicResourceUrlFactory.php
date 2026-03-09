@@ -17,7 +17,7 @@ class PublicResourceUrlFactory implements FactoryInterface
      *
      * @return PublicResourceUrl
      */
-    public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $services, $requestedName, ?array $options = null)
     {
         /** @var \Common\View\Helper\DefaultSite $defaultSite */
         $defaultSite = $services->get('ViewHelperManager')->get('defaultSite');

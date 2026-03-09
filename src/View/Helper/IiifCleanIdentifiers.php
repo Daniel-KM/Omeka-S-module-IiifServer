@@ -34,7 +34,7 @@ class IiifCleanIdentifiers extends AbstractHelper
      * @todo Manage new CleanUrl.
      */
     public function __construct(
-        GetIdentifiersFromResources $getIdentifiersFromResources = null,
+        ?GetIdentifiersFromResources $getIdentifiersFromResources = null,
         $prefix
     ) {
         $this->getIdentifiersFromResources = $getIdentifiersFromResources;

@@ -12,7 +12,7 @@ class IiifCleanIdentifiersFactory implements FactoryInterface
      *
      * @return IiifCleanIdentifiers
      */
-    public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $services, $requestedName, ?array $options = null)
     {
         // Check use of clean identifiers one time.
         $settings = $services->get('Omeka\Settings');

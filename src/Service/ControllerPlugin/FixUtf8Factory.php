@@ -8,7 +8,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class FixUtf8Factory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $services, $requestedName, ?array $options = null)
     {
         return new FixUtf8(
             $services->get('Omeka\Logger')

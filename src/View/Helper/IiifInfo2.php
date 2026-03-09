@@ -212,7 +212,7 @@ class IiifInfo2 extends AbstractHelper
     /**
      * @see \IiifServer\Iiif\TraitDescriptiveRights
      */
-    protected function rightsResource(MediaRepresentation $resource = null): ?string
+    protected function rightsResource(?MediaRepresentation $resource = null): ?string
     {
         $setting = $this->view->plugin('setting');
         $url = null;
