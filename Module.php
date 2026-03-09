@@ -220,32 +220,35 @@ class Module extends AbstractModule
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
+        $errors = [];
+
         // Check the optional module Derivative Media for incompatibility.
         if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
-            $message = new \Omeka\Stdlib\Message(
+            $errors[] = (string) new \Omeka\Stdlib\Message(
                 $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
                 'Derivative Media', '3.4.10'
             );
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
         if (!$this->checkDestinationDir($basePath . '/iiif/2')) {
-            $message = new PsrMessage(
+            $errors[] = (string) (new PsrMessage(
                 'The directory "{directory}" is not writeable.', // @translate
                 ['directory' => $basePath . '/iiif']
-            );
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
+            ))->setTranslator($translator);
         }
 
         if (!$this->checkDestinationDir($basePath . '/iiif/3')) {
-            $message = new PsrMessage(
+            $errors[] = (string) (new PsrMessage(
                 'The directory "{directory}" is not writeable.', // @translate
                 ['directory' => $basePath . '/iiif']
-            );
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message->setTranslator($translator));
+            ))->setTranslator($translator);
+        }
+
+        if ($errors) {
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException(implode("\n", $errors));
         }
     }
 
