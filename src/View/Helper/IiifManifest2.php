@@ -1104,7 +1104,12 @@ class IiifManifest2 extends AbstractHelper
         $placeholder = 'img/thumbnails/placeholder-image.png';
         $canvas['thumbnail'] = $serverUrl . $this->view->assetUrl($placeholder, 'ImageServer');
 
-        $imageSize = $this->getWidthAndHeight(OMEKA_PATH . '/modules/ImageServer/asset/' . $placeholder) ?: ['width' => null, 'height' => null];
+        $moduleDir = dirname(
+            (new \ReflectionClass(\ImageServer\Module::class))
+                ->getFileName()
+        );
+        $imageSize = $this->getWidthAndHeight($moduleDir . '/asset/' . $placeholder)
+            ?: ['width' => null, 'height' => null];
         $canvas['width'] = $imageSize['width'];
         $canvas['height'] = $imageSize['height'];
 
