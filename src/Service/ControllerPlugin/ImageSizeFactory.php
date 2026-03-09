@@ -2,7 +2,7 @@
 namespace IiifServer\Service\ControllerPlugin;
 
 use IiifServer\Mvc\Controller\Plugin\ImageSize;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ImageSizeFactory implements FactoryInterface

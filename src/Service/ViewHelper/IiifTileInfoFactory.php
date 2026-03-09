@@ -3,7 +3,7 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifTileInfo;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class IiifTileInfoFactory implements FactoryInterface

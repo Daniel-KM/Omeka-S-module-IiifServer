@@ -3,7 +3,7 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifManifest3;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class IiifManifest3Factory implements FactoryInterface

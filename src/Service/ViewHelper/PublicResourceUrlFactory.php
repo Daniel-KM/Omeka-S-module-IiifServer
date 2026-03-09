@@ -2,7 +2,7 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\PublicResourceUrl;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 /**

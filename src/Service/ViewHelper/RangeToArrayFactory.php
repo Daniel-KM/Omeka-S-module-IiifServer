@@ -3,7 +3,7 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\RangeToArray;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class RangeToArrayFactory implements FactoryInterface
