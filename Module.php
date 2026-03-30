@@ -999,9 +999,10 @@ class Module extends AbstractModule
         $identifier = $settings->get('iiifserver_media_api_identifier', 'media_id');
 
         if ($check['external']) {
+            $translate = $plugins->get('translate');
             $serverLabel = $check['server'] === 'cantaloupe'
                 ? 'Cantaloupe'
-                : ($check['server'] === 'iipimage' ? 'IIPImage' : $plugins->translate('unknown'));
+                : ($check['server'] === 'iipimage' ? 'IIPImage' : $translate('unknown')); // @translate
 
             if (in_array($identifier, ['media_id', 'default'])) {
                 // Auto-configure: external server with filesystem source
