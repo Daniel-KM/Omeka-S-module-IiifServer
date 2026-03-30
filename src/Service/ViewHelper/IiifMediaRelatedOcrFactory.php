@@ -3,8 +3,8 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifMediaRelatedOcr;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class IiifMediaRelatedOcrFactory implements FactoryInterface
 {

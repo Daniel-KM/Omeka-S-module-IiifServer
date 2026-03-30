@@ -3,8 +3,8 @@
 namespace IiifServer\Service\Form;
 
 use IiifServer\Form\ConfigForm;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class ConfigFormFactory implements FactoryInterface
 {

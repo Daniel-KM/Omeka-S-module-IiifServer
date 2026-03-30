@@ -3,8 +3,8 @@
 namespace IiifServer\Service\Controller;
 
 use IiifServer\Controller\MediaController;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class MediaControllerFactory implements FactoryInterface
 {

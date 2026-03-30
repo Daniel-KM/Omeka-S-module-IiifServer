@@ -2,8 +2,8 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\MediaDimension;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class MediaDimensionFactory implements FactoryInterface
 {

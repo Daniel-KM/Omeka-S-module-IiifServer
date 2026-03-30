@@ -162,11 +162,15 @@ class IiifCanvas2 extends AbstractHelper
         foreach ($values as $propertyData) {
             $valueMetadata = [];
             $valueMetadata['label'] = $propertyData['alternate_label'] ?: $propertyData['property']->label();
-            $valueValues = array_filter(array_map(function ($v) use ($publicResourceUrl) {
-                return strpos($v->type(), 'resource') === 0 && $vr = $v->valueResource()
-                    ? $publicResourceUrl($vr, true)
-                    : (string) $v;
-            }, $propertyData['values']), 'strlen');
+            $valueValues = array_filter(
+                array_map(
+                    fn ($v) => strpos($v->type(), 'resource') === 0 && $vr = $v->valueResource()
+                        ? $publicResourceUrl($vr, true)
+                        : (string) $v,
+                    $propertyData['values']
+                ),
+                'strlen'
+            );
             $valueMetadata['value'] = count($valueValues) <= 1 ? reset($valueValues) : $valueValues;
             $metadata[] = $valueMetadata;
         }

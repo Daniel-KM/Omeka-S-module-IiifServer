@@ -81,11 +81,9 @@ class IiifCleanIdentifiers extends AbstractHelper
         // percent-encoding, and IiifUrl/IiifMediaUrl conditionally restore
         // literal slashes based on the encode_slash setting.
         if ($this->prefix) {
-            $output = function ($v) {
-                return strpos($v, $this->prefix) === 0
-                    ? mb_substr($v, mb_strlen($this->prefix))
-                    : $v;
-            };
+            $output = fn ($v) => strpos($v, $this->prefix) === 0
+                ? mb_substr($v, mb_strlen($this->prefix))
+                : $v;
         } else {
             $output = fn ($v) => $v;
         }

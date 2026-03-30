@@ -8,8 +8,8 @@ if (!class_exists('JamesHeinrich\GetID3\GetId3', false)) {
 }
 
 use IiifServer\Mvc\Controller\Plugin\MediaDimension;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class MediaDimensionFactory implements FactoryInterface
 {

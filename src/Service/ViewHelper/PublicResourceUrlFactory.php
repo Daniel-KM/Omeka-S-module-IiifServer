@@ -2,8 +2,8 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\PublicResourceUrl;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Service factory for the PublicResourceUrlFactory view helper.

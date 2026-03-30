@@ -85,7 +85,7 @@ trait TraitXml
             $filename = explode('/original/', $filepath);
             $filename = 'original/' . array_pop($filename);
             $this->logger->err(
-                'Error: filepath {filepath} for xml media #{media_id} does not exist.', // @translate
+                'Error: filepath {filepath} for xml media #{media_id} does not exist.', // @translate
                 ['filepath' => $filename, 'media_id' => $mediaId]
             );
             return null;

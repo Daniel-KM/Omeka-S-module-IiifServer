@@ -1855,9 +1855,7 @@ class IiifManifest2 extends AbstractHelper
             return $this;
         }
 
-        $mediaIds = array_map(function ($image) {
-            return $image->id();
-        }, $images);
+        $mediaIds = array_map(fn ($image) => $image->id(), $images);
 
         try {
             $api = $plugins->get('api');

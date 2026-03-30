@@ -3,8 +3,8 @@
 namespace IiifServer\Service\ControllerPlugin;
 
 use IiifServer\Mvc\Controller\Plugin\FixUtf8;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 class FixUtf8Factory implements FactoryInterface
 {

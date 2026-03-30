@@ -172,8 +172,7 @@ trait TraitLinking
             ? $this->resource->sites()
             : [];
 
-        $homePageValue = function ($id, $format, $language, $values, $fallback) {
-            return [
+        $homePageValue = fn ($id, $format, $language, $values, $fallback) => [
                 'id' => $id,
                 'type' => 'Text',
                 'label' => ValueLanguage::output($values, false, $fallback),
@@ -182,7 +181,6 @@ trait TraitLinking
                     $language,
                 ],
             ];
-        };
 
         $result = [
             'property' => [],

@@ -3,8 +3,8 @@
 namespace IiifServer\Service\ViewHelper;
 
 use IiifServer\View\Helper\IiifInfo3;
-use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Service factory for the api view helper.
