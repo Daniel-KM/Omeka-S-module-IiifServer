@@ -360,8 +360,8 @@ class Module extends AbstractModule
             }
         }
 
-        $translate = $renderer->plugin('translate');
         $escape = $renderer->plugin('escapeHtml');
+        $translate = $renderer->plugin('translate');
 
         // Render audit HTML.
         $levelClasses = [
@@ -385,14 +385,88 @@ class Module extends AbstractModule
                 . '</p>';
         }
 
-        $translate = $renderer->plugin('translate');
-        return '<p>'
+        // Build the form.
+        $settings = $services->get('Omeka\Settings');
+        $formManager = $services->get('FormElementManager');
+        $renderer->ckEditor();
+
+        $this->initDataToPopulate($settings, 'config');
+        $data = $this->prepareDataToPopulate($settings, 'config');
+        if ($data === null) {
+            return null;
+        }
+
+        $form = $formManager->get(\IiifServer\Form\ConfigForm::class);
+        $form->init();
+        $form->setData($data);
+        $form->prepare();
+
+        $view = $renderer;
+
+        // Dispatch elements to tabs using element_groups.
+        // Fieldsets are rendered as sub-sections within their group.
+        $elementGroups = $form->getOption('element_groups') ?: [];
+        $tabs = array_fill_keys(array_keys($elementGroups), '');
+        $ungrouped = '';
+
+        foreach ($form as $element) {
+            $name = $element->getName();
+            if ($element instanceof \Laminas\Form\FieldsetInterface) {
+                $group = $element->getOption('element_group');
+                if ($group && isset($tabs[$group])) {
+                    $tabs[$group] .= $view->formCollection($element);
+                }
+                continue;
+            }
+            $group = $element->getOption('element_group');
+            if ($group && isset($tabs[$group])) {
+                $tabs[$group] .= $view->formRow($element);
+            } else {
+                $ungrouped .= $view->formRow($element);
+            }
+        }
+
+        // Prepend intro text to first tab.
+        $configNote = '<p>'
             . $translate('The module creates manifests with the properties from each resource (item set, item and media).') // @translate
             . ' ' . $translate('The properties below are used when some metadata are missing.') // @translate
             . ' ' . $translate('In all cases, empty properties are not set.') // @translate
-            . ' ' . $translate('Futhermore, the event "iiifserver.manifest" is available to change any data.') // @translate
-            . '</p>'
-            . $this->getConfigFormAuto($renderer);
+            . '</p>';
+        $firstGroup = array_key_first($elementGroups);
+        if ($firstGroup) {
+            $tabs[$firstGroup] = $configNote . $ungrouped
+                . $tabs[$firstGroup];
+        }
+
+        // Build tab navigation and content.
+        $iiifModules = [
+            'IiifServer',
+            'ImageServer',
+            'IiifSearch',
+        ];
+        $moduleNav = $view->moduleConfigNav($iiifModules, 'IiifServer');
+
+        $tabNav = '<li class="active"><a href="#iiifserver-audit">'
+            . $escape($translate('Audit')) . '</a></li>';
+        $tabContent = '<div id="iiifserver-audit" class="section active">'
+            . $auditHtml . '</div>';
+
+        foreach ($elementGroups as $groupName => $groupLabel) {
+            if (empty($tabs[$groupName])) {
+                continue;
+            }
+            $tabNav .= '<li><a href="#iiifserver-' . $groupName . '">'
+                . $escape($translate($groupLabel)) . '</a></li>';
+            $tabContent .= '<div id="iiifserver-' . $groupName
+                . '" class="section">'
+                . $tabs[$groupName] . '</div>';
+        }
+
+        return $moduleNav
+            . '<ul class="section-nav" style="list-style:none;padding:0;">'
+            . $tabNav
+            . '</ul>'
+            . $tabContent;
     }
 
     public function handleConfigForm(AbstractController $controller)
