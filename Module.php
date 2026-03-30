@@ -473,20 +473,29 @@ class Module extends AbstractModule
 
         /** @var \Omeka\Entity\Item $item */
         $item = $event->getParam('response')->getContent();
-        $services->get('Common\DeferredJobDispatch')->defer(
-            \IiifServer\Job\CacheManifests::class,
-            'iiifserver_cache_manifests',
-            ['item_ids' => $item->getId()],
-            function (string $key, array $allParams): array {
-                $ids = [];
-                foreach ($allParams as $p) {
-                    $ids[] = $p['item_ids'];
+
+        if ($services->has('Common\DeferredJobDispatch')) {
+            $services->get('Common\DeferredJobDispatch')->defer(
+                \IiifServer\Job\CacheManifests::class,
+                'iiifserver_cache_manifests',
+                ['item_ids' => $item->getId()],
+                function (string $key, array $allParams): array {
+                    $ids = [];
+                    foreach ($allParams as $p) {
+                        $ids[] = $p['item_ids'];
+                    }
+                    return [
+                        'query' => ['id' => array_unique($ids)],
+                    ];
                 }
-                return [
-                    'query' => ['id' => array_unique($ids)],
-                ];
-            }
-        );
+            );
+        } else {
+            $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
+            $dispatcher->dispatch(
+                \IiifServer\Job\CacheManifests::class,
+                ['query' => ['id' => $item->getId()]]
+            );
+        }
     }
 
     public function handleAfterDeleteItem(Event $event): void
