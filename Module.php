@@ -336,9 +336,54 @@ class Module extends AbstractModule
 
     public function getConfigForm(PhpRenderer $renderer)
     {
+        $services = $this->getServiceLocator();
+        $plugins = $services->get('ControllerPluginManager');
+        $messenger = $plugins->get('messenger');
+
+        // Clear previous, run diagnostics, collect for audit tab.
+        $messenger->clear();
+        $this->runIiifDiagnostics();
+        $diagnostics = $messenger->get();
+        $messenger->clear();
+
+        // Also run existing checks (they may add messages too).
         $this->messageCors();
         $this->messageEncodedSlashes();
         $this->messageExternalImageServer();
+        $diagExtra = $messenger->get();
+        $messenger->clear();
+
+        // Merge all diagnostics.
+        foreach ($diagExtra as $type => $msgs) {
+            foreach ($msgs as $msg) {
+                $diagnostics[$type][] = $msg;
+            }
+        }
+
+        $translate = $renderer->plugin('translate');
+        $escape = $renderer->plugin('escapeHtml');
+
+        // Render audit HTML.
+        $levelClasses = [
+            \Omeka\Mvc\Controller\Plugin\Messenger::ERROR => 'error',
+            \Omeka\Mvc\Controller\Plugin\Messenger::SUCCESS => 'success',
+            \Omeka\Mvc\Controller\Plugin\Messenger::WARNING => 'warning',
+        ];
+        $auditHtml = '';
+        foreach ($diagnostics as $type => $messages) {
+            $class = $levelClasses[$type] ?? 'notice';
+            foreach ($messages as $msg) {
+                $text = ($msg instanceof PsrMessage && $msg->escapeHtml() === false)
+                    ? (string) $msg
+                    : $escape((string) $msg);
+                $auditHtml .= '<p class="' . $class . '">' . $text . '</p>';
+            }
+        }
+        if (!$auditHtml) {
+            $auditHtml = '<p class="success">'
+                . $escape($translate('All checks passed.'))
+                . '</p>';
+        }
 
         $translate = $renderer->plugin('translate');
         return '<p>'
@@ -716,6 +761,190 @@ class Module extends AbstractModule
         return array_key_exists('Access-Control-Allow-Origin', $headers)
             ? count((array) $headers['Access-Control-Allow-Origin'])
             : 0;
+    }
+
+    /**
+     * Run IIIF Server diagnostics.
+     */
+    protected function runIiifDiagnostics(): void
+    {
+        $this->checkIiifPresentationVersion();
+        $this->checkManifestCache();
+        $this->checkMediaDimensions();
+        $this->checkManifestRoute();
+    }
+
+    /**
+     * Recommend IIIF Presentation v3.
+     */
+    protected function checkIiifPresentationVersion(): void
+    {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $messenger = $services->get('ControllerPluginManager')
+            ->get('messenger');
+
+        $version = $settings->get('iiifserver_manifest_default_version', '2');
+        if ($version !== '3') {
+            $messenger->addWarning(new PsrMessage(
+                'The default IIIF Presentation version is {version}. Version 3 is the current standard and is recommended.', // @translate
+                ['version' => $version]
+            ));
+        }
+    }
+
+    /**
+     * Check manifest cache status and recommend it for large
+     * collections.
+     */
+    protected function checkManifestCache(): void
+    {
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $connection = $services->get('Omeka\Connection');
+        $messenger = $services->get('ControllerPluginManager')
+            ->get('messenger');
+
+        $cacheEnabled = (bool) $settings->get('iiifserver_manifest_cache', false);
+
+        // Count items with many images.
+        $threshold = 10;
+        $largeItems = (int) $connection->fetchOne(<<<SQL
+            SELECT COUNT(*) FROM (
+                SELECT item_id, COUNT(*) as cnt FROM media
+                WHERE media_type LIKE 'image/%'
+                GROUP BY item_id
+                HAVING cnt > $threshold
+            ) t
+            SQL
+        );
+
+        if ($largeItems && !$cacheEnabled) {
+            $messenger->addWarning(new PsrMessage(
+                '{count} items have more than {threshold} images. Enabling manifest cache is recommended to avoid slow page loads.', // @translate
+                ['count' => $largeItems, 'threshold' => $threshold]
+            ));
+        } elseif ($cacheEnabled) {
+            $config = $services->get('Config');
+            $basePath = $config['file_store']['local']['base_path']
+                ?: (OMEKA_PATH . '/files');
+            $cachePath = $basePath . '/iiif';
+            if (!is_dir($cachePath)) {
+                @mkdir($cachePath, 0775, true);
+            }
+            if (!is_dir($cachePath) || !is_writable($cachePath)) {
+                $messenger->addError(new PsrMessage(
+                    'Manifest cache is enabled but directory "{dir}" is not writable.', // @translate
+                    ['dir' => 'files/iiif']
+                ));
+            } else {
+                $messenger->addSuccess(new PsrMessage(
+                    'Manifest cache is enabled.' // @translate
+                ));
+            }
+        }
+    }
+
+    /**
+     * Check how many audio/video/image media lack dimensions.
+     */
+    protected function checkMediaDimensions(): void
+    {
+        $services = $this->getServiceLocator();
+        $connection = $services->get('Omeka\Connection');
+        $messenger = $services->get('ControllerPluginManager')
+            ->get('messenger');
+
+        $total = (int) $connection->fetchOne(<<<'SQL'
+            SELECT COUNT(*) FROM media
+            WHERE (media_type LIKE 'image/%'
+                OR media_type LIKE 'audio/%'
+                OR media_type LIKE 'video/%')
+                AND media_type != 'image/svg+xml'
+            SQL
+        );
+        if (!$total) {
+            return;
+        }
+
+        $unsized = (int) $connection->fetchOne(<<<'SQL'
+            SELECT COUNT(*) FROM media
+            WHERE (media_type LIKE 'image/%'
+                OR media_type LIKE 'audio/%'
+                OR media_type LIKE 'video/%')
+                AND media_type != 'image/svg+xml'
+                AND (data IS NULL
+                    OR JSON_EXTRACT(data, '$.dimensions') IS NULL)
+            SQL
+        );
+
+        if ($unsized === 0) {
+            $messenger->addSuccess(new PsrMessage(
+                'All {total} media (images, audio, video) have stored dimensions.', // @translate
+                ['total' => $total]
+            ));
+        } else {
+            $messenger->addWarning(new PsrMessage(
+                '{unsized} of {total} media (images, audio, video) have no stored dimensions. Run "Media Dimensions" job to speed up manifest generation.', // @translate
+                ['unsized' => $unsized, 'total' => $total]
+            ));
+        }
+    }
+
+    /**
+     * Quick self-test of the manifest route.
+     */
+    protected function checkManifestRoute(): void
+    {
+        $services = $this->getServiceLocator();
+        $connection = $services->get('Omeka\Connection');
+        $messenger = $services->get('ControllerPluginManager')
+            ->get('messenger');
+
+        // Find any public item to test.
+        $itemId = $connection->fetchOne(<<<'SQL'
+            SELECT r.id FROM resource r
+            JOIN item i ON r.id = i.id
+            WHERE r.is_public = 1
+            LIMIT 1
+            SQL
+        );
+        if (!$itemId) {
+            return;
+        }
+
+        $urlHelper = $services->get('ViewHelperManager')->get('url');
+        $settings = $services->get('Omeka\Settings');
+        $baseUrl = $settings->get('imageserver_base_url')
+            ?: $settings->get('iiifserver_url')
+            ?: rtrim($urlHelper('top', [], ['force_canonical' => true]), '/') . '/';
+        $version = $settings->get('iiifserver_manifest_default_version', '2');
+        $manifestUrl = $baseUrl . 'iiif/' . $version . '/' . $itemId . '/manifest';
+
+        $context = stream_context_create([
+            'http' => ['timeout' => 5, 'ignore_errors' => true],
+            'ssl' => ['verify_peer' => false, 'verify_peer_name' => false],
+        ]);
+        $result = @file_get_contents($manifestUrl, false, $context);
+        if ($result === false) {
+            $messenger->addWarning(new PsrMessage(
+                'Could not reach manifest URL: {url}. Check server configuration.', // @translate
+                ['url' => $manifestUrl]
+            ));
+        } else {
+            $json = json_decode($result, true);
+            if (empty($json)) {
+                $messenger->addWarning(new PsrMessage(
+                    'Manifest URL {url} returned invalid JSON.', // @translate
+                    ['url' => $manifestUrl]
+                ));
+            } else {
+                $messenger->addSuccess(new PsrMessage(
+                    'Manifest route is working (tested item #{id}).', // @translate
+                    ['id' => $itemId]
+                ));
+            }
+        }
     }
 
     protected function messageCors(): void
