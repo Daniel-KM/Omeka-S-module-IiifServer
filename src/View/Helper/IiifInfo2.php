@@ -81,7 +81,9 @@ class IiifInfo2 extends AbstractHelper
             $sizes = [];
             $availableTypes = ['medium', 'large', 'original'];
             foreach ($availableTypes as $imageType) {
-                $sizes[] = $view->imageSize($media, $imageType);
+                $size = $view->imageSize($media, $imageType);
+                // Keep only width/height per IIIF Image API spec.
+                $sizes[] = array_intersect_key($size, ['width' => true, 'height' => true]);
             }
 
             $imageType = 'original';
