@@ -120,6 +120,10 @@ class PresentationController extends AbstractActionController
             // TODO Manage level reserved.
         }
 
+        // Manifests can be cached by browsers and proxies (1h/24h).
+        $this->getResponse()->getHeaders()
+            ->addHeaderLine('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+
         // Version may be 2 or 3.
         $version = $this->requestedVersion();
 

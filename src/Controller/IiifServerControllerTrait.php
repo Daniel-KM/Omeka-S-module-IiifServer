@@ -165,6 +165,10 @@ trait IiifServerControllerTrait
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }
 
+        // Cache info for one day for browser, one week for proxy.
+        $this->getResponse()->getHeaders()
+            ->addHeaderLine('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+
         return $this->iiifImageJsonLd($info, $this->requestedApiVersion);
     }
 
