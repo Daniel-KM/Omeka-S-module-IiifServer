@@ -210,13 +210,11 @@ class Module extends AbstractModule
     protected function preInstall(): void
     {
         $services = $this->getServiceLocator();
-        $plugins = $services->get('ControllerPluginManager');
-        $translate = $plugins->get('translate');
         $translator = $services->get('MvcTranslator');
 
         if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.82')) {
             $message = new \Omeka\Stdlib\Message(
-                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                $translator->translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
                 'Common', '3.4.82'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
@@ -226,10 +224,10 @@ class Module extends AbstractModule
 
         // Check the optional module Derivative Media for incompatibility.
         if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
-            $errors[] = (string) new \Omeka\Stdlib\Message(
-                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Derivative Media', '3.4.10'
-            );
+            $errors[] = (string) (new PsrMessage(
+                'The module {module} should be upgraded to version {version} or later.', // @translate
+                ['module' => 'Derivative Media', 'version' => '3.4.10']
+            ))->setTranslator($translator);
         }
 
         $config = $services->get('Config');
@@ -383,7 +381,7 @@ class Module extends AbstractModule
         }
         if (!$auditHtml) {
             $auditHtml = '<p class="success">'
-                . $escape($translate('All checks passed.'))
+                . $escape($translate('All checks passed.')) // @translate
                 . '</p>';
         }
 
@@ -412,7 +410,6 @@ class Module extends AbstractModule
         $ungrouped = '';
 
         foreach ($form as $element) {
-            $name = $element->getName();
             if ($element instanceof \Laminas\Form\FieldsetInterface) {
                 $group = $element->getOption('element_group');
                 if ($group && isset($tabs[$group])) {
@@ -1304,10 +1301,9 @@ class Module extends AbstractModule
         $identifier = $settings->get('iiifserver_media_api_identifier', 'media_id');
 
         if ($check['external']) {
-            $translate = $plugins->get('translate');
             $serverLabel = $check['server'] === 'cantaloupe'
                 ? 'Cantaloupe'
-                : ($check['server'] === 'iipimage' ? 'IIPImage' : $translate('unknown')); // @translate
+                : ($check['server'] === 'iipimage' ? 'IIPImage' : 'unknown');
 
             if (in_array($identifier, ['media_id', 'default'])) {
                 // Auto-configure: external server with filesystem source
