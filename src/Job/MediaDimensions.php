@@ -155,14 +155,14 @@ class MediaDimensions extends AbstractJob
         }
 
         $this->logger->notice(
-            'End of bulk sizing: {count}/{total} items processed, {count_succeed} audio, video and images files sized, {count_failed} errors, {count_skipped} skipped on a total of {count_medias} images.', // @translate
+            'End of bulk sizing: {count}/{total} items processed, {count_medias} media checked (images, audio, video), {count_succeed} sized, {count_skipped} already sized (skipped), {count_failed} errors.', // @translate
             [
                 'count' => $this->totalProcessed,
                 'total' => $this->totalToProcess,
-                'count_succeed' => $this->totalSucceed,
-                'count_failed' => $this->totalFailed,
-                'count_skipped' => $this->totalSkipped,
                 'count_medias' => $this->totalMedias,
+                'count_succeed' => $this->totalSucceed,
+                'count_skipped' => $this->totalSkipped,
+                'count_failed' => $this->totalFailed,
             ]
         );
     }

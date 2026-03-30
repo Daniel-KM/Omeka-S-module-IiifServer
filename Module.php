@@ -118,6 +118,8 @@ class Module extends AbstractModule
             return;
         }
 
+        $matches = [];
+
         // Parse: /iiif[/version][/collection|set]/{identifier}[/suffix]
         // Version is any single digit to be future-proof (v2, v3, v4…).
         if (!preg_match('#^(/iiif(?:/\d+)?)(?:(/collection|/set))?(/[^?]*)$#', $path, $matches)) {
