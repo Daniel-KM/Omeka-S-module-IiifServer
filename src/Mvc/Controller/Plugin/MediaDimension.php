@@ -259,7 +259,11 @@ class MediaDimension extends AbstractPlugin
                 [$width, $height] = $result;
                 // EXIF orientations 5-8 indicate a 90° or 270°
                 // rotation, so width and height must be swapped.
-                $exif = @exif_read_data($filepath);
+                try {
+                    $exif = @exif_read_data($filepath);
+                } catch (\Throwable $e) {
+                    $exif = false;
+                }
                 if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
                     [$width, $height] = [$height, $width];
                 }
