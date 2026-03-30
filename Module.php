@@ -458,9 +458,6 @@ class Module extends AbstractModule
 
     public function handleAfterSaveItem(Event $event): void
     {
-        // Don't run creation of manifests during sizing during a batch edit of
-        // items, because it runs one job by item and it is slow.
-        // A batch process is always partial.
         /** @var \Omeka\Api\Request $request */
         $request = $event->getParam('request');
         if ($request->getOption('isPartial')) {
@@ -468,22 +465,28 @@ class Module extends AbstractModule
         }
 
         $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        if (!$settings->get('iiifserver_manifest_cache')) {
+        if (!$services->get('Omeka\Settings')
+            ->get('iiifserver_manifest_cache')
+        ) {
             return;
         }
 
         /** @var \Omeka\Entity\Item $item */
         $item = $event->getParam('response')->getContent();
-        $args = [
-            'query' => ['id' => $item->getId()],
-        ];
-
-        // TODO Use a direct strategy since manifest is created quickly now.
-
-        /** @var \Omeka\Job\Dispatcher $dispatcher */
-        $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
-        $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
+        $services->get('Common\DeferredJobDispatch')->defer(
+            \IiifServer\Job\CacheManifests::class,
+            'iiifserver_cache_manifests',
+            ['item_ids' => $item->getId()],
+            function (string $key, array $allParams): array {
+                $ids = [];
+                foreach ($allParams as $p) {
+                    $ids[] = $p['item_ids'];
+                }
+                return [
+                    'query' => ['id' => array_unique($ids)],
+                ];
+            }
+        );
     }
 
     public function handleAfterDeleteItem(Event $event): void
