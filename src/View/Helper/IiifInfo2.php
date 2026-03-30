@@ -145,6 +145,14 @@ class IiifInfo2 extends AbstractHelper
             $info['sizes'] = $sizes;
             if ($tiles) {
                 $info['tiles'] = $tiles;
+            } else {
+                // When no pre-tiled data, provide default tiles info so viewers
+                // like Diva/OSD can compute tile requests. The server is
+                // level2, so arbitrary region requests are supported.
+                $info['tiles'] = [[
+                    'width' => 512,
+                    'scaleFactors' => $this->defaultScaleFactors($width, $height, 512),
+                ]];
             }
             $info['profile'] = $profile;
         }
@@ -209,6 +217,24 @@ class IiifInfo2 extends AbstractHelper
         $tile['width'] = $tileSize;
         $tile['scaleFactors'] = $scaleFactors;
         return $tile;
+    }
+
+    /**
+     * Compute default scale factors for a level2 server that supports arbitrary
+     * region requests but has no pre-tiled data.
+     *
+     * @return int[]
+     */
+    protected function defaultScaleFactors(int $width, int $height, int $tileSize): array
+    {
+        $maxDim = max($width, $height);
+        $factors = [1];
+        $factor = 2;
+        while ($tileSize * $factor <= $maxDim) {
+            $factors[] = $factor;
+            $factor *= 2;
+        }
+        return $factors;
     }
 
     /**

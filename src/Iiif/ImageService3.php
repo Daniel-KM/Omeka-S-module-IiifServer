@@ -55,7 +55,7 @@ class ImageService3 extends AbstractResourceType
         'width' => self::REQUIRED,
         'height' => self::REQUIRED,
         // The maxWidth and maxHeight are optional/required together.
-        // If only maxWidth is set, maxHeight uses it, but the inverse is not possible.
+        // If only maxWidth is set, maxHeight uses it but inverse isn't possible.
         'maxWidth' => self::OPTIONAL,
         'maxHeight' => self::OPTIONAL,
         'maxArea' => self::OPTIONAL,
@@ -188,26 +188,50 @@ class ImageService3 extends AbstractResourceType
 
     public function tiles(): ?array
     {
-        if (!$this->hasModuleImageServer || !$this->isImage()) {
+        if (!$this->isImage()) {
             return null;
         }
 
         $tiles = [];
 
-        // TODO Use a standard json-serializable TileInfo.
-        $tilingData = $this->tileMediaInfo->__invoke($this->resource);
-        if ($tilingData) {
-            $iiifTileInfo = new \ImageServer\Iiif\Tile();
-            $iiifTileInfo
-                // TODO Options should be set first for now for init, done in setResource().
-                ->setOptions(['tilingData' => $tilingData])
-                ->setResource($this->resource);
-            if ($iiifTileInfo->hasTilingInfo()) {
-                $tiles[] = $iiifTileInfo;
+        if ($this->hasModuleImageServer) {
+            // TODO Use a standard json-serializable TileInfo.
+            $tilingData = $this->tileMediaInfo->__invoke($this->resource);
+            if ($tilingData) {
+                $iiifTileInfo = new \ImageServer\Iiif\Tile();
+                $iiifTileInfo
+                    // TODO Options should be set first for now for init, done in setResource().
+                    ->setOptions(['tilingData' => $tilingData])
+                    ->setResource($this->resource);
+                if ($iiifTileInfo->hasTilingInfo()) {
+                    $tiles[] = $iiifTileInfo;
+                }
             }
         }
 
-        return $tiles;
+        // Provide default tiles info when no pre-tiled data, so viewers like
+        // Diva/OSD can compute tile requests. The server is level2, so
+        // arbitrary region requests are supported.
+        if (!$tiles) {
+            $width = $this->maxWidth();
+            $height = $this->maxHeight();
+            if ($width && $height) {
+                $tileWidth = 512;
+                $maxDim = max($width, $height);
+                $factors = [1];
+                $factor = 2;
+                while ($tileWidth * $factor <= $maxDim) {
+                    $factors[] = $factor;
+                    $factor *= 2;
+                }
+                $tiles[] = [
+                    'width' => $tileWidth,
+                    'scaleFactors' => $factors,
+                ];
+            }
+        }
+
+        return $tiles ?: null;
     }
 
     /**
