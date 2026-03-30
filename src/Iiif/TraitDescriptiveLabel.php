@@ -54,6 +54,15 @@ trait TraitDescriptiveLabel
             $values = $this->resource->value('dcterms:title', ['all' => true]);
         }
 
+        // Fallback to resource.title stored in database when no
+        // value is found in properties (language is lost).
+        if (empty($values)) {
+            $title = (string) $this->resource->title();
+            if ($title !== '') {
+                return ValueLanguage::output($title, false, '[Untitled]'); // @translate
+            }
+        }
+
         return ValueLanguage::output($values, false, '[Untitled]'); // @translate
     }
 }
