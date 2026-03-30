@@ -89,13 +89,13 @@ class CacheManifests extends AbstractJob
                 try {
                     /** @var \Omeka\Api\Representation\ItemRepresentation $item */
                     $item = $api->read('items', $itemId)->getContent();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     continue;
                 }
 
                 try {
                     $manifest = $version === 2 ? $iiifManifest2($item) : $iiifManifest3($item);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $failed = true;
                     if ($item->media()) {
                         $this->logger->err(

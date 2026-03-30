@@ -112,7 +112,7 @@ class IiifMediaUrl extends AbstractHelper
             $id = $resource;
             try {
                 $resource = $this->view->api()->read('media', ['id' => $resource])->getContent();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 return '';
             }
         } else {

@@ -64,7 +64,7 @@ trait TraitLinkingLogo
 
         try {
             $size = $this->imageSize->__invoke($url);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return [];
         }
 

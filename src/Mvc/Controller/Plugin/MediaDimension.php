@@ -351,7 +351,7 @@ class MediaDimension extends AbstractPlugin
                 'UPDATE `media` SET `data` = ? WHERE `id` = ?',
                 [json_encode($mediaData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), $mediaId]
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Retry later.
         }
     }

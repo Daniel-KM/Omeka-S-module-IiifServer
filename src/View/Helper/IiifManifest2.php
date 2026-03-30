@@ -1898,7 +1898,7 @@ class IiifManifest2 extends AbstractHelper
                     }
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Module Annotate not available or other error.
         }
 

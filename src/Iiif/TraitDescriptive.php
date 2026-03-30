@@ -446,7 +446,7 @@ trait TraitDescriptive
                 // The media should be cached by doctrine.
                 /** @var \Omeka\Api\Representation\MediaRepresentation $mediaAccompanying */
                 $mediaAccompanying = $this->api->read('media', ['id' => $mediaId])->getContent();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 return null;
             }
 

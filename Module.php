@@ -870,7 +870,7 @@ class Module extends AbstractModule
                     "SELECT 1 FROM clean_url WHERE identifier LIKE '%/%' LIMIT 1"
                 )->fetchOne();
                 return (bool) $result;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 // Table may not exist; fall through.
             }
         }

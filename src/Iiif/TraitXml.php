@@ -117,7 +117,7 @@ trait TraitXml
                 }
                 $currentXml = @simplexml_load_string($xmlContent, null, LIBXML_NONET);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->err(
                 'Error: XML content is incorrect for media #{media_id}.', // @translate
                 ['media_id' => $mediaId]
