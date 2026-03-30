@@ -4,9 +4,21 @@ namespace IiifServer\Site\ResourcePageBlockLayout;
 
 use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface;
 
-class IiifManifestLink implements ResourcePageBlockLayoutInterface
+// Resource page block layouts require Omeka S v4+.
+if (interface_exists('Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface')) {
+    class IiifManifestLink implements \Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface
+    {
+        use IiifManifestLinkTrait;
+    }
+} else {
+    class IiifManifestLink
+    {
+        use IiifManifestLinkTrait;
+    }
+}
+
+trait IiifManifestLinkTrait
 {
     public function getLabel() : string
     {

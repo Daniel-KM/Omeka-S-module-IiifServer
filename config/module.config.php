@@ -17,6 +17,9 @@
  */
 namespace IiifServer;
 
+// Resource page block layouts require Omeka S v4+.
+$isBeforeV4 = !interface_exists('Omeka\Site\ResourcePageBlockLayout\ResourcePageBlockLayoutInterface');
+
 // Write the default version ("2" or "3") here (and in image server if needed).
 if (!isset($defaultVersion)) {
     $defaultVersion = '';
@@ -124,7 +127,7 @@ return [
             Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
     ],
-    'resource_page_block_layouts' => [
+    'resource_page_block_layouts' => $isBeforeV4 ? [] : [
         'invokables' => [
             'iiifManifestLink' => Site\ResourcePageBlockLayout\IiifManifestLink::class,
         ],
