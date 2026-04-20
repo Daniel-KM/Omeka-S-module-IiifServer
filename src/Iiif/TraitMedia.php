@@ -221,7 +221,7 @@ trait TraitMedia
     {
         if (is_null($this->isMediaIiif)) {
             $media = $this->resource->primaryMedia();
-            $this->isMediaIiif = $media && $media->ingester() === 'iiif';
+            $this->isMediaIiif = $media && $this->isIiifMedia->__invoke($media, 'image');
         }
         return $this->isMediaIiif;
     }

@@ -93,7 +93,7 @@ trait TraitDescriptiveThumbnail
         }
 
         // Manage external IIIF image.
-        if ($primaryMedia->ingester() === 'iiif') {
+        if ($this->isIiifMedia->__invoke($primaryMedia, 'image')) {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $primaryMedia->mediaData();
             if (empty($mediaData)

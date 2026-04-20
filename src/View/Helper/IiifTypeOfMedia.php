@@ -266,7 +266,7 @@ class IiifTypeOfMedia extends AbstractHelper
             return $mediaIiifTypes[$mediaId];
         }
 
-        if ($media->ingester() === 'iiif') {
+        if ($this->view->isIiifMedia($media)) {
             $mediaData = $media->mediaData();
             if (isset($mediaData['type'])) {
                 if (in_array($mediaData['type'], $this->iiifImageServiceTypes)) {

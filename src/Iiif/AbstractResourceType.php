@@ -256,6 +256,11 @@ abstract class AbstractResourceType extends AbstractType
     protected $isAllowedViewAll = false;
 
     /**
+     * @var \IiifServer\Mvc\Controller\Plugin\IsIiifMedia
+     */
+    protected $isIiifMedia;
+
+    /**
      * @var \Laminas\Log\Logger
      */
     protected $logger;
@@ -417,6 +422,7 @@ abstract class AbstractResourceType extends AbstractType
         $this->iiifTypeOfMedia = $viewHelpers->get('iiifTypeOfMedia');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->imageSize = $plugins->get('imageSize');
+        $this->isIiifMedia = $plugins->get('isIiifMedia');
         $this->isAllowedMediaContent = $this->hasModuleAccess ? $plugins->get('isAllowedMediaContent') : null;
         $this->accessStatus = $this->hasModuleAccess && $plugins->has('accessStatus') ? $plugins->get('accessStatus') : null;
         $this->isAllowedViewAll = $this->services->get('Omeka\Acl')

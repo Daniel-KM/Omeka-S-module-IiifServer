@@ -315,7 +315,7 @@ class IiifManifest2 extends AbstractHelper
                 $images[] = $media;
             }
             // Handle external IIIF images.
-            elseif ($media->ingester() === 'iiif') {
+            elseif ($this->view->isIiifMedia($media, 'image')) {
                 $images[] = $media;
             }
             // Non-images files.
@@ -833,7 +833,7 @@ class IiifManifest2 extends AbstractHelper
         }
 
         // Manage external IIIF image.
-        if ($media->ingester() === 'iiif') {
+        if ($this->view->isIiifMedia($media, 'image')) {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
             if (empty($mediaData)
@@ -915,7 +915,7 @@ class IiifManifest2 extends AbstractHelper
 
         // If it is an external IIIF image.
         // Convert info.json saved in media into a presentation sequence part.
-        if ($media->ingester() == 'iiif') {
+        if ($this->view->isIiifMedia($media, 'image')) {
             // The method "mediaData" contains data from the info.json file.
             $mediaData = $media->mediaData();
             $imageBaseUri = $mediaData['@id'] ?? $mediaData['id'];
@@ -1005,7 +1005,7 @@ class IiifManifest2 extends AbstractHelper
         $canvas['thumbnail'] = $this->_iiifThumbnail($media);
 
         // If it is an external IIIF image.
-        if ($media->ingester() == 'iiif') {
+        if ($this->view->isIiifMedia($media, 'image')) {
             $mediaData = $media->mediaData();
             $width = $canvas['width'] = $mediaData['width'];
             $height = $canvas['height'] = $mediaData['height'];

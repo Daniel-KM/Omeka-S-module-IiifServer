@@ -118,6 +118,7 @@ return [
             'iiifTileInfo' => Service\ViewHelper\IiifTileInfoFactory::class,
             'iiifUrl' => Service\ViewHelper\IiifUrlFactory::class,
             'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
+            'isIiifMedia' => Service\ViewHelper\IsIiifMediaFactory::class,
             'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
             'rangeToArray' => Service\ViewHelper\RangeToArrayFactory::class,
             'publicResourceUrl' => Service\ViewHelper\PublicResourceUrlFactory::class,
@@ -168,6 +169,7 @@ return [
         'factories' => [
             'fixUtf8' => Service\ControllerPlugin\FixUtf8Factory::class,
             'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
+            'isIiifMedia' => Service\ControllerPlugin\IsIiifMediaFactory::class,
             'mediaDimension' => Service\ControllerPlugin\MediaDimensionFactory::class,
         ],
     ],
@@ -647,6 +649,19 @@ return [
             'iiifserver_player_inline_height' => '600px',
             'iiifserver_player_button_label' => 'Open IIIF viewer', // @translate
             'iiifserver_player_button_lazy' => false,
+        ],
+        // Registry of ingesters producing iiif media, grouped by type.
+        // Modules (IIIF Remote Image, IIIF Remote Video, etc.) may contribute
+        // their own ingester name via this merged config key.
+        // Controller plugin and view helper `isIiifMedia` read this registry
+        // instead of hardcoded `ingester === 'iiif'`.
+        'media_ingesters' => [
+            'image' => [
+                'iiif',
+            ],
+            'audio' => [],
+            'video' => [],
+            'presentation' => [],
         ],
     ],
 ];
