@@ -34,14 +34,50 @@
     background: #222;
 }
 
+.iiif-player-button .iiif-player-sidebar-left,
+.iiif-player-button .iiif-player-sidebar-right {
+    display: flex;
+    flex-direction: row;
+}
+
+.iiif-player-button .iiif-player-sidebar-top,
+.iiif-player-button .iiif-player-sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+}
+
 .iiif-player-button .iiif-player-sidebar {
-    flex: 0 0 160px;
-    overflow-y: auto;
     background: #222;
     padding: 6px;
     display: flex;
-    flex-direction: column;
     gap: 6px;
+}
+
+.iiif-player-button .iiif-player-sidebar-left .iiif-player-sidebar,
+.iiif-player-button .iiif-player-sidebar-right .iiif-player-sidebar {
+    flex: 0 0 160px;
+    overflow-y: auto;
+    flex-direction: column;
+}
+
+.iiif-player-button .iiif-player-sidebar-top .iiif-player-sidebar,
+.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-sidebar {
+    flex: 0 0 120px;
+    overflow-x: auto;
+    flex-direction: row;
+}
+
+.iiif-player-button .iiif-player-sidebar-top .iiif-player-thumb,
+.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-thumb {
+    flex: 0 0 auto;
+    width: auto;
+    height: 100%;
+}
+
+.iiif-player-button .iiif-player-sidebar-top .iiif-player-thumb img,
+.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-thumb img {
+    width: auto;
+    height: 100%;
 }
 
 .iiif-player-button .iiif-player-thumb {

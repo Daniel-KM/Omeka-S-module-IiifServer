@@ -55,11 +55,32 @@ class SiteSettingsFieldset extends Fieldset
             ])
 
             ->add([
+                'name' => 'iiifserver_player_button_osd_sidebar',
+                'type' => CommonElement\OptionalRadio::class,
+                'options' => [
+                    'element_group' => 'player',
+                    'label' => 'Resource block IIIF Player Button: OpenSeadragon thumbnails sidebar', // @translate
+                    'label_attributes' => [
+                        'style' => 'display: inline; margin-right: 1em;',
+                    ],
+                    'value_options' => [
+                        'bottom' => 'Bottom', // @translate
+                        'top' => 'Top', // @translate
+                        'left' => 'Left', // @translate
+                        'right' => 'Right', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_player_button_osd_sidebar',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_player_button_lazy',
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'element_group' => 'player',
-                    'label' => 'Resource block IIIF Viewer Button: Lazy load', // @translate
+                    'label' => 'Resource block IIIF Player Button: Lazy load', // @translate
                     'info' => 'When enabled, the viewer is loaded only on the first click. The options may conflict with a pre-existing instance of the same viewer on the page.', // @translate
                 ],
                 'attributes' => [

@@ -45,15 +45,21 @@
             }
 
             if (tiles && tiles.length > 1) {
-                stage.style.display = 'flex';
+                var pos = stage.getAttribute('data-sidebar-position') || 'bottom';
+                stage.classList.add('iiif-player-sidebar-' + pos);
                 stage.removeChild(inner);
                 var osdArea = document.createElement('div');
                 osdArea.className = 'iiif-player-osd-area';
                 osdArea.appendChild(inner);
                 var sidebar = document.createElement('div');
                 sidebar.className = 'iiif-player-sidebar';
-                stage.appendChild(osdArea);
-                stage.appendChild(sidebar);
+                if (pos === 'top' || pos === 'left') {
+                    stage.appendChild(sidebar);
+                    stage.appendChild(osdArea);
+                } else {
+                    stage.appendChild(osdArea);
+                    stage.appendChild(sidebar);
+                }
 
                 tiles.forEach(function (t, i) {
                     var a = document.createElement('button');
@@ -73,6 +79,18 @@
                     if (i === 0) a.classList.add('active');
                     sidebar.appendChild(a);
                 });
+
+                // Translate vertical wheel to horizontal scroll on horizontal
+                // sidebars; without this the wheel event bubbles up to the
+                // OpenSeadragon canvas and zooms the viewer instead.
+                if (pos === 'top' || pos === 'bottom') {
+                    sidebar.addEventListener('wheel', function (e) {
+                        var delta = e.deltaX || e.deltaY;
+                        if (!delta) return;
+                        e.preventDefault();
+                        sidebar.scrollLeft += delta;
+                    }, { passive: false });
+                }
             }
 
             var optsJson = stage.getAttribute('data-osd-options');

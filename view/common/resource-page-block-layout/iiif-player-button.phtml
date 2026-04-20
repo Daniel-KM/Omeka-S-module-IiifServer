@@ -69,13 +69,10 @@ switch ($player) {
             }
         }
         $isIiifMedia = $plugins->get('isIiifMedia');
-        $services = $plugins->getServiceLocator();
-        $moduleManager = $services->get('Omeka\ModuleManager');
-        $imageServerModule = $moduleManager->getModule('ImageServer');
         $setting = $plugins->get('setting');
         // IiifServer serves local iiif when the module ImageServer is active or
         // when an external image server is configured (Cantaloupe, etc.).
-        $hasImageServer = ($imageServerModule && $imageServerModule->getState() === \Omeka\Module\Manager::STATE_ACTIVE)
+        $hasImageServer = class_exists('ImageServer\Module', false)
             || (bool) trim((string) $setting('iiifserver_media_api_url', ''));
 
         $maxOriginalBytes = 5 * 1024 * 1024;
@@ -110,6 +107,11 @@ switch ($player) {
         $stageAttrs['data-asset-prefix'] = $assetUrl('vendor/openseadragon/images/', 'Omeka', false, false);
         if (count($tiles) > 1) {
             $stageAttrs['data-tiles'] = json_encode($tiles, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $sidebarPos = $siteSettings('iiifserver_player_button_osd_sidebar', 'bottom');
+            if (!in_array($sidebarPos, ['top', 'bottom', 'left', 'right'], true)) {
+                $sidebarPos = 'bottom';
+            }
+            $stageAttrs['data-sidebar-position'] = $sidebarPos;
         }
         $osdOptions = [
             'maxZoomPixelRatio' => 10,

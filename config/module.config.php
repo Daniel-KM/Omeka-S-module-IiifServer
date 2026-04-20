@@ -643,6 +643,7 @@ return [
             'iiifserver_player' => 'openseadragon_core',
             'iiifserver_player_button_label' => 'Open IIIF viewer', // @translate
             'iiifserver_player_button_lazy' => false,
+            'iiifserver_player_button_osd_sidebar' => 'bottom',
         ],
     ],
 ];
