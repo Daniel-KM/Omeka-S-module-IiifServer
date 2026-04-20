@@ -14,7 +14,9 @@
     background: #fff;
 }
 
-.iiif-player-button .iiif-player-stage > * {
+.iiif-player-button .iiif-player-stage > .uv,
+.iiif-player-button .iiif-player-stage > [id$="-inner"],
+.iiif-player-button .iiif-player-osd-area > [id$="-inner"] {
     width: 100% !important;
     height: 100% !important;
 }
@@ -23,6 +25,43 @@
 .iiif-player-button .iiif-player-stage .uv > div {
     width: 100% !important;
     height: 100% !important;
+}
+
+.iiif-player-button .iiif-player-osd-area {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    background: #222;
+}
+
+.iiif-player-button .iiif-player-sidebar {
+    flex: 0 0 160px;
+    overflow-y: auto;
+    background: #222;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.iiif-player-button .iiif-player-thumb {
+    background: transparent;
+    border: 2px solid transparent;
+    padding: 0;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+}
+
+.iiif-player-button .iiif-player-thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.iiif-player-button .iiif-player-thumb.active,
+.iiif-player-button .iiif-player-thumb:hover {
+    border-color: #fff;
 }
 
 .iiif-player-button .iiif-player-close {

@@ -55,25 +55,81 @@ switch ($player) {
         break;
 
     case 'openseadragon_core':
-        // OpenSeadragon needs an image info.json. Use current media, first
-        // media of item, or first image of item set.
-        $media = null;
+        // OpenSeadragon needs an image info.json. Collect all image medias.
+        $medias = [];
         if ($resourceName === 'media') {
-            $media = $resource;
+            $medias = [$resource];
         } elseif ($resourceName === 'items') {
-            $media = $resource->primaryMedia();
-            if (!$media) {
-                foreach ($resource->media() as $m) { $media = $m; break; }
-            }
+            $medias = $resource->media();
         } elseif ($resourceName === 'item_sets') {
             foreach ($resource->items() as $it) {
-                foreach ($it->media() as $m) { $media = $m; break 2; }
+                foreach ($it->media() as $m) {
+                    $medias[] = $m;
+                }
             }
         }
-        if (!$media) return '';
-        $stageAttrs['data-info'] = $this->iiifUrl($media);
+        $isIiifMedia = $plugins->get('isIiifMedia');
+        $services = $plugins->getServiceLocator();
+        $moduleManager = $services->get('Omeka\ModuleManager');
+        $imageServerModule = $moduleManager->getModule('ImageServer');
+        $setting = $plugins->get('setting');
+        // IiifServer serves local iiif when the module ImageServer is active or
+        // when an external image server is configured (Cantaloupe, etc.).
+        $hasImageServer = ($imageServerModule && $imageServerModule->getState() === \Omeka\Module\Manager::STATE_ACTIVE)
+            || (bool) trim((string) $setting('iiifserver_media_api_url', ''));
+
+        $maxOriginalBytes = 5 * 1024 * 1024;
+        $tiles = [];
+        foreach ($medias as $m) {
+            $isIiif = $isIiifMedia($m, 'image');
+            if (!$isIiif && strpos((string) $m->mediaType(), 'image/') !== 0) {
+                continue;
+            }
+            if ($isIiif) {
+                // Remote iiif info.json.
+                $tile = ['type' => 'iiif', 'url' => $m->source()];
+            } elseif ($hasImageServer) {
+                // Local iiif image server: info.json + tiled access.
+                $tile = ['type' => 'iiif', 'url' => $this->iiifUrl($m)];
+            } else {
+                // No image server: fall back to a plain image (original if
+                // small, else large thumbnail).
+                $size = (int) $m->size();
+                $url = $size > 0 && $size < $maxOriginalBytes && $m->hasOriginal()
+                    ? $m->originalUrl()
+                    : $m->thumbnailUrl('large');
+                $tile = ['type' => 'image', 'url' => $url];
+            }
+            $tile['thumb'] = $m->thumbnailUrl('medium');
+            $tile['title'] = $m->displayTitle();
+            $tiles[] = $tile;
+        }
+        if (!$tiles) return '';
+        $stageAttrs['data-tile-source'] = json_encode($tiles[0], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $stageAttrs['data-asset-js'] = $assetUrl('vendor/openseadragon/openseadragon.min.js', 'Omeka', false, false);
         $stageAttrs['data-asset-prefix'] = $assetUrl('vendor/openseadragon/images/', 'Omeka', false, false);
+        if (count($tiles) > 1) {
+            $stageAttrs['data-tiles'] = json_encode($tiles, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+        $osdOptions = [
+            'maxZoomPixelRatio' => 10,
+            'showNavigator' => false,
+            'animationTime' => 0.8,
+            'gestureSettingsMouse' => ['clickToZoom' => false],
+        ];
+        $osdStrings = [
+            'Tooltips.Home' => $translate('Go home'), // @translate
+            'Tooltips.ZoomIn' => $translate('Zoom in'), // @translate
+            'Tooltips.ZoomOut' => $translate('Zoom out'), // @translate
+            'Tooltips.FullPage' => $translate('Toggle full page'), // @translate
+            'Tooltips.RotateLeft' => $translate('Rotate left'), // @translate
+            'Tooltips.RotateRight' => $translate('Rotate right'), // @translate
+            'Tooltips.FlipHorizontal' => $translate('Flip horizontally'), // @translate
+            'Tooltips.NextPage' => $translate('Next page'), // @translate
+            'Tooltips.PreviousPage' => $translate('Previous page'), // @translate
+        ];
+        $stageAttrs['data-osd-options'] = json_encode($osdOptions, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $stageAttrs['data-osd-strings'] = json_encode($osdStrings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         break;
 
     default:

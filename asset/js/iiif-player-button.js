@@ -35,10 +35,61 @@
             };
             if (window.Mirador) start(); else loadScript(assetJs, start);
         } else if (player === 'openseadragon_core') {
-            var info = stage.getAttribute('data-info');
+            var firstTile = JSON.parse(stage.getAttribute('data-tile-source'));
             var prefix = stage.getAttribute('data-asset-prefix');
+            var tilesJson = stage.getAttribute('data-tiles');
+            var tiles = tilesJson ? JSON.parse(tilesJson) : null;
+
+            function toTileSource(t) {
+                return t.type === 'iiif' ? t.url : { type: 'image', url: t.url };
+            }
+
+            if (tiles && tiles.length > 1) {
+                stage.style.display = 'flex';
+                stage.removeChild(inner);
+                var osdArea = document.createElement('div');
+                osdArea.className = 'iiif-player-osd-area';
+                osdArea.appendChild(inner);
+                var sidebar = document.createElement('div');
+                sidebar.className = 'iiif-player-sidebar';
+                stage.appendChild(osdArea);
+                stage.appendChild(sidebar);
+
+                tiles.forEach(function (t, i) {
+                    var a = document.createElement('button');
+                    a.type = 'button';
+                    a.className = 'iiif-player-thumb';
+                    a.title = t.title || '';
+                    a.innerHTML = '<img src="' + t.thumb + '" alt="">';
+                    a.addEventListener('click', function () {
+                        if (window._iiifPlayerOsd && window._iiifPlayerOsd[inner.id]) {
+                            window._iiifPlayerOsd[inner.id].open(toTileSource(t));
+                        }
+                        sidebar.querySelectorAll('.iiif-player-thumb.active').forEach(function (el) {
+                            el.classList.remove('active');
+                        });
+                        a.classList.add('active');
+                    });
+                    if (i === 0) a.classList.add('active');
+                    sidebar.appendChild(a);
+                });
+            }
+
+            var optsJson = stage.getAttribute('data-osd-options');
+            var stringsJson = stage.getAttribute('data-osd-strings');
+            var extraOpts = optsJson ? JSON.parse(optsJson) : {};
+            var strings = stringsJson ? JSON.parse(stringsJson) : {};
+
             var start2 = function () {
-                window.OpenSeadragon({ id: inner.id, prefixUrl: prefix, tileSources: [info] });
+                Object.keys(strings).forEach(function (k) {
+                    window.OpenSeadragon.setString(k, strings[k]);
+                });
+                var opts = Object.assign({}, extraOpts);
+                opts.id = inner.id;
+                opts.prefixUrl = prefix;
+                opts.tileSources = [toTileSource(firstTile)];
+                window._iiifPlayerOsd = window._iiifPlayerOsd || {};
+                window._iiifPlayerOsd[inner.id] = window.OpenSeadragon(opts);
             };
             if (window.OpenSeadragon) start2(); else loadScript(assetJs, start2);
         }
