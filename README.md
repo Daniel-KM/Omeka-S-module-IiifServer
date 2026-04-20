@@ -28,6 +28,28 @@ The search is provided by the module [Iiif Search] for common formats (xml [alto
 Installation
 ------------
 
+### Install scenarios
+
+IiifServer and [Image Server] are two independent modules. Each one can be
+installed alone, or both together.
+
+- IiifServer alone: generates IIIF Presentation manifests (v2 and v3) for items
+  and collections. An external image server (Cantaloupe, IIP Image, etc.) must
+  be configured in the module settings (section "External image server", field
+  "Base url") to expose the IIIF Image API service inside the manifests.
+  Without an external server, manifests are generated without an image service
+  (static image URLs only).
+
+- Image Server alone: serves the IIIF Image API (info.json + image requests)
+  from the Omeka files locally. No manifest generation. Useful when another
+  Omeka module or a third-party tool handles manifests, or when the module is
+  consumed by an external IIIF viewer pointing directly at the image endpoints.
+
+- Both installed: IiifServer auto-detects Image Server and uses it as the local
+  IIIF image service. Manifests point to the local server by default.
+  The "External image server" settings are still available and take precedence
+  if a base url is set.
+
 ### Module
 
 See general end user documentation for [installing a module].
@@ -134,14 +156,15 @@ The iiif authentication api is not yet integrated. Anyway, to access iiif
 resources when authenticated, the [fix #omeka/omeka-s/1714] can be patched or
 the module [Guest] can be used.
 
-### IIIF button in a theme
+### OpenSeadragon
 
-A resource page block is available in the theme settings. Else, you can add the
-view helper in your theme:
+Omeka core v4.2.0 ships OpenSeadragon 5.0.1, whose `IIIFTileSource` may
+emit tile URLs with negative region dimensions when the `info.json`
+`sizes` array does not cover every scale factor. This produces HTTP 400
+errors on the image server.
 
-```php
-<?= $this->iiifManifestLink($item) ?>
-```
+The module integrates last version of OpenSeadragon that fixes the issues and
+improve performance.
 
 * For test
 
@@ -218,6 +241,54 @@ Three params should be set:
 
 Since 2020 (v5), Cantaloupe supports IIIF Image Api v3. If you use an older
 version, keep Image Api v2.
+
+
+Theme development
+-----------------
+
+### IIIF button in a theme
+
+A resource page block is available in the theme settings. Else, you can add the
+view helper in your theme:
+
+```php
+<?= $this->iiifManifestLink($item) ?>
+```
+
+### IIIF player button and embed
+
+The resource page block "IIIF Player" displays a button that opens a selected
+player (Universal Viewer, Mirador, Diva, Mirador from Omeka or OpenSeadragon) in
+a full-page overlay. The viewer is configured per site (admin > site > settings > "IIIF Player"):
+
+The view helper `iiifPlayer()` allows to instantiate the same block from a theme
+template with a custom trigger (e.g. the main image of the page acting as the
+button):
+
+```php
+// Main image opens OpenSeadragon overlay.
+echo $this->iiifPlayer($item, [
+    'player' => 'openseadragon',
+    'trigger' => '<img src="' . $escape($item->primaryMedia()->thumbnailUrl('large')) . '">',
+]);
+
+// Secondary "advanced viewer" button opens Mirador.
+echo $this->iiifPlayer($item, [
+    'player' => 'mirador_core',
+    'label' => 'Advanced viewer',
+]);
+
+// Inline mode: viewer is embedded directly in the page, without button
+// or overlay. A height must be provided (default: 600px).
+echo $this->iiifPlayer($item, [
+    'player' => 'openseadragon',
+    'inline' => true,
+    'height' => '80vh',
+]);
+```
+
+The helper also accepts `lazy` (bool) and `sidebarPosition` (top|bottom|
+left|right) options to override the site settings.
 
 
 Notes
