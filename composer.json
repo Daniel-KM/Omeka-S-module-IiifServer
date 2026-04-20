@@ -55,7 +55,7 @@
         "installer-name": "IiifServer",
         "configurable": true,
         "external-assets": {
-            "asset/vendor/openseadragon/": "https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases/download/3.6.33/openseadragon-5.0.1-iiif-tile-bounds.tar.gz"
+            "asset/vendor/openseadragon/": "https://github.com/openseadragon/openseadragon/releases/download/v6.0.2/openseadragon-bin-6.0.2.tar.gz"
         }
     }
 }

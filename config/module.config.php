@@ -140,10 +140,10 @@ return [
         ],
     ],
     'assets' => [
-        // Override Omeka core OpenSeadragon 5.0.1 with a patched build that
-        // clamps iiif tile bounds (upstream bug produces negative region
-        // dimensions when info.json sizes don't cover every scale factor).
-        // Requires module Common's AssetUrl override.
+        // Override Omeka core OpenSeadragon 5.0.1 with the upstream 6.0.2 build
+        // shipped by this module. Upstream 6.0.2 fixes the iiif tile bounds bug
+        // present in 5.0.1 by validating "sizes" against scale factors before
+        // assigning levelSizes. Requires module Common's AssetUrl override.
         'internals' => [
             'vendor/openseadragon/openseadragon.js' => 'IiifServer',
             'vendor/openseadragon/openseadragon.js.map' => 'IiifServer',
