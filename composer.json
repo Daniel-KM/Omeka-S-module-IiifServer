@@ -27,7 +27,8 @@
         "daniel-km/omeka-s-module-common": "*"
     },
     "require": {
-        "james-heinrich/getid3": "^2.0.0-beta"
+        "james-heinrich/getid3": "^2.0.0-beta",
+        "sempia/external-assets": "^1.0"
     },
     "provide": {
         "doctrine/inflector": "*"
@@ -45,10 +46,16 @@
     "config": {
         "platform": {
             "php": "7.4"
+        },
+        "allow-plugins": {
+            "sempia/external-assets": true
         }
     },
     "extra": {
         "installer-name": "IiifServer",
-        "configurable": true
+        "configurable": true,
+        "external-assets": {
+            "asset/vendor/openseadragon/": "https://github.com/Daniel-KM/Omeka-S-module-IiifServer/releases/download/3.6.33/openseadragon-5.0.1-iiif-tile-bounds.tar.gz"
+        }
     }
 }

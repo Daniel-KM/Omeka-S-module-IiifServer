@@ -136,6 +136,18 @@ return [
             'iiifPlayerButton' => Site\ResourcePageBlockLayout\IiifPlayerButton::class,
         ],
     ],
+    'assets' => [
+        // Override Omeka core OpenSeadragon 5.0.1 with a patched build that
+        // clamps iiif tile bounds (upstream bug produces negative region
+        // dimensions when info.json sizes don't cover every scale factor).
+        // Requires module Common's AssetUrl override.
+        'internals' => [
+            'vendor/openseadragon/openseadragon.js' => 'IiifServer',
+            'vendor/openseadragon/openseadragon.js.map' => 'IiifServer',
+            'vendor/openseadragon/openseadragon.min.js' => 'IiifServer',
+            'vendor/openseadragon/openseadragon.min.js.map' => 'IiifServer',
+        ],
+    ],
     'controllers' => [
         'invokables' => [
             Controller\NoopServerController::class => Controller\NoopServerController::class,

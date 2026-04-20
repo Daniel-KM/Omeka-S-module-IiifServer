@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a4ac7edfffb5ea8d80998bff08bbf30",
+    "content-hash": "6914fce3c6051c1197746a432d67aeb0",
     "packages": [
         {
             "name": "james-heinrich/getid3",
@@ -90,6 +90,64 @@
                 "source": "https://github.com/JamesHeinrich/getID3/tree/v2.0.0-beta6"
             },
             "time": "2023-11-02T19:40:57+00:00"
+        },
+        {
+            "name": "sempia/external-assets",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/Sempia/composer-plugin-external-assets.git",
+                "reference": "d3d15b3d7f94083c89f9320644729740aaaf5bcd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/Sempia%2Fcomposer-plugin-external-assets/repository/archive.zip?sha=d3d15b3d7f94083c89f9320644729740aaaf5bcd",
+                "reference": "d3d15b3d7f94083c89f9320644729740aaaf5bcd",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^2.0",
+                "php": ">=7.2.5"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0",
+                "phpunit/phpunit": "^8.5 || ^9.6"
+            },
+            "bin": [
+                "bin/external-assets"
+            ],
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Sempia\\ExternalAssets\\ExternalAssetsPlugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Sempia\\ExternalAssets\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "CECILL-2.1"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Berthereau",
+                    "email": "Daniel.fr@Berthereau.net"
+                }
+            ],
+            "description": "Composer plugin to download external assets (JS, CSS, fonts, images) for any PHP project",
+            "homepage": "https://gitlab.com/sempia/composer-plugin-external-assets",
+            "keywords": [
+                "assets",
+                "composer-plugin",
+                "download",
+                "external"
+            ],
+            "support": {
+                "issues": "https://gitlab.com/Sempia/composer-plugin-external-assets/-/issues",
+                "source": "https://gitlab.com/Sempia/composer-plugin-external-assets/-/tree/1.0.2"
+            },
+            "time": "2026-04-06T00:00:00+00:00"
         }
     ],
     "packages-dev": [],
