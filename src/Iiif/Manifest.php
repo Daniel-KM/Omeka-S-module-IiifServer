@@ -179,6 +179,10 @@ class Manifest extends AbstractResourceType
      */
     public function rendering(): array
     {
+        if ($this->settings->get('iiifserver_manifest_rendering_skip')) {
+            return [];
+        }
+
         $mediaTypes = $this->settings->get('iiifserver_manifest_rendering_media_types') ?: ['all'];
         if (in_array('none', $mediaTypes)) {
             return [];
@@ -196,6 +200,15 @@ class Manifest extends AbstractResourceType
             $media = $mediaInfo['resource'];
             if (!$allMediaTypes && !in_array($media->mediaType(), $mediaTypes)) {
                 continue;
+            }
+            // When module Access is active, expose rendering only for resources
+            // with status "free": rendering is a direct download link bypassing
+            // image server access checks.
+            if ($this->accessStatus) {
+                $status = $this->accessStatus->__invoke($media);
+                if (!$status || $status->getLevel() !== \Access\Entity\AccessStatus::FREE) {
+                    continue;
+                }
             }
             $rendering = new Rendering();
             $rendering

@@ -105,16 +105,23 @@ class IiifManifest2 extends AbstractHelper
      */
     protected $annotatedMediaIds;
 
+    /**
+     * @var \Access\Mvc\Controller\Plugin\AccessStatus|null
+     */
+    protected $accessStatus;
+
     public function __construct(
         Settings $settings,
         TempFileFactory $tempFileFactory,
         ?string $basePath,
-        bool $isAllowedViewAll = false
+        bool $isAllowedViewAll = false,
+        $accessStatus = null
     ) {
         $this->settings = $settings;
         $this->tempFileFactory = $tempFileFactory;
         $this->basePath = $basePath;
         $this->isAllowedViewAll = $isAllowedViewAll;
+        $this->accessStatus = $accessStatus;
     }
 
     /**
@@ -427,8 +434,17 @@ class IiifManifest2 extends AbstractHelper
         // When there are images or one json file, other files may be added to
         // download section, except if they belong to a 3D model, where nothing
         // is downloadable.
-        if ($totalImages && !$is3dModel) {
+        $renderingSkip = (bool) $this->settings->get('iiifserver_manifest_rendering_skip');
+        if ($totalImages && !$is3dModel && !$renderingSkip) {
             foreach ($nonImages as $media) {
+                // When module Access is active, expose rendering only for
+                // resources with status "free".
+                if ($this->accessStatus) {
+                    $status = $this->accessStatus->__invoke($media);
+                    if (!$status || $status->getLevel() !== \Access\Entity\AccessStatus::FREE) {
+                        continue;
+                    }
+                }
                 $mediaType = $media->mediaType();
                 switch ($mediaType) {
                     case '':

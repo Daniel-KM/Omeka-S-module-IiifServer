@@ -725,6 +725,19 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_rendering_skip',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'metadata',
+                    'label' => 'Skip "rendering" links in manifest (download)', // @translate
+                    'info' => 'When checked, viewers will not display a download button. When module Access is active, "rendering" is always exposed only for resources with status "free".', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_rendering_skip',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_rendering_media_types',
                 'type' => CommonElement\MediaTypeSelect::class,
                 'options' => [

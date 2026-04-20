@@ -301,7 +301,19 @@ class Canvas extends AbstractResourceType
         }
 
         $this->cache['rendering'] = [];
+        if ($this->settings->get('iiifserver_manifest_rendering_skip')) {
+            return $this->cache['rendering'];
+        }
         if (isset($this->options['key']) && $this->options['key'] === 'rendering') {
+            // When module Access is active, expose rendering only for resources
+            // with status "free": rendering is a direct download link bypassing
+            // image server access checks.
+            if ($this->accessStatus) {
+                $status = $this->accessStatus->__invoke($this->resource);
+                if (!$status || $status->getLevel() !== \Access\Entity\AccessStatus::FREE) {
+                    return $this->cache['rendering'];
+                }
+            }
             $rendering = new Rendering();
             // TODO Options should be set first for now for init, done in setResource().
             $rendering

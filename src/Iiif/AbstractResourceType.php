@@ -189,6 +189,11 @@ abstract class AbstractResourceType extends AbstractType
     protected $hasModuleAccess;
 
     /**
+     * @var \Access\Mvc\Controller\Plugin\AccessStatus|null
+     */
+    protected $accessStatus;
+
+    /**
      * @var bool
      */
     protected $hasModuleImageServer;
@@ -413,6 +418,7 @@ abstract class AbstractResourceType extends AbstractType
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
         $this->imageSize = $plugins->get('imageSize');
         $this->isAllowedMediaContent = $this->hasModuleAccess ? $plugins->get('isAllowedMediaContent') : null;
+        $this->accessStatus = $this->hasModuleAccess && $plugins->has('accessStatus') ? $plugins->get('accessStatus') : null;
         $this->isAllowedViewAll = $this->services->get('Omeka\Acl')
             ->userIsAllowed('Omeka\Entity\Resource', 'view-all');
         $this->logger = $this->services->get('Omeka\Logger');
