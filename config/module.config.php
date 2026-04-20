@@ -123,6 +123,9 @@ return [
         ],
     ],
     'form_elements' => [
+        'invokables' => [
+            Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
+        ],
         'factories' => [
             Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
@@ -130,6 +133,7 @@ return [
     'resource_page_block_layouts' => $isBeforeV4 ? [] : [
         'invokables' => [
             'iiifManifestLink' => Site\ResourcePageBlockLayout\IiifManifestLink::class,
+            'iiifPlayerButton' => Site\ResourcePageBlockLayout\IiifPlayerButton::class,
         ],
     ],
     'controllers' => [
@@ -621,6 +625,10 @@ return [
                 'service' => '2',
                 'level' => '2',
             ],
+        ],
+        'site_settings' => [
+            'iiifserver_player' => 'openseadragon_core',
+            'iiifserver_player_button_label' => 'Open IIIF viewer', // @translate
         ],
     ],
 ];

@@ -1,0 +1,111 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ */
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$escapeAttr = $plugins->get('escapeHtmlAttr');
+$siteSettings = $plugins->get('siteSetting');
+
+$player = $siteSettings('iiifserver_player', 'openseadragon_core');
+$label = $siteSettings('iiifserver_player_button_label', $translate('Open IIIF player'));
+
+$resourceName = $resource->resourceName();
+$embedId = 'iiif-player-' . $resourceName . '-' . $resource->id();
+
+// Player available only with modules or core assets.
+$hasHelper = fn ($n) => $plugins->has($n);
+
+// $stageAttrs: data attributes for external JS loader. $templateHtml:
+// module-helper content, rendered inside <template>.
+$stageAttrs = ['data-player' => $player, 'data-embed-id' => $embedId];
+$templateHtml = null;
+
+switch ($player) {
+    case 'diva':
+        if (!$hasHelper('diva')) return '';
+        $templateHtml = $this->diva($resource);
+        break;
+
+    case 'mirador':
+        if (!$hasHelper('mirador')) return '';
+        $templateHtml = $this->mirador($resource);
+        break;
+
+    case 'universalviewer':
+        if (!$hasHelper('universalViewer')) return '';
+        $templateHtml = $this->universalViewer($resource);
+        break;
+
+    case 'mirador_core':
+        // Mirador bundled in Omeka core since v4.0.0.
+        if (!file_exists(OMEKA_PATH . '/application/asset/vendor/mirador/mirador.min.js')) {
+            return '';
+        }
+        $stageAttrs['data-manifest'] = $this->iiifUrl($resource);
+        $stageAttrs['data-asset-js'] = $assetUrl('vendor/mirador/mirador.min.js', 'Omeka', false, false);
+        break;
+
+    case 'openseadragon_core':
+        // OpenSeadragon needs an image info.json. Use current media, first
+        // media of item, or first image of item set.
+        $media = null;
+        if ($resourceName === 'media') {
+            $media = $resource;
+        } elseif ($resourceName === 'items') {
+            $media = $resource->primaryMedia();
+            if (!$media) {
+                foreach ($resource->media() as $m) { $media = $m; break; }
+            }
+        } elseif ($resourceName === 'item_sets') {
+            foreach ($resource->items() as $it) {
+                foreach ($it->media() as $m) { $media = $m; break 2; }
+            }
+        }
+        if (!$media) return '';
+        $stageAttrs['data-info'] = $this->iiifUrl($media);
+        $stageAttrs['data-asset-js'] = $assetUrl('vendor/openseadragon/openseadragon.min.js', 'Omeka', false, false);
+        $stageAttrs['data-asset-prefix'] = $assetUrl('vendor/openseadragon/images/', 'Omeka', false, false);
+        break;
+
+    default:
+        return '';
+}
+
+// Register asset JS/CSS once per page.
+$jsUrl = $assetUrl('js/iiif-player-button.js', 'IiifServer');
+$cssUrl = $assetUrl('css/iiif-player-button.css', 'IiifServer');
+$headScript = $this->headScript();
+$headLink = $this->headLink();
+$hasItem = function ($container, $key, $url) {
+    foreach ($container->getContainer() as $item) {
+        if (isset($item->$key) && $item->$key === $url) return true;
+        if (isset($item->attributes[$key]) && $item->attributes[$key] === $url) return true;
+    }
+    return false;
+};
+if (!$hasItem($headScript, 'src', $jsUrl)) $headScript->appendFile($jsUrl);
+if (!$hasItem($headLink, 'href', $cssUrl)) $headLink->appendStylesheet($cssUrl);
+
+$stageAttrsStr = '';
+foreach ($stageAttrs as $k => $v) {
+    $stageAttrsStr .= ' ' . $k . '="' . $escapeAttr($v) . '"';
+}
+?>
+
+<div class="block resource-block block-iiif-player-button iiif-player-button">
+    <button type="button" class="button iiif-player-toggle" aria-expanded="false">
+        <?= $escape($label) ?>
+    </button>
+    <?php if ($templateHtml !== null): ?>
+    <template class="iiif-player-template"><?= $templateHtml ?></template>
+    <?php endif; ?>
+    <div class="iiif-player-overlay" role="dialog" aria-modal="true">
+        <div class="iiif-player-stage"<?= $stageAttrsStr ?>></div>
+        <button type="button" class="iiif-player-close" aria-label="<?= $escapeAttr($translate('Close')) ?>">×</button>
+    </div>
+</div>

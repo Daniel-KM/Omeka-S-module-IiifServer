@@ -1,0 +1,43 @@
+.iiif-player-button .iiif-player-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.92);
+    flex-direction: column;
+}
+
+.iiif-player-button .iiif-player-stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    background: #fff;
+}
+
+.iiif-player-button .iiif-player-stage > * {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.iiif-player-button .iiif-player-stage .uv,
+.iiif-player-button .iiif-player-stage .uv > div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.iiif-player-button .iiif-player-close {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 10001;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}

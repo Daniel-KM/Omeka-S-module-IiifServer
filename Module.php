@@ -321,7 +321,14 @@ class Module extends AbstractModule
             [$this, 'handleAfterDeleteItem']
         );
 
+        $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_elements',
+            [$this, 'handleSiteSettings']
+        );
+
         // Add a job to upgrade structures once from v3.
+
         $sharedEventManager->attach(
             \EasyAdmin\Form\CheckAndFixForm::class,
             'form.add_elements',
