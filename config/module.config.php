@@ -134,6 +134,7 @@ return [
     'resource_page_block_layouts' => $isBeforeV4 ? [] : [
         'invokables' => [
             'iiifManifestLink' => Site\ResourcePageBlockLayout\IiifManifestLink::class,
+            'iiifPlayer' => Site\ResourcePageBlockLayout\IiifPlayer::class,
             'iiifPlayerButton' => Site\ResourcePageBlockLayout\IiifPlayerButton::class,
         ],
     ],
@@ -642,9 +643,10 @@ return [
         ],
         'site_settings' => [
             'iiifserver_player' => 'openseadragon_core',
+            'iiifserver_player_osd_sidebar' => 'bottom',
+            'iiifserver_player_inline_height' => '600px',
             'iiifserver_player_button_label' => 'Open IIIF viewer', // @translate
             'iiifserver_player_button_lazy' => false,
-            'iiifserver_player_button_osd_sidebar' => 'bottom',
         ],
     ],
 ];

@@ -1,0 +1,11 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ */
+
+?>
+
+<div class="block resource-block block-iiif-player">
+    <?= $this->iiifPlayer($resource, ['inline' => true]) ?>
+</div>

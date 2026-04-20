@@ -25,7 +25,7 @@ class SiteSettingsFieldset extends Fieldset
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'element_group' => 'player',
-                    'label' => 'Resource block IIIF Player Button: Viewer', // @translate
+                    'label' => 'Resource block IIIF Player: Viewer', // @translate
                     'label_attributes' => [
                         'style' => 'display: inline; margin-right: 1em;',
                     ],
@@ -43,23 +43,11 @@ class SiteSettingsFieldset extends Fieldset
             ])
 
             ->add([
-                'name' => 'iiifserver_player_button_label',
-                'type' => Element\Text::class,
-                'options' => [
-                    'element_group' => 'player',
-                    'label' => 'Resource block IIIF Player Button: Label', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_player_button_label',
-                ],
-            ])
-
-            ->add([
-                'name' => 'iiifserver_player_button_osd_sidebar',
+                'name' => 'iiifserver_player_osd_sidebar',
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'element_group' => 'player',
-                    'label' => 'Resource block IIIF Player Button: OpenSeadragon thumbnails sidebar', // @translate
+                    'label' => 'Resource block IIIF Player: OpenSeadragon thumbnails sidebar', // @translate
                     'label_attributes' => [
                         'style' => 'display: inline; margin-right: 1em;',
                     ],
@@ -71,7 +59,33 @@ class SiteSettingsFieldset extends Fieldset
                     ],
                 ],
                 'attributes' => [
-                    'id' => 'iiifserver_player_button_osd_sidebar',
+                    'id' => 'iiifserver_player_osd_sidebar',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_player_inline_height',
+                'type' => Element\Text::class,
+                'options' => [
+                    'element_group' => 'player',
+                    'label' => 'Resource block IIIF Viewer: Inline height', // @translate
+                    'info' => 'CSS length (e.g. 600px, 80vh, 100%).', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_player_inline_height',
+                    'placeholder' => '600px',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_player_button_label',
+                'type' => Element\Text::class,
+                'options' => [
+                    'element_group' => 'player',
+                    'label' => 'Resource block IIIF Viewer Button: Label', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_player_button_label',
                 ],
             ])
 

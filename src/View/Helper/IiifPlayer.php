@@ -44,8 +44,8 @@ class IiifPlayer extends AbstractHelper
         $label = $options['label'] ?? $siteSettings('iiifserver_player_button_label', $view->translate('Open IIIF viewer'));
         $trigger = $options['trigger'] ?? null;
         $sidebarPosition = $options['sidebarPosition']
-            ?? $siteSettings('iiifserver_player_button_osd_sidebar', 'bottom');
-        $height = $options['height'] ?? '600px';
+            ?? $siteSettings('iiifserver_player_osd_sidebar', 'bottom');
+        $height = $options['height'] ?? $siteSettings('iiifserver_player_inline_height', '600px');
 
         return $view->partial('common/iiif-player', [
             'resource' => $resource,
