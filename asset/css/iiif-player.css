@@ -7,6 +7,18 @@
     flex-direction: column;
 }
 
+.iiif-player-button.iiif-player-inline {
+    width: 100%;
+    position: relative;
+}
+
+.iiif-player-button.iiif-player-inline > .iiif-player-stage {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    position: relative;
+}
+
 .iiif-player-button .iiif-player-stage {
     flex: 1;
     min-height: 0;
@@ -14,15 +26,37 @@
     background: #fff;
 }
 
-.iiif-player-button .iiif-player-stage > .uv,
-.iiif-player-button .iiif-player-stage > [id$="-inner"],
+/* Force every direct child to fill the stage (except sidebar layout, which
+   has its own flex children iiif-player-osd-area + iiif-player-sidebar). */
+.iiif-player-button .iiif-player-stage:not([class*="iiif-player-sidebar-"]) > * {
+    width: 100% !important;
+    height: 100% !important;
+}
+
 .iiif-player-button .iiif-player-osd-area > [id$="-inner"] {
     width: 100% !important;
     height: 100% !important;
 }
 
+/* UV nests its viewport inside .uv (fixed pixel height set at init). */
 .iiif-player-button .iiif-player-stage .uv,
 .iiif-player-button .iiif-player-stage .uv > div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Mirador module container + core workspace. */
+.iiif-player-button .iiif-player-stage .mirador-container,
+.iiif-player-button .iiif-player-stage [class*="WorkspaceArea"],
+.iiif-player-button .iiif-player-stage [class*="mirador-workspace"] {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Diva nested app div (clears parent classes at init). */
+.iiif-player-button .iiif-player-stage .diva-player,
+.iiif-player-button .iiif-player-stage .diva-app,
+.iiif-player-button .iiif-player-stage .diva-outer {
     width: 100% !important;
     height: 100% !important;
 }

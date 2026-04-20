@@ -1,0 +1,176 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ * @var string $player
+ * @var string $label
+ * @var string|null $trigger Raw HTML replacing $label inside the toggle.
+ * @var bool $lazy
+ * @var string $sidebarPosition
+ * @var bool $inline
+ * @var string $height
+ */
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$escapeAttr = $plugins->get('escapeHtmlAttr');
+
+$inline = $inline ?? false;
+$height = $height ?? '600px';
+
+$resourceName = $resource->resourceName();
+$embedId = 'iiif-player-' . $resourceName . '-' . $resource->id() . '-' . $player;
+
+$hasHelper = fn ($n) => $plugins->has($n);
+
+$stageAttrs = ['data-player' => $player, 'data-embed-id' => $embedId];
+if ($lazy) {
+    $stageAttrs['data-lazy'] = '1';
+}
+$directHtml = null;
+
+switch ($player) {
+    case 'diva':
+        if (!$hasHelper('diva')) return '';
+        $directHtml = $this->diva($resource);
+        break;
+
+    case 'mirador':
+        if (!$hasHelper('mirador')) return '';
+        $directHtml = $this->mirador($resource);
+        break;
+
+    case 'universalviewer':
+        if (!$hasHelper('universalViewer')) return '';
+        $directHtml = $this->universalViewer($resource);
+        break;
+
+    case 'mirador_core':
+        if (!file_exists(OMEKA_PATH . '/application/asset/vendor/mirador/mirador.min.js')) {
+            return '';
+        }
+        $stageAttrs['data-manifest'] = $this->iiifUrl($resource);
+        $stageAttrs['data-asset-js'] = $assetUrl('vendor/mirador/mirador.min.js', 'Omeka', false, false);
+        break;
+
+    case 'openseadragon_core':
+        $medias = [];
+        if ($resourceName === 'media') {
+            $medias = [$resource];
+        } elseif ($resourceName === 'items') {
+            $medias = $resource->media();
+        } elseif ($resourceName === 'item_sets') {
+            foreach ($resource->items() as $it) {
+                foreach ($it->media() as $m) {
+                    $medias[] = $m;
+                }
+            }
+        }
+        $isIiifMedia = $plugins->get('isIiifMedia');
+        $setting = $plugins->get('setting');
+        $hasImageServer = class_exists('ImageServer\Module', false)
+            || (bool) trim((string) $setting('iiifserver_media_api_url', ''));
+
+        $maxOriginalBytes = 5 * 1024 * 1024;
+        $tiles = [];
+        foreach ($medias as $m) {
+            $isIiif = $isIiifMedia($m, 'image');
+            if (!$isIiif && strpos((string) $m->mediaType(), 'image/') !== 0) {
+                continue;
+            }
+            if ($isIiif) {
+                $tile = ['type' => 'iiif', 'url' => $m->source()];
+            } elseif ($hasImageServer) {
+                $tile = ['type' => 'iiif', 'url' => $this->iiifUrl($m)];
+            } else {
+                $size = (int) $m->size();
+                $url = $size > 0 && $size < $maxOriginalBytes && $m->hasOriginal()
+                    ? $m->originalUrl()
+                    : $m->thumbnailUrl('large');
+                $tile = ['type' => 'image', 'url' => $url];
+            }
+            $tile['thumb'] = $m->thumbnailUrl('medium');
+            $tile['title'] = $m->displayTitle();
+            $tiles[] = $tile;
+        }
+        if (!$tiles) return '';
+        $stageAttrs['data-tile-source'] = json_encode($tiles[0], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $stageAttrs['data-asset-js'] = $assetUrl('vendor/openseadragon/openseadragon.min.js', 'Omeka', false, false);
+        $stageAttrs['data-asset-prefix'] = $assetUrl('vendor/openseadragon/images/', 'IiifServer', true, false);
+        if (count($tiles) > 1) {
+            $stageAttrs['data-tiles'] = json_encode($tiles, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $pos = in_array($sidebarPosition, ['top', 'bottom', 'left', 'right'], true)
+                ? $sidebarPosition : 'bottom';
+            $stageAttrs['data-sidebar-position'] = $pos;
+        }
+        $osdOptions = [
+            'maxZoomPixelRatio' => 10,
+            'showNavigator' => false,
+            'animationTime' => 0.8,
+            'gestureSettingsMouse' => ['clickToZoom' => false],
+        ];
+        $osdStrings = [
+            'Tooltips.Home' => $translate('Go home'), // @translate
+            'Tooltips.ZoomIn' => $translate('Zoom in'), // @translate
+            'Tooltips.ZoomOut' => $translate('Zoom out'), // @translate
+            'Tooltips.FullPage' => $translate('Toggle full page'), // @translate
+            'Tooltips.RotateLeft' => $translate('Rotate left'), // @translate
+            'Tooltips.RotateRight' => $translate('Rotate right'), // @translate
+            'Tooltips.FlipHorizontal' => $translate('Flip horizontally'), // @translate
+            'Tooltips.NextPage' => $translate('Next page'), // @translate
+            'Tooltips.PreviousPage' => $translate('Previous page'), // @translate
+        ];
+        $stageAttrs['data-osd-options'] = json_encode($osdOptions, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $stageAttrs['data-osd-strings'] = json_encode($osdStrings, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        break;
+
+    default:
+        return '';
+}
+
+// Register asset JS/CSS once per page.
+$jsUrl = $assetUrl('js/iiif-player.js', 'IiifServer');
+$cssUrl = $assetUrl('css/iiif-player.css', 'IiifServer');
+$headScript = $this->headScript();
+$headLink = $this->headLink();
+$hasItem = function ($container, $key, $url) {
+    foreach ($container->getContainer() as $item) {
+        if (isset($item->$key) && $item->$key === $url) return true;
+        if (isset($item->attributes[$key]) && $item->attributes[$key] === $url) return true;
+    }
+    return false;
+};
+if (!$hasItem($headScript, 'src', $jsUrl)) $headScript->appendFile($jsUrl);
+if (!$hasItem($headLink, 'href', $cssUrl)) $headLink->appendStylesheet($cssUrl);
+
+$stageAttrsStr = '';
+foreach ($stageAttrs as $k => $v) {
+    $stageAttrsStr .= ' ' . $k . '="' . $escapeAttr($v) . '"';
+}
+
+$triggerContent = $trigger ?? $escape($label);
+$triggerClass = $trigger === null ? 'button iiif-player-toggle' : 'iiif-player-toggle';
+?>
+
+<?php if ($inline): ?>
+
+<div class="iiif-player-button iiif-player-inline" style="height: <?= $escapeAttr($height) ?>;">
+    <div class="iiif-player-stage"<?= $stageAttrsStr ?>><?= $directHtml ?? '' ?></div>
+</div>
+
+<?php else: ?>
+
+<div class="iiif-player-button">
+    <button type="button" class="<?= $triggerClass ?>" aria-expanded="false"><?= $triggerContent ?></button>
+    <?php if ($lazy && $directHtml !== null): ?>
+    <template class="iiif-player-template"><?= $directHtml ?></template>
+    <?php endif; ?>
+    <div class="iiif-player-overlay" role="dialog" aria-modal="true">
+        <div class="iiif-player-stage"<?= $stageAttrsStr ?>><?= (!$lazy ? ($directHtml ?? '') : '') ?></div>
+        <button type="button" class="iiif-player-close" aria-label="<?= $escapeAttr($translate('Close')) ?>">×</button>
+    </div>
+</div>
+
+<?php endif; ?>

@@ -114,15 +114,24 @@
     }
 
     function setup(root) {
-        var btn = root.querySelector('.iiif-player-toggle');
-        var overlay = root.querySelector('.iiif-player-overlay');
         var stage = root.querySelector('.iiif-player-stage');
-        var closeBtn = root.querySelector('.iiif-player-close');
-        var tpl = root.querySelector('template.iiif-player-template');
-        if (!btn || !overlay || !stage || !closeBtn) return;
+        if (!stage) return;
 
         var player = stage.getAttribute('data-player');
         var isCore = player === 'mirador_core' || player === 'openseadragon_core';
+
+        // Inline mode: init player immediately, no button/overlay.
+        if (root.classList.contains('iiif-player-inline')) {
+            if (isCore) initCore(stage);
+            return;
+        }
+
+        var btn = root.querySelector('.iiif-player-toggle');
+        var overlay = root.querySelector('.iiif-player-overlay');
+        var closeBtn = root.querySelector('.iiif-player-close');
+        var tpl = root.querySelector('template.iiif-player-template');
+        if (!btn || !overlay || !closeBtn) return;
+
         var lazy = stage.getAttribute('data-lazy') === '1';
         var loaded = false;
 
