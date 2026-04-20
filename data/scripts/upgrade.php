@@ -105,6 +105,19 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
     throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
 }
 
+$moduleManager = $services->get('Omeka\ModuleManager');
+$imageServerModule = $moduleManager->getModule('ImageServer');
+if ($imageServerModule) {
+    $imageServerVersion = $imageServerModule->getDb('version');
+    if ($imageServerVersion && version_compare($imageServerVersion, '3.6.25', '<')) {
+        $message = new PsrMessage(
+            'The module {module} should be upgraded to version {version} or later.', // @translate
+            ['module' => 'ImageServer', 'version' => '3.6.25']
+        );
+        $messenger->addWarning($message);
+    }
+}
+
 if (version_compare($oldVersion, '3.5.1', '<')) {
     // The method createTilesMainDir() was removed: tiles are now managed by module ImageServer.
     $settings->set(
@@ -514,4 +527,28 @@ if (version_compare($oldVersion, '3.6.29', '<')) {
     );
     $message->setEscapeHtml(false);
     $messenger->addSuccess($message);
+}
+
+if (version_compare($oldVersion, '3.6.32', '<')) {
+    $message = new PsrMessage(
+        'Two new resource blocks are available: "IIIF Viewer" (viewer embedded inline in the page) and "IIIF Viewer Button" (button opening the viewer in a full-page overlay). It embeds OpenSeadragon or the viewers of modules.' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    // Derive the new skip switch from the existing media types selector: "none"
+    // disables rendering completely.
+    $mediaTypes = $settings->get('iiifserver_manifest_rendering_media_types') ?: ['all'];
+    $settings->set('iiifserver_manifest_rendering_skip', in_array('none', $mediaTypes));
+
+    $message = new PsrMessage(
+        'A new option allows to skip the "rendering" links in manifests (used by viewers to display a download button).' // @translate
+    );
+    $messenger->addSuccess($message);
+
+    if ($this->isModuleActive('Access')) {
+        $message = new PsrMessage(
+            'Module Access is active: "rendering" links are now exposed only for resources with status "free". Other resources will not advertise a download link in their manifest.' // @translate
+        );
+        $messenger->addWarning($message);
+    }
 }
