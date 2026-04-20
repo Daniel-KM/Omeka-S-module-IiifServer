@@ -32,9 +32,9 @@ class SiteSettingsFieldset extends Fieldset
                     'value_options' => [
                         'diva' => 'Diva (module)', // @translate
                         'mirador' => 'Mirador (module)', // @translate
-                        'universalviewer' => 'Universal Viewer (module)', // @translate
                         'mirador_core' => 'Mirador (Omeka)', // @translate
-                        'openseadragon_core' => 'OpenSeadragon (Omeka)', // @translate
+                        'openseadragon_core' => 'OpenSeadragon', // @translate
+                        'universalviewer' => 'Universal Viewer (module)', // @translate
                     ],
                 ],
                 'attributes' => [
@@ -51,6 +51,19 @@ class SiteSettingsFieldset extends Fieldset
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_player_button_label',
+                ],
+            ])
+
+            ->add([
+                'name' => 'iiifserver_player_button_lazy',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'player',
+                    'label' => 'Resource block IIIF Viewer Button: Lazy load', // @translate
+                    'info' => 'When enabled, the viewer is loaded only on the first click. The options may conflict with a pre-existing instance of the same viewer on the page.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_player_button_lazy',
                 ],
             ])
         ;

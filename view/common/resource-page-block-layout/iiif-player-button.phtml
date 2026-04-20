@@ -12,7 +12,8 @@ $escapeAttr = $plugins->get('escapeHtmlAttr');
 $siteSettings = $plugins->get('siteSetting');
 
 $player = $siteSettings('iiifserver_player', 'openseadragon_core');
-$label = $siteSettings('iiifserver_player_button_label', $translate('Open IIIF player'));
+$label = $siteSettings('iiifserver_player_button_label', $translate('Open IIIF viewer'));
+$lazy = (bool) $siteSettings('iiifserver_player_button_lazy', false);
 
 $resourceName = $resource->resourceName();
 $embedId = 'iiif-player-' . $resourceName . '-' . $resource->id();
@@ -20,25 +21,28 @@ $embedId = 'iiif-player-' . $resourceName . '-' . $resource->id();
 // Player available only with modules or core assets.
 $hasHelper = fn ($n) => $plugins->has($n);
 
-// $stageAttrs: data attributes for external JS loader. $templateHtml:
+// $stageAttrs: data attributes for external JS loader. $directHtml:
 // module-helper content, rendered inside <template>.
 $stageAttrs = ['data-player' => $player, 'data-embed-id' => $embedId];
-$templateHtml = null;
+if ($lazy) {
+    $stageAttrs['data-lazy'] = '1';
+}
+$directHtml = null;
 
 switch ($player) {
     case 'diva':
         if (!$hasHelper('diva')) return '';
-        $templateHtml = $this->diva($resource);
+        $directHtml = $this->diva($resource);
         break;
 
     case 'mirador':
         if (!$hasHelper('mirador')) return '';
-        $templateHtml = $this->mirador($resource);
+        $directHtml = $this->mirador($resource);
         break;
 
     case 'universalviewer':
         if (!$hasHelper('universalViewer')) return '';
-        $templateHtml = $this->universalViewer($resource);
+        $directHtml = $this->universalViewer($resource);
         break;
 
     case 'mirador_core':
@@ -101,11 +105,11 @@ foreach ($stageAttrs as $k => $v) {
     <button type="button" class="button iiif-player-toggle" aria-expanded="false">
         <?= $escape($label) ?>
     </button>
-    <?php if ($templateHtml !== null): ?>
-    <template class="iiif-player-template"><?= $templateHtml ?></template>
+    <?php if ($lazy && $directHtml !== null): ?>
+    <template class="iiif-player-template"><?= $directHtml ?></template>
     <?php endif; ?>
     <div class="iiif-player-overlay" role="dialog" aria-modal="true">
-        <div class="iiif-player-stage"<?= $stageAttrsStr ?>></div>
+        <div class="iiif-player-stage"<?= $stageAttrsStr ?>><?= (!$lazy ? ($directHtml ?? '') : '') ?></div>
         <button type="button" class="iiif-player-close" aria-label="<?= $escapeAttr($translate('Close')) ?>">×</button>
     </div>
 </div>

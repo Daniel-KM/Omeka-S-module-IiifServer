@@ -1,6 +1,13 @@
 (function () {
     'use strict';
 
+    function loadScript(src, onload) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = onload;
+        document.head.appendChild(s);
+    }
+
     function runScripts(container) {
         container.querySelectorAll('script').forEach(function (old) {
             var s = document.createElement('script');
@@ -10,13 +17,6 @@
             s.text = old.text;
             old.parentNode.replaceChild(s, old);
         });
-    }
-
-    function loadScript(src, onload) {
-        var s = document.createElement('script');
-        s.src = src;
-        s.onload = onload;
-        document.head.appendChild(s);
     }
 
     function initCore(stage) {
@@ -44,11 +44,6 @@
         }
     }
 
-    function initTemplate(stage, tpl) {
-        stage.appendChild(tpl.content.cloneNode(true));
-        runScripts(stage);
-    }
-
     function setup(root) {
         var btn = root.querySelector('.iiif-player-toggle');
         var overlay = root.querySelector('.iiif-player-overlay');
@@ -57,20 +52,26 @@
         var tpl = root.querySelector('template.iiif-player-template');
         if (!btn || !overlay || !stage || !closeBtn) return;
 
+        var player = stage.getAttribute('data-player');
+        var isCore = player === 'mirador_core' || player === 'openseadragon_core';
+        var lazy = stage.getAttribute('data-lazy') === '1';
         var loaded = false;
 
         function open() {
             if (!loaded) {
-                if (tpl) {
-                    initTemplate(stage, tpl);
-                } else {
+                if (isCore) {
                     initCore(stage);
+                } else if (lazy && tpl) {
+                    stage.appendChild(tpl.content.cloneNode(true));
+                    runScripts(stage);
                 }
                 loaded = true;
             }
             overlay.style.display = 'flex';
             btn.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
+            // Module viewers init hidden: force relayout.
+            window.dispatchEvent(new Event('resize'));
         }
         function close() {
             overlay.style.display = 'none';
