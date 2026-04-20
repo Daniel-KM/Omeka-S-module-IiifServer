@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-16 00:00+0000\n"
+"POT-Creation-Date: 2026-04-20 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,47 +17,43 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:101 data/scripts/upgrade.php:366
-#: data/scripts/upgrade.php:410 Module.php:219 Module.php:230
+#: data/scripts/upgrade.php:101 data/scripts/upgrade.php:379
+#: data/scripts/upgrade.php:423 Module.php:217
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: data/scripts/upgrade.php:105 data/scripts/upgrade.php:370
-#: data/scripts/upgrade.php:414
+#: data/scripts/upgrade.php:105 data/scripts/upgrade.php:383
+#: data/scripts/upgrade.php:427
 msgid "Missing requirement. Unable to upgrade."
 msgstr ""
 
-#: data/scripts/upgrade.php:139
+#: data/scripts/upgrade.php:152
 msgid ""
 "This version requires Archive Repertory 3.15.4 or greater (used for some 3D "
 "views)."
 msgstr ""
 
-#: Module.php:386
+#: Module.php:391
 msgid "All checks passed."
 msgstr ""
 
-#: Module.php:434
+#: Module.php:437
 msgid ""
 "The module creates manifests with the properties from each resource (item "
 "set, item and media)."
 msgstr ""
 
-#: Module.php:435
+#: Module.php:438
 msgid "The properties below are used when some metadata are missing."
 msgstr ""
 
-#: Module.php:436
+#: Module.php:439
 msgid "In all cases, empty properties are not set."
 msgstr ""
 
-#: Module.php:449
+#: Module.php:456
 msgid "Audit"
-msgstr ""
-
-#: Module.php:1298
-msgid "unknown"
 msgstr ""
 
 #: src/Iiif/TraitStructuralStructures.php:380
@@ -73,35 +69,39 @@ msgstr ""
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:441
+#: src/View/Helper/IiifManifest2.php:457
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:450
+#: src/View/Helper/IiifManifest2.php:466
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:458
+#: src/View/Helper/IiifManifest2.php:474
 msgid "Download as ALTO XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:466
+#: src/View/Helper/IiifManifest2.php:482
 msgid "Download as text"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1102
+#: src/View/Helper/IiifManifest2.php:1118
 msgid "Placeholder image"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1283
+#: src/View/Helper/IiifManifest2.php:1299
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "v2 content (e.g., audio, video) and is unfortunately incompatible with IIIF "
 "v2 viewers."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1830
+#: src/View/Helper/IiifManifest2.php:1846
 msgid "Text of current page"
+msgstr ""
+
+#: src/View/Helper/IiifPlayer.php:44
+msgid "Open IIIF viewer"
 msgstr ""
 
 #: view/common/iiif-manifest-link.phtml:27
@@ -116,13 +116,53 @@ msgstr ""
 msgid "Unable to copy url in clipboard!"
 msgstr ""
 
+#: view/common/iiif-player.phtml:115
+msgid "Go home"
+msgstr ""
+
+#: view/common/iiif-player.phtml:116
+msgid "Zoom in"
+msgstr ""
+
+#: view/common/iiif-player.phtml:117
+msgid "Zoom out"
+msgstr ""
+
+#: view/common/iiif-player.phtml:118
+msgid "Toggle full page"
+msgstr ""
+
+#: view/common/iiif-player.phtml:119
+msgid "Rotate left"
+msgstr ""
+
+#: view/common/iiif-player.phtml:120
+msgid "Rotate right"
+msgstr ""
+
+#: view/common/iiif-player.phtml:121
+msgid "Flip horizontally"
+msgstr ""
+
+#: view/common/iiif-player.phtml:122
+msgid "Next page"
+msgstr ""
+
+#: view/common/iiif-player.phtml:123
+msgid "Previous page"
+msgstr ""
+
 #: data/scripts/upgrade.php:81
 msgid ""
 "The job #{job_id} is still starting after the sleep delay. It may need to be "
 "relaunched manually."
 msgstr ""
 
-#: data/scripts/upgrade.php:171
+#: data/scripts/upgrade.php:114 Module.php:228
+msgid "The module {module} should be upgraded to version {version} or later."
+msgstr ""
+
+#: data/scripts/upgrade.php:184
 msgid ""
 "The module IIIF Server was split into two modules: {link_url}IIIF "
 "Server{link_end}, that creates iiif manifest, and {link_url_2}Image "
@@ -131,220 +171,240 @@ msgid ""
 "is automatic, but you need to install the two modules."
 msgstr ""
 
-#: data/scripts/upgrade.php:277
+#: data/scripts/upgrade.php:290
 msgid ""
 "The module IIIF Server is now totally independant from the module Image "
 "Server and any other external image server can be used."
 msgstr ""
 
-#: data/scripts/upgrade.php:281
+#: data/scripts/upgrade.php:294
 msgid ""
 "Check the config of the image server, if any, in the config of this module."
 msgstr ""
 
-#: data/scripts/upgrade.php:285
+#: data/scripts/upgrade.php:298
 msgid ""
 "The module IIIF Server supports creation of structures through a table-of-"
 "contents-like value: see {link_url}readme{link_end}."
 msgstr ""
 
-#: data/scripts/upgrade.php:297
+#: data/scripts/upgrade.php:310
 msgid ""
 "XML Alto is supported natively and it can be displayed as an overlay layer "
 "if your viewer supports it."
 msgstr ""
 
-#: data/scripts/upgrade.php:301
+#: data/scripts/upgrade.php:314
 msgid ""
 "The xml media-type should be a precise one: \"application/alto+xml\", not "
 "\"text/xml\" or \"application/xml\"."
 msgstr ""
 
-#: data/scripts/upgrade.php:305
+#: data/scripts/upgrade.php:318
 msgid ""
 "New files are automatically managed, but you may need modules Bulk Edit or "
 "Easy Admin to fix old ones, if any."
 msgstr ""
 
-#: data/scripts/upgrade.php:309
+#: data/scripts/upgrade.php:322
 msgid ""
 "Badly formatted xml files may be fixed dynamically, but it will affect "
 "performance. See {link_url}readme{link_end}."
 msgstr ""
 
-#: data/scripts/upgrade.php:322
+#: data/scripts/upgrade.php:335
 msgid "An option allows to skip the rights managed by module Access Resource."
 msgstr ""
 
-#: data/scripts/upgrade.php:334
+#: data/scripts/upgrade.php:347
 msgid "A new option allows to fix bad xml and invalid utf-8 characters."
 msgstr ""
 
-#: data/scripts/upgrade.php:341
+#: data/scripts/upgrade.php:354
 msgid ""
 "A new option allows to cache manifests in order to delivrate them instantly."
 msgstr ""
 
-#: data/scripts/upgrade.php:345
+#: data/scripts/upgrade.php:358
 msgid ""
 "A new resource block allows to display the iiif manifest link to copy in "
 "clipboard."
 msgstr ""
 
-#: data/scripts/upgrade.php:357
+#: data/scripts/upgrade.php:370
 msgid "A new option allows to set the provider."
 msgstr ""
 
-#: data/scripts/upgrade.php:378
+#: data/scripts/upgrade.php:391
 msgid "A new option allows to limit the files types to download."
 msgstr ""
 
-#: data/scripts/upgrade.php:386
+#: data/scripts/upgrade.php:399
 msgid ""
 "A new option allows to cache the manifests on save. It is set on, but may be "
 "disabled in settings."
 msgstr ""
 
-#: data/scripts/upgrade.php:394
+#: data/scripts/upgrade.php:407
 msgid "A new option allows to fix playing mp3 with Universal Viewer v4."
 msgstr ""
 
-#: data/scripts/upgrade.php:421
+#: data/scripts/upgrade.php:434
 msgid ""
 "The creation of manifests is now a lot quicker and can be done in real time "
 "in most of the cases. The cache is still available for big manifests and for "
 "instant access."
 msgstr ""
 
-#: data/scripts/upgrade.php:426
+#: data/scripts/upgrade.php:439
 msgid ""
 "If you use the feature \"table of contents\", a new format was integrated. "
 "Management of the old ones will be removed in version 3.6.20. A job is added "
 "in module EasyAdmin (version 3.4.17) to do the conversion."
 msgstr ""
 
-#: data/scripts/upgrade.php:448
+#: data/scripts/upgrade.php:461
 msgid ""
 "A job was launched to upgrade the format of \"table of contents\". Replaced "
 "tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}"
 "logs{link_end})."
 msgstr ""
 
-#: data/scripts/upgrade.php:492
+#: data/scripts/upgrade.php:505
 msgid ""
 "The settings \"iiifserver_identifier_raw\" and "
 "\"iiifserver_identifier_apache_preencoding\" have been replaced by "
 "\"iiifserver_identifier_encode_slash\" (auto-detected on config save)."
 msgstr ""
 
-#: data/scripts/upgrade.php:505
+#: data/scripts/upgrade.php:518
 msgid ""
 "A job was launched to recompute all media dimensions with EXIF orientation "
 "fix ({link}job #{job_id}{link_end}, {link_log}logs{link_end})."
 msgstr ""
 
-#: Module.php:240 Module.php:247
+#: data/scripts/upgrade.php:534
+msgid ""
+"Two new resource blocks are available: \"IIIF Viewer\" (viewer embedded "
+"inline in the page) and \"IIIF Viewer Button\" (button opening the viewer in "
+"a full-page overlay). It embeds OpenSeadragon or the viewers of modules."
+msgstr ""
+
+#: data/scripts/upgrade.php:544
+msgid ""
+"A new option allows to skip the \"rendering\" links in manifests (used by "
+"viewers to display a download button)."
+msgstr ""
+
+#: data/scripts/upgrade.php:550
+msgid ""
+"Module Access is active: \"rendering\" links are now exposed only for "
+"resources with status \"free\". Other resources will not advertise a "
+"download link in their manifest."
+msgstr ""
+
+#: Module.php:238 Module.php:245
 msgid "The directory \"{directory}\" is not writeable."
 msgstr ""
 
-#: Module.php:527
+#: Module.php:556
 msgid ""
 "Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:533
+#: Module.php:564
 msgid ""
 "Storing dimensions of images, audio and video ({link}job #{job_id}"
 "{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:641
+#: Module.php:680
 msgid "Iiif Server: Cache manifests"
 msgstr ""
 
-#: Module.php:642
+#: Module.php:681
 msgid "Iiif Server: Store dimensions of medias"
 msgstr ""
 
-#: Module.php:643
+#: Module.php:682
 msgid ""
 "Iiif Server: Upgrade old tables of contents to new format with four columns "
 "(to do only one time for old external manifests)"
 msgstr ""
 
-#: Module.php:650
+#: Module.php:689
 msgid "Options to cache manifests"
 msgstr ""
 
-#: Module.php:661
+#: Module.php:700
 msgid "Limit cache of manifests to specific items"
 msgstr ""
 
-#: Module.php:672
+#: Module.php:711
 msgid "Options to store dimensions"
 msgstr ""
 
-#: Module.php:683
+#: Module.php:722
 msgid "Limit storage of dimensions to specific items"
 msgstr ""
 
-#: Module.php:694
+#: Module.php:733
 msgid "Options to upgrade table of contents"
 msgstr ""
 
-#: Module.php:705
+#: Module.php:744
 msgid "Limit upgrade of tables of contents to specific items"
 msgstr ""
 
-#: Module.php:854
+#: Module.php:893
 msgid ""
 "The default IIIF Presentation version is {version}. Version 3 is the current "
 "standard and is recommended."
 msgstr ""
 
-#: Module.php:888
+#: Module.php:927
 msgid ""
 "{count} items have more than {threshold} images. Enabling manifest cache is "
 "recommended to avoid slow page loads."
 msgstr ""
 
-#: Module.php:901
+#: Module.php:940
 msgid "Manifest cache is enabled but directory \"{dir}\" is not writable."
 msgstr ""
 
-#: Module.php:906
+#: Module.php:945
 msgid "Manifest cache is enabled."
 msgstr ""
 
-#: Module.php:947
+#: Module.php:997
 msgid "All {total} media (images, audio, video) have stored dimensions."
 msgstr ""
 
-#: Module.php:952
+#: Module.php:1002
 msgid ""
 "{unsized} of {total} media (images, audio, video) have no stored dimensions. "
 "Run \"Media Dimensions\" job to speed up manifest generation."
 msgstr ""
 
-#: Module.php:995
+#: Module.php:1045
 msgid "Could not reach manifest URL: {url}. Check server configuration."
 msgstr ""
 
-#: Module.php:1002
+#: Module.php:1052
 msgid "Manifest URL {url} returned invalid JSON."
 msgstr ""
 
-#: Module.php:1007
+#: Module.php:1057
 msgid "Manifest route is working (tested item #{id})."
 msgstr ""
 
-#: Module.php:1028
+#: Module.php:1078
 msgid ""
 "The cors headers are disabled. You shall enable them to allow other "
 "libraries to access to your manifests."
 msgstr ""
 
-#: Module.php:1035
+#: Module.php:1085
 msgid ""
 "The cors headers are enabled multiple times in the config of the module and "
 "in the config of Apache or in the file .htaccess. Duplicating the cors "
@@ -352,13 +412,13 @@ msgid ""
 "the module, in the Apache config or in the file .htaccess."
 msgstr ""
 
-#: Module.php:1051
+#: Module.php:1101
 msgid ""
 "When cache is enabled, you should recreate it each time the config is "
 "updated."
 msgstr ""
 
-#: Module.php:1131
+#: Module.php:1181
 #, php-format
 msgid ""
 "The server supports encoded slashes (AllowEncodedSlashes). IIIF URLs will "
@@ -366,7 +426,7 @@ msgid ""
 "be changed in the config form."
 msgstr ""
 
-#: Module.php:1138
+#: Module.php:1188
 #, php-format
 msgid ""
 "The server rejects encoded slashes (%%2F) in URLs (Apache default). IIIF "
@@ -376,21 +436,21 @@ msgid ""
 "prefix, or use numeric identifiers."
 msgstr ""
 
-#: Module.php:1305
+#: Module.php:1354
 msgid ""
 "An external IIIF image server was detected ({server_label}). The media "
 "identifier has been set to \"filename with extension (image only)\" for "
 "compatibility. The option can be changed in the config form."
 msgstr ""
 
-#: Module.php:1311
+#: Module.php:1360
 msgid ""
 "An external IIIF image server was detected ({server_label}). The current "
 "media identifier setting \"{identifier}\" is already set and likely "
 "compatible. If images don’t display, check the config form."
 msgstr ""
 
-#: Module.php:1376
+#: Module.php:1425
 msgid ""
 "Item #{item_id} / media #{media_id}: Error getting dimensions for types "
 "\"{types}\"."
@@ -402,7 +462,7 @@ msgid ""
 "processed quickly."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:572
+#: src/View/Helper/IiifManifest2.php:588
 msgid "elements"
 msgstr ""
 
@@ -457,11 +517,7 @@ msgid ""
 "already sized (skipped), {count_failed} errors."
 msgstr ""
 
-#: src/Job/MediaDimensions.php:235
-msgid "Media #{media_id}: Sizing"
-msgstr ""
-
-#: src/Job/MediaDimensions.php:259
+#: src/Job/MediaDimensions.php:254
 msgid "Media #{media_id}: Error getting dimensions for types \"{types}\"."
 msgstr ""
 
@@ -501,46 +557,100 @@ msgid ""
 "converted."
 msgstr ""
 
-#: src/Form/ConfigForm.php:24
+#: src/Form/SiteSettingsFieldset.php:11 src/Form/SiteSettingsFieldset.php:14
+msgid "Players"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:28
+msgid "Resource block IIIF Player: Viewer"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:33
+msgid "Diva (module)"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:34
+msgid "Mirador (module)"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:35
+msgid "Mirador (Omeka)"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:36
+msgid "OpenSeadragon"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:37
+msgid "Universal Viewer (module)"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:50
+msgid "Resource block IIIF Player: OpenSeadragon thumbnails sidebar"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:71
+msgid "Resource block IIIF Viewer: Inline height"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:72
+msgid "CSS length (e.g. 600px, 80vh, 100%)."
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:85
+msgid "Resource block IIIF Viewer Button: Label"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:97
+msgid "Resource block IIIF Player Button: Lazy load"
+msgstr ""
+
+#: src/Form/SiteSettingsFieldset.php:98
+msgid ""
+"When enabled, the viewer is loaded only on the first click. The options may "
+"conflict with a pre-existing instance of the same viewer on the page."
+msgstr ""
+
+#: src/Form/ConfigForm.php:18
 msgid "Infrastructure"
 msgstr ""
 
-#: src/Form/ConfigForm.php:25 src/Form/ConfigForm.php:252
+#: src/Form/ConfigForm.php:19
 msgid "External image server"
 msgstr ""
 
-#: src/Form/ConfigForm.php:26
+#: src/Form/ConfigForm.php:20
 msgid "Metadata and rights"
 msgstr ""
 
-#: src/Form/ConfigForm.php:27
+#: src/Form/ConfigForm.php:21
 msgid "Bulk processing"
 msgstr ""
 
-#: src/Form/ConfigForm.php:40
+#: src/Form/ConfigForm.php:34
 msgid "Default IIIF api version of the manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:41
+#: src/Form/ConfigForm.php:35
 msgid ""
 "Set the version of the manifest to provide. Note that the version is "
 "automatically selected when a request specifies it in headers, or via the "
 "specific url (iiif/2/ or iiif/3/)."
 msgstr ""
 
-#: src/Form/ConfigForm.php:43
+#: src/Form/ConfigForm.php:37
 msgid "2"
 msgstr ""
 
-#: src/Form/ConfigForm.php:44
+#: src/Form/ConfigForm.php:38
 msgid "3"
 msgstr ""
 
-#: src/Form/ConfigForm.php:57
+#: src/Form/ConfigForm.php:51
 msgid "Append CORS headers to web server response"
 msgstr ""
 
-#: src/Form/ConfigForm.php:58
+#: src/Form/ConfigForm.php:52
 msgid ""
 "CORS (\"Cross Origin Resource Sharing\") headers are required to share "
 "manifests and media. They are generally managed by the web server, but, if "
@@ -548,211 +658,196 @@ msgid ""
 "they are disabled."
 msgstr ""
 
-#: src/Form/ConfigForm.php:59
+#: src/Form/ConfigForm.php:53
 msgid ""
 "https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer#CORS-Cross-Origin-"
 "Resource-Sharing)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:71
+#: src/Form/ConfigForm.php:65
 msgid "Output pretty indented json"
 msgstr ""
 
-#: src/Form/ConfigForm.php:72
+#: src/Form/ConfigForm.php:66
 msgid "Recommended only if your server zip json automatically."
 msgstr ""
 
-#: src/Form/ConfigForm.php:84
+#: src/Form/ConfigForm.php:78
 msgid "Cache"
 msgstr ""
 
-#: src/Form/ConfigForm.php:85
+#: src/Form/ConfigForm.php:79
 msgid ""
 "A cache may be required when there are more than 100 to 1000 media, "
 "depending on server, or when there are many visitors."
 msgstr ""
 
-#: src/Form/ConfigForm.php:87
+#: src/Form/ConfigForm.php:81
 msgid "Cache manifest for instant access"
 msgstr ""
 
-#: src/Form/ConfigForm.php:88
+#: src/Form/ConfigForm.php:82
 msgid "Create manifest in real time"
 msgstr ""
 
-#: src/Form/ConfigForm.php:112
+#: src/Form/ConfigForm.php:106
 msgid "Match images and xmls when they are multiple"
 msgstr ""
 
-#: src/Form/ConfigForm.php:114
+#: src/Form/ConfigForm.php:108
 msgid "Media order (page_001.jpg, alto_001.xml, page_002.jpg, alto_002.xml, …)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:115
+#: src/Form/ConfigForm.php:109
 msgid ""
 "Media source base filename (page_001.jpg, page_002.jpg, page_002.xml, "
 "page_001.xml…)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:130
+#: src/Form/ConfigForm.php:124
 msgid "Fix bad xml and invalid utf-8 characters"
 msgstr ""
 
-#: src/Form/ConfigForm.php:133
+#: src/Form/ConfigForm.php:127
 msgid "Via DOM (quick)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:134
+#: src/Form/ConfigForm.php:128
 msgid "Via regex (slow)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:149
+#: src/Form/ConfigForm.php:143
 msgid "Skip check of access rights to files for module Access"
 msgstr ""
 
-#: src/Form/ConfigForm.php:150
+#: src/Form/ConfigForm.php:144
 msgid "If set, all public and restricted files will be displayed."
 msgstr ""
 
-#: src/Form/ConfigForm.php:162
+#: src/Form/ConfigForm.php:156
 msgid "Hide OCR for reserved resources for module Access"
 msgstr ""
 
-#: src/Form/ConfigForm.php:174
+#: src/Form/ConfigForm.php:168
 msgid "Advanced options for urls"
 msgstr ""
 
-#: src/Form/ConfigForm.php:183
+#: src/Form/ConfigForm.php:177
 msgid "Append version to url (to be set inside module.config.php currently)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:184 src/Form/ConfigForm.php:318
+#: src/Form/ConfigForm.php:178 src/Form/ConfigForm.php:334
 msgid ""
 "If set, the version will be appended to the url of the server: \"iiif/3\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:196
+#: src/Form/ConfigForm.php:190
 msgid "Use the identifiers from Clean Url"
 msgstr ""
 
-#: src/Form/ConfigForm.php:197
+#: src/Form/ConfigForm.php:191
 msgid "Use the identifiers from Clean Url (unavailable)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:208
+#: src/Form/ConfigForm.php:202
 msgid ""
 "Prefix to use for identifier (to be set inside module.config.php currently)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:209
+#: src/Form/ConfigForm.php:203
 #, php-format
 msgid ""
 "Allows to check identifiers that contains \"/\" from \"ark:/12345/xxx\" and "
 "\"ark:%2F12345%2Fxxx\" (example: \"ark:/12345/\")."
 msgstr ""
 
-#: src/Form/ConfigForm.php:225
+#: src/Form/ConfigForm.php:219
 msgid "Force base of url (from)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:226
+#: src/Form/ConfigForm.php:220
 msgid ""
 "When a proxy or a firewall is used, or when the config is specific, it may "
 "be needed to change the base url. For example, when the server is secured, "
 "the \"http:\" urls may be replaced by \"https:\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:237
+#: src/Form/ConfigForm.php:231
 msgid "Force base of url (to)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:261
+#: src/Form/ConfigForm.php:246
 msgid "External image server base url (required to use an external server)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:262
+#: src/Form/ConfigForm.php:247
 msgid ""
 "When using an external server like Cantaloupe or IIPImage. this url must be "
 "set, for example: https://iiif.example.org/iiif. All IIIF image urls will be "
 "rewritten to use this base instead of the Omeka one."
 msgstr ""
 
-#: src/Form/ConfigForm.php:274
-msgid "Default IIIF image api version"
+#: src/Form/ConfigForm.php:265
+msgid ""
+"The remaining image server settings are configured in the tab of the module "
+"Image Server."
 msgstr ""
 
 #: src/Form/ConfigForm.php:275
+msgid "Default IIIF image api version"
+msgstr ""
+
+#: src/Form/ConfigForm.php:276
 msgid ""
 "Set the version of the iiif info.json to provide. The image server should "
 "support it."
 msgstr ""
 
-#: src/Form/ConfigForm.php:277
+#: src/Form/ConfigForm.php:278
 msgid "No image server"
 msgstr ""
 
-#: src/Form/ConfigForm.php:278
+#: src/Form/ConfigForm.php:279
 msgid "Image Api 1"
 msgstr ""
 
-#: src/Form/ConfigForm.php:279
+#: src/Form/ConfigForm.php:280
 msgid "Image Api 2"
 msgstr ""
 
-#: src/Form/ConfigForm.php:280
+#: src/Form/ConfigForm.php:281
 msgid "Image Api 3"
 msgstr ""
 
-#: src/Form/ConfigForm.php:294
+#: src/Form/ConfigForm.php:295
 msgid "Supported IIIF image api versions and max compliance level"
 msgstr ""
 
-#: src/Form/ConfigForm.php:296
-msgid "Image Api 1 level 0"
+#: src/Form/ConfigForm.php:300 src/Form/ConfigForm.php:308
+#: src/Form/ConfigForm.php:316
+msgid "Level 0"
 msgstr ""
 
-#: src/Form/ConfigForm.php:297
-msgid "Image Api 1 level 1"
-msgstr ""
-
-#: src/Form/ConfigForm.php:298
-msgid "Image Api 1 level 2"
-msgstr ""
-
-#: src/Form/ConfigForm.php:299
-msgid "Image Api 2 level 0"
-msgstr ""
-
-#: src/Form/ConfigForm.php:300
-msgid "Image Api 2 level 1"
-msgstr ""
-
-#: src/Form/ConfigForm.php:301
-msgid "Image Api 2 level 2"
-msgstr ""
-
-#: src/Form/ConfigForm.php:302
-msgid "Image Api 3 level 0"
-msgstr ""
-
-#: src/Form/ConfigForm.php:303
-msgid "Image Api 3 level 1"
-msgstr ""
-
-#: src/Form/ConfigForm.php:304
-msgid "Image Api 3 level 2"
-msgstr ""
-
+#: src/Form/ConfigForm.php:301 src/Form/ConfigForm.php:309
 #: src/Form/ConfigForm.php:317
+msgid "Level 1"
+msgstr ""
+
+#: src/Form/ConfigForm.php:302 src/Form/ConfigForm.php:310
+#: src/Form/ConfigForm.php:318
+msgid "Level 2"
+msgstr ""
+
+#: src/Form/ConfigForm.php:333
 msgid ""
 "Append the version to the url (to be set inside module.config.php currently)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:345
+#: src/Form/ConfigForm.php:362
 msgid "Media identifier"
 msgstr ""
 
-#: src/Form/ConfigForm.php:346
+#: src/Form/ConfigForm.php:363
 msgid ""
 "Using the full filename with extension for images allows to use an image "
 "server like Cantaloupe sharing the Omeka original files directory. In other "
@@ -760,647 +855,652 @@ msgid ""
 "an extension."
 msgstr ""
 
-#: src/Form/ConfigForm.php:349
+#: src/Form/ConfigForm.php:366
 msgid "Media id"
 msgstr ""
 
-#: src/Form/ConfigForm.php:350
+#: src/Form/ConfigForm.php:367
 msgid "Filename"
 msgstr ""
 
-#: src/Form/ConfigForm.php:351
+#: src/Form/ConfigForm.php:368
 msgid "Filename with extension (all)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:352
+#: src/Form/ConfigForm.php:369
 msgid "Filename with extension (image only)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:366
+#: src/Form/ConfigForm.php:386
 msgid "Append \"info.json\" to the image iiif identifier"
 msgstr ""
 
-#: src/Form/ConfigForm.php:367
+#: src/Form/ConfigForm.php:387
 msgid ""
 "May be required with an external image server that doesn’t manage the url "
 "rewriting to /info.json (iiif specification requires a redirection with http "
 "303)."
 msgstr ""
 
-#: src/Form/ConfigForm.php:379
-msgid "Support non-image files"
+#: src/Form/ConfigForm.php:399
+msgid "The server supports non-image files"
 msgstr ""
 
-#: src/Form/ConfigForm.php:380
+#: src/Form/ConfigForm.php:400
 msgid ""
 "If unchecked, audio, video, models, pdf, etc. will be served through Omeka."
 msgstr ""
 
-#: src/Form/ConfigForm.php:392
+#: src/Form/ConfigForm.php:412
 msgid ""
 "Use \"audio/mp4\" instead of \"audio/mpeg\" (fix playing mp3 in Universal "
 "Viewer v4)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:404
-msgid "Content of the manifest"
-msgstr ""
-
-#: src/Form/ConfigForm.php:413
+#: src/Form/ConfigForm.php:424
 msgid "Property supplying an external manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:414
+#: src/Form/ConfigForm.php:425
 msgid ""
 "External or static manifests can be more customized and may be quicker to be "
 "loaded. Usually, the property is \"dcterms:hasFormat\" or "
 "\"dcterms:isFormatOf\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:422 src/Form/ConfigForm.php:443
-#: src/Form/ConfigForm.php:461 src/Form/ConfigForm.php:512
-#: src/Form/ConfigForm.php:643 src/Form/ConfigForm.php:681
-#: src/Form/ConfigForm.php:708 src/Form/ConfigForm.php:743
-#: src/Form/ConfigForm.php:773 src/Form/ConfigForm.php:803
-#: src/Form/ConfigForm.php:841 src/Form/ConfigForm.php:883
-#: src/Form/ConfigForm.php:962
+#: src/Form/ConfigForm.php:433 src/Form/ConfigForm.php:463
+#: src/Form/ConfigForm.php:481 src/Form/ConfigForm.php:532
+#: src/Form/ConfigForm.php:663 src/Form/ConfigForm.php:701
+#: src/Form/ConfigForm.php:728 src/Form/ConfigForm.php:776
+#: src/Form/ConfigForm.php:806 src/Form/ConfigForm.php:836
+#: src/Form/ConfigForm.php:874 src/Form/ConfigForm.php:916
+#: src/Form/ConfigForm.php:995
 msgid "Select a property…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:431
+#: src/Form/ConfigForm.php:442
+msgid "Content of the manifest"
+msgstr ""
+
+#: src/Form/ConfigForm.php:451
 msgid "Property to use for summary or description"
 msgstr ""
 
-#: src/Form/ConfigForm.php:432
+#: src/Form/ConfigForm.php:452
 msgid ""
 "If any, the first metadata of the record will be added in all manifests and "
 "viewers for main description. It’s recommended to use \"Dublin "
 "Core:Bibliographic Citation\"."
 msgstr ""
 
-#: src/Form/ConfigForm.php:436
+#: src/Form/ConfigForm.php:456
 msgid "Template description"
 msgstr ""
 
-#: src/Form/ConfigForm.php:452
+#: src/Form/ConfigForm.php:472
 msgid "Property to use for Attribution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:453
+#: src/Form/ConfigForm.php:473
 msgid ""
 "If any, the first metadata of the resource will be added in all manifests "
 "and viewers to indicate the attribution."
 msgstr ""
 
-#: src/Form/ConfigForm.php:470
+#: src/Form/ConfigForm.php:490
 msgid "Default attribution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:471
+#: src/Form/ConfigForm.php:491
 msgid ""
 "If any, and if there is no metadata for the property above, this text will "
 "be added in all manifests and viewers. It will be used as pop up in the "
 "Universal Viewer too, if enabled."
 msgstr ""
 
-#: src/Form/ConfigForm.php:475
+#: src/Form/ConfigForm.php:495
 msgid "Provided by Example Organization"
 msgstr ""
 
-#: src/Form/ConfigForm.php:484
+#: src/Form/ConfigForm.php:504
 msgid "Rights (license)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:486
+#: src/Form/ConfigForm.php:506
 msgid "No mention"
 msgstr ""
 
-#: src/Form/ConfigForm.php:487
+#: src/Form/ConfigForm.php:507
 msgid "Specified text below (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:488
+#: src/Form/ConfigForm.php:508
 msgid "Specified license below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:489 src/Form/ConfigForm.php:616
-#: src/Form/ConfigForm.php:657 src/Form/ConfigForm.php:938
+#: src/Form/ConfigForm.php:509 src/Form/ConfigForm.php:636
+#: src/Form/ConfigForm.php:677 src/Form/ConfigForm.php:971
 msgid "Property specified below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:490
+#: src/Form/ConfigForm.php:510
 msgid "Property if any, else specified license text (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:491
+#: src/Form/ConfigForm.php:511
 msgid "Property if any, else specified license"
 msgstr ""
 
-#: src/Form/ConfigForm.php:505
+#: src/Form/ConfigForm.php:525
 msgid "Property to use for rights"
 msgstr ""
 
-#: src/Form/ConfigForm.php:521
+#: src/Form/ConfigForm.php:541
 msgid "Uri of the license or rights"
 msgstr ""
 
-#: src/Form/ConfigForm.php:526
+#: src/Form/ConfigForm.php:546
 msgid "Uri below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:529
+#: src/Form/ConfigForm.php:549
 msgid "Creative Commons 0"
 msgstr ""
 
-#: src/Form/ConfigForm.php:531
+#: src/Form/ConfigForm.php:551
 msgid "Creative Commons CC0 Universal Public Domain Dedication"
 msgstr ""
 
-#: src/Form/ConfigForm.php:536
+#: src/Form/ConfigForm.php:556
 msgid "Creative Commons 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:538
+#: src/Form/ConfigForm.php:558
 msgid "Creative Commons Attribution 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:539
+#: src/Form/ConfigForm.php:559
 msgid "Creative Commons Attribution-ShareAlike 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:540
+#: src/Form/ConfigForm.php:560
 msgid "Creative Commons Attribution-NonCommercial 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:541
+#: src/Form/ConfigForm.php:561
 msgid "Creative Commons Attribution-NonCommercial-ShareAlike 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:542
+#: src/Form/ConfigForm.php:562
 msgid ""
 "Creative Commons Attribution-NonCommercial-NoDerivatives 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:543
+#: src/Form/ConfigForm.php:563
 msgid "Creative Commons Attribution-NoDerivatives 3.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:548
+#: src/Form/ConfigForm.php:568
 msgid "Creative Commons 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:550
+#: src/Form/ConfigForm.php:570
 msgid "Creative Commons Attribution 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:551
+#: src/Form/ConfigForm.php:571
 msgid "Creative Commons Attribution-ShareAlike 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:552
+#: src/Form/ConfigForm.php:572
 msgid "Creative Commons Attribution-NonCommercial 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:553
+#: src/Form/ConfigForm.php:573
 msgid "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:554
+#: src/Form/ConfigForm.php:574
 msgid ""
 "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:555
+#: src/Form/ConfigForm.php:575
 msgid "Creative Commons Attribution-NoDerivatives 4.0 International"
 msgstr ""
 
-#: src/Form/ConfigForm.php:560
+#: src/Form/ConfigForm.php:580
 msgid "Rights Statements"
 msgstr ""
 
-#: src/Form/ConfigForm.php:562
+#: src/Form/ConfigForm.php:582
 msgid "In Copyright"
 msgstr ""
 
-#: src/Form/ConfigForm.php:563
+#: src/Form/ConfigForm.php:583
 msgid "In Copyright - Rights-holder(s) Unlocatable or Unidentifiable"
 msgstr ""
 
-#: src/Form/ConfigForm.php:564
+#: src/Form/ConfigForm.php:584
 msgid "In Copyright - Non-Commercial Use Permitted"
 msgstr ""
 
-#: src/Form/ConfigForm.php:565
+#: src/Form/ConfigForm.php:585
 msgid "In Copyright - Educational Use Permitted"
 msgstr ""
 
-#: src/Form/ConfigForm.php:566
+#: src/Form/ConfigForm.php:586
 msgid "In Copyright - EU Orphan Work"
 msgstr ""
 
-#: src/Form/ConfigForm.php:567
+#: src/Form/ConfigForm.php:587
 msgid "No Copyright - Other Known Legal Restrictions"
 msgstr ""
 
-#: src/Form/ConfigForm.php:568
+#: src/Form/ConfigForm.php:588
 msgid "No Copyright - Contractual Restrictions"
 msgstr ""
 
-#: src/Form/ConfigForm.php:569
+#: src/Form/ConfigForm.php:589
 msgid "No Copyright - Non-Commercial Use Only"
 msgstr ""
 
-#: src/Form/ConfigForm.php:570
+#: src/Form/ConfigForm.php:590
 msgid "No Copyright - United States"
 msgstr ""
 
-#: src/Form/ConfigForm.php:571
+#: src/Form/ConfigForm.php:591
 msgid "No Known Copyright"
 msgstr ""
 
-#: src/Form/ConfigForm.php:572
+#: src/Form/ConfigForm.php:592
 msgid "Copyright Undetermined"
 msgstr ""
 
-#: src/Form/ConfigForm.php:573
+#: src/Form/ConfigForm.php:593
 msgid "Copyright Not Evaluated"
 msgstr ""
 
-#: src/Form/ConfigForm.php:588
+#: src/Form/ConfigForm.php:608
 msgid "Uri of the rights/license when unselected above"
 msgstr ""
 
-#: src/Form/ConfigForm.php:589
+#: src/Form/ConfigForm.php:609
 msgid ""
 "For IIIF v3, the license of the item must be an url from https://"
 "creativecommons.org or https://rightsstatements.org."
 msgstr ""
 
-#: src/Form/ConfigForm.php:600
+#: src/Form/ConfigForm.php:620
 msgid "Default license text (only for iiif 2.0)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:612
+#: src/Form/ConfigForm.php:632
 msgid "Resource page"
 msgstr ""
 
-#: src/Form/ConfigForm.php:613 src/Form/ConfigForm.php:636
+#: src/Form/ConfigForm.php:633 src/Form/ConfigForm.php:656
 msgid ""
 "In some cases, the resources are external and the link to it may be specific."
 msgstr ""
 
-#: src/Form/ConfigForm.php:615
+#: src/Form/ConfigForm.php:635
 msgid "No link"
 msgstr ""
 
-#: src/Form/ConfigForm.php:617
+#: src/Form/ConfigForm.php:637
 msgid "Resource page (default site)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:618
+#: src/Form/ConfigForm.php:638
 msgid "Resource pages (all sites)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:619
+#: src/Form/ConfigForm.php:639
 msgid "Property if any, else resource page (defaut site)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:620
+#: src/Form/ConfigForm.php:640
 msgid "Property if any, else resource pages (all sites)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:621
+#: src/Form/ConfigForm.php:641
 msgid "Default site home page (not recommended)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:622
+#: src/Form/ConfigForm.php:642
 msgid "Site home pages (not recommended)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:623
+#: src/Form/ConfigForm.php:643
 msgid "Api (not recommended)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:635
+#: src/Form/ConfigForm.php:655
 msgid "Property for resource link"
 msgstr ""
 
-#: src/Form/ConfigForm.php:652
+#: src/Form/ConfigForm.php:672
 msgid "Provider"
 msgstr ""
 
-#: src/Form/ConfigForm.php:653
+#: src/Form/ConfigForm.php:673
 msgid ""
 "An organization or person that contributed to providing the content of the "
 "resource. The address, web site, logo, etc. can be appended."
 msgstr ""
 
-#: src/Form/ConfigForm.php:658
+#: src/Form/ConfigForm.php:678
 msgid "Agent specified below"
 msgstr ""
 
-#: src/Form/ConfigForm.php:659
+#: src/Form/ConfigForm.php:679
 msgid "Simple data from main parameters"
 msgstr ""
 
-#: src/Form/ConfigForm.php:660
+#: src/Form/ConfigForm.php:680
 msgid "Property if any, else agent"
 msgstr ""
 
-#: src/Form/ConfigForm.php:661
+#: src/Form/ConfigForm.php:681
 msgid "Property if any, else simple"
 msgstr ""
 
-#: src/Form/ConfigForm.php:674
+#: src/Form/ConfigForm.php:694
 msgid "Property for provider"
 msgstr ""
 
-#: src/Form/ConfigForm.php:689
+#: src/Form/ConfigForm.php:709
 msgid "Provider (as json)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:701
+#: src/Form/ConfigForm.php:721
 msgid "Property for machine-readable \"See also\" links"
 msgstr ""
 
-#: src/Form/ConfigForm.php:717
+#: src/Form/ConfigForm.php:737
+msgid "Skip \"rendering\" links in manifest (download)"
+msgstr ""
+
+#: src/Form/ConfigForm.php:738
+msgid ""
+"When checked, viewers will not display a download button. When module Access "
+"is active, \"rendering\" is always exposed only for resources with status "
+"\"free\"."
+msgstr ""
+
+#: src/Form/ConfigForm.php:750
 msgid "Media types of files to include in download"
 msgstr ""
 
-#: src/Form/ConfigForm.php:727
+#: src/Form/ConfigForm.php:760
 msgid "Select media-types to download"
 msgstr ""
 
-#: src/Form/ConfigForm.php:736
+#: src/Form/ConfigForm.php:769
 msgid "Property to set the start page (may be an index, a media or a time)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:752
+#: src/Form/ConfigForm.php:785
 msgid ""
 "Use the primary media as start page, except when property above is filled"
 msgstr ""
 
-#: src/Form/ConfigForm.php:764
+#: src/Form/ConfigForm.php:797
 msgid "Property for structures"
 msgstr ""
 
-#: src/Form/ConfigForm.php:767
+#: src/Form/ConfigForm.php:800
 msgid "Refer to the following URL for the input format."
 msgstr ""
 
-#: src/Form/ConfigForm.php:782
+#: src/Form/ConfigForm.php:815
 msgid "Skip the flat structure appended when no structure is set"
 msgstr ""
 
-#: src/Form/ConfigForm.php:783
+#: src/Form/ConfigForm.php:816
 msgid "This flat structure can fix some issues on old versions of viewers."
 msgstr ""
 
-#: src/Form/ConfigForm.php:795
+#: src/Form/ConfigForm.php:828
 msgid "Property to use for viewing direction"
 msgstr ""
 
-#: src/Form/ConfigForm.php:796
+#: src/Form/ConfigForm.php:829
 msgid ""
 "If any, the first value will be added to indicate the viewing direction of "
 "the manifest."
 msgstr ""
 
-#: src/Form/ConfigForm.php:812
+#: src/Form/ConfigForm.php:845
 msgid "Default viewing direction"
 msgstr ""
 
-#: src/Form/ConfigForm.php:813
+#: src/Form/ConfigForm.php:846
 msgid ""
 "If any, and if there is no metadata for the property above, this value will "
 "be added in all manifests."
 msgstr ""
 
-#: src/Form/ConfigForm.php:816
+#: src/Form/ConfigForm.php:849
 msgid "Left to right"
 msgstr ""
 
-#: src/Form/ConfigForm.php:817
+#: src/Form/ConfigForm.php:850
 msgid "Right to left"
 msgstr ""
 
-#: src/Form/ConfigForm.php:818
+#: src/Form/ConfigForm.php:851
 msgid "Top to bottom"
 msgstr ""
 
-#: src/Form/ConfigForm.php:819
+#: src/Form/ConfigForm.php:852
 msgid "Bottom to top"
 msgstr ""
 
-#: src/Form/ConfigForm.php:832
+#: src/Form/ConfigForm.php:865
 msgid ""
 "Property to use in item or media to set a placeholder canvas for waiting or "
 "warning"
 msgstr ""
 
-#: src/Form/ConfigForm.php:833
+#: src/Form/ConfigForm.php:866
 msgid ""
 "May be a url to a placeholder file, a list of media to protect, a string "
 "with the value below, or a boolean value, in which case the default "
 "placeholder canvas is used."
 msgstr ""
 
-#: src/Form/ConfigForm.php:850
+#: src/Form/ConfigForm.php:883
 msgid "Value to match to display the placeholder canvas"
 msgstr ""
 
-#: src/Form/ConfigForm.php:851
+#: src/Form/ConfigForm.php:884
 msgid ""
 "This option is used only when the property above is a string, for example "
 "\"Informed public\". The warning with the url below will be displayed when "
 "the property has this value."
 msgstr ""
 
-#: src/Form/ConfigForm.php:863
+#: src/Form/ConfigForm.php:896
 msgid "Url to use as a default placeholder canvas"
 msgstr ""
 
-#: src/Form/ConfigForm.php:875
+#: src/Form/ConfigForm.php:908
 msgid "Property to use for behavior (viewing hint)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:876
+#: src/Form/ConfigForm.php:909
 msgid ""
 "If any, the first value will be added to indicate the viewing hint of the "
 "manifest and the canvas."
 msgstr ""
 
-#: src/Form/ConfigForm.php:892
+#: src/Form/ConfigForm.php:925
 msgid "Default behavior (viewing hint)"
 msgstr ""
 
-#: src/Form/ConfigForm.php:893
+#: src/Form/ConfigForm.php:926
 msgid ""
 "If any, and if there is no metadata for the property above, these values "
 "will be added in all manifests and canvases."
 msgstr ""
 
-#: src/Form/ConfigForm.php:899
+#: src/Form/ConfigForm.php:932
 msgid "Auto-advance"
 msgstr ""
 
-#: src/Form/ConfigForm.php:900
+#: src/Form/ConfigForm.php:933
 msgid "No auto-advance"
 msgstr ""
 
-#: src/Form/ConfigForm.php:901
+#: src/Form/ConfigForm.php:934
 msgid "Repeat"
 msgstr ""
 
-#: src/Form/ConfigForm.php:902
+#: src/Form/ConfigForm.php:935
 msgid "No repeat"
 msgstr ""
 
-#: src/Form/ConfigForm.php:904
+#: src/Form/ConfigForm.php:937
 msgid "Unordered"
 msgstr ""
 
-#: src/Form/ConfigForm.php:905
+#: src/Form/ConfigForm.php:938
 msgid "Individuals"
 msgstr ""
 
-#: src/Form/ConfigForm.php:906
+#: src/Form/ConfigForm.php:939
 msgid "Continuous"
 msgstr ""
 
-#: src/Form/ConfigForm.php:907
+#: src/Form/ConfigForm.php:940
 msgid "Paged"
 msgstr ""
 
-#: src/Form/ConfigForm.php:908
+#: src/Form/ConfigForm.php:941
 msgid "Facing pages"
 msgstr ""
 
-#: src/Form/ConfigForm.php:909
+#: src/Form/ConfigForm.php:942
 msgid "Non-paged"
 msgstr ""
 
-#: src/Form/ConfigForm.php:931
+#: src/Form/ConfigForm.php:964
 msgid "Label for each file"
 msgstr ""
 
-#: src/Form/ConfigForm.php:932
+#: src/Form/ConfigForm.php:965
 msgid ""
 "This value can be used to indicate the page number in multi-paged documents. "
 "The position is used when there is no value."
 msgstr ""
 
-#: src/Form/ConfigForm.php:936
+#: src/Form/ConfigForm.php:969
 msgid "Position in sequence"
 msgstr ""
 
-#: src/Form/ConfigForm.php:937
+#: src/Form/ConfigForm.php:970
 msgid "Template title"
 msgstr ""
 
-#: src/Form/ConfigForm.php:939
+#: src/Form/ConfigForm.php:972
 msgid "File name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:940
+#: src/Form/ConfigForm.php:973
 msgid "Template title, else file name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:941
+#: src/Form/ConfigForm.php:974
 msgid "Property if any, else file name"
 msgstr ""
 
-#: src/Form/ConfigForm.php:947
+#: src/Form/ConfigForm.php:980
 msgid "Select an option…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:955
+#: src/Form/ConfigForm.php:988
 msgid "Property for files label"
 msgstr ""
 
-#: src/Form/ConfigForm.php:971
+#: src/Form/ConfigForm.php:1004
 msgid "Logo of the institution"
 msgstr ""
 
-#: src/Form/ConfigForm.php:983
+#: src/Form/ConfigForm.php:1016
 msgid "Link for descriptive metadata"
 msgstr ""
 
-#: src/Form/ConfigForm.php:984
+#: src/Form/ConfigForm.php:1017
 msgid ""
 "Some viewers display urls (for resources and uris) as plain text. This "
 "option presents them as a html link."
 msgstr ""
 
-#: src/Form/ConfigForm.php:997
+#: src/Form/ConfigForm.php:1030
 msgid "Limit properties for collection in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:998 src/Form/ConfigForm.php:1018
-#: src/Form/ConfigForm.php:1038
+#: src/Form/ConfigForm.php:1031 src/Form/ConfigForm.php:1051
+#: src/Form/ConfigForm.php:1071
 msgid "If empty, all public values will be output."
 msgstr ""
 
-#: src/Form/ConfigForm.php:1009 src/Form/ConfigForm.php:1029
-#: src/Form/ConfigForm.php:1049 src/Form/ConfigForm.php:1066
-#: src/Form/ConfigForm.php:1082 src/Form/ConfigForm.php:1098
+#: src/Form/ConfigForm.php:1042 src/Form/ConfigForm.php:1062
+#: src/Form/ConfigForm.php:1082 src/Form/ConfigForm.php:1099
+#: src/Form/ConfigForm.php:1115 src/Form/ConfigForm.php:1131
 msgid "Select one or more properties…"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1017
+#: src/Form/ConfigForm.php:1050
 msgid "Limit properties for item in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1037
+#: src/Form/ConfigForm.php:1070
 msgid "Limit properties for media in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1058
+#: src/Form/ConfigForm.php:1091
 msgid "Skip properties for collection in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1074
+#: src/Form/ConfigForm.php:1107
 msgid "Skip properties for item in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1090
+#: src/Form/ConfigForm.php:1123
 msgid "Skip properties for media in manifest"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1109
+#: src/Form/ConfigForm.php:1142
 msgid "Cache manifests"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1119
+#: src/Form/ConfigForm.php:1152
 msgid "Query to filter items to cache"
 msgstr ""
 
-#: src/Form/ConfigForm.php:1130
-msgid "Cache selected item manifests in background"
-msgstr ""
-
-#: src/Form/ConfigForm.php:1134 src/Form/ConfigForm.php:1173
-msgid "Process"
-msgstr ""
-
-#: src/Form/ConfigForm.php:1146
-msgid "Store dimensions"
-msgstr ""
-
-#: src/Form/ConfigForm.php:1156
-msgid "Query to filter items to process"
-msgstr ""
-
-#: src/Form/ConfigForm.php:1157
+#: src/Form/ConfigForm.php:1153 src/Form/ConfigForm.php:1192
 msgid ""
 "This query will be used to select all items whose attached images, audio and "
 "video files will be prepared in the background."
 msgstr ""
 
 #: src/Form/ConfigForm.php:1169
-msgid ""
-"Prepare dimensions for images, audio and videos attached to items selected "
-"above in background"
+msgid "Run caching"
+msgstr ""
+
+#: src/Form/ConfigForm.php:1181
+msgid "Store dimensions"
+msgstr ""
+
+#: src/Form/ConfigForm.php:1191
+msgid "Query to filter items to size"
+msgstr ""
+
+#: src/Form/ConfigForm.php:1208
+msgid "Run sizing"
 msgstr ""
 
 #: src/Iiif/ContentResource.php:128
@@ -1536,6 +1636,14 @@ msgstr ""
 msgid "The media server is unavailable for resource #{resource_id}."
 msgstr ""
 
+#: src/Site/ResourcePageBlockLayout/IiifPlayerButton.php:24
+msgid "IIIF Player Button"
+msgstr ""
+
 #: src/Site/ResourcePageBlockLayout/IiifManifestLink.php:25
 msgid "IIIF Manifest Link"
+msgstr ""
+
+#: src/Site/ResourcePageBlockLayout/IiifPlayer.php:24
+msgid "IIIF Viewer"
 msgstr ""

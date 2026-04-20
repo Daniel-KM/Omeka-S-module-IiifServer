@@ -396,7 +396,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'element_group' => 'image_server',
-                    'label' => 'The server support non-image files', // @translate
+                    'label' => 'The server supports non-image files', // @translate
                     'info' => 'If unchecked, audio, video, models, pdf, etc. will be served through Omeka.', // @translate
                 ],
                 'attributes' => [
