@@ -33,7 +33,7 @@ class SiteSettingsFieldset extends Fieldset
                         'diva' => 'Diva (module)', // @translate
                         'mirador' => 'Mirador (module)', // @translate
                         'mirador_core' => 'Mirador (Omeka)', // @translate
-                        'openseadragon_core' => 'OpenSeadragon', // @translate
+                        'openseadragon' => 'OpenSeadragon', // @translate
                         'universalviewer' => 'Universal Viewer (module)', // @translate
                     ],
                 ],

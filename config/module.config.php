@@ -642,7 +642,7 @@ return [
             ],
         ],
         'site_settings' => [
-            'iiifserver_player' => 'openseadragon_core',
+            'iiifserver_player' => 'openseadragon',
             'iiifserver_player_osd_sidebar' => 'bottom',
             'iiifserver_player_inline_height' => '600px',
             'iiifserver_player_button_label' => 'Open IIIF viewer', // @translate

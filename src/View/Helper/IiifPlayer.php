@@ -17,7 +17,7 @@ class IiifPlayer extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @param array $options
      *     - player (string):
-     *     diva|mirador|universalviewer|mirador_core|openseadragon_core.
+     *     diva|mirador|universalviewer|mirador_core|openseadragon.
      *         When absent, falls back to site setting `iiifserver_player`.
      *     - inline (bool): render the player directly without button/overlay.
      *     - height (string): stage height in inline mode (default: 600px).
@@ -34,7 +34,7 @@ class IiifPlayer extends AbstractHelper
         $plugins = $view->getHelperPluginManager();
         $siteSettings = $plugins->get('siteSetting');
 
-        $player = $options['player'] ?? $siteSettings('iiifserver_player', 'openseadragon_core');
+        $player = $options['player'] ?? $siteSettings('iiifserver_player', 'openseadragon');
         $inline = (bool) ($options['inline'] ?? false);
         $lazy = $inline
             ? false

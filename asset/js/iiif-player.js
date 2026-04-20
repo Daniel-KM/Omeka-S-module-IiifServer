@@ -34,7 +34,7 @@
                 window.Mirador.player({ id: inner.id, windows: [{ manifestId: manifestId }] });
             };
             if (window.Mirador) start(); else loadScript(assetJs, start);
-        } else if (player === 'openseadragon_core') {
+        } else if (player === 'openseadragon') {
             var firstTile = JSON.parse(stage.getAttribute('data-tile-source'));
             var prefix = stage.getAttribute('data-asset-prefix');
             var tilesJson = stage.getAttribute('data-tiles');
@@ -118,7 +118,7 @@
         if (!stage) return;
 
         var player = stage.getAttribute('data-player');
-        var isCore = player === 'mirador_core' || player === 'openseadragon_core';
+        var isCore = player === 'mirador_core' || player === 'openseadragon';
 
         // Inline mode: init player immediately, no button/overlay.
         if (root.classList.contains('iiif-player-inline')) {
