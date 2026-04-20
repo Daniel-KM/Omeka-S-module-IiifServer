@@ -212,10 +212,10 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $translator = $services->get('MvcTranslator');
 
-        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.82')) {
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.84')) {
             $message = new \Omeka\Stdlib\Message(
                 $translator->translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Common', '3.4.82'
+                'Common', '3.4.84'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
