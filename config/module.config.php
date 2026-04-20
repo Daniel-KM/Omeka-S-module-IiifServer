@@ -125,10 +125,8 @@ return [
     ],
     'form_elements' => [
         'invokables' => [
+            Form\ConfigForm::class => Form\ConfigForm::class,
             Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
-        ],
-        'factories' => [
-            Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
     ],
     'resource_page_block_layouts' => $isBeforeV4 ? [] : [

@@ -14,12 +14,6 @@ class ConfigForm extends Form
 {
     use EventManagerAwareTrait;
 
-    /**
-     * @var bool
-     */
-    protected $hasCleanUrl = false;
-
-
     protected $elementGroups = [
         'infra' => 'Infrastructure', // @translate
         'image_server' => 'External image server', // @translate
@@ -192,9 +186,9 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'element_group' => 'infra',
-                    'label' => $this->hasCleanUrl
-                    ? 'Use the identifiers from Clean Url' // @translate
-                    : 'Use the identifiers from Clean Url (unavailable)', // @translate
+                    'label' => class_exists('CleanUrl\Module', false)
+                        ? 'Use the identifiers from Clean Url' // @translate
+                        : 'Use the identifiers from Clean Url (unavailable)', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_identifier_clean',
@@ -245,15 +239,6 @@ class ConfigForm extends Form
             // The same keys are used in the module Image Server.
 
             ->add([
-                'name' => 'fieldset_media_api',
-                'type' => \Laminas\Form\Fieldset::class,
-                'options' => [
-                    'element_group' => 'image_server',
-                    'label' => 'External image server', // @translate
-                ],
-            ])
-
-            ->add([
                 'name' => 'iiifserver_media_api_url',
                 'type' => Element\Url::class,
                 'options' => [
@@ -265,114 +250,134 @@ class ConfigForm extends Form
                     'id' => 'iiifserver_media_api_url',
                 ],
             ])
+        ;
 
-            ->add([
-                'name' => 'iiifserver_media_api_default_version',
-                'type' => CommonElement\OptionalRadio::class,
+        // When the module ImageServer is installed, the following settings are
+        // owned by its own config form. Hide them here to avoid duplicate UI.
+        // The URL field above remains visible because it allows to override the
+        // local image server with an external one.
+        if (class_exists('ImageServer\Module', false)) {
+            $this->add([
+                'name' => 'iiifserver_media_api_note',
+                'type' => CommonElement\Note::class,
                 'options' => [
                     'element_group' => 'image_server',
-                    'label' => 'Default IIIF image api version', // @translate
-                    'info' => 'Set the version of the iiif info.json to provide. The image server should support it.', // @translate
-                    'value_options' => [
-                        '0' => 'No image server', // @translate
-                        '1' => 'Image Api 1', // @translate
-                        '2' => 'Image Api 2', // @translate
-                        '3' => 'Image Api 3', // @translate
-                    ],
+                    'text' => 'The remaining image server settings are configured in the tab of the module Image Server.', // @translate
                 ],
-                'attributes' => [
-                    'id' => 'iiifserver_media_api_default_version',
-                    'required' => true,
-                ],
-            ])
-
-            ->add([
-                'name' => 'iiifserver_media_api_supported_versions',
-                'type' => CommonElement\OptionalMultiCheckbox::class,
-                'options' => [
-                    'element_group' => 'image_server',
-                    'label' => 'Supported IIIF image api versions and max compliance level', // @translate
-                    'value_options' => [
-                        'v1' => [
-                            'label' => 'Image API 1',
-                            'options' => [
-                                '1/0' => 'Level 0', // @translate
-                                '1/1' => 'Level 1', // @translate
-                                '1/2' => 'Level 2', // @translate
-                            ],
-                        ],
-                        'v2' => [
-                            'label' => 'Image API 2',
-                            'options' => [
-                                '2/0' => 'Level 0', // @translate
-                                '2/1' => 'Level 1', // @translate
-                                '2/2' => 'Level 2', // @translate
-                            ],
-                        ],
-                        'v3' => [
-                            'label' => 'Image API 3',
-                            'options' => [
-                                '3/0' => 'Level 0', // @translate
-                                '3/1' => 'Level 1', // @translate
-                                '3/2' => 'Level 2', // @translate
-                            ],
+            ]);
+        } else {
+            $this
+                ->add([
+                    'name' => 'iiifserver_media_api_default_version',
+                    'type' => CommonElement\OptionalRadio::class,
+                    'options' => [
+                        'element_group' => 'image_server',
+                        'label' => 'Default IIIF image api version', // @translate
+                        'info' => 'Set the version of the iiif info.json to provide. The image server should support it.', // @translate
+                        'value_options' => [
+                            '0' => 'No image server', // @translate
+                            '1' => 'Image Api 1', // @translate
+                            '2' => 'Image Api 2', // @translate
+                            '3' => 'Image Api 3', // @translate
                         ],
                     ],
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_media_api_supported_versions',
-                ],
-            ])
-
-            ->add([
-                'name' => 'iiifserver_media_api_version_append',
-                'type' => CommonElement\OptionalCheckbox::class,
-                'options' => [
-                    'element_group' => 'image_server',
-                    'label' => 'Append the version to the url (to be set inside module.config.php currently)', // @translate
-                    'info' => 'If set, the version will be appended to the url of the server: "iiif/3".', // @translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_media_api_version_append',
-                ],
-            ])
-
-            /**
-            ->add([
-                'name' => 'iiifserver_media_api_prefix',
-                'type' => Element\Text::class,
-                'options' => [
-                    'element_group' => 'image_server',
-                    'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @ translate
-                    'info' => 'If set, the prefix will be added after the version: "iiif/3/xxx".', // @ translate
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_media_api_prefix',
-                ],
-            ])
-            */
-
-            ->add([
-                'name' => 'iiifserver_media_api_identifier',
-                'type' => CommonElement\OptionalRadio::class,
-                'options' => [
-                    'element_group' => 'image_server',
-                    'label' => 'Media identifier', // @translate
-                    'info' => 'Using the full filename with extension for images allows to use an image server like Cantaloupe sharing the Omeka original files directory. In other cases, this option is not recommended because the identifier should not have an extension.', // @translate
-                    'value_options' => [
-                        'default' => 'Default', // @translate
-                        'media_id' => 'Media id', // @translate
-                        'storage_id' => 'Filename', // @translate
-                        'filename' => 'Filename with extension (all)', // @translate
-                        'filename_image' => 'Filename with extension (image only)', // @translate
+                    'attributes' => [
+                        'id' => 'iiifserver_media_api_default_version',
+                        'required' => true,
                     ],
-                ],
-                'attributes' => [
-                    'id' => 'iiifserver_media_api_identifier',
-                    'required' => true,
-                ],
-            ])
+                ])
 
+                ->add([
+                    'name' => 'iiifserver_media_api_supported_versions',
+                    'type' => CommonElement\OptionalMultiCheckbox::class,
+                    'options' => [
+                        'element_group' => 'image_server',
+                        'label' => 'Supported IIIF image api versions and max compliance level', // @translate
+                        'value_options' => [
+                            'v1' => [
+                                'label' => 'Image API 1',
+                                'options' => [
+                                    '1/0' => 'Level 0', // @translate
+                                    '1/1' => 'Level 1', // @translate
+                                    '1/2' => 'Level 2', // @translate
+                                ],
+                            ],
+                            'v2' => [
+                                'label' => 'Image API 2',
+                                'options' => [
+                                    '2/0' => 'Level 0', // @translate
+                                    '2/1' => 'Level 1', // @translate
+                                    '2/2' => 'Level 2', // @translate
+                                ],
+                            ],
+                            'v3' => [
+                                'label' => 'Image API 3',
+                                'options' => [
+                                    '3/0' => 'Level 0', // @translate
+                                    '3/1' => 'Level 1', // @translate
+                                    '3/2' => 'Level 2', // @translate
+                                ],
+                            ],
+                        ],
+                    ],
+                    'attributes' => [
+                        'id' => 'iiifserver_media_api_supported_versions',
+                    ],
+                ])
+
+                ->add([
+                    'name' => 'iiifserver_media_api_version_append',
+                    'type' => CommonElement\OptionalCheckbox::class,
+                    'options' => [
+                        'element_group' => 'image_server',
+                        'label' => 'Append the version to the url (to be set inside module.config.php currently)', // @translate
+                        'info' => 'If set, the version will be appended to the url of the server: "iiif/3".', // @translate
+                    ],
+                    'attributes' => [
+                        'id' => 'iiifserver_media_api_version_append',
+                    ],
+                ])
+
+
+                /**
+                ->add([
+                    'name' => 'iiifserver_media_api_prefix',
+                    'type' => Element\Text::class,
+                    'options' => [
+                        'element_group' => 'image_server',
+                        'label' => 'Append a prefix to the url (to be set inside module.config.php currently)', // @ translate
+                        'info' => 'If set, the prefix will be added after the version: "iiif/3/xxx".', // @ translate
+                    ],
+                    'attributes' => [
+                        'id' => 'iiifserver_media_api_prefix',
+                    ],
+                ])
+                */
+
+                ->add([
+                    'name' => 'iiifserver_media_api_identifier',
+                    'type' => CommonElement\OptionalRadio::class,
+                    'options' => [
+                        'element_group' => 'image_server',
+                        'label' => 'Media identifier', // @translate
+                        'info' => 'Using the full filename with extension for images allows to use an image server like Cantaloupe sharing the Omeka original files directory. In other cases, this option is not recommended because the identifier should not have an extension.', // @translate
+                        'value_options' => [
+                            'default' => 'Default', // @translate
+                            'media_id' => 'Media id', // @translate
+                            'storage_id' => 'Filename', // @translate
+                            'filename' => 'Filename with extension (all)', // @translate
+                            'filename_image' => 'Filename with extension (image only)', // @translate
+                        ],
+                    ],
+                    'attributes' => [
+                        'id' => 'iiifserver_media_api_identifier',
+                        'required' => true,
+                    ],
+                ])
+            ;
+        }
+
+        $this
             ->add([
                 'name' => 'iiifserver_media_api_identifier_infojson',
                 'type' => CommonElement\OptionalCheckbox::class,
@@ -1210,11 +1215,5 @@ class ConfigForm extends Form
 
         $filterEvent = new Event('form.add_input_filters', $this, ['inputFilter' => $this->getInputFilter()]);
         $this->getEventManager()->triggerEvent($filterEvent);
-    }
-
-    public function setHasCleanUrl($hasCleanUrl)
-    {
-        $this->hasCleanUrl = $hasCleanUrl;
-        return $this;
     }
 }
