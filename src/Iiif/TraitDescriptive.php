@@ -415,7 +415,7 @@ trait TraitDescriptive
                 return null;
             }
 
-            $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
+            $mediaAccompanyingSize = $this->mediaDimension->__invoke($mediaAccompanying);
             if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
                 return null;
             }
@@ -455,7 +455,7 @@ trait TraitDescriptive
                 return null;
             }
 
-            $mediaAccompanyingSize = $this->imageSize->__invoke($mediaAccompanying);
+            $mediaAccompanyingSize = $this->mediaDimension->__invoke($mediaAccompanying);
             if (!$mediaAccompanyingSize['width'] || !$mediaAccompanyingSize['height']) {
                 return null;
             }

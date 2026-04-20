@@ -39,11 +39,6 @@ trait TraitMedia
     protected $iiifMediaUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
-     */
-    protected $imageSize;
-
-    /**
      * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
     protected $mediaDimension;

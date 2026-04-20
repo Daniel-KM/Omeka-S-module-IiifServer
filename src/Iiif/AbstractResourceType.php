@@ -239,11 +239,6 @@ abstract class AbstractResourceType extends AbstractType
     protected $iiifUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
-     */
-    protected $imageSize;
-
-    /**
      * @var \Access\Mvc\Controller\Plugin\IsAllowedMediaContent
      */
     protected $isAllowedMediaContent;
@@ -343,7 +338,7 @@ abstract class AbstractResourceType extends AbstractType
     ];
 
     /**
-     * @var \IiifServer\View\Helper\MediaDimension
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
     protected $mediaDimension;
 
@@ -421,14 +416,13 @@ abstract class AbstractResourceType extends AbstractType
         $this->iiifTileInfo = $viewHelpers->get('iiifTileInfo');
         $this->iiifTypeOfMedia = $viewHelpers->get('iiifTypeOfMedia');
         $this->iiifUrl = $viewHelpers->get('iiifUrl');
-        $this->imageSize = $plugins->get('imageSize');
-        $this->isIiifMedia = $plugins->get('isIiifMedia');
         $this->isAllowedMediaContent = $this->hasModuleAccess ? $plugins->get('isAllowedMediaContent') : null;
         $this->accessStatus = $this->hasModuleAccess && $plugins->has('accessStatus') ? $plugins->get('accessStatus') : null;
         $this->isAllowedViewAll = $this->services->get('Omeka\Acl')
             ->userIsAllowed('Omeka\Entity\Resource', 'view-all');
+        $this->isIiifMedia = $plugins->get('isIiifMedia');
         $this->logger = $this->services->get('Omeka\Logger');
-        $this->mediaDimension = $viewHelpers->get('mediaDimension');
+        $this->mediaDimension = $plugins->get('mediaDimension');
         $this->publicResourceUrl = $viewHelpers->get('publicResourceUrl');
         $this->rangeToArray = $plugins->get('rangeToArray');
         $this->settings = $this->services->get('Omeka\Settings');

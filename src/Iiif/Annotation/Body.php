@@ -61,9 +61,9 @@ class Body extends AbstractResourceType
     protected $iiifMediaUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @var \IiifServer\View\Helper\IiifTileInfo
@@ -128,10 +128,10 @@ class Body extends AbstractResourceType
             // Nevertheless, UniversalViewer 2 requires the original size image,
             // because it doesn't load the info.json, but only the id: it
             // considers it as the whole image.
-            // $size = $this->imageSize->__invoke($this->resource, 'large');
-            $size = $this->imageSize->__invoke($this->resource, 'original');
+            // $size = $this->mediaDimension->__invoke($this->resource, 'large');
+            $size = $this->mediaDimension->__invoke($this->resource, 'original');
             if (empty($size)) {
-                $size = $this->imageSize->__invoke($this->resource, 'large');
+                $size = $this->mediaDimension->__invoke($this->resource, 'large');
                 if (empty($size)) {
                     $iiifSize = $this->iiifImageApiVersion === '3' ? 'max' : 'full';
                 } else {
@@ -140,7 +140,7 @@ class Body extends AbstractResourceType
             } else {
                 // Nevertheless, to avoid to big files, a limit of 1000 px is set.
                 if ($size['width'] > 1000 || $size['height'] > 1000) {
-                    $sizeLarge = $this->imageSize->__invoke($this->resource, 'large');
+                    $sizeLarge = $this->mediaDimension->__invoke($this->resource, 'large');
                     if ($sizeLarge) {
                         $size = $sizeLarge;
                     }

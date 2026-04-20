@@ -47,9 +47,9 @@ trait TraitLinking
     protected $iiifUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @var \Omeka\Settings\Settings

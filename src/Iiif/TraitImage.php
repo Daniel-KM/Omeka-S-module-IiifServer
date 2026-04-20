@@ -39,9 +39,9 @@ trait TraitImage
     protected $iiifMediaUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @var array
@@ -72,7 +72,7 @@ trait TraitImage
         }
 
         if (!array_key_exists($type, $this->imageSizesByType)) {
-            $this->imageSizesByType[$type] = $this->imageSize->__invoke($this->resource->primaryMedia(), $type);
+            $this->imageSizesByType[$type] = $this->mediaDimension->__invoke($this->resource->primaryMedia(), $type);
         }
 
         return $this->imageSizesByType[$type];

@@ -32,9 +32,9 @@ namespace IiifServer\Iiif;
 trait TraitLinkingLogo
 {
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @var \Omeka\Settings\Settings
@@ -63,7 +63,7 @@ trait TraitLinkingLogo
         ];
 
         try {
-            $size = $this->imageSize->__invoke($url);
+            $size = $this->mediaDimension->__invoke($url);
         } catch (\Throwable $e) {
             return [];
         }

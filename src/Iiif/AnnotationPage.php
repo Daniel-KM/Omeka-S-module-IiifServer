@@ -296,7 +296,7 @@ class AnnotationPage extends AbstractResourceType
         // With common tools, it may be 300 / 108.
         // It allows to fix refactored images and alto extracted from pdf via
         // the module Extract Ocr.
-        [$widthImage, $heightImage] = array_values($this->imageSize->__invoke($this->callingResource));
+        [$widthImage, $heightImage] = array_values($this->mediaDimension->__invoke($this->callingResource));
         $widthCoef = 1;
         $heightCoef = 1;
         if ($widthImage && $heightImage) {

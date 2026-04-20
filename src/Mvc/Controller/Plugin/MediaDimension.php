@@ -6,8 +6,10 @@ use Doctrine\DBAL\Connection;
 use finfo;
 use JamesHeinrich\GetID3\GetId3;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
-use Omeka\Api\Adapter\MediaAdapter;
+use Omeka\Api\Adapter\Manager as AdapterManager;
+use Omeka\Api\Representation\AssetRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
+use Omeka\Entity\Asset;
 use Omeka\Entity\Media;
 use Omeka\File\TempFileFactory;
 use Omeka\Mvc\Exception\RuntimeException;
@@ -25,9 +27,9 @@ class MediaDimension extends AbstractPlugin
     protected $tempFileFactory;
 
     /**
-     * @var MediaAdapter
+     * @var AdapterManager
      */
-    protected $mediaAdapter;
+    protected $adapterManager;
 
     /**
      * @var Connection
@@ -48,24 +50,26 @@ class MediaDimension extends AbstractPlugin
     public function __construct(
         ?string $basePath,
         TempFileFactory $tempFileFactory,
-        MediaAdapter $mediaAdapter,
+        AdapterManager $adapterManager,
         Connection $connection
     ) {
         $this->basePath = $basePath;
         $this->tempFileFactory = $tempFileFactory;
-        $this->mediaAdapter = $mediaAdapter;
+        $this->adapterManager = $adapterManager;
         $this->connection = $connection;
     }
 
     /**
-     * Get an array of the width, height, and/or duration of a media or file.
+     * Get an array of the width, height, and/or duration of a media, asset or
+     * file.
      *
      * Data can be stored in media data via the module Image Server or a job in
      * module Bulk Check.
      *
      * @todo Use the storage adapter.
      *
-     * @param MediaRepresentation|Media|string $media Can be a media, an url or a filepath.
+     * @param MediaRepresentation|AssetRepresentation|Media|Asset|string $media
+     * Can be a media, an asset, a url or a filepath.
      * @param string $type "original", "large", "medium", "square", or any other
      * subdirectory of the directory "files".
      * @param bool $force Get dimensions from the file, not from the media data.
@@ -79,12 +83,35 @@ class MediaDimension extends AbstractPlugin
         if ($media instanceof MediaRepresentation) {
             return $this->dimensionMedia($media, $type, $force);
         }
+        if ($media instanceof AssetRepresentation) {
+            return $this->dimensionAsset($media);
+        }
         if ($media instanceof Media) {
-            $media = $this->mediaAdapter->getRepresentation($media);
+            $media = $this->adapterManager->get('media')->getRepresentation($media);
             return $this->dimensionMedia($media, $type, $force);
+        }
+        if ($media instanceof Asset) {
+            $media = $this->adapterManager->get('assets')->getRepresentation($media);
+            return $this->dimensionAsset($media);
         }
         // For file path or url.
         return $this->getDimensions((string) $media);
+    }
+
+    /**
+     * Get width and height of an asset (logo, thumbnail, placeholder, etc.).
+     *
+     * Assets are always images, never audio/video. Duration is always null.
+     */
+    protected function dimensionAsset(AssetRepresentation $asset): array
+    {
+        $storagePath = $this->getStoragePath('asset', $asset->filename());
+        $filepath = $this->basePath . DIRECTORY_SEPARATOR . $storagePath;
+        $result = $this->getDimensionsLocal($filepath, 'image');
+        if ($result['width']) {
+            return $result;
+        }
+        return $this->getDimensionsUrl($asset->assetUrl(), 'image');
     }
 
     /**
@@ -104,13 +131,17 @@ class MediaDimension extends AbstractPlugin
             return $this->emptyDimensions;
         }
 
-        // Check if size is already stored. The stored dimension may be null.
+        // Check if size is already stored. Stored dimensions may contain an
+        // all-null tuple (legacy rows). Use the cache only when at least one
+        // value is non-null; otherwise fall through and recompute from file.
         if (!$force) {
             $mediaData = $media->mediaData();
-            if (is_array($mediaData)
-                && !empty($mediaData['dimensions'][$type])
-            ) {
-                return $mediaData['dimensions'][$type];
+            $stored = $mediaData['dimensions'][$type] ?? null;
+            if (is_array($stored) && array_filter(
+                $stored,
+                static fn ($v) => $v !== null && $v !== ''
+            )) {
+                return $stored;
             }
         }
 
@@ -188,9 +219,9 @@ class MediaDimension extends AbstractPlugin
     }
 
     /**
-     * For images, try getimagesize() on the url first: it reads only the
-     * image header over HTTP, which is much faster than downloading the
-     * whole file, especially for remote storage (S3, etc.).
+     * For images, try getimagesize() on the url first: it reads only the image
+     * header over HTTP, which is much faster than downloading the whole file,
+     * especially for remote storage (S3, etc.).
      * For audio/video, a full download is required for GetId3 analysis.
      */
     protected function getDimensionsUrl(?string $url, ?string $mainMediaType = null): array
@@ -205,8 +236,8 @@ class MediaDimension extends AbstractPlugin
             if ($result) {
                 [$width, $height] = $result;
                 if ($width && $height) {
-                    // EXIF orientations 5-8 indicate a 90° or 270°
-                    // rotation, so width and height must be swapped.
+                    // EXIF orientations 5-8 indicate a 90° or 270° rotation, so
+                    // width and height must be swapped.
                     $exif = @exif_read_data($url);
                     if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
                         [$width, $height] = [$height, $width];
@@ -257,8 +288,8 @@ class MediaDimension extends AbstractPlugin
             $result = @getimagesize($filepath);
             if ($result) {
                 [$width, $height] = $result;
-                // EXIF orientations 5-8 indicate a 90° or 270°
-                // rotation, so width and height must be swapped.
+                // EXIF orientations 5-8 indicate a 90° or 270° rotation, so
+                // width and height must be swapped.
                 try {
                     $exif = @exif_read_data($filepath);
                 } catch (\Throwable $e) {

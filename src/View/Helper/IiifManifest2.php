@@ -819,7 +819,7 @@ class IiifManifest2 extends AbstractHelper
 
         if ($media->hasThumbnails()) {
             $imageUrl = $media->thumbnailUrl('medium');
-            $size = $this->getView()->imageSize($media, 'medium');
+            $size = $this->getView()->mediaDimension($media, 'medium');
             if ($size && $size['width']) {
                 $thumbnail = [
                     '@id' => $imageUrl,
@@ -875,7 +875,7 @@ class IiifManifest2 extends AbstractHelper
      */
     protected function _iiifThumbnailAsset(AssetRepresentation $asset)
     {
-        $size = $this->view->imageSize($asset);
+        $size = $this->view->mediaDimension($asset);
         if ($size && $size['width']) {
             $thumbnail = [
                 '@id' => $asset->assetUrl(),
@@ -902,7 +902,7 @@ class IiifManifest2 extends AbstractHelper
     {
         $view = $this->getView();
         if (empty($width) || empty($height)) {
-            [$width, $height] = array_values($view->imageSize($media, 'original'));
+            [$width, $height] = array_values($view->mediaDimension($media, 'original'));
         }
 
         $image = [];
@@ -947,7 +947,7 @@ class IiifManifest2 extends AbstractHelper
         // "the URL may be the complete URL to a particular size of the image
         // content", so the large one here, and it's always a jpeg.
         // It's not needed to use the full original size.
-        [$widthLarge, $heightLarge] = array_values($view->imageSize($media, 'large'));
+        [$widthLarge, $heightLarge] = array_values($view->mediaDimension($media, 'large'));
         $imageUrl = $this->view->iiifMediaUrl($media, 'imageserver/media', $service ?: '2', [
             'region' => 'full',
             'size' => $widthLarge && $heightLarge
@@ -1012,7 +1012,7 @@ class IiifManifest2 extends AbstractHelper
         } else {
             // Size of canvas should be the double of small images (< 1200 px),
             // but only when more than one image is used by a canvas.
-            [$width, $height] = array_values($this->getView()->imageSize($media, 'original'));
+            [$width, $height] = array_values($this->getView()->mediaDimension($media, 'original'));
             $canvas['width'] = $width;
             $canvas['height'] = $height;
         }

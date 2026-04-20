@@ -52,9 +52,9 @@ class Size extends AbstractType
     protected $iiifMediaUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @var \Omeka\Api\Representation\MediaRepresentation
@@ -79,7 +79,7 @@ class Size extends AbstractType
         $plugins = $this->services->get('ControllerPluginManager');
         $viewHelpers = $this->services->get('ViewHelperManager');
 
-        $this->imageSize = $plugins->get('imageSize');
+        $this->mediaDimension = $plugins->get('mediaDimension');
         $this->iiifMediaUrl = $viewHelpers->get('iiifMediaUrl');
 
         return $this;

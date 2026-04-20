@@ -42,9 +42,9 @@ trait TraitDescriptiveThumbnail
     protected $iiifMediaUrl;
 
     /**
-     * @var \IiifServer\Mvc\Controller\Plugin\ImageSize
+     * @var \IiifServer\Mvc\Controller\Plugin\MediaDimension
      */
-    protected $imageSize;
+    protected $mediaDimension;
 
     /**
      * @todo Normalize and factorize as a standard image.
@@ -55,7 +55,7 @@ trait TraitDescriptiveThumbnail
         $thumbnailAsset = $this->resource->thumbnail();
         if ($thumbnailAsset) {
             $imageUrl = $thumbnailAsset->assetUrl();
-            $size = $this->imageSize->__invoke($thumbnailAsset);
+            $size = $this->mediaDimension->__invoke($thumbnailAsset);
             if ($size) {
                 $thumbnail = [
                     'id' => $imageUrl,
@@ -77,7 +77,7 @@ trait TraitDescriptiveThumbnail
 
         if ($primaryMedia->hasThumbnails()) {
             $imageUrl = $primaryMedia->thumbnailUrl('medium');
-            $size = $this->imageSize->__invoke($primaryMedia, 'medium');
+            $size = $this->mediaDimension->__invoke($primaryMedia, 'medium');
             if ($size) {
                 $thumbnail = [
                     'id' => $imageUrl,

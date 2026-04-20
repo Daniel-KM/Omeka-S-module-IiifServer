@@ -495,16 +495,30 @@ class Module extends AbstractModule
          */
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
-        $form = $services->get('FormElementManager')->get(ConfigForm::class);
-        $params = $controller->getRequest()->getPost();
+        $rawPost = $controller->getRequest()->getPost()->toArray();
+
+        // Dispatch bulk jobs first. The job dispatch is independent from the
+        // config-save step: it only needs the query string and the submit
+        // button name from the raw POST.
+        $runCache = !empty($rawPost['fieldset_cache']['process_cache']);
+        $runDimensions = !empty(
+            $rawPost['fieldset_dimensions']['process_dimensions']
+        );
+        if ($runCache || $runDimensions) {
+            $this->dispatchBulkJob($controller, $rawPost, $runCache);
+        }
 
         if (!$this->handleConfigFormAuto($controller)) {
             return false;
         }
 
-        // Form is already validated in parent.
-        $form->init();
-        $form->setData($params);
+        // handleConfigFormAuto saved standard settings. For the array-valued
+        // settings it cannot handle, get a fresh form instance
+        // (FormElementManager returns non-shared instances with init() already
+        // called — do NOT re-init).
+        $form = $services->get('FormElementManager')
+            ->get(ConfigForm::class);
+        $form->setData($rawPost);
         $form->isValid();
         $params = $form->getData();
 
@@ -518,25 +532,35 @@ class Module extends AbstractModule
 
         $this->normalizeMediaApiSettings($params);
 
-        if (empty($params['fieldset_cache']['process_cache'])
-            && empty($params['fieldset_dimensions']['process_dimensions'])
-        ) {
-            return true;
-        }
+        return true;
+    }
 
+    /**
+     * Dispatch the cache-manifests or media-dimensions bulk job.
+     */
+    protected function dispatchBulkJob(
+        AbstractController $controller,
+        array $rawPost,
+        bool $runCache
+    ): void {
+        $services = $this->getServiceLocator();
         $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
 
-        if (!empty($params['fieldset_cache']['process_cache'])) {
+        if ($runCache) {
             $query = [];
-            parse_str($params['fieldset_cache']['query_cache'] ?? '', $query);
-            $args = ['query' => $query ?: []];
-            $job = $dispatcher->dispatch(\IiifServer\Job\CacheManifests::class, $args);
+            parse_str($rawPost['fieldset_cache']['query_cache'] ?? '', $query);
+            $job = $dispatcher->dispatch(
+                \IiifServer\Job\CacheManifests::class,
+                ['query' => $query ?: []]
+            );
             $message = 'Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
-        } elseif (!empty($params['fieldset_dimensions']['process_dimensions'])) {
+        } else {
             $query = [];
-            parse_str($params['fieldset_dimensions']['query'] ?? '', $query);
-            $args = ['query' => $query ?: []];
-            $job = $dispatcher->dispatch(\IiifServer\Job\MediaDimensions::class, $args);
+            parse_str($rawPost['fieldset_dimensions']['query'] ?? '', $query);
+            $job = $dispatcher->dispatch(
+                \IiifServer\Job\MediaDimensions::class,
+                ['query' => $query ?: []]
+            );
             $message = 'Storing dimensions of images, audio and video ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
         }
 
@@ -545,7 +569,7 @@ class Module extends AbstractModule
             $message,
             [
                 'link' => sprintf('<a href="%s">',
-                    htmlspecialchars($controller->url()->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
+                    htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))
                 ),
                 'job_id' => $job->getId(),
                 'link_end' => '</a>',
@@ -556,7 +580,6 @@ class Module extends AbstractModule
         );
         $message->setEscapeHtml(false);
         $controller->messenger()->addSuccess($message);
-        return true;
     }
 
     public function handleBeforeSaveItem(Event $event): void
@@ -947,6 +970,14 @@ class Module extends AbstractModule
             return;
         }
 
+        // Plain LIKE scan on the JSON text column. It is faster than
+        // JSON_EXTRACT on large tables because it skips JSON parsing
+        // entirely, while relying on the deterministic key order
+        // produced by json_encode. Patterns cover: missing data,
+        // missing "dimensions", missing "original", legacy image
+        // null tuple ({"width":null,"height":null}) and fully-null
+        // audio/video tuple — without matching audio/video rows
+        // that have a valid duration.
         $unsized = (int) $connection->fetchOne(<<<'SQL'
             SELECT COUNT(*) FROM media
             WHERE (media_type LIKE 'image/%'
@@ -954,7 +985,10 @@ class Module extends AbstractModule
                 OR media_type LIKE 'video/%')
                 AND media_type != 'image/svg+xml'
                 AND (data IS NULL
-                    OR JSON_EXTRACT(data, '$.dimensions') IS NULL)
+                    OR data NOT LIKE '%"dimensions":%'
+                    OR data NOT LIKE '%"original":%'
+                    OR data LIKE '%"original":{"width":null,"height":null}%'
+                    OR data LIKE '%"original":{"width":null,"height":null,"duration":null%')
             SQL
         );
 

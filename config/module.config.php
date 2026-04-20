@@ -117,7 +117,6 @@ return [
             'iiifMediaRelatedOcr' => Service\ViewHelper\IiifMediaRelatedOcrFactory::class,
             'iiifTileInfo' => Service\ViewHelper\IiifTileInfoFactory::class,
             'iiifUrl' => Service\ViewHelper\IiifUrlFactory::class,
-            'imageSize' => Service\ViewHelper\ImageSizeFactory::class,
             'isIiifMedia' => Service\ViewHelper\IsIiifMediaFactory::class,
             'mediaDimension' => Service\ViewHelper\MediaDimensionFactory::class,
             'rangeToArray' => Service\ViewHelper\RangeToArrayFactory::class,
@@ -168,7 +167,6 @@ return [
         ],
         'factories' => [
             'fixUtf8' => Service\ControllerPlugin\FixUtf8Factory::class,
-            'imageSize' => Service\ControllerPlugin\ImageSizeFactory::class,
             'isIiifMedia' => Service\ControllerPlugin\IsIiifMediaFactory::class,
             'mediaDimension' => Service\ControllerPlugin\MediaDimensionFactory::class,
         ],
