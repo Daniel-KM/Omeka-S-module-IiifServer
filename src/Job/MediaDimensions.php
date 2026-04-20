@@ -231,11 +231,6 @@ class MediaDimensions extends AbstractJob
                 break;
         }
 
-        $this->logger->info(
-            'Media #{media_id}: Sizing', // @translate
-            ['media_id' => $media->id()]
-        );
-
         /** @var \Omeka\Entity\Media $mediaEntity */
         $mediaEntity = $this->mediaRepository->find($media->id());
 
