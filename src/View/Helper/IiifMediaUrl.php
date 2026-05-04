@@ -150,10 +150,21 @@ class IiifMediaUrl extends AbstractHelper
                 : 'mediaserver/info';
         }
 
+        // Pre-encode "/" in the identifier so the slash survives Segmentv route
+        // assembly. Laminas Url emits "/" verbatim for constrained parameters
+        // even when the constraint forbids it ([^\/]+), so we pre-encode to
+        // "%2F"; Laminas then rawurlencodes the "%" to "%252F", which we
+        // collapse back to "%2F" right before returning. When encodeSlash is
+        // off, the final block below restores literal "/" (legacy fallback for
+        // servers that decode encoded slashes).
+        $idForUrl = (is_string($identifier) && $this->encodeSlash && strpos($identifier, '/') !== false)
+            ? strtr($identifier, ['/' => '%2F'])
+            : $identifier;
+
         $params += [
             'version' => $version ?: $this->defaultVersion,
             'prefix' => $this->prefix,
-            'id' => $identifier,
+            'id' => $idForUrl,
         ];
 
         $urlIiif = (string) $this->url->__invoke($route, $params, ['force_canonical' => true]);
@@ -172,11 +183,13 @@ class IiifMediaUrl extends AbstractHelper
             $urlIiif = substr_replace($urlIiif, $this->imageApiUrl, 0, strlen($this->baseUrlPath));
         }
 
-        // When the server does not support encoded slashes, restore literal
-        // slashes so URLs remain functional (non-spec-compliant fallback).
-        if (!$this->encodeSlash) {
-            $urlIiif = strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
-        }
+        // Collapse the double-encoding produced by the pre-encoding step.
+        // When encodeSlash is off, restore literal slashes so URLs remain
+        // functional on servers without "AllowEncodedSlashes NoDecode"
+        // (non-spec-compliant fallback).
+        $urlIiif = $this->encodeSlash
+            ? strtr($urlIiif, ['%252F' => '%2F'])
+            : strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
 
         return $this->forceUrlFrom && (strpos($urlIiif, $this->forceUrlFrom) === 0)
             ? substr_replace($urlIiif, $this->forceUrlTo, 0, strlen($this->forceUrlFrom))

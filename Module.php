@@ -85,15 +85,15 @@ class Module extends AbstractModule
     /**
      * Re-encode decoded slashes in iiif url identifiers.
      *
-     * When apache or a reverse proxy does not preserve encoded slashes
-     * (%2F), they get decoded to "/" in the path, breaking segment routes
-     * that expect the identifier as a single path segment. This listener
-     * detects where the identifier ends by looking for known iiif keywords
-     * (manifest, canvas, info.json, etc.) from the right of the path, then
-     * re-encodes all "/" within the identifier portion.
+     * When apache or a reverse proxy does not preserve encoded slashes (%2F),
+     * they get decoded to "/" in the path, breaking segment routes that expect
+     * the identifier as a single path segment. This listener detects where the
+     * identifier ends by looking for known iiif keywords (manifest, canvas,
+     * info.json, etc.) from the right of the path, then re-encodes all "/"
+     * within the identifier portion.
      *
-     * This is a no-op when identifiers contain no decoded slashes (e.g.
-     * simple numeric ids or already-encoded identifiers).
+     * This is a no-op when identifiers contain no decoded slashes (e.g. simple
+     * numeric ids or already-encoded identifiers).
      *
      * @see https://iiif.io/api/presentation/3.0/
      * @see https://iiif.io/api/presentation/2.1/
@@ -1198,6 +1198,7 @@ class Module extends AbstractModule
     protected function hasIdentifiersWithSlash(): bool
     {
         $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
 
         // Check via CleanUrl module if available.
         $moduleManager = $services->get('Omeka\ModuleManager');
@@ -1212,14 +1213,36 @@ class Module extends AbstractModule
                 $result = $connection->executeQuery(
                     "SELECT 1 FROM clean_url WHERE identifier LIKE '%/%' LIMIT 1"
                 )->fetchOne();
-                return (bool) $result;
+                if ($result) {
+                    return true;
+                }
             } catch (\Throwable $e) {
                 // Table may not exist; fall through.
             }
         }
 
+        // Standard Omeka media identifiers (`storage_id`, `filename`) are
+        // stored as `<itemId>/<basename>`, i.e. they always contain a slash.
+        // When such an identifier mode is selected, treat that as "has slash identifiers",
+        // otherwise the auto-detection of %2F support stays silent and admins
+        // end up with broken IIIF URLs after upgrades that change %2F handling
+        // defaults.
+        $mediaIdentifier = (string) $settings->get('iiifserver_media_api_identifier', '');
+        if (in_array($mediaIdentifier, ['storage_id', 'filename', 'filename_image'], true)) {
+            $connection = $services->get('Omeka\Connection');
+            try {
+                $result = $connection->executeQuery(
+                    "SELECT 1 FROM media WHERE storage_id LIKE '%/%' LIMIT 1"
+                )->fetchOne();
+                if ($result) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                // Ignore: keep falling through to the prefix check.
+            }
+        }
+
         // Fallback: check if the prefix setting contains "/".
-        $settings = $services->get('Omeka\Settings');
         $prefix = $settings->get('iiifserver_identifier_prefix', '');
         return strpos($prefix, '/') !== false;
     }
@@ -1227,14 +1250,14 @@ class Module extends AbstractModule
     /**
      * Check if an external IIIF image server handles image requests.
      *
-     * Uses a self-request to a IIIF image info endpoint and analyzes
-     * response headers and content. Detection works regardless of which
-     * proxy (Apache, nginx, Traefik) sits in front of the image server.
+     * Uses a self-request to a IIIF image info endpoint and analyzes response
+     * headers and content. Detection works regardless of which proxy (Apache,
+     * nginx, Traefik) sits in front of the image server.
      *
      * Known servers detected by name: Cantaloupe, IIPImage.
-     * Any other external server (Loris, serverless-iiif, RAIS, Digilib,
-     * SIPI, Go IIIF, Riiif, etc.) is detected generically via header and
-     * content analysis.
+     * Any other external server (Loris, serverless-iiif, RAIS, Digilib, SIPI,
+     * Go IIIF, Riiif, etc.) is detected generically via header and content
+     * analysis.
      *
      * @see https://iiif.io/get-started/image-servers/
      *
