@@ -99,11 +99,10 @@ trait TraitLinking
             }
         }
 
-        // Add the link to the whole alto if any.
-        if (isset($this->extraFiles['alto'][$this->resource->id()])) {
-            $altoId = $this->baseUri . '/alto/' . basename($this->extraFiles['alto'][$this->resource->id()]);
+        $altoUrl = $this->wholeAltoUrl();
+        if ($altoUrl) {
             $output[] = [
-                'id' => $altoId,
+                'id' => $altoUrl,
                 'type' => 'Dataset',
                 'label' => ['none' => ['Alto xml (ocr)']],
                 'format' => 'application/alto+xml',
@@ -123,6 +122,40 @@ trait TraitLinking
         ];
 
         return $output;
+    }
+
+    /**
+     * Url of the whole alto of the item, when it can be advertised.
+     *
+     * The file gathers all pages, so the manifest built for unauthorized
+     * visitors advertises it only when the ocr of every page is free.
+     */
+    protected function wholeAltoUrl(): ?string
+    {
+        if (!$this->resource instanceof \Omeka\Api\Representation\ItemRepresentation
+            || !$this->iiifSearchAnnotationUrl
+            || !method_exists($this->iiifSearchAnnotationUrl, 'wholeAltoUrl')
+        ) {
+            return null;
+        }
+
+        $url = $this->iiifSearchAnnotationUrl->wholeAltoUrl($this->resource);
+        if (!$url
+            || $this->accessFilter !== self::ACCESS_FILTER_FREE
+            || !$this->accessStatus
+        ) {
+            return $url;
+        }
+
+        $countPages = max($this->iiifSearchAnnotationUrl->countWholeAltoPages($this->resource), 1);
+        for ($pageIndex = 0; $pageIndex < $countPages; $pageIndex++) {
+            $resource = $this->iiifSearchAnnotationUrl->ocrResource($this->resource, $pageIndex);
+            $status = $this->accessStatus->__invoke($resource);
+            if ($status && $status->getLevel() !== \Access\Entity\AccessStatus::FREE) {
+                return null;
+            }
+        }
+        return $url;
     }
 
     public function homepage(): array
