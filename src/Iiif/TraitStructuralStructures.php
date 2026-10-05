@@ -125,6 +125,27 @@ trait TraitStructuralStructures
         return $structures;
     }
 
+    /**
+     * Get the canvas indexes of an item of a structure that is not a range id.
+     *
+     * The item may be a canvas index ("4") or a range of canvas indexes ("4-5").
+     * The range is limited, so a wrong value cannot create a huge structure.
+     *
+     * @return int[]
+     */
+    protected function canvasIndexesOfItem(string $item): array
+    {
+        if (!preg_match('~^\s*(\d+)\s*(?:-\s*(\d+))?\s*$~', $item, $matches)) {
+            return [];
+        }
+        $first = (int) $matches[1];
+        $last = isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : $first;
+        if ($last < $first || $last - $first > 10000) {
+            return [];
+        }
+        return range($first, $last);
+    }
+
     protected function defaultStructure(): ?Range
     {
         // Take iiif media in the order they are.
@@ -444,15 +465,15 @@ trait TraitStructuralStructures
             // Create iiif items, that may be ranges or canvas.
             $ascendants[] = $rangeData['name'];
             foreach ($rangeData['ranges'] as $iiifItem) {
-                // An item that is not a range is a canvas index, so the pages
-                // of a section are kept in order with its sub-sections.
+                // An item that is not a range is a canvas index or a range of
+                // canvas indexes, so the pages of a section are kept in order
+                // with its sub-sections.
                 if (!isset($ranges[$iiifItem])) {
-                    if (ctype_digit((string) $iiifItem)
-                        && isset($referencedCanvases[(int) $iiifItem])
-                        && !isset($addedViews[(int) $iiifItem])
-                    ) {
-                        $iiifItems[] = $referencedCanvases[(int) $iiifItem];
-                        $addedViews[(int) $iiifItem] = true;
+                    foreach ($this->canvasIndexesOfItem((string) $iiifItem) as $view) {
+                        if (isset($referencedCanvases[$view]) && !isset($addedViews[$view])) {
+                            $iiifItems[] = $referencedCanvases[$view];
+                            $addedViews[$view] = true;
+                        }
                     }
                     continue;
                 }
