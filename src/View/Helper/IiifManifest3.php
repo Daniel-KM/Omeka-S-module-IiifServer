@@ -29,6 +29,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\AbstractResourceType;
 use IiifServer\Iiif\Manifest;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -97,7 +98,8 @@ class IiifManifest3 extends AbstractHelper
         $resource = $item;
         $format = 'manifest';
         $type = 'item';
-        $params = compact('format', 'manifest', 'resource', 'type');
+        $accessFilter = $accessFilter ?? AbstractResourceType::ACCESS_FILTER_ALL;
+        $params = compact('format', 'manifest', 'resource', 'type', 'accessFilter');
         $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $manifest->normalize();
         return $manifest;

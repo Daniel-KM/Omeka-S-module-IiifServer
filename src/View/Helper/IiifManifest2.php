@@ -701,7 +701,8 @@ class IiifManifest2 extends AbstractHelper
         // TODO Manifest should be a true object, with many sub-objects.
         $resource = $item;
         $type = 'item';
-        $params = compact('manifest', 'resource', 'type');
+        $accessFilter = $this->accessFilter;
+        $params = compact('manifest', 'resource', 'type', 'accessFilter');
         $params = $this->view->plugin('trigger')->__invoke('iiifserver.manifest', $params, true);
         $manifest = $params['manifest'];
 
