@@ -832,18 +832,15 @@ class Module extends AbstractModule
 
         $logger = $services->get('Omeka\Logger');
 
+        // The manifest cache is read back through the presentation controller
+        // (which enforces resource visibility) or on the filesystem by jobs,
+        // never by a direct url, so deny direct web access: a manifest cached
+        // while public then made private would otherwise stay downloadable.
         foreach ([2, 3] as $version) {
             $dirPath = "$basePath/iiif/$version";
-            if (!is_dir($dirPath)) {
-                if (!@mkdir($dirPath, 0775, true)) {
-                    $logger->warn(
-                        'Could not create IIIF cache directory "{path}". Cache will not work unless created manually with proper permissions.',
-                        ['path' => $dirPath]
-                    );
-                }
-            } elseif (!is_writable($dirPath)) {
+            if (!$this->checkDestinationDir($dirPath, true)) {
                 $logger->warn(
-                    'IIIF cache directory "{path}" exists but is not writable. Cache will not work unless permissions are fixed.',
+                    'Could not create or write the IIIF cache directory "{path}". Cache will not work unless created manually with proper permissions.', // @translate
                     ['path' => $dirPath]
                 );
             }
