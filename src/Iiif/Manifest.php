@@ -304,6 +304,9 @@ class Manifest extends AbstractResourceType
             $canvas
                 // TODO Options should be set first for now for init, done in setResource().
                 ->setOptions([
+                    // An embedded resource has no "@context": it is required on
+                    // the outermost object only, that is the manifest itself.
+                    'skip' => ['@context' => true],
                     'index' => $mediaInfo['index'] ?? null,
                     'content' => $mediaInfo['content'],
                     'key' => $mediaInfo['key'],

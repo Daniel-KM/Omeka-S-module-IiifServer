@@ -1848,6 +1848,14 @@ class IiifManifest2 extends AbstractHelper
             return null;
         }
         $iiifSearchUrl = $plugins->get('iiifSearchAnnotationUrl');
+        // Don't advertise an ocr that does not exist: the url is built from the
+        // id of the item, so it is always returned, but the endpoint answers a
+        // 404 when the item has no alto, like the manifest v3 checks it.
+        if (!$iiifSearchUrl->isActive()
+            || !$iiifSearchUrl->hasOcrSource($media->item())
+        ) {
+            return null;
+        }
         $altoUrl = $iiifSearchUrl->altoUrl($media->item(), (int) $indexOne);
         if (!$altoUrl) {
             return null;
@@ -1871,6 +1879,11 @@ class IiifManifest2 extends AbstractHelper
             return null;
         }
         $iiifSearchUrl = $plugins->get('iiifSearchAnnotationUrl');
+        if (!$iiifSearchUrl->isActive()
+            || !$iiifSearchUrl->hasOcrSource($media->item())
+        ) {
+            return null;
+        }
         $listUrl = $iiifSearchUrl->__invoke($media->item(), (int) $indexOne, 2);
         if (!$listUrl) {
             return null;
