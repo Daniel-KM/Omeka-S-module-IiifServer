@@ -255,7 +255,7 @@ trait IiifServerControllerTrait
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                 }
                 try {
-                    return $this->api()->read('digital_objects', ['storage_id' => $id])->getContent();
+                    return $this->api()->read('digital_objects', ['storageId' => $id])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                     return null;
                 } catch (\Omeka\Api\Exception\BadRequestException $e) {
@@ -279,7 +279,7 @@ trait IiifServerControllerTrait
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                 }
                 try {
-                    return $this->api()->read('digital_objects', ['storage_id' => $storageId])->getContent();
+                    return $this->api()->read('digital_objects', ['storageId' => $storageId])->getContent();
                 } catch (\Omeka\Api\Exception\NotFoundException $e) {
                     return null;
                 } catch (\Omeka\Api\Exception\BadRequestException $e) {
