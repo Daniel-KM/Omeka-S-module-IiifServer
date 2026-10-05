@@ -36,13 +36,26 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-if (!trait_exists(\Common\TraitModule::class, false)) {
-    if (file_exists(OMEKA_PATH . '/modules/Common/src/TraitModule.php')) {
-        require_once OMEKA_PATH . '/modules/Common/src/TraitModule.php';
-    } elseif (file_exists(OMEKA_PATH . '/composer-addons/modules/Common/src/TraitModule.php')) {
-        require_once OMEKA_PATH . '/composer-addons/modules/Common/src/TraitModule.php';
-    } elseif (file_exists(dirname(__DIR__) . '/Common/src/TraitModule.php')) {
-        require_once dirname(__DIR__) . '/Common/src/TraitModule.php';
+// Common may be installed but not registered in autoloader, in particular
+// during upgrade. So dynamically register all classes of the module.
+if (!defined('COMMON_PSR4_FALLBACK')) {
+    foreach ([
+        OMEKA_PATH . '/modules/Common/src',
+        OMEKA_PATH . '/composer-addons/modules/Common/src',
+        dirname(__DIR__) . '/Common/src',
+    ] as $commonSrc) {
+        if (file_exists($commonSrc . '/TraitModule.php')) {
+            define('COMMON_PSR4_FALLBACK', $commonSrc);
+            spl_autoload_register(static function ($class): void {
+                if (str_starts_with($class, 'Common\\')) {
+                    $file = COMMON_PSR4_FALLBACK . '/' . strtr(substr($class, 7), '\\', '/') . '.php';
+                    if (file_exists($file)) {
+                        require_once $file;
+                    }
+                }
+            });
+            break;
+        }
     }
 }
 
@@ -220,10 +233,10 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $translator = $services->get('MvcTranslator');
 
-        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.88')) {
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.93')) {
             $message = new \Omeka\Stdlib\Message(
                 $translator->translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-                'Common', '3.4.88'
+                'Common', '3.4.93'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
