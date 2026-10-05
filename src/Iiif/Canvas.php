@@ -185,6 +185,10 @@ class Canvas extends AbstractResourceType
 
     public function label(): ?array
     {
+        if (!empty($this->options['pdfPage'])) {
+            return ['none' => [(string) $this->options['pdfPage']]];
+        }
+
         $labelOption = $this->settings->get('iiifserver_manifest_canvas_label');
         $values = [];
         $fallback = (string) $this->options['index'];
@@ -333,6 +337,10 @@ class Canvas extends AbstractResourceType
         }
 
         $this->cache['items'] = [];
+        if (!empty($this->options['pdfPage'])) {
+            $this->cache['items'][] = $this->pdfPageAnnotationPage();
+            return $this->cache['items'];
+        }
         if (isset($this->options['key']) && $this->options['key'] === 'annotation'
             && isset($this->options['motivation']) && $this->options['motivation'] === 'painting'
         ) {
@@ -398,6 +406,14 @@ class Canvas extends AbstractResourceType
         }
 
         $this->cache['dimensions'] = [];
+        if (!empty($this->options['pdfPage'])) {
+            $this->cache['dimensions'] = [
+                'width' => $this->options['pdfPageSize']['width'] ?? null,
+                'height' => $this->options['pdfPageSize']['height'] ?? null,
+                'duration' => null,
+            ];
+            return $this->cache['dimensions'];
+        }
         $heights = [0];
         $widths = [0];
         $durations = [0];
@@ -432,6 +448,55 @@ class Canvas extends AbstractResourceType
         }
         */
         return $this->cache['dimensions'];
+    }
+
+    /**
+     * Build the painting annotation page of a page of a pdf.
+     *
+     * The page is an image served by an image server like Cantaloupe, with the
+     * size of the page in points for the canvas, the same unit than the ocr.
+     */
+    protected function pdfPageAnnotationPage(): array
+    {
+        $page = (int) $this->options['pdfPage'];
+        $item = $this->resource->item();
+        $name = $this->resource->id() . '-p' . $page;
+        $version = (string) $this->settings->get('iiifserver_media_api_default_version', '3') === '2' ? '2' : '3';
+        $serviceUrl = $this->services->get('ViewHelperManager')->get('iiifMediaUrl')
+            ->__invoke($this->resource, 'imageserver/id', $version, ['page' => $page]);
+        $service = $version === '3'
+            ? [
+                'id' => $serviceUrl,
+                'type' => 'ImageService3',
+                'profile' => 'level2',
+            ]
+            : [
+                '@id' => $serviceUrl,
+                '@type' => 'ImageService2',
+                'profile' => 'http://iiif.io/api/image/2/level2.json',
+            ];
+        return [
+            'id' => $this->iiifUrl->__invoke($item, 'iiifserver/uri', '3', [
+                'type' => 'annotation-page',
+                'name' => $name,
+            ]),
+            'type' => 'AnnotationPage',
+            'items' => [[
+                'id' => $this->iiifUrl->__invoke($item, 'iiifserver/uri', '3', [
+                    'type' => 'annotation',
+                    'name' => $name,
+                ]),
+                'type' => 'Annotation',
+                'motivation' => 'painting',
+                'body' => [
+                    'id' => $serviceUrl . ($version === '3' ? '/full/max/0/default.jpg' : '/full/full/0/default.jpg'),
+                    'type' => 'Image',
+                    'format' => 'image/jpeg',
+                    'service' => [$service],
+                ],
+                'target' => $this->id(),
+            ]],
+        ];
     }
 
     /**

@@ -293,6 +293,12 @@ class Manifest extends AbstractResourceType
     public function items(): array
     {
         $items = [];
+        // The pages of a pdf may be displayed as images by the image server,
+        // so a media may have multiple canvases, and the index is the one of
+        // the canvas.
+        $pdfPages = (bool) $this->settings->get('iiifserver_manifest_pdf_pages');
+        $pdfPageSizes = $this->services->get('ViewHelperManager')->get('pdfPageSizes');
+        $index = 0;
         // Use mediaInfos directly: it preserves insertion order, already
         // excludes private media, and avoids rebuilding representations.
         foreach ($this->mediaInfos as $mediaInfo) {
@@ -300,15 +306,18 @@ class Manifest extends AbstractResourceType
                 continue;
             }
             $media = $mediaInfo['resource'];
-            $canvas = new Canvas();
-            $canvas
-                // TODO Options should be set first for now for init, done in setResource().
-                ->setOptions([
+            $pages = $pdfPages
+                && $mediaInfo['content']->format() === 'application/pdf'
+                && !$this->isLockedByAccess($media)
+                ? $pdfPageSizes($media)
+                : [];
+            foreach ($pages ?: [null] as $pageIndex => $pageSize) {
+                $options = [
                     'accessFilter' => $this->accessFilter,
                     // An embedded resource has no "@context": it is required on
                     // the outermost object only, that is the manifest itself.
                     'skip' => ['@context' => true],
-                    'index' => $mediaInfo['index'] ?? null,
+                    'index' => ++$index,
                     'content' => $mediaInfo['content'],
                     'key' => $mediaInfo['key'],
                     'motivation' => $mediaInfo['motivation'],
@@ -322,9 +331,18 @@ class Manifest extends AbstractResourceType
                             'alto' => $this->extraFiles['alto'][$this->resource->id()] ?? null,
                         ],
                     ],
-                ])
-                ->setResource($media);
-            $items[] = $canvas;
+                ];
+                if ($pageSize) {
+                    $options['pdfPage'] = $pageIndex + 1;
+                    $options['pdfPageSize'] = $pageSize;
+                }
+                $canvas = new Canvas();
+                // TODO Options should be set first for now for init, done in setResource().
+                $canvas
+                    ->setOptions($options)
+                    ->setResource($media);
+                $items[] = $canvas;
+            }
         }
 
         // A manifest requires at least one canvas, but an item may have no

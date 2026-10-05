@@ -112,6 +112,8 @@ class IiifMediaUrl extends AbstractHelper
      * @see \IiifServer\View\Helper\IiifUrl
      *
      * @param \Omeka\Api\Representation\MediaRepresentation|int $resource
+     * @param array $params Route params, and "page" for a page of a pdf served
+     *   by an image server like Cantaloupe.
      */
     public function __invoke($resource, ?string $route = null, ?string $version = null, array $params = []): string
     {
@@ -149,6 +151,18 @@ class IiifMediaUrl extends AbstractHelper
             // The identifier will be the identifier set in clean url or the
             // media id.
             $identifier = $this->iiifCleanIdentifiers->__invoke($resource);
+        }
+
+        // A page of a pdf is an image for an image server like Cantaloupe, with
+        // the file name and the page as meta-identifier ("file.pdf;2").
+        $page = (int) ($params['page'] ?? 0);
+        unset($params['page']);
+        if ($page) {
+            if (in_array($this->mediaIdentifier, ['filename', 'filename_image'], true) && $resource->filename()) {
+                $identifier = $resource->filename();
+            }
+            $identifier .= ';' . $page;
+            $route = $route ?: 'imageserver/id';
         }
 
         if (!$route) {
@@ -201,6 +215,11 @@ class IiifMediaUrl extends AbstractHelper
         $urlIiif = $this->encodeSlash
             ? strtr($urlIiif, ['%252F' => '%2F'])
             : strtr($urlIiif, ['%252F' => '/', '%2F' => '/']);
+
+        // The delimiter of the page should not be encoded for the image server.
+        if ($page) {
+            $urlIiif = strtr($urlIiif, ['%3B' => ';', '%3b' => ';']);
+        }
 
         return $this->forceUrlFrom && (strpos($urlIiif, $this->forceUrlFrom) === 0)
             ? substr_replace($urlIiif, $this->forceUrlTo, 0, strlen($this->forceUrlFrom))

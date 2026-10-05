@@ -1171,6 +1171,19 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_pdf_pages',
+                'type' => CommonElement\OptionalCheckbox::class,
+                'options' => [
+                    'tab' => 'image_server',
+                    'label' => 'Display the pages of the pdf files as images of the image server', // @translate
+                    'info' => 'The image server should render each page of a pdf with the identifier "file.pdf;page", like Cantaloupe. So the viewers display the pdf as images, with the search and the annotations of the ocr.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_pdf_pages',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_media_api_fix_uv_mp3',
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
