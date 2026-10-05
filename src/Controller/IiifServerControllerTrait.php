@@ -65,6 +65,19 @@ trait IiifServerControllerTrait
      */
     public function badAction()
     {
+        // The base url of a media identified by its file name ("file.jpg") has
+        // the format of a bad request, so redirect it to the info.json.
+        $routeMatch = $this->getEvent()->getRouteMatch();
+        $format = (string) $routeMatch->getParam('format');
+        if ($format !== '' && $routeMatch->getParam('region') === null) {
+            $id = (string) $routeMatch->getParam('id');
+            $routeMatch->setParam('id', $id . '.' . $format);
+            if ($this->fetchResource('media')) {
+                return $this->idAction();
+            }
+            $routeMatch->setParam('id', $id);
+        }
+
         return $this->viewError(new PsrMessage(
                 'The image server cannot fulfill the request: the arguments are incorrect.' // @translate
             ),
