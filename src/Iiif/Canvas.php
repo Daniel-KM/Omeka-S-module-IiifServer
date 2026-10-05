@@ -274,10 +274,10 @@ class Canvas extends AbstractResourceType
             return $this->cache['seeAlso'];
         }
         $canvasIndex = (int) ($this->options['index'] ?? 1);
-        // Do not advertise the OCR of a page that the user cannot read: the
-        // endpoint of IiifSearch refuses it anyway, so the link would only add
-        // an error in the viewer.
-        if (!$this->isAllowedOcr($item, $canvasIndex - 1)) {
+        // Do not advertise the OCR of a page that is not readable: the endpoint
+        // of IiifSearch refuses it anyway, so the link would only add an error
+        // in the viewer.
+        if (!$this->isOcrExposed($item, $canvasIndex - 1)) {
             return $this->cache['seeAlso'];
         }
         $altoUrl = $this->iiifSearchAnnotationUrl->altoUrl($item, $canvasIndex);
@@ -371,10 +371,10 @@ class Canvas extends AbstractResourceType
             return $this->cache['annotations'];
         }
         $canvasIndex = (int) ($this->options['index'] ?? 1);
-        // Do not advertise the OCR of a page that the user cannot read: the
-        // endpoint of IiifSearch refuses it anyway, so the link would only add
-        // an error in the viewer.
-        if (!$this->isAllowedOcr($item, $canvasIndex - 1)) {
+        // Do not advertise the OCR of a page that is not readable: the endpoint
+        // of IiifSearch refuses it anyway, so the link would only add an error
+        // in the viewer.
+        if (!$this->isOcrExposed($item, $canvasIndex - 1)) {
             return $this->cache['annotations'];
         }
         $url = $this->iiifSearchAnnotationUrl->__invoke($item, $canvasIndex, 3);
@@ -440,12 +440,36 @@ class Canvas extends AbstractResourceType
      * and the image of the page when it is not an attached file. Without the
      * module Access or the module IiifSearch, there is no restriction.
      */
-    protected function isAllowedOcr(\Omeka\Api\Representation\ItemRepresentation $item, int $pageIndex): bool
+    /**
+     * Should the ocr of the page be advertised in this manifest?
+     *
+     * The check cannot use the rights of the current user: the manifest is
+     * cached and shared, so it would freeze the rights of the visitor who
+     * happened to build it. Like the medias, the ocr is removed only from the
+     * manifest built for the unauthorized visitors, according to the access
+     * status of the resource that carries the ocr of the page.
+     */
+    protected function isOcrExposed(\Omeka\Api\Representation\ItemRepresentation $item, int $pageIndex): bool
     {
-        $plugins = $this->services->get('ControllerPluginManager');
-        if (!$plugins->has('isAllowedOcr')) {
+        if ($this->accessFilter !== self::ACCESS_FILTER_FREE || !$this->accessStatus) {
             return true;
         }
-        return (bool) $plugins->get('isAllowedOcr')->__invoke($item, $pageIndex);
+
+        $viewHelpers = $this->services->get('ViewHelperManager');
+        if (!$viewHelpers->has('xmlAltoSplitter')) {
+            return true;
+        }
+
+        // The ocr follows the access level of the resource it belongs to: the
+        // attached alto when there is one, else the image of the page, else the
+        // item itself.
+        $resource = $viewHelpers->get('xmlAltoSplitter')->sourceResource($item, $pageIndex);
+        if (!$resource) {
+            $resource = self::isMediaLikeResource($this->resource) ? $this->resource : $item;
+        }
+
+        $status = $this->accessStatus->__invoke($resource);
+        return !$status
+            || $status->getLevel() === \Access\Entity\AccessStatus::FREE;
     }
 }
