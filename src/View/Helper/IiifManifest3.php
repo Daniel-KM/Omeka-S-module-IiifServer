@@ -62,11 +62,15 @@ class IiifManifest3 extends AbstractHelper
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    /**
+     * @param string|null $accessFilter One of the constants ACCESS_FILTER_* of
+     * AbstractResourceType: remove or keep the medias that are not "free".
+     */
+    public function __invoke(AbstractResourceEntityRepresentation $resource, ?string $accessFilter = null)
     {
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
-            return $this->buildManifestItem($resource);
+            return $this->buildManifestItem($resource, $accessFilter);
         }
         if ($resourceName == 'item_sets') {
             return $this->view->iiifCollection3($resource);
@@ -79,9 +83,12 @@ class IiifManifest3 extends AbstractHelper
      * @param ItemRepresentation $item
      * @return Manifest|null
      */
-    protected function buildManifestItem(ItemRepresentation $item)
+    protected function buildManifestItem(ItemRepresentation $item, ?string $accessFilter = null)
     {
         $manifest = new Manifest();
+        if ($accessFilter !== null) {
+            $manifest->setAccessFilter($accessFilter);
+        }
         $manifest
             ->setResource($item)
             ->normalize();

@@ -161,6 +161,7 @@ return [
             'rangeToArray' => Mvc\Controller\Plugin\RangeToArray::class,
         ],
         'factories' => [
+            'iiifAccessCache' => Service\ControllerPlugin\IiifAccessCacheFactory::class,
             'isIiifMedia' => Service\ControllerPlugin\IsIiifMediaFactory::class,
             'mediaDimension' => Service\ControllerPlugin\MediaDimensionFactory::class,
         ],

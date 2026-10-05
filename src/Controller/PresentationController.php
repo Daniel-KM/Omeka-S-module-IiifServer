@@ -31,6 +31,7 @@
 namespace IiifServer\Controller;
 
 use Common\Stdlib\PsrMessage;
+use IiifServer\Iiif\AbstractResourceType;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Omeka\Mvc\Exception as OmekaException;
 
@@ -133,16 +134,23 @@ class PresentationController extends AbstractActionController
             $version = (string) $this->settings()->get('iiifserver_manifest_default_version', '3');
         }
 
+        // When the module Access is used, an item with reserved resources has
+        // two manifests: one without them, one with all medias. The variant
+        // depends only on the access status of the resources, so both are
+        // cached and the visitor gets the one matching its rights.
+        $accessFilter = $hasAccessModule
+            ? $this->iiifAccessCache()->accessFilterForVisitor((int) $resource->id())
+            : AbstractResourceType::ACCESS_FILTER_ALL;
+
         // Compute conditional-cache validators (ETag + Last-Modified) from the
-        // item modified date and the max modified date of its media. Skip 304
-        // entirely for privileged users (their manifests may differ from the
-        // public version).
-        $canCache304 = !$this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
-        if ($canCache304 && $this->getPluginManager()->has('accessLevel')) {
-            $canCache304 = !$this->identity();
-        }
+        // item modified date and the max modified date of its media. Only the
+        // manifest without reserved medias is the same for everybody, so it is
+        // the only one a shared proxy may store. Skip 304 entirely for
+        // privileged users, whose manifests contain the private medias.
+        $canCache304 = !$this->userIsAllowed('Omeka\Entity\Resource', 'view-all')
+            && $accessFilter === AbstractResourceType::ACCESS_FILTER_FREE;
         $mtime = $this->manifestMtime($resource);
-        $etag = '"manifest-' . ($version ?: 'auto') . '-' . $resource->id() . '-' . $mtime . '"';
+        $etag = '"manifest-' . ($version ?: 'auto') . '-' . $resource->id() . '-' . $accessFilter . '-' . $mtime . '"';
         if ($canCache304) {
             $request = $this->getRequest();
             $ifNoneMatch = $request->getHeader('If-None-Match');
@@ -177,11 +185,11 @@ class PresentationController extends AbstractActionController
         // in fresh manifests. Cached manifests only contain public media.
         $skipCache = $this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
 
-        // When the Access module is active, authenticated users may have
-        // intermediate permissions (reserved media), so skip cache for all
-        // authenticated users.
-        if (!$skipCache && $hasAccessModule) {
-            $skipCache = (bool) $this->identity();
+        // A user that owns a private resource sees it whatever its rights, so
+        // its manifest cannot be shared with anybody else.
+        if (!$skipCache && ($user = $this->identity())) {
+            $owner = $resource->owner();
+            $skipCache = $owner && (int) $owner->id() === (int) $user->getId();
         }
 
         $useCache = !$skipCache && (bool) $settings->get('iiifserver_manifest_cache', false);
@@ -189,7 +197,8 @@ class PresentationController extends AbstractActionController
             $itemId = $resource->id();
             $config = $resource->getServiceLocator()->get('Config');
             $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-            $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
+            $filepath = $this->iiifAccessCache()
+                ->filepath($basePath, (string) $version, (int) $itemId, $accessFilter);
             if (file_exists($filepath) && is_readable($filepath)) {
                 $manifest = file_get_contents($filepath);
                 $manifest = $manifest !== false ? json_decode($manifest, true) : null;
@@ -225,7 +234,7 @@ class PresentationController extends AbstractActionController
 
         $iiifManifest = $this->viewHelpers()->get('iiifManifest');
         try {
-            $manifest = $iiifManifest($resource, $version);
+            $manifest = $iiifManifest($resource, $version, $accessFilter);
         } catch (\IiifServer\Iiif\Exception\RuntimeException $e) {
             return $this->jsonError($e, \Laminas\Http\Response::STATUS_CODE_400);
         }

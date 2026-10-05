@@ -30,6 +30,7 @@
 
 namespace IiifServer\View\Helper;
 
+use IiifServer\Iiif\AbstractResourceType;
 use IiifServer\Iiif\TraitDescriptiveRights;
 use IiifServer\Iiif\TraitStructuralStructures;
 use Laminas\View\Helper\AbstractHelper;
@@ -102,6 +103,11 @@ class IiifManifest2 extends AbstractHelper
     protected $isAllowedViewAll = false;
 
     /**
+     * @var string One of the constants ACCESS_FILTER_* of AbstractResourceType.
+     */
+    protected $accessFilter = AbstractResourceType::ACCESS_FILTER_ALL;
+
+    /**
      * @var array|null
      */
     protected $annotatedMediaIds;
@@ -131,9 +137,14 @@ class IiifManifest2 extends AbstractHelper
      * @param AbstractResourceEntityRepresentation $resource
      * @return Object|null
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    /**
+     * @param string|null $accessFilter One of the constants ACCESS_FILTER_* of
+     * AbstractResourceType: remove or keep the medias that are not "free".
+     */
+    public function __invoke(AbstractResourceEntityRepresentation $resource, ?string $accessFilter = null)
     {
         $this->resource = $resource;
+        $this->accessFilter = $accessFilter ?: AbstractResourceType::ACCESS_FILTER_ALL;
 
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
@@ -304,6 +315,19 @@ class IiifManifest2 extends AbstractHelper
         $medias = $this->isAllowedViewAll
             ? $item->media()
             : array_filter($item->media(), fn ($m) => $m->isPublic());
+        // Build the manifest of the unauthorized visitors without the medias
+        // that are not "free": the filter depends only on the access status,
+        // never on the current user, so the manifest can be cached and served
+        // to anybody who has no right on the reserved medias.
+        if ($this->accessFilter === AbstractResourceType::ACCESS_FILTER_FREE
+            && $this->accessStatus
+        ) {
+            $medias = array_filter($medias, function ($media) {
+                $status = $this->accessStatus->__invoke($media);
+                return !$status
+                    || $status->getLevel() === \Access\Entity\AccessStatus::FREE;
+            });
+        }
         $images = [];
         $nonImages = [];
         $mediaMain3d = null;

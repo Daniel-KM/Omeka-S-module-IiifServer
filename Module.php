@@ -635,10 +635,16 @@ class Module extends AbstractModule
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
 
+        // Remove the two variants of the manifest (with and without the
+        // reserved medias, see the plugin iiifAccessCache).
         foreach ([2, 3] as $version) {
-            $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
-            if (file_exists($filepath) && is_writeable($filepath)) {
-                @unlink($filepath);
+            $filepaths = glob("$basePath/iiif/$version/$itemId.manifest.json")
+                ?: [];
+            $filepaths = array_merge($filepaths, glob("$basePath/iiif/$version/$itemId.*.manifest.json") ?: []);
+            foreach ($filepaths as $filepath) {
+                if (is_writeable($filepath)) {
+                    @unlink($filepath);
+                }
             }
         }
     }

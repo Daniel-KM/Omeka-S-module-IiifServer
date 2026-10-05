@@ -43,7 +43,7 @@ class IiifManifest extends AbstractHelper
      * @throws \IiifServer\Iiif\Exception\RuntimeException
      * @return Object|null
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null)
+    public function __invoke(AbstractResourceEntityRepresentation $resource, $version = null, ?string $accessFilter = null)
     {
         $view = $this->getView();
 
@@ -56,8 +56,8 @@ class IiifManifest extends AbstractHelper
         $resourceName = $resource->resourceName();
         if ($resourceName == 'items') {
             return $version === '2'
-                ? $view->iiifManifest2($resource)
-                : $view->iiifManifest3($resource);
+                ? $view->iiifManifest2($resource, $accessFilter)
+                : $view->iiifManifest3($resource, $accessFilter);
         }
 
         if ($resourceName == 'item_sets') {

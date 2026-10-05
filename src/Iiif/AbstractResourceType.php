@@ -384,6 +384,34 @@ abstract class AbstractResourceType extends AbstractType
      */
     protected $cache = [];
 
+    /**
+     * Build the manifest with all medias, whatever their access status.
+     */
+    const ACCESS_FILTER_ALL = 'all';
+
+    /**
+     * Remove the medias that are not "free" from the manifest.
+     */
+    const ACCESS_FILTER_FREE = 'free';
+
+    /**
+     * @var string One of the constants ACCESS_FILTER_*.
+     *
+     * The manifest of an item with reserved medias is built twice: once with
+     * all medias for the authorized visitors, once without the reserved ones
+     * for the other ones. The filter depends only on the access status of the
+     * resources, never on the current user, so both manifests can be built by
+     * a background job and cached, then served according to the rights of the
+     * visitor.
+     */
+    protected $accessFilter = self::ACCESS_FILTER_ALL;
+
+    public function setAccessFilter(string $accessFilter): self
+    {
+        $this->accessFilter = $accessFilter;
+        return $this;
+    }
+
     public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
         $this->resource = $resource;

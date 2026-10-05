@@ -2,6 +2,7 @@
 
 namespace IiifServer\Job;
 
+use IiifServer\Iiif\AbstractResourceType;
 use Omeka\Job\AbstractJob;
 
 class CacheManifests extends AbstractJob
@@ -26,6 +27,7 @@ class CacheManifests extends AbstractJob
         $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $viewHelpers = $services->get('ViewHelperManager');
+        $iiifAccessCache = $services->get('ControllerPluginManager')->get('iiifAccessCache');
         $iiifManifest2 = $viewHelpers->get('iiifManifest2');
         $iiifManifest3 = $viewHelpers->get('iiifManifest3');
 
@@ -74,14 +76,35 @@ class CacheManifests extends AbstractJob
             }
 
             $failed = false;
-            foreach ([2, 3] as $version) {
-                $filepath = "$basePath/iiif/$version/$itemId.manifest.json";
+            $created = 0;
+
+            // An item with a reserved resource needs a second manifest, built
+            // with all medias for the authorized visitors. An item with only
+            // free resources, or any item without the module Access, has a
+            // single manifest.
+            $accessFilters = [AbstractResourceType::ACCESS_FILTER_FREE];
+            if ($iiifAccessCache->reservedResourceId((int) $itemId)) {
+                $accessFilters[] = AbstractResourceType::ACCESS_FILTER_ALL;
+            } else {
+                // The item has no reserved resource any more: remove the second
+                // manifest, that would stay orphan and outdated.
+                foreach ([2, 3] as $version) {
+                    $orphan = $iiifAccessCache->filepath($basePath, (string) $version, (int) $itemId, AbstractResourceType::ACCESS_FILTER_ALL);
+                    if (file_exists($orphan) && is_writeable($orphan)) {
+                        @unlink($orphan);
+                    }
+                }
+            }
+
+            foreach ([2, 3] as $version) foreach ($accessFilters as $accessFilter) {
+                $filepath = $iiifAccessCache->filepath($basePath, (string) $version, (int) $itemId, $accessFilter);
+                $relativePath = mb_substr($filepath, mb_strlen($basePath));
                 if (file_exists($filepath)
                     && (!is_writeable($filepath) || !unlink($filepath))
                 ) {
                     $this->logger->err(
                         'Item #{item_id}: Unable to remove existing file "{file}". Manifest version {version} skipped.', // @translate
-                        ['item_id' => $itemId, 'file' => "/iiif/$version/$itemId.manifest.json", 'version' => $version]
+                        ['item_id' => $itemId, 'file' => $relativePath, 'version' => $version]
                     );
                     continue;
                 }
@@ -94,7 +117,9 @@ class CacheManifests extends AbstractJob
                 }
 
                 try {
-                    $manifest = $version === 2 ? $iiifManifest2($item) : $iiifManifest3($item);
+                    $manifest = $version === 2
+                        ? $iiifManifest2($item, $accessFilter)
+                        : $iiifManifest3($item, $accessFilter);
                 } catch (\Throwable $e) {
                     $failed = true;
                     if ($item->media()) {
@@ -116,7 +141,9 @@ class CacheManifests extends AbstractJob
                 }
 
                 $result = file_put_contents($filepath, $manifest);
-                if (!$result) {
+                if ($result) {
+                    ++$created;
+                } else {
                     $failed = true;
                     $this->logger->err(
                         'Item #{item_id}: Unable to store the manifest version {version}.', // @translate
@@ -127,10 +154,17 @@ class CacheManifests extends AbstractJob
 
             // Don't add a message when failed or skipped: already done.
             if (!$failed) {
-                $this->logger->info(
-                    'Item #{item_id}: iiif manifests created successfully.', // @translate
-                    ['item_id' => $itemId]
-                );
+                if ($created <= 1) {
+                    $this->logger->info(
+                        'Item #{item_id}: iiif manifest created successfully.', // @translate
+                        ['item_id' => $itemId]
+                    );
+                } else {
+                    $this->logger->info(
+                        'Item #{item_id}: {count} iiif manifests created successfully.', // @translate
+                        ['item_id' => $itemId, 'count' => $created]
+                    );
+                }
             }
 
             if ((++$index % 100) === 0) {
