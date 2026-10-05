@@ -2020,7 +2020,7 @@ class IiifManifest2 extends AbstractHelper
         return [
             '@id' => $id,
             '@type' => 'sc:AnnotationList',
-            'label' => $this->view->translate('Annotations'), // @ŧranslate
+            'label' => $this->view->translate('Annotations'), // @translate
         ];
     }
 
