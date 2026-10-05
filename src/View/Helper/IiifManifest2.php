@@ -646,12 +646,29 @@ class IiifManifest2 extends AbstractHelper
 
         // TODO Flat structure is currently not skipped in iiif v2.
         // $appendFlatStructure = !$this->setting->__invoke('iiifserver_manifest_structures_skip_flat');
+        // Like the ocr, the table of contents of the TEI file follows the access
+        // level of the file: it is removed from the manifest of the unauthorized
+        // visitors when the file is reserved.
         $plugins = $this->view->getHelperPluginManager();
+        $teiStructure = null;
+        if ($plugins->has('iiifSearchTeiStructure')) {
+            $teiStructure = $plugins->get('iiifSearchTeiStructure');
+            $tei = $teiStructure->teiResource($item);
+            if ($tei
+                && $this->accessFilter === AbstractResourceType::ACCESS_FILTER_FREE
+                && $this->accessStatus
+                && ($status = $this->accessStatus->__invoke($tei->inner()))
+                && $status->getLevel() !== \Access\Entity\AccessStatus::FREE
+            ) {
+                $teiStructure = null;
+            }
+        }
+
         $literalStructures = $this->structureLiterals(
             $item,
             (string) $this->setting->__invoke('iiifserver_manifest_structures_property'),
             (string) $this->setting->__invoke('iiifserver_manifest_structures_source_v2', 'property'),
-            $plugins->has('iiifSearchTeiStructure') ? $plugins->get('iiifSearchTeiStructure') : null
+            $teiStructure
         );
 
         $structures = [];

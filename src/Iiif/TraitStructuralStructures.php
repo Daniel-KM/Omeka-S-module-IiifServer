@@ -81,12 +81,26 @@ trait TraitStructuralStructures
 
         $appendFlatStructure = !$this->settings->get('iiifserver_manifest_structures_skip_flat');
 
+        // Like the ocr, the table of contents of the TEI file follows the access
+        // level of the file: it is removed from the manifest of the unauthorized
+        // visitors when the file is reserved.
         $viewHelpers = $this->services->get('ViewHelperManager');
+        $teiStructure = null;
+        if ($viewHelpers->has('iiifSearchTeiStructure')
+            && $this->resource instanceof ItemRepresentation
+        ) {
+            $teiStructure = $viewHelpers->get('iiifSearchTeiStructure');
+            $tei = $teiStructure->teiResource($this->resource);
+            if ($tei && $this->isLockedByAccess($tei->inner())) {
+                $teiStructure = null;
+            }
+        }
+
         $literalStructures = $this->structureLiterals(
             $this->resource,
             (string) $this->settings->get('iiifserver_manifest_structures_property'),
             (string) $this->settings->get('iiifserver_manifest_structures_source', 'both'),
-            $viewHelpers->has('iiifSearchTeiStructure') ? $viewHelpers->get('iiifSearchTeiStructure') : null
+            $teiStructure
         );
 
         // TODO A structure requires a media for now to build reference to canvas.
