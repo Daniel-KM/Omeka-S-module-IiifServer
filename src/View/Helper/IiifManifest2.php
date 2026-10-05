@@ -1456,22 +1456,27 @@ class IiifManifest2 extends AbstractHelper
             // When there is no range on top, it means that it is a list of
             // views, but it is generally an error.
 
+            // An item that is not a range is a canvas index.
+            $views = $rangeData['views'];
             if (count($rangeData['ranges'])) {
                 foreach ($rangeData['ranges'] as $subRangeName) {
-                    $range['ranges'][] = $ranges[$subRangeName]['@id'] ?? null;
+                    if (isset($ranges[$subRangeName])) {
+                        $range['ranges'][] = $ranges[$subRangeName]['@id'];
+                    } elseif (ctype_digit((string) $subRangeName)) {
+                        $views[] = (int) $subRangeName;
+                    }
                 }
-                $range['ranges'] = array_filter($range['ranges']);
             }
 
-            if (count($rangeData['views'])
+            if (count($views)
                 // According to spec, no views on top, except if there is no
                 // ranges.
-                && !($isFirst && count($rangeData['ranges']))
+                && !($isFirst && !empty($range['ranges']))
             ) {
-                foreach ($rangeData['views'] as $view) {
+                foreach (array_unique($views) as $view) {
                     $range['canvases'][] = $referencedCanvases[$view]['@id'] ?? null;
                 }
-                $range['canvases'] = array_filter($range['canvases']);
+                $range['canvases'] = array_values(array_filter($range['canvases']));
             }
 
             $isFirst = false;

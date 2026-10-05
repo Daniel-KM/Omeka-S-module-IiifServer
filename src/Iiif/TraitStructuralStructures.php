@@ -427,18 +427,16 @@ trait TraitStructuralStructures
 
             // Append the current canvas, if it is a canvas.
             // Manage short toc with missing ranges.
+            $addedViews = [];
             if ($rangeData['is_canvas']) {
                 // Append all views when children are not present in ranges.
-                if (array_intersect($rangeData['ranges'], array_keys($ranges))) {
-                    $view = reset($rangeData['views']);
+                $views = array_intersect($rangeData['ranges'], array_keys($ranges))
+                    ? [reset($rangeData['views'])]
+                    : $rangeData['views'];
+                foreach ($views as $view) {
                     if (isset($referencedCanvases[$view])) {
                         $iiifItems[] = $referencedCanvases[$view];
-                    }
-                } else {
-                    foreach ($rangeData['views'] as $view) {
-                        if (isset($referencedCanvases[$view])) {
-                            $iiifItems[] = $referencedCanvases[$view];
-                        }
+                        $addedViews[$view] = true;
                     }
                 }
             }
@@ -446,14 +444,24 @@ trait TraitStructuralStructures
             // Create iiif items, that may be ranges or canvas.
             $ascendants[] = $rangeData['name'];
             foreach ($rangeData['ranges'] as $iiifItem) {
-                if (isset($ranges[$iiifItem])) {
-                    $iiifItem = $buildStructure($ranges[$iiifItem], $ascendants);
-                    if ($iiifItem) {
-                        if (is_array($iiifItem)) {
-                            $iiifItems = array_merge(array_values($iiifItems), array_values($iiifItem));
-                        } else {
-                            $iiifItems[] = $iiifItem;
-                        }
+                // An item that is not a range is a canvas index, so the pages
+                // of a section are kept in order with its sub-sections.
+                if (!isset($ranges[$iiifItem])) {
+                    if (ctype_digit((string) $iiifItem)
+                        && isset($referencedCanvases[(int) $iiifItem])
+                        && !isset($addedViews[(int) $iiifItem])
+                    ) {
+                        $iiifItems[] = $referencedCanvases[(int) $iiifItem];
+                        $addedViews[(int) $iiifItem] = true;
+                    }
+                    continue;
+                }
+                $iiifItem = $buildStructure($ranges[$iiifItem], $ascendants);
+                if ($iiifItem) {
+                    if (is_array($iiifItem)) {
+                        $iiifItems = array_merge(array_values($iiifItems), array_values($iiifItem));
+                    } else {
+                        $iiifItems[] = $iiifItem;
                     }
                 }
             }
