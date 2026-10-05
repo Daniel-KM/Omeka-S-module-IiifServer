@@ -472,7 +472,9 @@ return [
                                 'version' => '2|3',
                                 'prefix' => $constraintPrefix,
                                 'id' => '[^\/]+',
-                                'format' => '[^\/]+',
+                                // The ";" is the delimiter of the page of a pdf
+                                // ("file.pdf;2"), served by route "id".
+                                'format' => '[^\/;]+',
                             ],
                             'defaults' => [
                                 'version' => $version,
