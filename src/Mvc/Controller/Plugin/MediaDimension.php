@@ -218,9 +218,12 @@ class MediaDimension extends AbstractPlugin
         }
 
         // Cache dimensions in media data to avoid computation on next request.
-        if ($result['width'] || $result['height'] || $result['duration']) {
+        // A media created but not yet persisted (item creation, before save)
+        // has no id: nothing to update in database, skip. Dimensions are still
+        // saved with the entity via setData() in the sizing listener.
+        if ($media->id() && ($result['width'] || $result['height'] || $result['duration'])) {
             $table = $media->resourceName() === 'digital_objects' ? 'digital_object' : 'media';
-            $this->cacheMediaDimensions($media->id(), $type, $result, $table);
+            $this->cacheMediaDimensions((int) $media->id(), $type, $result, $table);
         }
 
         return $result;
