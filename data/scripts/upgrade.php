@@ -30,10 +30,10 @@ $entityManager = $services->get('Omeka\EntityManager');
 $defaultConfig = require dirname(__DIR__, 2) . '/config/module.config.php';
 $defaultSettings = $defaultConfig['iiifserver']['config'];
 
-if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.88')) {
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.93')) {
     $message = new \Omeka\Stdlib\Message(
         $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
-        'Common', '3.4.88'
+        'Common', '3.4.93'
     );
     $messenger->addError($message);
     throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
@@ -589,6 +589,31 @@ if (version_compare($oldVersion, '3.6.33', '<')) {
     $message = new PsrMessage(
         'Removed {count} stale version-less manifest cache files.', // @translate
         ['count' => count($orphans)]
+    );
+    $messenger->addSuccess($message);
+}
+
+if (version_compare($oldVersion, '3.6.34', '<')) {
+    // The manifests are now cached in two variants when the module Access is
+    // used: without the reserved medias for the unauthorized visitors, with all
+    // medias for the authorized ones. The existing files contain all medias
+    // whatever the status, so they are removed and rebuilt on the fly.
+    $config = $services->get('Config');
+    $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+    $removed = 0;
+    foreach ([2, 3] as $version) {
+        foreach (glob($basePath . '/iiif/' . $version . '/*.manifest.json') ?: [] as $filepath) {
+            $removed += (int) @unlink($filepath);
+        }
+    }
+    $message = new PsrMessage(
+        'Removed {count} cached manifests: they are rebuilt with or without the reserved medias, according to the rights of the visitor.', // @translate
+        ['count' => $removed]
+    );
+    $messenger->addSuccess($message);
+
+    $message = new PsrMessage(
+        'The table of contents of a tei file attached to an item (module IIIF Search) can be used as structures of the manifest, with or instead of the property (option "Structures from property and TEI file").' // @translate
     );
     $messenger->addSuccess($message);
 }
