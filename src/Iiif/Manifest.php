@@ -325,6 +325,59 @@ class Manifest extends AbstractResourceType
                 ->setResource($media);
             $items[] = $canvas;
         }
-        return $items;
+
+        // A manifest requires at least one canvas, but an item may have no
+        // displayable file, for example a single pdf or an external link. So
+        // add a placeholder canvas, like the manifest v2 does, else the
+        // manifest is invalid and a viewer refuses to load it.
+        return $items ?: [$this->placeholderCanvas()];
+    }
+
+    /**
+     * Build the canvas used when the item has no displayable file.
+     */
+    protected function placeholderCanvas(): array
+    {
+        $viewHelpers = $this->services->get('ViewHelperManager');
+        $serverUrl = $viewHelpers->get('serverUrl')->__invoke('');
+        $basePath = $viewHelpers->get('basePath');
+        $translate = $viewHelpers->get('translate');
+
+        $canvasId = $serverUrl . $basePath('/iiif/ixif-message/canvas/c1');
+
+        // Use the asset directly and not the route "mediaserver/placeholder":
+        // when an external image server (Cantaloupe) is proxied on the path
+        // "/iiif", it answers instead of Omeka and the image is not found.
+        $assetUrl = $viewHelpers->get('assetUrl');
+        $imageUrl = $serverUrl . $assetUrl('img/thumbnails/placeholder-image.png', 'ImageServer', true);
+
+        // The size of the placeholder image of the module Image Server.
+        $width = 200;
+        $height = 200;
+
+        return [
+            'id' => $canvasId,
+            'type' => 'Canvas',
+            'label' => ['none' => [$translate('Placeholder image')]], // @translate
+            'width' => $width,
+            'height' => $height,
+            'items' => [[
+                'id' => $serverUrl . $basePath('/iiif/ixif-message/annotationpage/p1'),
+                'type' => 'AnnotationPage',
+                'items' => [[
+                    'id' => $serverUrl . $basePath('/iiif/ixif-message/annotation/a1'),
+                    'type' => 'Annotation',
+                    'motivation' => 'painting',
+                    'body' => [
+                        'id' => $imageUrl,
+                        'type' => 'Image',
+                        'format' => 'image/png',
+                        'width' => $width,
+                        'height' => $height,
+                    ],
+                    'target' => $canvasId,
+                ]],
+            ]],
+        ];
     }
 }
