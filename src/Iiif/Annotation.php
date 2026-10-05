@@ -144,7 +144,9 @@ class Annotation extends AbstractResourceType
             ->setOptions($this->options)
             ->setResource($this->resource)
             ->normalize();
-        return $body->getArrayCopy();
+        // Unlike getArrayCopy(), jsonSerialize() removes the empty properties,
+        // so a body without image service has no empty "service".
+        return $body->jsonSerialize();
     }
 
     public function target(): ?string
