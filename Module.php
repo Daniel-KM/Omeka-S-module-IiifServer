@@ -120,8 +120,11 @@ class Module extends AbstractModule
             return;
         }
 
-        // Skip fixed literal routes (e.g. ixif placeholder).
-        if (strpos($path, 'ixif-message') !== false) {
+        // Skip fixed literal routes (e.g. ixif placeholder) and the routes of
+        // module IiifSearch, that manages its own identifiers.
+        if (strpos($path, 'ixif-message') !== false
+            || strpos($path, '/iiif/search/') !== false
+        ) {
             return;
         }
 
