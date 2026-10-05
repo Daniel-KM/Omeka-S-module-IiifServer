@@ -547,6 +547,11 @@ class ConfigForm extends Form
                         'none' => 'None', // @translate
                         'all' => 'All', // @translate
                     ],
+                    // The options are the media types of the medias stored, so
+                    // a saved one may not exist any more, for example after the
+                    // removal of the ocr medias. It should not invalidate the
+                    // whole form, that cannot be saved any more.
+                    'disable_inarray_validator' => true,
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_manifest_rendering_media_types',
