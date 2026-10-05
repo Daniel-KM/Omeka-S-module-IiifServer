@@ -86,6 +86,11 @@ trait IiifServerControllerTrait
      */
     public function idAction()
     {
+        $forward = $this->forwardPdfPage('id');
+        if ($forward) {
+            return $forward;
+        }
+
         // Check if there is a resource in case of a forward or a mvc listener,
         // and if it is an item or a media (image or any other media).
         $params = $this->params()->fromRoute();
@@ -147,6 +152,11 @@ trait IiifServerControllerTrait
      */
     public function infoAction()
     {
+        $forward = $this->forwardPdfPage('info');
+        if ($forward) {
+            return $forward;
+        }
+
         $resource = $this->fetchResource('media');
         if (!$resource) {
             return $this->jsonError(new PsrMessage(
@@ -178,6 +188,23 @@ trait IiifServerControllerTrait
             ->addHeaderLine('Cache-Control', 'public, max-age=86400, s-maxage=604800');
 
         return $this->iiifImageJsonLd($info, $this->requestedApiVersion);
+    }
+
+    /**
+     * Forward a request for a page of a pdf ("file.pdf;2") to the module Image
+     * Server, that renders it as an image.
+     */
+    protected function forwardPdfPage(string $action)
+    {
+        if ($this instanceof \ImageServer\Controller\ImageController
+            || !preg_match('~;\d+$~', rawurldecode((string) $this->params('id')))
+            || !$this->getPluginManager()->has('pdfPage')
+        ) {
+            return null;
+        }
+        $params = $this->params()->fromRoute();
+        $params['action'] = $action;
+        return $this->forward()->dispatch(\ImageServer\Controller\ImageController::class, $params);
     }
 
     protected function isImageResource(MediaRepresentation $media): bool
