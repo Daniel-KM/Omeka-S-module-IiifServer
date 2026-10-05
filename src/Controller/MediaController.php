@@ -67,6 +67,132 @@ class MediaController extends AbstractActionController
     }
 
     /**
+     * Serve the locked file of the module Access at the size of the canvas.
+     *
+     * The locked file is a small image, so a viewer that gets it for a canvas
+     * of a full page anchors it in a corner instead of displaying it centered.
+     * So it is drawn once on a background of the size of the canvas and stored
+     * in the cache, since there are only a few different sizes in a document.
+     */
+    public function lockedAction()
+    {
+        $width = (int) $this->params('width');
+        $height = (int) $this->params('height');
+        // A size of 0 means a missing dimension; the maximum avoids a denial of
+        // service through the memory used to draw a huge image.
+        if ($width < 1 || $height < 1 || $width > 10000 || $height > 10000) {
+            return $this->viewError(new PsrMessage(
+                'The requested size is not managed.' // @translate
+            ), \Laminas\Http\Response::STATUS_CODE_400);
+        }
+
+        $filepath = sprintf('%s/iiif/locked/%dx%d.png', $this->basePath, $width, $height);
+        if (!file_exists($filepath) && !$this->createLockedFile($filepath, $width, $height)) {
+            return $this->viewError(new PsrMessage(
+                'The locked file cannot be prepared.' // @translate
+            ), \Laminas\Http\Response::STATUS_CODE_500);
+        }
+
+        $response = $this->getResponse();
+        $headers = $response->getHeaders()
+            ->addHeaderLine('Content-Type', 'image/png')
+            ->addHeaderLine('Content-Length', (string) filesize($filepath))
+            // The image is the same for everybody and never changes.
+            ->addHeaderLine('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+        if ($this->settings()->get('iiifserver_append_cors_headers')) {
+            $headers->addHeaderLine('Access-Control-Allow-Origin', '*');
+        }
+        $response->setContent((string) file_get_contents($filepath));
+        return $response;
+    }
+
+    /**
+     * Draw the locked file centered on a background of the requested size.
+     */
+    protected function createLockedFile(string $filepath, int $width, int $height): bool
+    {
+        if (!extension_loaded('gd')) {
+            return false;
+        }
+
+        $source = $this->lockedFileAssetPath();
+        if (!$source) {
+            return false;
+        }
+        $lock = @imagecreatefrompng($source);
+        if (!$lock) {
+            return false;
+        }
+
+        $image = imagecreatetruecolor($width, $height);
+        // A light grey background, like the one of most viewers.
+        imagefill($image, 0, 0, imagecolorallocate($image, 238, 238, 238));
+
+        // The lock takes a third of the smallest side, so it stays visible on a
+        // panorama as well as on a thumbnail. It is enlarged when needed, but
+        // not more than four times, else the small source image is too blurry.
+        $lockWidth = imagesx($lock);
+        $lockHeight = imagesy($lock);
+        $target = (int) (min($width, $height) / 3);
+        $target = max(1, min($target, $lockWidth * 4));
+        $targetHeight = (int) round($target * $lockHeight / $lockWidth);
+        imagealphablending($image, true);
+        imagecopyresampled(
+            $image,
+            $lock,
+            (int) (($width - $target) / 2),
+            (int) (($height - $targetHeight) / 2),
+            0,
+            0,
+            $target,
+            $targetHeight,
+            $lockWidth,
+            $lockHeight
+        );
+        imagedestroy($lock);
+
+        $dirpath = dirname($filepath);
+        if (!file_exists($dirpath)) {
+            @mkdir($dirpath, 0775, true);
+        }
+        // Write atomically: a concurrent request never reads a partial file.
+        $tempPath = $filepath . '.' . getmypid() . '.tmp';
+        $result = @imagepng($image, $tempPath);
+        imagedestroy($image);
+        if (!$result) {
+            @unlink($tempPath);
+            return false;
+        }
+        return @rename($tempPath, $filepath);
+    }
+
+    /**
+     * The path of the locked file of the module Access, overridable by a theme.
+     */
+    protected function lockedFileAssetPath(): ?string
+    {
+        $file = 'asset/img/locked-file.png';
+        $candidates = [];
+        try {
+            $theme = $this->getEvent()->getApplication()->getServiceManager()
+                ->get('Omeka\Site\ThemeManager')->getCurrentTheme();
+            if ($theme) {
+                $candidates[] = OMEKA_PATH . '/themes/' . $theme->getId() . '/' . $file;
+            }
+        } catch (\Exception $e) {
+            // No current theme.
+        }
+        $candidates[] = OMEKA_PATH . '/modules/Access/' . $file;
+        $candidates[] = OMEKA_PATH . '/composer-addons/modules/Access/' . $file;
+        foreach ($candidates as $candidate) {
+            if (is_readable($candidate)) {
+                return $candidate;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the current file.
      */
     public function fetchAction()

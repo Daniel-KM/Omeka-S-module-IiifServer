@@ -109,6 +109,11 @@ class Body extends AbstractResourceType
 
     public function id(): ?string
     {
+        $lockedUrl = $this->lockedFileUrl();
+        if ($lockedUrl) {
+            return $lockedUrl;
+        }
+
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
             return $mediaData['id'] ?? $mediaData['@id'] ?? null;
@@ -174,7 +179,84 @@ class Body extends AbstractResourceType
 
     public function format(): ?string
     {
-        return $this->contentResource->format();
+        return $this->lockedFileUrl()
+            ? $this->lockedFileMediaType()
+            : $this->contentResource->format();
+    }
+
+    /**
+     * The url of the "locked file" of the module Access, when the resource is
+     * not readable in this manifest.
+     *
+     * The manifest of the unauthorized visitors keeps every canvas, so the
+     * structure and the pagination of the document remain visible, but the
+     * image of a reserved resource is replaced by the image of a padlock, that
+     * the theme may override, and the canvas has no image service: the image
+     * server (Cantaloupe or Image Server) is never asked for a file that the
+     * visitor cannot get.
+     */
+    protected function lockedFileUrl(): ?string
+    {
+        if (!$this->isLockedByAccess($this->resource)) {
+            return null;
+        }
+
+        // Audio, video and other files are not drawn: the static file is used.
+        $file = $this->lockedFileName();
+        if ($file !== 'locked-file.png') {
+            return $this->services->get('ViewHelperManager')->get('assetUrl')
+                ->__invoke('img/' . $file, 'Access', true, true, true);
+        }
+
+        // An image is served at the size of the canvas, so a viewer displays it
+        // centered and full page.
+        $width = method_exists($this->contentResource, 'width')
+            ? (int) $this->contentResource->width()
+            : 0;
+        $height = method_exists($this->contentResource, 'height')
+            ? (int) $this->contentResource->height()
+            : 0;
+        if ($width < 1 || $height < 1) {
+            return $this->services->get('ViewHelperManager')->get('assetUrl')
+                ->__invoke('img/' . $file, 'Access', true, true, true);
+        }
+
+        return $this->services->get('ViewHelperManager')->get('url')->__invoke(
+            'mediaserver/locked',
+            ['width' => $width, 'height' => $height],
+            ['force_canonical' => true]
+        );
+    }
+
+    protected function lockedFileName(): string
+    {
+        $mediaType = (string) $this->contentResource->format();
+        $mediaTypeMain = strtok($mediaType, '/');
+        if ($mediaTypeMain === 'audio' || $mediaTypeMain === 'video') {
+            return 'locked-file.mp4';
+        }
+        if ($mediaType === 'application/pdf') {
+            return 'locked-file.pdf';
+        }
+        if ($mediaType === 'application/vnd.oasis.opendocument.text') {
+            return 'locked-file.odt';
+        }
+        return 'locked-file.png';
+    }
+
+    protected function lockedFileMediaType(): string
+    {
+        $file = $this->lockedFileName();
+        if ($file === 'locked-file.mp4') {
+            return 'video/mp4';
+        }
+        if ($file === 'locked-file.pdf') {
+            return 'application/pdf';
+        }
+        if ($file === 'locked-file.odt') {
+            return 'application/vnd.oasis.opendocument.text';
+        }
+        return 'image/png';
     }
 
     /**
@@ -183,6 +265,12 @@ class Body extends AbstractResourceType
     public function service(): array
     {
         // TODO Move this in ContentResource or TraitMedia.
+
+        // A locked resource is served as a single static image: there is no
+        // image service, so no viewer asks the image server for it.
+        if ($this->lockedFileUrl()) {
+            return [];
+        }
 
         if ($this->isMediaIiif()) {
             $mediaData = $this->resource->mediaData();
@@ -268,6 +356,7 @@ class Body extends AbstractResourceType
             ? $this->contentResource->width()
             : null;
     }
+
 
     public function duration(): ?float
     {

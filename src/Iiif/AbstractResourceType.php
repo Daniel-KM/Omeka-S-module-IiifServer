@@ -412,6 +412,41 @@ abstract class AbstractResourceType extends AbstractType
         return $this;
     }
 
+    public function setOptions(array $options): self
+    {
+        // The filter is set on the manifest, but it applies to the canvases and
+        // to the bodies, that are built with the options of their parent.
+        if (isset($options['accessFilter'])) {
+            $this->accessFilter = $options['accessFilter'];
+        }
+        return parent::setOptions($options);
+    }
+
+    /**
+     * Is the resource locked in the manifest built for unauthorized visitors?
+     *
+     * The canvas of a locked resource is kept, so the reader still gets the
+     * structure and the pagination of the document, but its image is replaced
+     * by the "locked file" of the module Access and it has no image service.
+     *
+     * The filter is set once for the whole manifest and does not depend on the
+     * current user: it only depends on the access status of the resource, so
+     * the same two manifests can be built and cached for everybody, then served
+     * according to the rights of the visitor.
+     */
+    protected function isLockedByAccess(?AbstractResourceEntityRepresentation $resource): bool
+    {
+        if (!$resource
+            || $this->accessFilter !== self::ACCESS_FILTER_FREE
+            || !$this->accessStatus
+        ) {
+            return false;
+        }
+        $status = $this->accessStatus->__invoke($resource);
+        return $status
+            && $status->getLevel() !== \Access\Entity\AccessStatus::FREE;
+    }
+
     public function setResource(AbstractResourceEntityRepresentation $resource): self
     {
         $this->resource = $resource;

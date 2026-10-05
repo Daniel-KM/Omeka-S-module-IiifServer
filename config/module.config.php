@@ -495,6 +495,25 @@ return [
                             ],
                         ],
                     ],
+                    // Locked file of the module Access, resized to the size of
+                    // the canvas, so a viewer displays it centered and full
+                    // page instead of a small image anchored in a big canvas.
+                    // @see \IiifServer\Iiif\Annotation\Body::lockedFileUrl()
+                    'locked' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '[/:version]/ixif-message-0/res/locked/:width/:height',
+                            'constraints' => [
+                                'version' => '2|3',
+                                'width' => '\d+',
+                                'height' => '\d+',
+                            ],
+                            'defaults' => [
+                                'version' => $versionMedia,
+                                'action' => 'locked',
+                            ],
+                        ],
+                    ],
                     // Warning: the format is separated with a ".", not a "/".
                     // TODO pdf is not an audio video media.
                     'media' => [

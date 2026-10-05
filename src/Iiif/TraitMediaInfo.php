@@ -111,25 +111,6 @@ trait TraitMediaInfo
      * @todo Manage media related to other (xml alto to its image).
      * @todo Better management of this list of medias, that should be available anywhere.
      */
-    /**
-     * Should the resource be removed from the manifest built for unauthorized
-     * visitors?
-     *
-     * The filter is set once for the whole manifest and does not depend on the
-     * current user: it only depends on the access status of the resource, so
-     * the same two manifests can be built and cached for everybody, then served
-     * according to the rights of the visitor.
-     */
-    private function isFilteredByAccess(AbstractResourceEntityRepresentation $resource): bool
-    {
-        if ($this->accessFilter !== self::ACCESS_FILTER_FREE || !$this->accessStatus) {
-            return false;
-        }
-        $status = $this->accessStatus->__invoke($resource);
-        return $status
-            && $status->getLevel() !== \Access\Entity\AccessStatus::FREE;
-    }
-
     private function prepareMediaInfoList(): self
     {
         // TODO Use ContentResources.
@@ -169,9 +150,6 @@ trait TraitMediaInfo
         foreach ($medias as $media) {
             // Skip private media for anonymous or unprivileged users (#34).
             if (!$media->isPublic() && !$this->isAllowedViewAll) {
-                continue;
-            }
-            if ($this->isFilteredByAccess($media)) {
                 continue;
             }
             $mediaId = $media->id();
@@ -218,9 +196,6 @@ trait TraitMediaInfo
                     $do->setItem($this->resource);
                 }
                 if (!$do->isPublic() && !$this->isAllowedViewAll) {
-                    continue;
-                }
-                if ($this->isFilteredByAccess($do)) {
                     continue;
                 }
                 $doId = $do->id();
