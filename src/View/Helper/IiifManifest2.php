@@ -646,35 +646,46 @@ class IiifManifest2 extends AbstractHelper
 
         // TODO Flat structure is currently not skipped in iiif v2.
         // $appendFlatStructure = !$this->setting->__invoke('iiifserver_manifest_structures_skip_flat');
-        $structureProperty = $this->setting->__invoke('iiifserver_manifest_structures_property');
+        $plugins = $this->view->getHelperPluginManager();
+        $literalStructures = $this->structureLiterals(
+            $item,
+            (string) $this->setting->__invoke('iiifserver_manifest_structures_property'),
+            (string) $this->setting->__invoke('iiifserver_manifest_structures_source_v2', 'property'),
+            $plugins->has('iiifSearchTeiStructure') ? $plugins->get('iiifSearchTeiStructure') : null
+        );
 
-        if ($structureProperty) {
-            // Only the first sequence is used in iiif v2.
-            $literalStructure = (string) $item->value($structureProperty);
-            if ($literalStructure) {
-                // Check if a structure is stored as xml or toc code.
-                // Json is currently unsupported.
-                $toc = $this->extractStructure($literalStructure);
-                if (!empty($toc)) {
-                    $this->rangeToArray = $this->view->plugin('rangeToArray');
-                    $indexMedias = [];
-                    foreach ($canvases as $index => $sequenceCanvas) {
-                        $id = $sequenceCanvas['images'][0]['resource']['service']['@id']
-                            ?? $sequenceCanvas['images'][0]['resource']['service']['id']
-                            ?? null;
-                        if ($id) {
-                            // The basename of the service id is the media id.
-                            $indexView = $index + 1;
-                            $indexMedias[$indexView] = (int) basename($id);
-                        }
-                    }
-                    $ranges = $this->finalizeToc($toc, $indexMedias);
-                    $structure = $this->convertStructure($ranges, $indexMedias, $canvases);
-                    if (count($structure) > 0) {
-                        $manifest['structures'] = $structure;
+        $structures = [];
+        $indexMedias = null;
+        foreach ($literalStructures as $literalStructure) {
+            // Check if a structure is stored as xml or toc code.
+            // Json is currently unsupported.
+            $toc = $this->extractStructure($literalStructure);
+            if (empty($toc)) {
+                continue;
+            }
+            if ($indexMedias === null) {
+                // Only the first sequence is used in iiif v2.
+                $this->rangeToArray = $this->view->plugin('rangeToArray');
+                $indexMedias = [];
+                foreach ($canvases as $index => $sequenceCanvas) {
+                    $id = $sequenceCanvas['images'][0]['resource']['service']['@id']
+                        ?? $sequenceCanvas['images'][0]['resource']['service']['id']
+                        ?? null;
+                    if ($id) {
+                        // The basename of the service id is the media id.
+                        $indexView = $index + 1;
+                        $indexMedias[$indexView] = (int) basename($id);
                     }
                 }
             }
+            $ranges = $this->finalizeToc($toc, $indexMedias);
+            $structure = $this->convertStructure($ranges, $indexMedias, $canvases);
+            if (count($structure) > 0) {
+                $structures = array_merge($structures, $structure);
+            }
+        }
+        if ($structures) {
+            $manifest['structures'] = $structures;
         }
 
         if ($is3dModel) {

@@ -618,6 +618,11 @@ return [
                 'extracttext:extracted_text',
             ],
             'iiifserver_manifest_structures_property' => '',
+            // Priority between the structure set in the property and the table
+            // of contents of the TEI file (module Iiif Search): "property",
+            // "tei" or "both". Most viewers v2 display a single structure.
+            'iiifserver_manifest_structures_source' => 'both',
+            'iiifserver_manifest_structures_source_v2' => 'property',
             'iiifserver_manifest_structures_skip_flat' => false,
             // Various.
             'iiifserver_access_resource_skip' => false,

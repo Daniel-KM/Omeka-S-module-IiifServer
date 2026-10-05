@@ -616,6 +616,41 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_structures_source',
+                'type' => CommonElement\OptionalRadio::class,
+                'options' => [
+                    'tab' => 'metadata',
+                    'label' => 'Structures from property and TEI file (iiif v3)', // @translate
+                    'info' => 'When the module Iiif Search is active, the table of contents of a TEI file attached to an item can be used as a structure.', // @translate
+                    'value_options' => [
+                        'property' => 'Property, else TEI', // @translate
+                        'tei' => 'TEI, else property', // @translate
+                        'both' => 'Both', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_structures_source',
+                ],
+            ])
+            ->add([
+                'name' => 'iiifserver_manifest_structures_source_v2',
+                'type' => CommonElement\OptionalRadio::class,
+                'options' => [
+                    'tab' => 'metadata',
+                    'label' => 'Structures from property and TEI file (iiif v2)', // @translate
+                    'info' => 'Most viewers for iiif v2 display a single structure.', // @translate
+                    'value_options' => [
+                        'property' => 'Property, else TEI', // @translate
+                        'tei' => 'TEI, else property', // @translate
+                        'both' => 'Both', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_structures_source_v2',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_manifest_structures_skip_flat',
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [

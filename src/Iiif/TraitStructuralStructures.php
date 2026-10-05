@@ -29,6 +29,9 @@
 
 namespace IiifServer\Iiif;
 
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
+use Omeka\Api\Representation\ItemRepresentation;
+
 /**
  * Iiif structures is possible only for Manifest
  *
@@ -77,27 +80,17 @@ trait TraitStructuralStructures
         }
 
         $appendFlatStructure = !$this->settings->get('iiifserver_manifest_structures_skip_flat');
-        $structureProperty = $this->settings->get('iiifserver_manifest_structures_property');
 
-        if (!$structureProperty) {
-            if ($appendFlatStructure && $total > 1) {
-                $structure = $this->defaultStructure();
-                return $structure ? [$structure] : [];
-            }
-            return [];
-        }
-
-        $stValues = $this->resource->value($structureProperty, ['all' => true]);
-        if (!count($stValues)) {
-            if ($appendFlatStructure && $total > 1) {
-                $structure = $this->defaultStructure();
-                return $structure ? [$structure] : [];
-            }
-            return [];
-        }
+        $viewHelpers = $this->services->get('ViewHelperManager');
+        $literalStructures = $this->structureLiterals(
+            $this->resource,
+            (string) $this->settings->get('iiifserver_manifest_structures_property'),
+            (string) $this->settings->get('iiifserver_manifest_structures_source', 'both'),
+            $viewHelpers->has('iiifSearchTeiStructure') ? $viewHelpers->get('iiifSearchTeiStructure') : null
+        );
 
         // TODO A structure requires a media for now to build reference to canvas.
-        if (!$this->resource->primaryMedia()) {
+        if (!$literalStructures || !$this->resource->primaryMedia()) {
             if ($appendFlatStructure && $total > 1) {
                 $structure = $this->defaultStructure();
                 return $structure ? [$structure] : [];
@@ -106,10 +99,9 @@ trait TraitStructuralStructures
         }
 
         $structures = [];
-        foreach ($stValues as $literalStructure) {
+        foreach ($literalStructures as $literalStructure) {
             // Check if a structure is stored as xml or toc code.
             // Json is currently unsupported.
-            $literalStructure = (string) $literalStructure;
             $toc = $this->extractStructure($literalStructure);
             if (!empty($toc)) {
                 // Prepare indexes one time.
@@ -123,6 +115,50 @@ trait TraitStructuralStructures
         }
 
         return $structures;
+    }
+
+    /**
+     * Get the literal structures of a resource, from a property and from the
+     * table of contents of its TEI file (module Iiif Search).
+     *
+     * @param string $source "property" to use the TEI only when the property is
+     *   empty, "tei" for the reverse, or "both" to get all of them, so viewers
+     *   can display multiple structures.
+     * @param callable|null $teiStructure Return the literal structure of the
+     *   TEI file of an item, or null.
+     * @return string[]
+     */
+    protected function structureLiterals(
+        AbstractResourceEntityRepresentation $resource,
+        ?string $property,
+        string $source,
+        ?callable $teiStructure
+    ): array {
+        $manual = [];
+        if ($property) {
+            foreach ($resource->value($property, ['all' => true]) as $value) {
+                $literal = trim((string) $value);
+                if ($literal !== '') {
+                    $manual[] = $literal;
+                }
+            }
+        }
+
+        $tei = $teiStructure && $resource instanceof ItemRepresentation
+            ? $teiStructure($resource)
+            : null;
+        $tei = $tei ? [$tei] : [];
+
+        switch ($source) {
+            case 'tei':
+                return $tei ?: $manual;
+            case 'both':
+                // The structure of the TEI may have been copied in the property.
+                return array_values(array_unique(array_merge($manual, $tei)));
+            case 'property':
+            default:
+                return $manual ?: $tei;
+        }
     }
 
     /**
