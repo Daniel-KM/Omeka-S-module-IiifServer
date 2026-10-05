@@ -13,7 +13,8 @@ class PdfPageSizesFactory implements FactoryInterface
         return new PdfPageSizes(
             $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
             $services->get('Omeka\Cli'),
-            $services->get('Omeka\Connection')
+            $services->get('Omeka\Connection'),
+            (int) $services->get('Omeka\Settings')->get('iiifserver_manifest_pdf_pages_dpi', 150)
         );
     }
 }

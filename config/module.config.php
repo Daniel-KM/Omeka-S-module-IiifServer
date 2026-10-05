@@ -654,6 +654,7 @@ return [
             'iiifserver_media_api_identifier_infojson' => false,
             'iiifserver_media_api_support_non_image' => false,
             'iiifserver_manifest_pdf_pages' => false,
+            'iiifserver_manifest_pdf_pages_dpi' => 150,
             'iiifserver_media_api_fix_uv_mp3' => false,
             // Hidden option.
             'iiifserver_media_api_default_supported_version' => [

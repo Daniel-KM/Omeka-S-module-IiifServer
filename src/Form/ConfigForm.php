@@ -1184,6 +1184,21 @@ class ConfigForm extends Form
             ])
 
             ->add([
+                'name' => 'iiifserver_manifest_pdf_pages_dpi',
+                'type' => CommonElement\OptionalNumber::class,
+                'options' => [
+                    'tab' => 'image_server',
+                    'label' => 'Resolution of the pages of the pdf files rendered by the image server (dpi)', // @translate
+                    'info' => 'The size of the canvas should be the size of the image. The default resolution of Cantaloupe is 150 dpi (key "processor.dpi").', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'iiifserver_manifest_pdf_pages_dpi',
+                    'min' => 1,
+                    'placeholder' => '150',
+                ],
+            ])
+
+            ->add([
                 'name' => 'iiifserver_media_api_fix_uv_mp3',
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
