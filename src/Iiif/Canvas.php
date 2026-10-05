@@ -274,6 +274,12 @@ class Canvas extends AbstractResourceType
             return $this->cache['seeAlso'];
         }
         $canvasIndex = (int) ($this->options['index'] ?? 1);
+        // Do not advertise the OCR of a page that the user cannot read: the
+        // endpoint of IiifSearch refuses it anyway, so the link would only add
+        // an error in the viewer.
+        if (!$this->isAllowedOcr($item, $canvasIndex - 1)) {
+            return $this->cache['seeAlso'];
+        }
         $altoUrl = $this->iiifSearchAnnotationUrl->altoUrl($item, $canvasIndex);
         if ($altoUrl) {
             $this->cache['seeAlso'][] = [
@@ -365,6 +371,12 @@ class Canvas extends AbstractResourceType
             return $this->cache['annotations'];
         }
         $canvasIndex = (int) ($this->options['index'] ?? 1);
+        // Do not advertise the OCR of a page that the user cannot read: the
+        // endpoint of IiifSearch refuses it anyway, so the link would only add
+        // an error in the viewer.
+        if (!$this->isAllowedOcr($item, $canvasIndex - 1)) {
+            return $this->cache['annotations'];
+        }
         $url = $this->iiifSearchAnnotationUrl->__invoke($item, $canvasIndex, 3);
         if ($url) {
             $this->cache['annotations'][] = [
@@ -420,5 +432,20 @@ class Canvas extends AbstractResourceType
         }
         */
         return $this->cache['dimensions'];
+    }
+
+    /**
+     * Check the access to the OCR of a page, with the rule of the module
+     * IiifSearch: the OCR follows the access level of the file it belongs to,
+     * and the image of the page when it is not an attached file. Without the
+     * module Access or the module IiifSearch, there is no restriction.
+     */
+    protected function isAllowedOcr(\Omeka\Api\Representation\ItemRepresentation $item, int $pageIndex): bool
+    {
+        $plugins = $this->services->get('ControllerPluginManager');
+        if (!$plugins->has('isAllowedOcr')) {
+            return true;
+        }
+        return (bool) $plugins->get('isAllowedOcr')->__invoke($item, $pageIndex);
     }
 }
