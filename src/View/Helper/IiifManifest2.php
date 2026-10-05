@@ -1559,8 +1559,12 @@ class IiifManifest2 extends AbstractHelper
                 if ($result) {
                     [$width, $height] = $result;
                     // EXIF orientations 5-8 indicate a 90° or 270°
-                    // rotation, so width and height must be swapped.
-                    $exif = @exif_read_data($tempPath);
+                    // rotation, so width and height must be swapped. Only
+                    // jpeg and tiff carry exif data, so skip the other
+                    // types: exif_read_data() warns on them.
+                    $exif = in_array($result[2] ?? null, [IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM], true)
+                        ? @exif_read_data($tempPath)
+                        : false;
                     if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
                         [$width, $height] = [$height, $width];
                     }
@@ -1573,7 +1577,9 @@ class IiifManifest2 extends AbstractHelper
             $result = getimagesize($filepath);
             if ($result) {
                 [$width, $height] = $result;
-                $exif = @exif_read_data($filepath);
+                $exif = in_array($result[2] ?? null, [IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM], true)
+                    ? @exif_read_data($filepath)
+                    : false;
                 if ($exif && !empty($exif['Orientation']) && $exif['Orientation'] >= 5) {
                     [$width, $height] = [$height, $width];
                 }
