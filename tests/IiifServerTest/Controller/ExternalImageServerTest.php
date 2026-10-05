@@ -5,45 +5,34 @@ namespace IiifServerTest\Controller;
 class ExternalImageServerTest extends IiifServerControllerTestCase
 {
     /**
-     * In the test environment, no external image server is present.
-     * The IIIF image info route should be handled by IiifServer itself,
-     * returning standard Apache/PHP headers.
+     * In the test environment, no external image server is present, so the
+     * IIIF image info route is handled by IiifServer itself.
+     *
+     * The media has no image file, so the response is an error 404, as
+     * recommended by the IIIF Image API.
      */
     public function testIiifImageInfoRouteResponds(): void
     {
         $item = $this->createItemWithHtmlMedia('Test item', 1);
         $mediaId = $item->media()[0]->id();
         $this->dispatch('/iiif/3/' . $mediaId . '/info.json');
-        // The route should be handled (200 or 303 redirect to info.json).
-        $status = $this->getResponse()->getStatusCode();
-        $this->assertTrue(
-            in_array($status, [200, 303]),
-            'Expected 200 or 303 for IIIF image info, got ' . $status
-        );
+        $this->assertControllerName(\IiifServer\Controller\MediaController::class);
+        $this->assertActionName('info');
+        $this->assertResponseStatusCode(404);
     }
 
     /**
-     * Without an external server, the info.json response should come from
-     * IiifServer (Content-Type: application/json or application/ld+json).
+     * Without an external server, the info.json response comes from IiifServer
+     * as json, even for an error.
      */
     public function testIiifImageInfoContentType(): void
     {
         $item = $this->createItemWithHtmlMedia('Test item', 1);
         $mediaId = $item->media()[0]->id();
         $this->dispatch('/iiif/3/' . $mediaId . '/info.json');
-        $status = $this->getResponse()->getStatusCode();
-        if ($status === 200) {
-            $contentType = $this->getResponse()->getHeaders()
-                ->get('Content-Type')->getFieldValue();
-            $this->assertTrue(
-                strpos($contentType, 'json') !== false
-                    || strpos($contentType, 'ld+json') !== false,
-                'Expected JSON content type from IiifServer, got ' . $contentType
-            );
-        } else {
-            // 303 redirect is also valid (redirect to canonical info.json).
-            $this->assertSame(303, $status);
-        }
+        $contentType = $this->getResponse()->getHeaders()
+            ->get('Content-Type')->getFieldValue();
+        $this->assertStringContainsString('json', $contentType);
     }
 
     /**
