@@ -14,6 +14,18 @@ class ConfigForm extends Form
 {
     use EventManagerAwareTrait;
 
+    protected $elementGroups = [
+        'fieldset_urls' => 'Advanced options for urls', // @translate
+        'manifest_summary' => 'Summary and attribution', // @translate
+        'manifest_rights' => 'Rights', // @translate
+        'manifest_links' => 'Homepage, provider and links', // @translate
+        'manifest_rendering' => 'Downloads', // @translate
+        'manifest_structures' => 'Start, structures and navigation', // @translate
+        'manifest_canvases' => 'Canvases', // @translate
+        'manifest_display' => 'Logo and display', // @translate
+        'manifest_properties' => 'Properties to include or exclude', // @translate
+    ];
+
     protected $elementTabs = [
         'audit' => 'Audit', // @translate
         'infra' => 'Infrastructure', // @translate
@@ -33,6 +45,7 @@ class ConfigForm extends Form
         ];
 
         $this
+            ->setOption('element_groups', $this->elementGroups)
             ->setOption('element_tabs', $this->elementTabs)
 
             ->add([
@@ -96,20 +109,12 @@ class ConfigForm extends Form
                 ],
             ])
 
-             ->add([
-                'name' => 'fieldset_urls',
-                'type' => \Laminas\Form\Fieldset::class,
-                'options' => [
-                    'tab' => 'infra',
-                    'label' => 'Advanced options for urls', // @translate
-                ],
-            ])
-
             ->add([
                 'name' => 'iiifserver_url_version_add',
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'infra',
+                    'element_group' => 'fieldset_urls',
                     'label' => 'Append version to url (to be set inside module.config.php currently)', // @translate
                     'info' => 'If set, the version will be appended to the url of the server: "iiif/3".', // @translate
                 ],
@@ -122,6 +127,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'infra',
+                    'element_group' => 'fieldset_urls',
                     'label' => class_exists('CleanUrl\Module', false)
                         ? 'Use the identifiers from Clean Url' // @translate
                         : 'Use the identifiers from Clean Url (unavailable)', // @translate
@@ -135,6 +141,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'infra',
+                    'element_group' => 'fieldset_urls',
                     'label' => 'Prefix to use for identifier (to be set inside module.config.php currently)', // @translate
                     'info' => 'Allows to check identifiers that contains "/" from "ark:/12345/xxx" and "ark:%2F12345%2Fxxx" (example: "ark:/12345/").', // @translate
                 ],
@@ -152,6 +159,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'infra',
+                    'element_group' => 'fieldset_urls',
                     'label' => 'Force base of url (from)', // @translate
                     'info' => 'When a proxy or a firewall is used, or when the config is specific, it may be needed to change the base url. For example, when the server is secured, the "http:" urls may be replaced by "https:".', // @translate
                 ],
@@ -164,6 +172,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'infra',
+                    'element_group' => 'fieldset_urls',
                     'label' => 'Force base of url (to)', // @translate
                 ],
                 'attributes' => [
@@ -228,19 +237,11 @@ class ConfigForm extends Form
             ])
 
             ->add([
-                'name' => 'fieldset_content',
-                'type' => \Laminas\Form\Fieldset::class,
-                'options' => [
-                    'tab' => 'metadata',
-                    'label' => 'Content of the manifest', // @translate
-                ],
-            ])
-
-            ->add([
                 'name' => 'iiifserver_manifest_summary_property',
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_summary',
                     'label' => 'Property to use for summary or description', // @translate
                     'info' => 'If any, the first metadata of the record will be added in all manifests and viewers for main description. It’s recommended to use "Dublin Core:Bibliographic Citation".', // @translate
                     'empty_option' => '',
@@ -262,6 +263,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_summary',
                     'label' => 'Property to use for Attribution', // @translate
                     'info' => 'If any, the first metadata of the resource will be added in all manifests and viewers to indicate the attribution.', // @translate
                     'empty_option' => '',
@@ -280,6 +282,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_summary',
                     'label' => 'Default attribution', // @translate
                     'info' => 'If any, and if there is no metadata for the property above, this text will be added in all manifests and viewers. It will be used as pop up in the Universal Viewer too, if enabled.', // @translate
                 ],
@@ -294,6 +297,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalSelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rights',
                     'label' => 'Rights (license)', // @translate
                     'value_options' => [
                         'none' => 'No mention', // @translate
@@ -315,6 +319,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rights',
                     'label' => 'Property to use for rights', // @translate
                     'info' => 'Select one or more properties: the first value will be used.', // @translate
                     'empty_option' => '',
@@ -333,6 +338,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalSelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rights',
                     'label' => 'Uri of the license or rights', // @translate
                     // TODO See https://iiif.io/api/presentation/3.0/#rights: uri are http but rendered as https.
                     // It should be http:// rendered as https by clients, but
@@ -400,6 +406,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalUrl::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rights',
                     'label' => 'Uri of the rights/license when unselected above', // @translate
                     'info' => 'For IIIF v3, the license of the item must be an url from https://creativecommons.org or https://rightsstatements.org.', // @translate
                 ],
@@ -412,6 +419,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rights',
                     'label' => 'Default license text (only for iiif 2.0)', // @translate
                 ],
                 'attributes' => [
@@ -424,6 +432,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Resource page', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
                     'value_options' => [
@@ -447,6 +456,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Property for resource link', // @translate
                     'info' => 'In some cases, the resources are external and the link to it may be specific.', // @translate
                     'empty_option' => '',
@@ -464,6 +474,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Provider', // @translate
                     'info' => 'An organization or person that contributed to providing the content of the resource. The address, web site, logo, etc. can be appended.', // @translate
                     'documentation' => 'https://iiif.io/api/presentation/3.0/#provider',
@@ -486,6 +497,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Property for provider', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -501,6 +513,7 @@ class ConfigForm extends Form
                 'type' => Element\Textarea::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Provider (as json)', // @translate
                 ],
                 'attributes' => [
@@ -513,6 +526,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_links',
                     'label' => 'Property for machine-readable "See also" links', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -529,6 +543,7 @@ class ConfigForm extends Form
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rendering',
                     'label' => 'Skip "rendering" links in manifest (download)', // @translate
                     'info' => 'When checked, viewers will not display a download button. When module Access is active, "rendering" is always exposed only for resources with status "free".', // @translate
                 ],
@@ -542,6 +557,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\MediaTypeSelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rendering',
                     'label' => 'Media types of files to include in download', // @translate
                     'prepend_value_options' => [
                         'none' => 'None', // @translate
@@ -566,6 +582,7 @@ class ConfigForm extends Form
                 'type' => Element\Checkbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_rendering',
                     'label' => 'Add a "rendering" link to download all files as zip (module ZipDownload)', // @translate
                     'info' => 'Requires module ZipDownload enabled on the site. Adds a manifest-level rendering link pointing to the zip download endpoint.', // @translate
                 ],
@@ -579,6 +596,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Property to set the start page (may be an index, a media or a time)', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -595,6 +613,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Use the primary media as start page, except when property above is filled', // @translate
                 ],
                 'attributes' => [
@@ -607,6 +626,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Property for structures', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -625,6 +645,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Structures from property and TEI file (iiif v3)', // @translate
                     'info' => 'When the module Iiif Search is active, the table of contents of a TEI file attached to an item can be used as a structure.', // @translate
                     'value_options' => [
@@ -642,6 +663,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Structures from property and TEI file (iiif v2)', // @translate
                     'info' => 'Most viewers for iiif v2 display a single structure.', // @translate
                     'value_options' => [
@@ -660,6 +682,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Skip the flat structure appended when no structure is set', // @translate
                     'info' => 'This flat structure can fix some issues on old versions of viewers.',  // @translate
                 ],
@@ -673,6 +696,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Property to use for viewing direction', // @translate
                     'info' => 'If any, the first value will be added to indicate the viewing direction of the manifest.', // @translate
                     'empty_option' => '',
@@ -690,6 +714,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalRadio::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Default viewing direction', // @translate
                     'info' => 'If any, and if there is no metadata for the property above, this value will be added in all manifests.', // @translate
                     'value_options' => [
@@ -710,6 +735,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_canvases',
                     'label' => 'Property to use in item or media to set a placeholder canvas for waiting or warning', // @translate
                     'info' => 'May be a url to a placeholder file, a list of media to protect, a string with the value below, or a boolean value, in which case the default placeholder canvas is used.', // @translate
                     'documentation' => 'https://iiif.io/api/presentation/3.0/#placeholdercanvas',
@@ -728,6 +754,7 @@ class ConfigForm extends Form
                 'type' => Element\Text::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_canvases',
                     'label' => 'Value to match to display the placeholder canvas', // @translate
                     'info' => 'This option is used only when the property above is a string, for example "Informed public". The warning with the url below will be displayed when the property has this value.', // @translate
                 ],
@@ -741,6 +768,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalUrl::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_canvases',
                     'label' => 'Url to use as a default placeholder canvas', // @translate
                 ],
                 'attributes' => [
@@ -753,6 +781,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Property to use for behavior (viewing hint)', // @translate
                     'info' => 'If any, the first value will be added to indicate the viewing hint of the manifest and the canvas.', // @translate
                     'empty_option' => '',
@@ -770,6 +799,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_structures',
                     'label' => 'Default behavior (viewing hint)', // @translate
                     'info' => 'If any, and if there is no metadata for the property above, these values will be added in all manifests and canvases.', // @translate
                     'value_options' => [
@@ -809,6 +839,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalSelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_canvases',
                     'label' => 'Label for each file', // @translate
                     'info' => 'This value can be used to indicate the page number in multi-paged documents. The position is used when there is no value.', // @translate
                     'empty_option' => '',
@@ -833,6 +864,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_canvases',
                     'label' => 'Property for files label', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -849,6 +881,7 @@ class ConfigForm extends Form
                 'type' => OmekaElement\Asset::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_display',
                     'label' => 'Logo of the institution (asset)', // @translate
                 ],
                 'attributes' => [
@@ -861,6 +894,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalUrl::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_display',
                     'label' => 'Logo of the institution (url, when asset is not set above)', // @translate
                 ],
                 'attributes' => [
@@ -873,6 +907,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_display',
                     'label' => 'Link for descriptive metadata', // @translate
                     'info' => 'Some viewers display urls (for resources and uris) as plain text. This option presents them as a html link.',  // @translate
                     'documentation' => 'https://iiif.io/api/presentation/3.0/#31-descriptive-properties',
@@ -887,6 +922,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Limit properties for collection in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
                     'empty_option' => 'All', // @translate
@@ -907,6 +943,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Limit properties for item in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
                     'empty_option' => 'All', // @translate
@@ -927,6 +964,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Limit properties for media in manifest', // @translate
                     'info' => 'If empty, all public values will be output.', // @translate
                     'empty_option' => 'All', // @translate
@@ -948,6 +986,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Skip properties for collection in manifest', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -964,6 +1003,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Skip properties for item in manifest', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
@@ -980,6 +1020,7 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalPropertySelect::class,
                 'options' => [
                     'tab' => 'metadata',
+                    'element_group' => 'manifest_properties',
                     'label' => 'Skip properties for media in manifest', // @translate
                     'empty_option' => '',
                     'term_as_value' => true,
