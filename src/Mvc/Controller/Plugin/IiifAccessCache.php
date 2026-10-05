@@ -36,10 +36,16 @@ class IiifAccessCache extends AbstractPlugin
      */
     protected $hasModuleAccess;
 
-    public function __construct(Connection $connection, bool $hasModuleAccess)
+    /**
+     * @var int[] Ids of the properties that link digital objects to the item.
+     */
+    protected $digitalObjectPropertyIds;
+
+    public function __construct(Connection $connection, bool $hasModuleAccess, array $digitalObjectPropertyIds = [])
     {
         $this->connection = $connection;
         $this->hasModuleAccess = $hasModuleAccess;
+        $this->digitalObjectPropertyIds = $digitalObjectPropertyIds;
     }
 
     public function __invoke(): self
@@ -58,17 +64,42 @@ class IiifAccessCache extends AbstractPlugin
         if (!$this->hasModuleAccess) {
             return null;
         }
-        $sql = <<<'SQL'
+        // Unlike the medias, the digital objects are not linked to the item by a
+        // column, but by values of the properties of the module Digital Object.
+        $bind = ['item_id' => $itemId];
+        $types = [];
+        $sqlDigitalObjects = '';
+        if ($this->digitalObjectPropertyIds) {
+            $sqlDigitalObjects = <<<'SQL'
+                    OR access_status.id IN (
+                        SELECT `value`.value_resource_id
+                        FROM `value`
+                        INNER JOIN resource AS linked ON linked.id = `value`.value_resource_id
+                        WHERE `value`.resource_id = :item_id
+                            AND `value`.property_id IN (:property_ids)
+                            AND linked.resource_type = :digital_object_type
+                    )
+                SQL;
+            $bind['property_ids'] = $this->digitalObjectPropertyIds;
+            $bind['digital_object_type'] = 'DigitalObject\\Entity\\DigitalObject';
+            $types['property_ids'] = Connection::PARAM_INT_ARRAY;
+        }
+
+        $sql = <<<SQL
             SELECT access_status.id
             FROM access_status AS access_status
             LEFT JOIN media AS media ON media.id = access_status.id
             WHERE access_status.level != "free"
-                AND (access_status.id = :item_id OR media.item_id = :item_id)
+                AND (
+                    access_status.id = :item_id
+                    OR media.item_id = :item_id
+            $sqlDigitalObjects
+                )
             ORDER BY access_status.id ASC
             LIMIT 1
             SQL;
         $id = $this->connection
-            ->executeQuery($sql, ['item_id' => $itemId])
+            ->executeQuery($sql, $bind, $types)
             ->fetchOne();
         return $id === false || $id === null ? null : (int) $id;
     }
