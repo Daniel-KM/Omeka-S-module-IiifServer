@@ -242,6 +242,42 @@ Three params should be set:
 Since 2020 (v5), Cantaloupe supports IIIF Image Api v3. If you use an older
 version, keep Image Api v2.
 
+#### Pages of pdf files as images
+
+By default, a pdf is a single canvas. Universal Viewer displays it with its own
+pdf viewer, without IIIF search nor annotations, and Mirador does not display
+it. Some image servers can render each page of a pdf as an image. With such a
+server, enable the option "Display the pages of the pdf files as images of the
+image server" (tab "Image server"): each page of a pdf becomes a canvas, so the
+viewers display the pages as images, with the search and the annotations of the
+ocr provided by the module [Iiif Search].
+
+The identifier of a page is the identifier of the file and the number of the
+page, separated with `;`, for example `xxx.pdf;2`, so the option "filename with
+extension" is recommended. The character `;` must not be url-encoded, so check
+the rules of the proxy.
+
+The size of the canvas is the size of the image rendered by the image server,
+so it depends on the resolution of the rendering: set the same resolution in the
+config of the module (150 dpi by default). The size of the pages is extracted
+with `pdfinfo` (package poppler-utils) and stored in the data of the media.
+
+Image servers:
+- [Cantaloupe]: supported via the processor PdfBox and the meta-identifier
+  (option `meta_identifier.transformer.StandardMetaIdentifierTransformer.delimiter = ;`,
+  the default). The resolution is the option `processor.dpi` (150 by default).
+  Rendering a page of a pdf is slower than reading an image, so enable the
+  derivative cache (option `cache.server.derivative.enabled`).
+- [IIP Image]: not supported. It serves tiff and jpeg 2000 files, so the pages
+  should be converted into images first.
+- [Image Server]: supported since version 3.6.26. The page is rendered once with
+  vips at the resolution of the option of this module, then processed like an
+  image.
+
+Only the manifests v3 are managed for now. A pdf reserved by the module Access
+keeps a single canvas, and the pdf of an item that has images is not displayed,
+but available as a download.
+
 
 Theme development
 -----------------
@@ -377,6 +413,14 @@ IIIF allows to display [structures] of documents.
 
 The default structure is the simple sequential list of iiif medias.
 
+When the module [Iiif Search] is active, the table of contents of a TEI file
+attached to the item is used too: each `div` with a `head` is a range and the
+`pb` inside it are its canvases. The option "Structures from property and TEI
+file" defines the priority between the property and the TEI, or uses both, so
+the viewers can display two tables of contents. The default is both in iiif v3
+and the property first in iiif v2, since most viewers v2 display a single
+structure.
+
 To build structures for a complex document with a table of contents, you can use
 a specific property and fill a value with the needed json, or with a literal
 value with the following format. Each row is a part of the structure:
@@ -400,6 +444,10 @@ cover, Front Cover, 1, 1
 r2, Introduction, 2, 2; 3; 4; 5
 backCover, Back Cover, 6, 6
 ```
+
+In the last column, a list of following canvases can be shortened as a range,
+for example "2-5" instead of "2; 3; 4; 5". A range id takes precedence over a
+canvas range with the same name.
 
 
 The range id (first part of a row) is the name of the range, that will be used
@@ -782,6 +830,8 @@ So, it is possible, for example, to modify the citation, to remove or to add
 some metadata or to change the thumbnail.
 
 Note: with a collection list, the parameter `resource` is an array of resources.
+With an item, the parameter `accessFilter` is `free` when the manifest is built
+for the visitors without rights on the reserved medias (module Access).
 
 All the combinations are possible: external manifest for items, iiif image for
 external medias, a local standard media file with module Image Server.
@@ -976,7 +1026,7 @@ format.
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
 [#6]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues/6
 [IIIF Image]: https://omeka.org/s/docs/user-manual/content/items/#media
-[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/work_items
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
