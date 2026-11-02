@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-05 00:00+0000\n"
+"POT-Creation-Date: 2026-11-02 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,36 +17,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:35 data/scripts/upgrade.php:327 Module.php:238
+#: data/scripts/upgrade.php:36 data/scripts/upgrade.php:328 Module.php:238
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: data/scripts/upgrade.php:39 data/scripts/upgrade.php:331
+#: data/scripts/upgrade.php:40 data/scripts/upgrade.php:332
 msgid "Missing requirement. Unable to upgrade."
 msgstr ""
 
-#: data/scripts/upgrade.php:100
+#: data/scripts/upgrade.php:101
 msgid ""
 "This version requires Archive Repertory 3.15.4 or greater (used for some 3D "
 "views)."
 msgstr ""
 
-#: Module.php:410
+#: Module.php:422
 msgid "All checks passed."
 msgstr ""
 
-#: Module.php:447
+#: Module.php:459
 msgid ""
 "The module creates manifests with the properties from each resource (item "
 "set, item and media)."
 msgstr ""
 
-#: Module.php:448
+#: Module.php:460
 msgid "The properties below are used when some metadata are missing."
 msgstr ""
 
-#: Module.php:449
+#: Module.php:461
 msgid "In all cases, empty properties are not set."
 msgstr ""
 
@@ -179,11 +179,11 @@ msgstr ""
 msgid "Previous page"
 msgstr ""
 
-#: data/scripts/upgrade.php:62 Module.php:249
+#: data/scripts/upgrade.php:63 Module.php:249
 msgid "The module {module} should be upgraded to version {version} or later."
 msgstr ""
 
-#: data/scripts/upgrade.php:132
+#: data/scripts/upgrade.php:133
 msgid ""
 "The module IIIF Server was split into two modules: {link_url}IIIF "
 "Server{link_end}, that creates iiif manifest, and {link_url_2}Image "
@@ -192,151 +192,151 @@ msgid ""
 "is automatic, but you need to install the two modules."
 msgstr ""
 
-#: data/scripts/upgrade.php:238
+#: data/scripts/upgrade.php:239
 msgid ""
 "The module IIIF Server is now totally independant from the module Image "
 "Server and any other external image server can be used."
 msgstr ""
 
-#: data/scripts/upgrade.php:242
+#: data/scripts/upgrade.php:243
 msgid ""
 "Check the config of the image server, if any, in the config of this module."
 msgstr ""
 
-#: data/scripts/upgrade.php:246
+#: data/scripts/upgrade.php:247
 msgid ""
 "The module IIIF Server supports creation of structures through a table-of-"
 "contents-like value: see {link_url}readme{link_end}."
 msgstr ""
 
-#: data/scripts/upgrade.php:258
+#: data/scripts/upgrade.php:259
 msgid ""
 "XML Alto is supported natively and it can be displayed as an overlay layer "
 "if your viewer supports it."
 msgstr ""
 
-#: data/scripts/upgrade.php:262
+#: data/scripts/upgrade.php:263
 msgid ""
 "The xml media-type should be a precise one: \"application/alto+xml\", not "
 "\"text/xml\" or \"application/xml\"."
 msgstr ""
 
-#: data/scripts/upgrade.php:266
+#: data/scripts/upgrade.php:267
 msgid ""
 "New files are automatically managed, but you may need modules Bulk Edit or "
 "Easy Admin to fix old ones, if any."
 msgstr ""
 
-#: data/scripts/upgrade.php:270
+#: data/scripts/upgrade.php:271
 msgid ""
 "Badly formatted xml files may be fixed dynamically, but it will affect "
 "performance. See {link_url}readme{link_end}."
 msgstr ""
 
-#: data/scripts/upgrade.php:283
+#: data/scripts/upgrade.php:284
 msgid "An option allows to skip the rights managed by module Access Resource."
 msgstr ""
 
-#: data/scripts/upgrade.php:295
+#: data/scripts/upgrade.php:296
 msgid "A new option allows to fix bad xml and invalid utf-8 characters."
 msgstr ""
 
-#: data/scripts/upgrade.php:302
+#: data/scripts/upgrade.php:303
 msgid ""
 "A new option allows to cache manifests in order to delivrate them instantly."
 msgstr ""
 
-#: data/scripts/upgrade.php:306
+#: data/scripts/upgrade.php:307
 msgid ""
 "A new resource block allows to display the iiif manifest link to copy in "
 "clipboard."
 msgstr ""
 
-#: data/scripts/upgrade.php:318
+#: data/scripts/upgrade.php:319
 msgid "A new option allows to set the provider."
 msgstr ""
 
-#: data/scripts/upgrade.php:339
+#: data/scripts/upgrade.php:340
 msgid "A new option allows to limit the files types to download."
 msgstr ""
 
-#: data/scripts/upgrade.php:347
+#: data/scripts/upgrade.php:348
 msgid ""
 "A new option allows to cache the manifests on save. It is set on, but may be "
 "disabled in settings."
 msgstr ""
 
-#: data/scripts/upgrade.php:355
+#: data/scripts/upgrade.php:356
 msgid "A new option allows to fix playing mp3 with Universal Viewer v4."
 msgstr ""
 
-#: data/scripts/upgrade.php:374
+#: data/scripts/upgrade.php:375
 msgid ""
 "The module {module} should be upgraded to version {version} or later after "
 "this upgrade."
 msgstr ""
 
-#: data/scripts/upgrade.php:384
+#: data/scripts/upgrade.php:385
 msgid ""
 "The creation of manifests is now a lot quicker and can be done in real time "
 "in most of the cases. The cache is still available for big manifests and for "
 "instant access."
 msgstr ""
 
-#: data/scripts/upgrade.php:389
+#: data/scripts/upgrade.php:390
 msgid ""
 "If you use the feature \"table of contents\", a new format was integrated. "
 "Management of the old ones will be removed in version 3.6.20. A job is added "
 "in module EasyAdmin (version 3.4.17) to do the conversion."
 msgstr ""
 
-#: data/scripts/upgrade.php:411
+#: data/scripts/upgrade.php:412
 msgid ""
 "A job was launched to upgrade the format of \"table of contents\". Replaced "
 "tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}"
 "logs{link_end})."
 msgstr ""
 
-#: data/scripts/upgrade.php:455
+#: data/scripts/upgrade.php:456
 msgid ""
 "The settings \"iiifserver_identifier_raw\" and "
 "\"iiifserver_identifier_apache_preencoding\" have been replaced by "
 "\"iiifserver_identifier_encode_slash\" (auto-detected on config save)."
 msgstr ""
 
-#: data/scripts/upgrade.php:468
+#: data/scripts/upgrade.php:469
 msgid ""
 "A job was launched to recompute all media dimensions with EXIF orientation "
 "fix ({link}job #{job_id}{link_end}, {link_log}logs{link_end})."
 msgstr ""
 
-#: data/scripts/upgrade.php:484
+#: data/scripts/upgrade.php:485
 msgid ""
 "Two new resource blocks are available: \"IIIF Viewer\" (viewer embedded "
 "inline in the page) and \"IIIF Viewer Button\" (button opening the viewer in "
 "a full-page overlay). It embeds OpenSeadragon or the viewers of modules."
 msgstr ""
 
-#: data/scripts/upgrade.php:494
+#: data/scripts/upgrade.php:495
 msgid ""
 "A new option allows to skip the \"rendering\" links in manifests (used by "
 "viewers to display a download button)."
 msgstr ""
 
-#: data/scripts/upgrade.php:500
+#: data/scripts/upgrade.php:501
 msgid ""
 "Module Access is active: \"rendering\" links are now exposed only for "
 "resources with status \"free\". Other resources will not advertise a "
 "download link in their manifest."
 msgstr ""
 
-#: data/scripts/upgrade.php:522
+#: data/scripts/upgrade.php:523
 msgid ""
 "A new per-site option was added to the button IIIF manifest link to allow "
 "drag-and-drop and to display a \"What is IIIF?\" link."
 msgstr ""
 
-#: data/scripts/upgrade.php:533
+#: data/scripts/upgrade.php:534
 msgid ""
 "All features related to ocr, text and alto were moved to the module Iiif "
 "Search. The module Iiif Search includes now automated processes to manage "
@@ -345,180 +345,187 @@ msgid ""
 "or single pages files, etc."
 msgstr ""
 
-#: data/scripts/upgrade.php:544
+#: data/scripts/upgrade.php:545
 msgid ""
 "A new option allows to pick the institution logo from the Omeka asset "
 "library. It takes precedence over the legacy url setting when both are set."
 msgstr ""
 
-#: data/scripts/upgrade.php:574
+#: data/scripts/upgrade.php:575
 msgid ""
 "The supported image api versions are now set with one option per version, "
 "each defining its single max compliance level."
 msgstr ""
 
-#: data/scripts/upgrade.php:590
+#: data/scripts/upgrade.php:591
 msgid "Removed {count} stale version-less manifest cache files."
 msgstr ""
 
-#: data/scripts/upgrade.php:610
+#: data/scripts/upgrade.php:611
 msgid ""
 "Removed {count} cached manifests: they are rebuilt with or without the "
 "reserved medias, according to the rights of the visitor."
 msgstr ""
 
-#: data/scripts/upgrade.php:616
+#: data/scripts/upgrade.php:617
 msgid ""
 "The table of contents of a tei file attached to an item (module IIIF Search) "
 "can be used as structures of the manifest, with or instead of the property "
 "(option \"Structures from property and TEI file\")."
 msgstr ""
 
-#: Module.php:548
+#: data/scripts/upgrade.php:626
+msgid ""
+"The direct web access to the cache of the manifests (files/iiif/) is denied, "
+"because the manifest with the reserved medias should be read via the "
+"controller only. With Nginx, deny it in the configuration of the server."
+msgstr ""
+
+#: Module.php:560
 msgid ""
 "Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:557
+#: Module.php:569
 msgid ""
 "Storing dimensions of images, audio and video ({link}job #{job_id}"
 "{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:678
+#: Module.php:747
 msgid "Iiif Server: Cache manifests"
 msgstr ""
 
-#: Module.php:679
+#: Module.php:748
 msgid "Iiif Server: Store dimensions of medias"
 msgstr ""
 
-#: Module.php:680
+#: Module.php:749
 msgid ""
 "Iiif Server: Upgrade old tables of contents to new format with four columns "
 "(to do only one time for old external manifests)"
 msgstr ""
 
-#: Module.php:686
-msgid "IIIF Server manifests cache"
+#: Module.php:755
+msgid "IIIF Server: Manifests cache"
 msgstr ""
 
-#: Module.php:687
+#: Module.php:756
 msgid "Pre-build and cache the IIIF presentation manifests."
 msgstr ""
 
-#: Module.php:689 src/Form/ConfigForm.php:100
+#: Module.php:758 src/Form/ConfigForm.php:100
 msgid "Cache"
 msgstr ""
 
-#: Module.php:693
-msgid "IIIF Server media dimensions"
+#: Module.php:762
+msgid "IIIF Server: Media dimensions"
 msgstr ""
 
-#: Module.php:694
+#: Module.php:763
 msgid "Store the dimensions (width and height) of media files."
 msgstr ""
 
-#: Module.php:696
+#: Module.php:765
 msgid "Store"
 msgstr ""
 
-#: Module.php:700
-msgid "IIIF Server tables of contents"
+#: Module.php:769
+msgid "IIIF Server: Tables of contents"
 msgstr ""
 
-#: Module.php:701
+#: Module.php:770
 msgid ""
 "Upgrade old tables of contents to the new four-column format (run once for "
 "old external manifests)."
 msgstr ""
 
-#: Module.php:713
+#: Module.php:782
 msgid "Options to cache manifests"
 msgstr ""
 
-#: Module.php:724
+#: Module.php:793
 msgid "Limit cache of manifests to specific items"
 msgstr ""
 
-#: Module.php:735
+#: Module.php:804
 msgid "Options to store dimensions"
 msgstr ""
 
-#: Module.php:746
+#: Module.php:815
 msgid "Limit storage of dimensions to specific items"
 msgstr ""
 
-#: Module.php:757
+#: Module.php:826
 msgid "Options to upgrade table of contents"
 msgstr ""
 
-#: Module.php:768
+#: Module.php:837
 msgid "Limit upgrade of tables of contents to specific items"
 msgstr ""
 
-#: Module.php:865
+#: Module.php:936
 msgid ""
 "Could not create or write the IIIF cache directory \"{path}\". Cache will "
 "not work unless created manually with proper permissions."
 msgstr ""
 
-#: Module.php:945
+#: Module.php:1016
 msgid ""
 "The default IIIF Presentation version is {version}. Version 3 is the current "
 "standard and is recommended."
 msgstr ""
 
-#: Module.php:988
+#: Module.php:1059
 msgid ""
 "Some items carry more than {threshold} images. Enabling manifest cache is "
 "recommended to avoid slow page loads."
 msgstr ""
 
-#: Module.php:1001
+#: Module.php:1072
 msgid "Manifest cache is enabled but directory \"{dir}\" is not writable."
 msgstr ""
 
-#: Module.php:1014
+#: Module.php:1085
 msgid "Manifest cache is enabled and working."
 msgstr ""
 
-#: Module.php:1018
+#: Module.php:1089
 msgid ""
 "Manifest cache is enabled but write/read test failed. Check directory "
 "permissions and filesystem available space."
 msgstr ""
 
-#: Module.php:1109
+#: Module.php:1180
 msgid "All {total} media (images, audio, video) have stored dimensions."
 msgstr ""
 
-#: Module.php:1115
+#: Module.php:1186
 msgid ""
 "Some media (images, audio, video) have no stored dimensions. Run \"Media "
 "Dimensions\" job to speed up manifest generation. The exact count is not "
 "computed during the audit to keep the page responsive on large installations."
 msgstr ""
 
-#: Module.php:1188
+#: Module.php:1259
 msgid "Manifest route is working (tested item #{id})."
 msgstr ""
 
-#: Module.php:1193
+#: Module.php:1264
 msgid "Could not reach manifest URL: {url}. Check server configuration."
 msgstr ""
 
-#: Module.php:1198
+#: Module.php:1269
 msgid "Manifest URL {url} returned invalid JSON."
 msgstr ""
 
-#: Module.php:1218
+#: Module.php:1289
 msgid ""
 "The cors headers are disabled. You shall enable them to allow other "
 "libraries to access to your manifests."
 msgstr ""
 
-#: Module.php:1225
+#: Module.php:1296
 msgid ""
 "The cors headers are enabled multiple times in the config of the module and "
 "in the config of Apache or in the file .htaccess. Duplicating the cors "
@@ -526,13 +533,13 @@ msgid ""
 "the module, in the Apache config or in the file .htaccess."
 msgstr ""
 
-#: Module.php:1241
+#: Module.php:1312
 msgid ""
 "When cache is enabled, you should recreate it each time the config is "
 "updated."
 msgstr ""
 
-#: Module.php:1321
+#: Module.php:1396
 #, php-format
 msgid ""
 "The server supports encoded slashes (AllowEncodedSlashes). IIIF URLs will "
@@ -540,7 +547,7 @@ msgid ""
 "be changed in the config form."
 msgstr ""
 
-#: Module.php:1328
+#: Module.php:1403
 #, php-format
 msgid ""
 "The server rejects encoded slashes (%%2F) in URLs (Apache default). IIIF "
@@ -550,21 +557,21 @@ msgid ""
 "prefix, or use numeric identifiers."
 msgstr ""
 
-#: Module.php:1546
+#: Module.php:1625
 msgid ""
 "An external IIIF image server was detected ({server_label}). The media "
 "identifier has been set to \"filename with extension (image only)\" for "
 "compatibility. The option can be changed in the config form."
 msgstr ""
 
-#: Module.php:1552
+#: Module.php:1631
 msgid ""
 "An external IIIF image server was detected ({server_label}). The current "
 "media identifier setting \"{identifier}\" is already set and likely "
 "compatible. If images don’t display, check the config form."
 msgstr ""
 
-#: Module.php:1617
+#: Module.php:1696
 msgid ""
 "Item #{item_id} / media #{media_id}: Error getting dimensions for types "
 "\"{types}\"."
@@ -574,37 +581,37 @@ msgstr ""
 msgid "elements"
 msgstr ""
 
-#: src/Job/CacheManifests.php:49
+#: src/Job/CacheManifests.php:50
 msgid "No items selected."
 msgstr ""
 
-#: src/Job/CacheManifests.php:63
+#: src/Job/CacheManifests.php:64
 msgid "Unable to create directory \"{dir}\"."
 msgstr ""
 
-#: src/Job/CacheManifests.php:73
+#: src/Job/CacheManifests.php:74
 msgid "The job was stopped."
 msgstr ""
 
 #: src/Job/CacheManifests.php:106
 msgid ""
-"Item #{item_id}: Unable to remove existing file \"{file}\". Manifest version "
+"Item #{item_id}: Unable to write the file \"{file}\". Manifest version "
 "{version} skipped."
 msgstr ""
 
-#: src/Job/CacheManifests.php:127
+#: src/Job/CacheManifests.php:128
 msgid "Item #{item_id}: Unable to create manifest {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:149
+#: src/Job/CacheManifests.php:151
 msgid "Item #{item_id}: Unable to store the manifest version {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:159
+#: src/Job/CacheManifests.php:161
 msgid "Item #{item_id}: iiif manifest created successfully."
 msgstr ""
 
-#: src/Job/CacheManifests.php:164
+#: src/Job/CacheManifests.php:166
 msgid "Item #{item_id}: {count} iiif manifests created successfully."
 msgstr ""
 
@@ -1886,7 +1893,7 @@ msgid ""
 "fulfilling the request: the resulting file is not found."
 msgstr ""
 
-#: src/Controller/PresentationController.php:274
+#: src/Controller/PresentationController.php:294
 msgid "The type \"{type}\" is currently only managed as uri, not url"
 msgstr ""
 
