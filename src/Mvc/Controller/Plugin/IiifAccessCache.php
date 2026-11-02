@@ -64,6 +64,9 @@ class IiifAccessCache extends AbstractPlugin
         if (!$this->hasModuleAccess) {
             return null;
         }
+        // Each part uses its own index and stops at the first reserved resource:
+        // a single condition "item OR media of the item" prevents the indexes and
+        // scans all the reserved resources of the base.
         // Unlike the medias, the digital objects are not linked to the item by a
         // column, but by values of the properties of the module Digital Object.
         $bind = ['item_id' => $itemId];
@@ -71,13 +74,18 @@ class IiifAccessCache extends AbstractPlugin
         $sqlDigitalObjects = '';
         if ($this->digitalObjectPropertyIds) {
             $sqlDigitalObjects = <<<'SQL'
-                    OR access_status.id IN (
-                        SELECT `value`.value_resource_id
+                    UNION ALL
+                    (
+                        SELECT access_status.id
                         FROM `value`
                         INNER JOIN resource AS linked ON linked.id = `value`.value_resource_id
+                        INNER JOIN access_status AS access_status ON access_status.id = `value`.value_resource_id
                         WHERE `value`.resource_id = :item_id
                             AND `value`.property_id IN (:property_ids)
                             AND linked.resource_type = :digital_object_type
+                            AND access_status.level != "free"
+                        ORDER BY access_status.id ASC
+                        LIMIT 1
                     )
                 SQL;
             $bind['property_ids'] = $this->digitalObjectPropertyIds;
@@ -86,17 +94,26 @@ class IiifAccessCache extends AbstractPlugin
         }
 
         $sql = <<<SQL
-            SELECT access_status.id
-            FROM access_status AS access_status
-            LEFT JOIN media AS media ON media.id = access_status.id
-            WHERE access_status.level != "free"
-                AND (
-                    access_status.id = :item_id
-                    OR media.item_id = :item_id
-            $sqlDigitalObjects
+            SELECT MIN(reserved.id)
+            FROM (
+                (
+                    SELECT access_status.id
+                    FROM access_status AS access_status
+                    WHERE access_status.id = :item_id
+                        AND access_status.level != "free"
                 )
-            ORDER BY access_status.id ASC
-            LIMIT 1
+                UNION ALL
+                (
+                    SELECT media.id
+                    FROM media AS media
+                    INNER JOIN access_status AS access_status ON access_status.id = media.id
+                    WHERE media.item_id = :item_id
+                        AND access_status.level != "free"
+                    ORDER BY media.id ASC
+                    LIMIT 1
+                )
+            $sqlDigitalObjects
+            ) AS reserved
             SQL;
         $id = $this->connection
             ->executeQuery($sql, $bind, $types)
