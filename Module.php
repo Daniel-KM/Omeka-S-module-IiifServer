@@ -752,21 +752,21 @@ class Module extends AbstractModule
         if (method_exists($form, 'addTaskSubjects')) {
             $form->addTaskSubjects([
                 'iiifserver_cache_manifests' => [
-                    'name' => 'IIIF Server manifests cache', // @translate
+                    'name' => 'IIIF Server: Manifests cache', // @translate
                     'description' => 'Pre-build and cache the IIIF presentation manifests.', // @translate
                     'actions' => [
                         'iiifserver_cache_manifests' => 'Cache', // @translate
                     ],
                 ],
                 'iiifserver_store_dimensions' => [
-                    'name' => 'IIIF Server media dimensions', // @translate
+                    'name' => 'IIIF Server: Media dimensions', // @translate
                     'description' => 'Store the dimensions (width and height) of media files.', // @translate
                     'actions' => [
                         'iiifserver_store_dimensions' => 'Store', // @translate
                     ],
                 ],
                 'iiifserver_upgrade_structure' => [
-                    'name' => 'IIIF Server tables of contents', // @translate
+                    'name' => 'IIIF Server: Tables of contents', // @translate
                     'description' => 'Upgrade old tables of contents to the new four-column format (run once for old external manifests).', // @translate
                     'actions' => [
                         'iiifserver_upgrade_structure' => 'Upgrade', // @translate
