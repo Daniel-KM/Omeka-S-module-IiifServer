@@ -212,7 +212,8 @@ class PresentationController extends AbstractActionController
             $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
             $filepath = $this->iiifAccessCache()
                 ->filepath($basePath, (string) $version, (int) $itemId, $accessFilter);
-            if (file_exists($filepath) && is_readable($filepath)) {
+            // A manifest older than the item or one of its medias is rebuilt.
+            if (is_readable($filepath) && filemtime($filepath) > $mtime) {
                 $manifest = file_get_contents($filepath);
                 $manifest = $manifest !== false ? json_decode($manifest, true) : null;
                 if (is_array($manifest)) {

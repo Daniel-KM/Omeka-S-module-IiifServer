@@ -324,19 +324,19 @@ class Module extends AbstractModule
             'api.delete.post',
             [$this, 'handleAfterDeleteItem']
         );
-        // Medias may be created, updated or deleted separately from their item
-        // (imports, media edition), so the manifest of the item is refreshed.
-        foreach ([
-            'api.create.post',
-            'api.update.post',
+        // A cached manifest older than its item and medias is rebuilt on read,
+        // so only changes without modified date remove it: the deletion of a
+        // media and the update of the access statuses.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\MediaAdapter::class,
             'api.delete.post',
-        ] as $eventName) {
-            $sharedEventManager->attach(
-                \Omeka\Api\Adapter\MediaAdapter::class,
-                $eventName,
-                [$this, 'handleAfterSaveMedia']
-            );
-        }
+            [$this, 'handleAfterDeleteMedia']
+        );
+        $sharedEventManager->attach(
+            'Access',
+            'access.status.updated',
+            [$this, 'handleAccessStatusUpdated']
+        );
 
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
@@ -628,29 +628,6 @@ class Module extends AbstractModule
         $this->cacheItemManifests((int) $item->getId());
     }
 
-    public function handleAfterSaveMedia(Event $event): void
-    {
-        /** @var \Omeka\Api\Request $request */
-        $request = $event->getParam('request');
-        if ($request->getOption('isPartial')) {
-            return;
-        }
-
-        $services = $this->getServiceLocator();
-        if (!$services->get('Omeka\Settings')
-            ->get('iiifserver_manifest_cache')
-        ) {
-            return;
-        }
-
-        /** @var \Omeka\Entity\Media $media */
-        $media = $event->getParam('response')->getContent();
-        $item = $media ? $media->getItem() : null;
-        if ($item && $item->getId()) {
-            $this->cacheItemManifests((int) $item->getId());
-        }
-    }
-
     /**
      * Rebuild the cached manifests of an item, deferred to the end of the
      * request when possible.
@@ -686,24 +663,72 @@ class Module extends AbstractModule
     {
         /** @var \Omeka\Api\Request $request */
         $request = $event->getParam('request');
-        $itemId = $request->getId();
-        if (!$itemId) {
+        $itemId = (int) $request->getId();
+        if ($itemId) {
+            $this->removeCachedManifests([$itemId]);
+        }
+    }
+
+    public function handleAfterDeleteMedia(Event $event): void
+    {
+        /** @var \Omeka\Entity\Media $media */
+        $media = $event->getParam('response')->getContent();
+        $item = $media ? $media->getItem() : null;
+        if ($item && $item->getId()) {
+            $this->removeCachedManifests([(int) $item->getId()]);
+        }
+    }
+
+    /**
+     * Remove the cached manifests of the resources whose access was updated.
+     *
+     * The ids may be items, medias or item sets, or null when all resources
+     * may have changed.
+     */
+    public function handleAccessStatusUpdated(Event $event): void
+    {
+        $resourceIds = $event->getParam('resource_ids');
+        if ($resourceIds === null) {
+            $this->removeCachedManifests(null);
             return;
         }
+        if (!$resourceIds) {
+            return;
+        }
+        $itemIds = $this->getServiceLocator()->get('Omeka\Connection')
+            ->executeQuery(
+                'SELECT id FROM item WHERE id IN (:ids) UNION SELECT item_id FROM media WHERE id IN (:ids)',
+                ['ids' => array_map('intval', $resourceIds)],
+                ['ids' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+            )
+            ->fetchFirstColumn();
+        if ($itemIds) {
+            $this->removeCachedManifests(array_map('intval', $itemIds));
+        }
+    }
 
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+    /**
+     * Remove the cached manifests of items, or all of them when null.
+     *
+     * Each item may have two variants: with and without the reserved medias
+     * (see the plugin iiifAccessCache).
+     */
+    protected function removeCachedManifests(?array $itemIds): void
+    {
+        $config = $this->getServiceLocator()->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-
-        // Remove the two variants of the manifest (with and without the
-        // reserved medias, see the plugin iiifAccessCache).
         foreach ([2, 3] as $version) {
-            $filepaths = glob("$basePath/iiif/$version/$itemId.manifest.json")
-                ?: [];
-            $filepaths = array_merge($filepaths, glob("$basePath/iiif/$version/$itemId.*.manifest.json") ?: []);
-            foreach ($filepaths as $filepath) {
-                if (is_writeable($filepath)) {
-                    @unlink($filepath);
+            $patterns = $itemIds === null
+                ? ["$basePath/iiif/$version/*.manifest.json"]
+                : array_merge(...array_map(fn ($itemId) => [
+                    "$basePath/iiif/$version/$itemId.manifest.json",
+                    "$basePath/iiif/$version/$itemId.*.manifest.json",
+                ], $itemIds));
+            foreach ($patterns as $pattern) {
+                foreach (glob($pattern) ?: [] as $filepath) {
+                    if (is_writeable($filepath)) {
+                        @unlink($filepath);
+                    }
                 }
             }
         }
