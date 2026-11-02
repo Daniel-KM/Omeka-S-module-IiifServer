@@ -857,9 +857,11 @@ class Module extends AbstractModule
         // The manifest cache is read back through the presentation controller
         // (which enforces resource visibility) or on the filesystem by jobs,
         // never by a direct url, so deny direct web access: a manifest cached
-        // while public then made private would otherwise stay downloadable.
-        foreach ([2, 3] as $version) {
-            $dirPath = "$basePath/iiif/$version";
+        // while public then made private would otherwise stay downloadable, and
+        // the manifest with the reserved medias would be readable by anybody.
+        // The parent directory is protected too, for all the cached files.
+        foreach (['', '/2', '/3'] as $subDir) {
+            $dirPath = "$basePath/iiif$subDir";
             if (!$this->checkDestinationDir($dirPath, true)) {
                 $logger->warn(
                     'Could not create or write the IIIF cache directory "{path}". Cache will not work unless created manually with proper permissions.', // @translate

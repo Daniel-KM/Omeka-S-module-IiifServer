@@ -173,11 +173,15 @@ class CacheManifests extends AbstractJob
         }
     }
 
+    /**
+     * Create the directory of the cache and deny the direct web access to it.
+     *
+     * The cache is read via the controller only, that checks the rights.
+     */
     protected function ensureDirectory(string $dirpath): bool
     {
-        if (file_exists($dirpath)) {
-            return true;
-        }
-        return mkdir($dirpath, 0775, true);
+        $directoryManager = $this->getServiceLocator()->get('Common\DirectoryManager');
+        return $directoryManager->checkDestinationDir(dirname($dirpath), true)
+            && $directoryManager->checkDestinationDir($dirpath, true);
     }
 }

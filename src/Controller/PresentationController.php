@@ -253,8 +253,12 @@ class PresentationController extends AbstractActionController
         }
 
         if ($toCache) {
-            // Ensure dirpath. Don't keep issue, it's only cache.
+            // Ensure dirpath and deny the direct web access to the cache, read
+            // via the controller only. Don't keep issue, it's only cache.
             if (!file_exists(dirname($filepath))) {
+                $this->getEvent()->getApplication()->getServiceManager()
+                    ->get('Common\DirectoryManager')
+                    ->checkDestinationDir(dirname($filepath, 2), true);
                 @mkdir(dirname($filepath), 0775, true);
             }
             $prettyPrint = (bool) $settings->get('iiifserver_manifest_pretty_json');
