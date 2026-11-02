@@ -38,6 +38,20 @@ class MediaDimension extends AbstractPlugin
     protected $connection;
 
     /**
+     * Strategy and constraint of each thumbnail type, from the config.
+     *
+     * @var array
+     */
+    protected $thumbnailTypes;
+
+    /**
+     * Whether the files are stored on the local disk by Omeka.
+     *
+     * @var bool
+     */
+    protected $isLocalStore;
+
+    /**
      * The default output when the file is unavailable or unknown.
      *
      * @var array
@@ -52,12 +66,16 @@ class MediaDimension extends AbstractPlugin
         ?string $basePath,
         TempFileFactory $tempFileFactory,
         AdapterManager $adapterManager,
-        Connection $connection
+        Connection $connection,
+        array $thumbnailTypes = [],
+        bool $isLocalStore = true
     ) {
         $this->basePath = $basePath;
         $this->tempFileFactory = $tempFileFactory;
         $this->adapterManager = $adapterManager;
         $this->connection = $connection;
+        $this->thumbnailTypes = $thumbnailTypes;
+        $this->isLocalStore = $isLocalStore;
     }
 
     /**
@@ -212,6 +230,14 @@ class MediaDimension extends AbstractPlugin
                 $result = $this->getDimensionsLocal($filepath, $mainMediaType);
             } elseif ($isLocal) {
                 $result = $this->emptyDimensions;
+            } elseif ($this->isLocalStore || $mainMediaType !== 'image') {
+                // The thumbnails are always created by Omeka, so with a local
+                // store, the url points back to this instance and a missing
+                // file means a slow 404 round trip for each media. Compute the
+                // size from the original and the thumbnail config instead.
+                $result = $mainMediaType === 'image'
+                    ? $this->derivativeDimensions($this->dimensionMedia($media, 'original', false), $type)
+                    : $this->emptyDimensions;
             } else {
                 $result = $this->getDimensionsUrl($media->thumbnailUrl($type), $mainMediaType);
             }
@@ -227,6 +253,35 @@ class MediaDimension extends AbstractPlugin
         }
 
         return $result;
+    }
+
+    /**
+     * Compute the size of a thumbnail from the size of the original.
+     *
+     * Same rules than the core thumbnailers: "square" is cropped to the
+     * constraint, "default" is reduced to fit in the constraint, never
+     * enlarged.
+     */
+    protected function derivativeDimensions(array $original, string $type): array
+    {
+        $width = (int) ($original['width'] ?? 0);
+        $height = (int) ($original['height'] ?? 0);
+        $constraint = (int) ($this->thumbnailTypes[$type]['constraint'] ?? 0);
+        if (!$width || !$height || !$constraint) {
+            return $this->emptyDimensions;
+        }
+        if (($this->thumbnailTypes[$type]['strategy'] ?? 'default') === 'square') {
+            return ['width' => $constraint, 'height' => $constraint, 'duration' => null];
+        }
+        if ($width <= $constraint && $height <= $constraint) {
+            return ['width' => $width, 'height' => $height, 'duration' => null];
+        }
+        $ratio = $constraint / max($width, $height);
+        return [
+            'width' => max(1, (int) round($width * $ratio)),
+            'height' => max(1, (int) round($height * $ratio)),
+            'duration' => null,
+        ];
     }
 
     /**

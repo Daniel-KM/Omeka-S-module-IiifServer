@@ -10,11 +10,14 @@ class MediaDimensionFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $services, $requestedName, ?array $options = null)
     {
+        $config = $services->get('Config');
         return new MediaDimension(
-            $services->get('Config')['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
+            $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
             $services->get('Omeka\File\TempFileFactory'),
             $services->get('Omeka\ApiAdapterManager'),
-            $services->get('Omeka\Connection')
+            $services->get('Omeka\Connection'),
+            $config['thumbnails']['types'] ?? [],
+            $services->get('Omeka\File\Store') instanceof \Omeka\File\Store\Local
         );
     }
 }
