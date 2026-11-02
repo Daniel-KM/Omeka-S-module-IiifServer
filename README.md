@@ -1024,7 +1024,7 @@ format.
 [Deepzoom library]: https://gitlab.com/Daniel-KM/LibraryDeepzoom
 [Zoomify library]: https://gitlab.com/Daniel-KM/LibraryZoomify
 [Deepzoom]: https://github.com/jeremytubbs/deepzoom
-[#6]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/issues/6
+[#6]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/work_items/6
 [IIIF Image]: https://omeka.org/s/docs/user-manual/content/items/#media
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-IiifServer/-/work_items
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
