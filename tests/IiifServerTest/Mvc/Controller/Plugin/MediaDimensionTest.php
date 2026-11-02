@@ -212,6 +212,40 @@ class MediaDimensionTest extends IiifServerControllerTestCase
         $this->assertNull($result['height']);
     }
 
+    /**
+     * The size of a thumbnail is computed from the original with the rules of
+     * the core thumbnailers, so no http request is needed when the file is
+     * missing locally.
+     */
+    public function testDerivativeDimensionsFromOriginal(): void
+    {
+        $services = $this->getApplicationServiceLocator();
+        $mediaDimension = new \IiifServer\Mvc\Controller\Plugin\MediaDimension(
+            null,
+            $services->get('Omeka\File\TempFileFactory'),
+            $services->get('Omeka\ApiAdapterManager'),
+            $this->connection,
+            [
+                'large' => ['strategy' => 'default', 'constraint' => 800],
+                'medium' => ['strategy' => 'default', 'constraint' => 400],
+                'square' => ['strategy' => 'square', 'constraint' => 200],
+            ]
+        );
+        $method = new \ReflectionMethod($mediaDimension, 'derivativeDimensions');
+        $method->setAccessible(true);
+        $original = ['width' => 1744, 'height' => 2652, 'duration' => null];
+
+        $this->assertSame(['width' => 526, 'height' => 800, 'duration' => null], $method->invoke($mediaDimension, $original, 'large'));
+        $this->assertSame(['width' => 263, 'height' => 400, 'duration' => null], $method->invoke($mediaDimension, $original, 'medium'));
+        $this->assertSame(['width' => 200, 'height' => 200, 'duration' => null], $method->invoke($mediaDimension, $original, 'square'));
+        // A small image is never enlarged.
+        $small = ['width' => 300, 'height' => 120, 'duration' => null];
+        $this->assertSame($small, $method->invoke($mediaDimension, $small, 'large'));
+        // Unknown original or type: nothing to compute.
+        $this->assertNull($method->invoke($mediaDimension, ['width' => null, 'height' => null], 'large')['width']);
+        $this->assertNull($method->invoke($mediaDimension, $original, 'unknown')['width']);
+    }
+
     protected function resetMediaData(): void
     {
         $this->connection->executeStatement(
