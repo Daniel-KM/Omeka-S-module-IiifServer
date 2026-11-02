@@ -105,6 +105,62 @@ class IiifAccessCache extends AbstractPlugin
     }
 
     /**
+     * Check if the manifest of an item may contain private data.
+     *
+     * The cached manifests are built as anonymous, so they can be served to a
+     * user who can see the private resources (admin, owner) only when there is
+     * no private data: the item, its medias, their values, the resources linked
+     * by these values (digital objects included) and its item sets. Each part
+     * stops at the first private row.
+     */
+    public function hasPrivateContent(int $itemId): bool
+    {
+        $sql = <<<'SQL'
+            SELECT 1 FROM (
+                (
+                    SELECT 1 FROM resource
+                    WHERE resource.id = :item_id AND resource.is_public = 0
+                )
+                UNION ALL
+                (
+                    SELECT 1 FROM media
+                    INNER JOIN resource ON resource.id = media.id
+                    WHERE media.item_id = :item_id AND resource.is_public = 0
+                    LIMIT 1
+                )
+                UNION ALL
+                (
+                    SELECT 1 FROM `value`
+                    LEFT JOIN resource AS linked ON linked.id = `value`.value_resource_id
+                    WHERE `value`.resource_id = :item_id
+                        AND (`value`.is_public = 0 OR linked.is_public = 0)
+                    LIMIT 1
+                )
+                UNION ALL
+                (
+                    SELECT 1 FROM media
+                    INNER JOIN `value` ON `value`.resource_id = media.id
+                    LEFT JOIN resource AS linked ON linked.id = `value`.value_resource_id
+                    WHERE media.item_id = :item_id
+                        AND (`value`.is_public = 0 OR linked.is_public = 0)
+                    LIMIT 1
+                )
+                UNION ALL
+                (
+                    SELECT 1 FROM item_item_set
+                    INNER JOIN resource ON resource.id = item_item_set.item_set_id
+                    WHERE item_item_set.item_id = :item_id AND resource.is_public = 0
+                    LIMIT 1
+                )
+            ) AS private_content
+            LIMIT 1
+            SQL;
+        return (bool) $this->connection
+            ->executeQuery($sql, ['item_id' => $itemId])
+            ->fetchOne();
+    }
+
+    /**
      * The path of the manifest to read or to write for the given variant.
      *
      * The manifest without the reserved medias keeps the historical path, so it

@@ -192,7 +192,20 @@ class PresentationController extends AbstractActionController
             $skipCache = $owner && (int) $owner->id() === (int) $user->getId();
         }
 
-        $useCache = !$skipCache && (bool) $settings->get('iiifserver_manifest_cache', false);
+        // Nevertheless, the cached manifest is the same for them when there is
+        // no private data in the item. It is only read: a manifest built with
+        // their rights is never written in the shared cache.
+        $isCacheEnabled = (bool) $settings->get('iiifserver_manifest_cache', false);
+        $isCacheReadOnly = false;
+        if ($skipCache
+            && $isCacheEnabled
+            && !$this->iiifAccessCache()->hasPrivateContent((int) $resource->id())
+        ) {
+            $skipCache = false;
+            $isCacheReadOnly = true;
+        }
+
+        $useCache = !$skipCache && $isCacheEnabled;
         if ($useCache) {
             $itemId = $resource->id();
             $config = $resource->getServiceLocator()->get('Config');
@@ -206,7 +219,7 @@ class PresentationController extends AbstractActionController
                     return $this->iiifJsonLd($manifest, $version);
                 }
             }
-            $toCache = true;
+            $toCache = !$isCacheReadOnly;
         }
 
         // Compatibility with old version of DerivativeMedia.
