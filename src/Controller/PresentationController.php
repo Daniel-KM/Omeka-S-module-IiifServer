@@ -270,7 +270,9 @@ class PresentationController extends AbstractActionController
             // the manifest is kept as simple array to avoid the double json
             // encoding, here and in iiifJsonLd,
             $jsonEncoded = json_encode($manifest, $prettyJson);
-            @file_put_contents($filepath, $jsonEncoded);
+            // Atomic write, so a concurrent request never reads a partial
+            // manifest.
+            (new \Common\Stdlib\FileLock())->write($filepath, $jsonEncoded);
             $manifest = json_decode($jsonEncoded, true) ?? $manifest;
         }
 

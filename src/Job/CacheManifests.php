@@ -28,6 +28,7 @@ class CacheManifests extends AbstractJob
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
         $viewHelpers = $services->get('ViewHelperManager');
         $iiifAccessCache = $services->get('ControllerPluginManager')->get('iiifAccessCache');
+        $fileLock = new \Common\Stdlib\FileLock();
         $iiifManifest2 = $viewHelpers->get('iiifManifest2');
         $iiifManifest3 = $viewHelpers->get('iiifManifest3');
 
@@ -99,11 +100,10 @@ class CacheManifests extends AbstractJob
             foreach ([2, 3] as $version) foreach ($accessFilters as $accessFilter) {
                 $filepath = $iiifAccessCache->filepath($basePath, (string) $version, (int) $itemId, $accessFilter);
                 $relativePath = mb_substr($filepath, mb_strlen($basePath));
-                if (file_exists($filepath)
-                    && (!is_writeable($filepath) || !unlink($filepath))
-                ) {
+                // The previous manifest is served until the new one replaces it.
+                if (!is_writeable(dirname($filepath))) {
                     $this->logger->err(
-                        'Item #{item_id}: Unable to remove existing file "{file}". Manifest version {version} skipped.', // @translate
+                        'Item #{item_id}: Unable to write the file "{file}". Manifest version {version} skipped.', // @translate
                         ['item_id' => $itemId, 'file' => $relativePath, 'version' => $version]
                     );
                     continue;
@@ -122,6 +122,7 @@ class CacheManifests extends AbstractJob
                         : $iiifManifest3($item, $accessFilter);
                 } catch (\Throwable $e) {
                     $failed = true;
+                    @unlink($filepath);
                     if ($item->media()) {
                         $this->logger->err(
                             'Item #{item_id}: Unable to create manifest {version}.', // @translate
@@ -133,6 +134,7 @@ class CacheManifests extends AbstractJob
 
                 if (!$manifest) {
                     $failed = true;
+                    @unlink($filepath);
                     continue;
                 }
 
@@ -140,7 +142,7 @@ class CacheManifests extends AbstractJob
                     $manifest = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
                 }
 
-                $result = file_put_contents($filepath, $manifest);
+                $result = $fileLock->write($filepath, $manifest);
                 if ($result) {
                     ++$created;
                 } else {
