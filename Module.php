@@ -309,7 +309,6 @@ class Module extends AbstractModule
             [$this, 'handleBeforeSaveItem']
         );
 
-        // TODO Update manifests on media update.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ItemAdapter::class,
             'api.create.post',
@@ -325,6 +324,19 @@ class Module extends AbstractModule
             'api.delete.post',
             [$this, 'handleAfterDeleteItem']
         );
+        // Medias may be created, updated or deleted separately from their item
+        // (imports, media edition), so the manifest of the item is refreshed.
+        foreach ([
+            'api.create.post',
+            'api.update.post',
+            'api.delete.post',
+        ] as $eventName) {
+            $sharedEventManager->attach(
+                \Omeka\Api\Adapter\MediaAdapter::class,
+                $eventName,
+                [$this, 'handleAfterSaveMedia']
+            );
+        }
 
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
@@ -613,12 +625,44 @@ class Module extends AbstractModule
 
         /** @var \Omeka\Entity\Item $item */
         $item = $event->getParam('response')->getContent();
+        $this->cacheItemManifests((int) $item->getId());
+    }
 
+    public function handleAfterSaveMedia(Event $event): void
+    {
+        /** @var \Omeka\Api\Request $request */
+        $request = $event->getParam('request');
+        if ($request->getOption('isPartial')) {
+            return;
+        }
+
+        $services = $this->getServiceLocator();
+        if (!$services->get('Omeka\Settings')
+            ->get('iiifserver_manifest_cache')
+        ) {
+            return;
+        }
+
+        /** @var \Omeka\Entity\Media $media */
+        $media = $event->getParam('response')->getContent();
+        $item = $media ? $media->getItem() : null;
+        if ($item && $item->getId()) {
+            $this->cacheItemManifests((int) $item->getId());
+        }
+    }
+
+    /**
+     * Rebuild the cached manifests of an item, deferred to the end of the
+     * request when possible.
+     */
+    protected function cacheItemManifests(int $itemId): void
+    {
+        $services = $this->getServiceLocator();
         if ($services->has('Common\DeferredJobDispatch')) {
             $services->get('Common\DeferredJobDispatch')->defer(
                 \IiifServer\Job\CacheManifests::class,
                 'iiifserver_cache_manifests',
-                ['item_ids' => $item->getId()],
+                ['item_ids' => $itemId],
                 function (string $key, array $allParams): array {
                     $ids = [];
                     foreach ($allParams as $p) {
@@ -633,7 +677,7 @@ class Module extends AbstractModule
             $dispatcher = $services->get(\Omeka\Job\Dispatcher::class);
             $dispatcher->dispatch(
                 \IiifServer\Job\CacheManifests::class,
-                ['query' => ['id' => $item->getId()]]
+                ['query' => ['id' => $itemId]]
             );
         }
     }
