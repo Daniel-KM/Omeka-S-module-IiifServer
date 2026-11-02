@@ -1342,6 +1342,10 @@ class Module extends AbstractModule
             ],
         ]);
         $response = @file_get_contents($testUrl, false, $context);
+        // Php 8.5 deprecates reading $http_response_header unless assigned.
+        if (function_exists('http_get_last_response_headers')) {
+            $http_response_header = http_get_last_response_headers();
+        }
 
         // Check the HTTP response code from $http_response_header.
         if (!isset($http_response_header) || !is_array($http_response_header)) {
@@ -1527,6 +1531,10 @@ class Module extends AbstractModule
             ],
         ]);
         $response = @file_get_contents($testUrl, false, $context);
+        // Php 8.5 deprecates reading $http_response_header unless assigned.
+        if (function_exists('http_get_last_response_headers')) {
+            $http_response_header = http_get_last_response_headers();
+        }
 
         if (!isset($http_response_header) || !is_array($http_response_header)) {
             // Self-request failed. Fallback: check the media api url setting.
