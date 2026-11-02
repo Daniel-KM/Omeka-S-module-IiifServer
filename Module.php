@@ -244,7 +244,7 @@ class Module extends AbstractModule
         $errors = [];
 
         // Check the optional module Derivative Media for incompatibility.
-        if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
+        if (!$this->checkModuleAvailability('DerivativeMedia', '3.4.10')) {
             $errors[] = (string) (new PsrMessage(
                 'The module {module} should be upgraded to version {version} or later.', // @translate
                 ['module' => 'Derivative Media', 'version' => '3.4.10']

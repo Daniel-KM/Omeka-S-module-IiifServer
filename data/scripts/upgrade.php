@@ -21,7 +21,8 @@ $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
-$urlPlugin = $plugins->get('url');
+$helpers = $services->get('ViewHelperManager');
+$url = $helpers->get('url');
 $easyMeta = $services->get('Common\EasyMeta');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
@@ -322,7 +323,7 @@ if (version_compare($oldVersion, '3.6.17', '<')) {
 
 if (version_compare($oldVersion, '3.6.18', '<')) {
     // Check the optional module Derivative Media for incompatibility.
-    if ($this->isModuleActive('DerivativeMedia') && !$this->isModuleVersionAtLeast('DerivativeMedia', '3.4.10')) {
+    if (!$this->checkModuleAvailability('DerivativeMedia', '3.4.10')) {
         $message = new \Omeka\Stdlib\Message(
             $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
             'Derivative Media', '3.4.10'
@@ -369,7 +370,7 @@ if (version_compare($oldVersion, '3.6.19', '<')) {
     // IiifServer is the parent module: never block its upgrade because of an
     // older ImageServer. ImageServer enforces its own minimum IiifServer in its
     // preInstall, which is the right direction for the dependency chain.
-    if ($this->isModuleActive('ImageServer') && !$this->isModuleVersionAtLeast('ImageServer', '3.6.16')) {
+    if (!$this->checkModuleAvailability('ImageServer', '3.6.16')) {
         $message = new PsrMessage(
             'The module {module} should be upgraded to version {version} or later after this upgrade.', // @translate
             ['module' => 'ImageServer', 'version' => '3.6.16']
@@ -410,12 +411,12 @@ if (version_compare($oldVersion, '3.6.20', '<')) {
             $message = new PsrMessage(
                 'A job was launched to upgrade the format of "table of contents". Replaced tocs will be stored in logs ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
                 [
-                    'link' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
+                    'link' => sprintf('<a href="%s">', htmlspecialchars($url('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
                     'job_id' => $job->getId(),
                     'link_end' => '</a>',
                     'link_log' => class_exists('Log\Module', false)
-                        ? sprintf('<a href="%1$s">', htmlspecialchars($urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])))
-                        : sprintf('<a href="%1$s" target="_blank" rel="noopener noreferrer">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
+                        ? sprintf('<a href="%1$s">', htmlspecialchars($url('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])))
+                        : sprintf('<a href="%1$s" target="_blank" rel="noopener noreferrer">', htmlspecialchars($url('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
                 ]
             );
             $message->setEscapeHtml(false);
@@ -467,12 +468,12 @@ if (version_compare($oldVersion, '3.6.29', '<')) {
     $message = new PsrMessage(
         'A job was launched to recompute all media dimensions with EXIF orientation fix ({link}job #{job_id}{link_end}, {link_log}logs{link_end}).', // @translate
         [
-            'link' => sprintf('<a href="%s">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
+            'link' => sprintf('<a href="%s">', htmlspecialchars($url('admin/id', ['controller' => 'job', 'id' => $job->getId()]))),
             'job_id' => $job->getId(),
             'link_end' => '</a>',
             'link_log' => class_exists('Log\Module', false)
-                ? sprintf('<a href="%1$s">', htmlspecialchars($urlPlugin->fromRoute('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])))
-                : sprintf('<a href="%1$s" target="_blank" rel="noopener noreferrer">', htmlspecialchars($urlPlugin->fromRoute('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
+                ? sprintf('<a href="%1$s">', htmlspecialchars($url('admin/default', ['controller' => 'log'], ['query' => ['job_id' => $job->getId()]])))
+                : sprintf('<a href="%1$s" target="_blank" rel="noopener noreferrer">', htmlspecialchars($url('admin/id', ['controller' => 'job', 'action' => 'log', 'id' => $job->getId()]))),
         ]
     );
     $message->setEscapeHtml(false);
@@ -614,6 +615,15 @@ if (version_compare($oldVersion, '3.6.34', '<')) {
 
     $message = new PsrMessage(
         'The table of contents of a tei file attached to an item (module IIIF Search) can be used as structures of the manifest, with or instead of the property (option "Structures from property and TEI file").' // @translate
+    );
+    $messenger->addSuccess($message);
+}
+
+if (version_compare($oldVersion, '3.6.35', '<')) {
+    // The directory of the cache was protected only on install.
+    $this->ensureIiifDirectories();
+    $message = new PsrMessage(
+        'The direct web access to the cache of the manifests (files/iiif/) is denied, because the manifest with the reserved medias should be read via the controller only. With Nginx, deny it in the configuration of the server.' // @translate
     );
     $messenger->addSuccess($message);
 }
