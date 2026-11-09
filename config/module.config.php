@@ -692,4 +692,14 @@ return [
             'presentation' => [],
         ],
     ],
+    // Rules of the background jobs for the module Job Queue, used only when it
+    // is installed: merge the jobs dispatched again before they start and limit
+    // the number of heavy jobs running at the same time.
+    'jobqueue' => [
+        'jobs' => [
+            'IiifServer\Job\CacheManifests' => [
+                'merge' => ['query.id'],
+            ],
+        ],
+    ],
 ];
