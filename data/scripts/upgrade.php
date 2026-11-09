@@ -627,3 +627,14 @@ if (version_compare($oldVersion, '3.6.35', '<')) {
     );
     $messenger->addSuccess($message);
 }
+
+if (version_compare($oldVersion, '3.6.36', '<')) {
+    if (!$this->isModuleActive('JobQueue')) {
+        $message = new PsrMessage(
+            'The optional module {link}Job Queue{link_end} can be installed to avoid running the same background jobs several times in parallel and to limit the number of heavy jobs running at the same time.', // @translate
+            ['link' => '<a href="https://gitlab.com/Daniel-KM/Omeka-S-module-JobQueue" target="_blank" rel="noopener">', 'link_end' => '</a>']
+        );
+        $message->setEscapeHtml(false);
+        $messenger->addNotice($message);
+    }
+}
