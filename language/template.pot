@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 00:00+0000\n"
+"POT-Creation-Date: 2026-11-09 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -381,6 +381,13 @@ msgid ""
 "controller only. With Nginx, deny it in the configuration of the server."
 msgstr ""
 
+#: data/scripts/upgrade.php:634
+msgid ""
+"The optional module {link}Job Queue{link_end} can be installed to avoid "
+"running the same background jobs several times in parallel and to limit the "
+"number of heavy jobs running at the same time."
+msgstr ""
+
 #: Module.php:560
 msgid ""
 "Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})"
@@ -585,34 +592,41 @@ msgstr ""
 msgid "No items selected."
 msgstr ""
 
-#: src/Job/CacheManifests.php:64
+#: src/Job/CacheManifests.php:71
 msgid "Unable to create directory \"{dir}\"."
 msgstr ""
 
-#: src/Job/CacheManifests.php:74
+#: src/Job/CacheManifests.php:81
 msgid "The job was stopped."
 msgstr ""
 
-#: src/Job/CacheManifests.php:106
+#: src/Job/CacheManifests.php:113
 msgid ""
 "Item #{item_id}: Unable to write the file \"{file}\". Manifest version "
 "{version} skipped."
 msgstr ""
 
-#: src/Job/CacheManifests.php:128
+#: src/Job/CacheManifests.php:135
 msgid "Item #{item_id}: Unable to create manifest {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:151
+#: src/Job/CacheManifests.php:158
 msgid "Item #{item_id}: Unable to store the manifest version {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:161
+#: src/Job/CacheManifests.php:168
 msgid "Item #{item_id}: iiif manifest created successfully."
 msgstr ""
 
-#: src/Job/CacheManifests.php:166
+#: src/Job/CacheManifests.php:173
 msgid "Item #{item_id}: {count} iiif manifests created successfully."
+msgstr ""
+
+#: src/Job/CacheManifests.php:204
+msgid ""
+"The server url is unknown or local (\"{url}\"), so the manifests would "
+"contain invalid urls. Run the job from the admin interface or via the cli "
+"script with the option \"--server-url\"."
 msgstr ""
 
 #: src/Job/MediaDimensions.php:99

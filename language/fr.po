@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-02 00:00+0000\n"
+"POT-Creation-Date: 2026-11-09 00:00+0000\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
 "Language-Team: \n"
@@ -474,6 +474,16 @@ msgstr ""
 "le contrôleur. Avec Nginx, bloquez cet accès dans la configuration du "
 "serveur."
 
+#: data/scripts/upgrade.php:634
+msgid ""
+"The optional module {link}Job Queue{link_end} can be installed to avoid "
+"running the same background jobs several times in parallel and to limit the "
+"number of heavy jobs running at the same time."
+msgstr ""
+"Le module optionnel {link}Job Queue{link_end} peut être installé pour éviter "
+"que les mêmes tâches en arrière-plan ne s'exécutent en parallèle et pour "
+"limiter les grosses tâches simultanées."
+
 #: Module.php:560
 msgid ""
 "Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})"
@@ -739,15 +749,15 @@ msgstr "éléments"
 msgid "No items selected."
 msgstr "Aucun contenu choisi."
 
-#: src/Job/CacheManifests.php:64
+#: src/Job/CacheManifests.php:71
 msgid "Unable to create directory \"{dir}\"."
 msgstr "Impossible de créer dossier « {dir} »."
 
-#: src/Job/CacheManifests.php:74
+#: src/Job/CacheManifests.php:81
 msgid "The job was stopped."
 msgstr "La tâche a été arrêtée."
 
-#: src/Job/CacheManifests.php:106
+#: src/Job/CacheManifests.php:113
 msgid ""
 "Item #{item_id}: Unable to write the file \"{file}\". Manifest version "
 "{version} skipped."
@@ -755,24 +765,35 @@ msgstr ""
 "Contenu #{item_id} : impossible d'écrire le fichier existant « {file} ». La "
 "version {version} du manifeste a été ignorée."
 
-#: src/Job/CacheManifests.php:128
+#: src/Job/CacheManifests.php:135
 msgid "Item #{item_id}: Unable to create manifest {version}."
 msgstr "Contenu #{item_id} : impossible de créer le manifeste {version}."
 
-#: src/Job/CacheManifests.php:151
+#: src/Job/CacheManifests.php:158
 msgid "Item #{item_id}: Unable to store the manifest version {version}."
 msgstr ""
 "Contenu #{item_id} : impossible d’enregistrer la version {version} du "
 "manifeste."
 
-#: src/Job/CacheManifests.php:161
+#: src/Job/CacheManifests.php:168
 msgid "Item #{item_id}: iiif manifest created successfully."
 msgstr "Contenu #{item_id} : les manifestes iiif ont été créés avec succès."
 
-#: src/Job/CacheManifests.php:166
+#: src/Job/CacheManifests.php:173
 msgid "Item #{item_id}: {count} iiif manifests created successfully."
 msgstr ""
 "Contenu #{item_id} : {count} manifestes iiif ont été créés avec succès."
+
+#: src/Job/CacheManifests.php:204
+msgid ""
+"The server url is unknown or local (\"{url}\"), so the manifests would "
+"contain invalid urls. Run the job from the admin interface or via the cli "
+"script with the option \"--server-url\"."
+msgstr ""
+"L’url du serveur est inconnue ou locale (« {url} »), donc les manifestes "
+"contiendraient des url invalides. Lancez la tâche depuis l’interface "
+"d’administration ou via le script en ligne de commande avec l’option « --"
+"server-url »."
 
 #: src/Job/MediaDimensions.php:99
 msgid "No scope selected (items / digital objects). Nothing to do."
