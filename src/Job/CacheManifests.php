@@ -52,6 +52,13 @@ class CacheManifests extends AbstractJob
             return;
         }
 
+        // The urls of the manifests use the server url, that is unknown when
+        // the job is run via cli without it (empty host) or set to a
+        // placeholder (localhost), so the cached manifests would be unusable.
+        if (!$this->checkServerUrl()) {
+            return;
+        }
+
         // Clear authentication identity so manifests are generated as anonymous
         // user: cached manifests should only contain public media, not private
         // ones.
@@ -173,6 +180,31 @@ class CacheManifests extends AbstractJob
                 $entityManager->clear();
             }
         }
+    }
+
+    /**
+     * Check that the server url is a real one, used in the urls of manifests.
+     *
+     * When the job is run via cli, the server url should be set with the option
+     * "--server-url" of the script (core perform-job.php, or task.php of module
+     * EasyAdmin, that uses "http://localhost" without it). A local server is
+     * allowed only when the job is launched manually by an admin, for a site
+     * served on localhost.
+     */
+    protected function checkServerUrl(): bool
+    {
+        $serverUrl = $this->getServiceLocator()->get('ViewHelperManager')->get('ServerUrl')->__invoke();
+        $host = strtolower((string) parse_url($serverUrl, PHP_URL_HOST));
+        $isLocal = in_array($host, ['localhost', '127.0.0.1', '[::1]', '::1'], true);
+        if ($host !== '' && (!$isLocal || $this->getArg('manual'))) {
+            return true;
+        }
+        $this->job->setStatus(\Omeka\Entity\Job::STATUS_ERROR);
+        $this->logger->err(
+            'The server url is unknown or local ("{url}"), so the manifests would contain invalid urls. Run the job from the admin interface or via the cli script with the option "--server-url".', // @translate
+            ['url' => $serverUrl]
+        );
+        return false;
     }
 
     /**

@@ -555,7 +555,7 @@ class Module extends AbstractModule
             parse_str($rawPost['fieldset_cache']['query_cache'] ?? '', $query);
             $job = $dispatcher->dispatch(
                 \IiifServer\Job\CacheManifests::class,
-                ['query' => $query ?: []]
+                ['query' => $query ?: [], 'manual' => true]
             );
             $message = 'Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})'; // @translate
         } else {
@@ -848,7 +848,7 @@ class Module extends AbstractModule
         if ($process === 'iiifserver_cache_manifests') {
             $params = $event->getParam('params');
             $event->setParam('job', \IiifServer\Job\CacheManifests::class);
-            $event->setParam('args', $params['module_tasks']['iiifserver_cache_manifests'] ?? []);
+            $event->setParam('args', ['manual' => true] + ($params['module_tasks']['iiifserver_cache_manifests'] ?? []));
         } elseif ($process === 'iiifserver_store_dimensions') {
             $params = $event->getParam('params');
             $event->setParam('job', \IiifServer\Job\MediaDimensions::class);
