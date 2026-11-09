@@ -56,6 +56,9 @@ See general end user documentation for [installing a module].
 
 The module [Common] must be installed first.
 
+With big bases or on shared hosts, it is recommended to install the optional
+module [Job Queue] to avoid to overload the server when preparing manifests.
+
 The module uses external libraries, so use the release zip to install it, or
 use and init the source.
 
@@ -1038,5 +1041,6 @@ format.
 [OpenLayers Zoom]: https://gitlab.com/Daniel-KM/Omeka-S-module-OpenLayersZoom
 [nakamura196]: https://github.com/nakamura196
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
+[Job Queue]: https://gitlab.com/Daniel-KM/Omeka-S-module-JobQueue
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
