@@ -11,30 +11,29 @@
     background: white;
     text-decoration: none;
     cursor: grab;
-}
+    &.iiif-copy-with-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4em;
+        width: auto;
+        height: auto;
+        padding: 0.3em 0.7em;
+    }
 
-.iiif-copy.iiif-copy-with-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    width: auto;
-    height: auto;
-    padding: 0.3em 0.7em;
-}
+    & img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        -webkit-user-drag: element;
+        -webkit-filter: grayscale(1);
+        filter: grayscale(1);
+        pointer-events: none;
+    }
 
-.iiif-copy img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    -webkit-user-drag: element;
-    -webkit-filter: grayscale(1);
-    filter: grayscale(1);
-    pointer-events: none;
-}
-
-.iiif-copy.iiif-copy-with-label img {
-    width: 1.5em;
-    height: 1.5em;
+    &.iiif-copy-with-label img {
+        width: 1.5em;
+        height: 1.5em;
+    }
 }
 
 .iiif-copy-label {
@@ -65,25 +64,23 @@
     align-items: center;
     gap: 0.5rem;
     text-align: center;
-}
-
-.iiif-share-section p {
-    margin: 0;
+    & p {
+        margin: 0;
+    }
 }
 
 .iiif-share-icon {
     display: inline-block;
     cursor: grab;
-}
+    &:active {
+        cursor: grabbing;
+    }
 
-.iiif-share-icon:active {
-    cursor: grabbing;
-}
-
-.iiif-share-icon img {
-    width: 60px;
-    height: auto;
-    display: block;
+    & img {
+        width: 60px;
+        height: auto;
+        display: block;
+    }
 }
 
 .iiif-share-info {

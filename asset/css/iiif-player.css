@@ -1,73 +1,76 @@
-.iiif-player-button .iiif-player-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    background: rgba(0, 0, 0, 0.92);
-    flex-direction: column;
-}
+.iiif-player-button {
+    & .iiif-player-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.92);
+        flex-direction: column;
+    }
 
-.iiif-player-button.iiif-player-inline {
-    width: 100%;
-    position: relative;
-}
+    &.iiif-player-inline {
+        width: 100%;
+        position: relative;
+    }
 
-.iiif-player-button.iiif-player-inline > .iiif-player-stage {
-    width: 100%;
-    height: 100%;
-    background: #fff;
-    position: relative;
-}
+    &.iiif-player-inline > .iiif-player-stage {
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        position: relative;
+    }
 
-.iiif-player-button .iiif-player-stage {
-    flex: 1;
-    min-height: 0;
-    position: relative;
-    background: #fff;
-}
+    & .iiif-player-stage {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        background: #fff;
+        /* Force every direct child to fill the stage (except sidebar layout, which
+           has its own flex children iiif-player-osd-area + iiif-player-sidebar). The
+           zoom indicator is an absolutely-positioned overlay and must keep its own
+           size. */
+        &:not([class*="iiif-player-sidebar-"]) > *:not(.iiif-player-zoom) {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
 
-/* Force every direct child to fill the stage (except sidebar layout, which
-   has its own flex children iiif-player-osd-area + iiif-player-sidebar). The
-   zoom indicator is an absolutely-positioned overlay and must keep its own
-   size. */
-.iiif-player-button .iiif-player-stage:not([class*="iiif-player-sidebar-"]) > *:not(.iiif-player-zoom) {
-    width: 100% !important;
-    height: 100% !important;
-}
+    & .iiif-player-osd-area > [id$="-inner"] {
+        width: 100% !important;
+        height: 100% !important;
+    }
 
-.iiif-player-button .iiif-player-osd-area > [id$="-inner"] {
-    width: 100% !important;
-    height: 100% !important;
-}
+    /* UV nests its viewport inside .uv (fixed pixel height set at init). */
+    & .iiif-player-stage {
+        & .uv,
+        & .uv > div {
+            width: 100% !important;
+            height: 100% !important;
+        }
 
-/* UV nests its viewport inside .uv (fixed pixel height set at init). */
-.iiif-player-button .iiif-player-stage .uv,
-.iiif-player-button .iiif-player-stage .uv > div {
-    width: 100% !important;
-    height: 100% !important;
-}
+        /* Mirador module container + core workspace. */
+        & .mirador-container,
+        & [class*="WorkspaceArea"],
+        & [class*="mirador-workspace"] {
+            width: 100% !important;
+            height: 100% !important;
+        }
 
-/* Mirador module container + core workspace. */
-.iiif-player-button .iiif-player-stage .mirador-container,
-.iiif-player-button .iiif-player-stage [class*="WorkspaceArea"],
-.iiif-player-button .iiif-player-stage [class*="mirador-workspace"] {
-    width: 100% !important;
-    height: 100% !important;
-}
+        /* Diva nested app div (clears parent classes at init). */
+        & .diva-player,
+        & .diva-app,
+        & .diva-outer {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
 
-/* Diva nested app div (clears parent classes at init). */
-.iiif-player-button .iiif-player-stage .diva-player,
-.iiif-player-button .iiif-player-stage .diva-app,
-.iiif-player-button .iiif-player-stage .diva-outer {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-.iiif-player-button .iiif-player-osd-area {
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    background: #222;
+    & .iiif-player-osd-area {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+        background: #222;
+    }
 }
 
 .iiif-player-zoom {
@@ -85,140 +88,138 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.25s ease;
+    &.is-visible {
+        opacity: 1;
+    }
 }
 
-.iiif-player-zoom.is-visible {
-    opacity: 1;
-}
+.iiif-player-button {
+    & .iiif-player-sidebar-left,
+    & .iiif-player-sidebar-right {
+        display: flex;
+        flex-direction: row;
+    }
 
-.iiif-player-button .iiif-player-sidebar-left,
-.iiif-player-button .iiif-player-sidebar-right {
-    display: flex;
-    flex-direction: row;
-}
+    & .iiif-player-sidebar-top,
+    & .iiif-player-sidebar-bottom {
+        display: flex;
+        flex-direction: column;
+    }
 
-.iiif-player-button .iiif-player-sidebar-top,
-.iiif-player-button .iiif-player-sidebar-bottom {
-    display: flex;
-    flex-direction: column;
-}
+    & .iiif-player-sidebar {
+        background: #222;
+        display: flex;
+        align-items: stretch;
+        position: relative;
+    }
 
-.iiif-player-button .iiif-player-sidebar {
-    background: #222;
-    display: flex;
-    align-items: stretch;
-    position: relative;
-}
+    & .iiif-player-sidebar-left .iiif-player-sidebar,
+    & .iiif-player-sidebar-right .iiif-player-sidebar {
+        flex: 0 0 160px;
+        flex-direction: column;
+    }
 
-.iiif-player-button .iiif-player-sidebar-left .iiif-player-sidebar,
-.iiif-player-button .iiif-player-sidebar-right .iiif-player-sidebar {
-    flex: 0 0 160px;
-    flex-direction: column;
-}
+    & .iiif-player-sidebar-top .iiif-player-sidebar,
+    & .iiif-player-sidebar-bottom .iiif-player-sidebar {
+        flex: 0 0 120px;
+        flex-direction: row;
+    }
 
-.iiif-player-button .iiif-player-sidebar-top .iiif-player-sidebar,
-.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-sidebar {
-    flex: 0 0 120px;
-    flex-direction: row;
-}
+    & .iiif-player-sidebar-track {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+        padding: 6px;
+        display: flex;
+        gap: 6px;
+    }
 
-.iiif-player-button .iiif-player-sidebar-track {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    padding: 6px;
-    display: flex;
-    gap: 6px;
-}
+    & .iiif-player-sidebar-left .iiif-player-sidebar-track,
+    & .iiif-player-sidebar-right .iiif-player-sidebar-track {
+        overflow-y: auto;
+        flex-direction: column;
+    }
 
-.iiif-player-button .iiif-player-sidebar-left .iiif-player-sidebar-track,
-.iiif-player-button .iiif-player-sidebar-right .iiif-player-sidebar-track {
-    overflow-y: auto;
-    flex-direction: column;
-}
+    & .iiif-player-sidebar-top .iiif-player-sidebar-track,
+    & .iiif-player-sidebar-bottom .iiif-player-sidebar-track {
+        overflow-x: auto;
+        flex-direction: row;
+        justify-content: center;
+    }
 
-.iiif-player-button .iiif-player-sidebar-top .iiif-player-sidebar-track,
-.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-sidebar-track {
-    overflow-x: auto;
-    flex-direction: row;
-    justify-content: center;
-}
+    & .iiif-player-nav {
+        flex: 0 0 28px;
+        background: rgba(0, 0, 0, 0.55);
+        border: 0;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover:not(:disabled) {
+            background: rgba(0, 0, 0, 0.85);
+        }
 
-.iiif-player-button .iiif-player-nav {
-    flex: 0 0 28px;
-    background: rgba(0, 0, 0, 0.55);
-    border: 0;
-    color: #fff;
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        &:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+    }
 
-.iiif-player-button .iiif-player-nav:hover:not(:disabled) {
-    background: rgba(0, 0, 0, 0.85);
-}
+    & .iiif-player-sidebar-top .iiif-player-thumb,
+    & .iiif-player-sidebar-bottom .iiif-player-thumb {
+        flex: 0 0 auto;
+        width: auto;
+        height: 100%;
+    }
 
-.iiif-player-button .iiif-player-nav:disabled {
-    opacity: 0.3;
-    cursor: default;
-}
+    & .iiif-player-sidebar-top .iiif-player-thumb img,
+    & .iiif-player-sidebar-bottom .iiif-player-thumb img {
+        width: auto;
+        height: 100%;
+    }
 
-.iiif-player-button .iiif-player-sidebar-top .iiif-player-thumb,
-.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-thumb {
-    flex: 0 0 auto;
-    width: auto;
-    height: 100%;
-}
+    & .iiif-player-thumb {
+        background: transparent;
+        border: 2px solid transparent;
+        padding: 0;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        & img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
 
-.iiif-player-button .iiif-player-sidebar-top .iiif-player-thumb img,
-.iiif-player-button .iiif-player-sidebar-bottom .iiif-player-thumb img {
-    width: auto;
-    height: 100%;
-}
+        &.active,
+        &:hover {
+            border-color: #fff;
+        }
+    }
 
-.iiif-player-button .iiif-player-thumb {
-    background: transparent;
-    border: 2px solid transparent;
-    padding: 0;
-    cursor: pointer;
-    display: block;
-    width: 100%;
-}
-
-.iiif-player-button .iiif-player-thumb img {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-.iiif-player-button .iiif-player-thumb.active,
-.iiif-player-button .iiif-player-thumb:hover {
-    border-color: #fff;
-}
-
-.iiif-player-button .iiif-player-close {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 10001;
-    height: 36px;
-    padding: 0 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid #fff;
-    border-radius: 18px;
-    color: #fff;
-    font-size: 14px;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.iiif-player-button .iiif-player-close .iiif-player-close-icon {
-    font-size: 20px;
+    & .iiif-player-close {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 10001;
+        height: 36px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #fff;
+        border-radius: 18px;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        & .iiif-player-close-icon {
+            font-size: 20px;
+        }
+    }
 }
