@@ -47,9 +47,7 @@ class UpgradeStructures extends AbstractJob
             $queryItem = null;
             parse_str($query, $queryItem);
             if (empty($query)) {
-                $this->job->setStatus(\Omeka\Entity\Job::STATUS_ERROR);
-                $logger->err('A query was set but invalid or empty.'); // @translate
-                return;
+                throw new \Common\Job\Exception\RuntimeException('A query was set but invalid or empty.'); // @translate
             }
             $query = $queryItem;
         }

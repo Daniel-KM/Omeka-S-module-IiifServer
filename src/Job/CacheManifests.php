@@ -55,9 +55,7 @@ class CacheManifests extends AbstractJob
         // The urls of the manifests use the server url, that is unknown when
         // the job is run via cli without it (empty host) or set to a
         // placeholder (localhost), so the cached manifests would be unusable.
-        if (!$this->checkServerUrl()) {
-            return;
-        }
+        $this->checkServerUrl();
 
         // Clear authentication identity so manifests are generated as anonymous
         // user: cached manifests should only contain public media, not private
@@ -67,14 +65,15 @@ class CacheManifests extends AbstractJob
 
         foreach ([2, 3] as $version) {
             if (!$this->ensureDirectory("$basePath/iiif/$version")) {
-                $this->logger->err(
+                throw new \Common\Job\Exception\RuntimeException(
                     'Unable to create directory "{dir}".', // @translate
                     ['dir' => "/iiif/$version/"]
                 );
-                return;
             }
         }
 
+        $totalCreated = 0;
+        $totalFailed = 0;
         foreach (array_values($ids) as $index => $itemId) {
             if ($this->shouldStop()) {
                 $this->logger->warn(
@@ -161,6 +160,9 @@ class CacheManifests extends AbstractJob
                 }
             }
 
+            $totalCreated += $created;
+            $totalFailed += (int) $failed;
+
             // Don't add a message when failed or skipped: already done.
             if (!$failed) {
                 if ($created <= 1) {
@@ -180,6 +182,13 @@ class CacheManifests extends AbstractJob
                 $entityManager->clear();
             }
         }
+
+        if ($totalFailed && !$totalCreated) {
+            throw new \Common\Job\Exception\RuntimeException(
+                'No manifest could be created: {count} items failed.', // @translate
+                ['count' => $totalFailed]
+            );
+        }
     }
 
     /**
@@ -191,20 +200,17 @@ class CacheManifests extends AbstractJob
      * allowed only when the job is launched manually by an admin, for a site
      * served on localhost.
      */
-    protected function checkServerUrl(): bool
+    protected function checkServerUrl(): void
     {
         $serverUrl = $this->getServiceLocator()->get('ViewHelperManager')->get('ServerUrl')->__invoke();
         $host = strtolower((string) parse_url($serverUrl, PHP_URL_HOST));
         $isLocal = in_array($host, ['localhost', '127.0.0.1', '[::1]', '::1'], true);
-        if ($host !== '' && (!$isLocal || $this->getArg('manual'))) {
-            return true;
+        if ($host === '' || ($isLocal && !$this->getArg('manual'))) {
+            throw new \Common\Job\Exception\RuntimeException(
+                'The server url is unknown or local ("{url}"), so the manifests would contain invalid urls. Run the job from the admin interface or via the cli script with the option "--server-url".', // @translate
+                ['url' => $serverUrl]
+            );
         }
-        $this->job->setStatus(\Omeka\Entity\Job::STATUS_ERROR);
-        $this->logger->err(
-            'The server url is unknown or local ("{url}"), so the manifests would contain invalid urls. Run the job from the admin interface or via the cli script with the option "--server-url".', // @translate
-            ['url' => $serverUrl]
-        );
-        return false;
     }
 
     /**

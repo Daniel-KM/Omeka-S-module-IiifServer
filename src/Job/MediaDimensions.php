@@ -238,6 +238,13 @@ class MediaDimensions extends AbstractJob
                 'count_failed' => $this->totalFailed,
             ]
         );
+
+        if ($this->totalFailed && !$this->totalSucceed) {
+            throw new \Common\Job\Exception\RuntimeException(
+                'No media could be sized: {count} errors.', // @translate
+                ['count' => $this->totalFailed]
+            );
+        }
     }
 
     protected function prepareSizer(): void
