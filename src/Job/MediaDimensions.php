@@ -336,12 +336,17 @@ class MediaDimensions extends AbstractJob
         }
 
         $mediaEntity->setData($mediaData);
-        // The modified date refreshes the cached manifests.
-        if ($mediaData != ($media->mediaData() ?: [])) {
-            $mediaEntity->setModified(new \DateTime('now'));
-        }
         $this->entityManager->persist($mediaEntity);
         $this->entityManager->flush();
+        // Removed after the flush, so it is not rebuilt with old data.
+        if ($mediaData != ($media->mediaData() ?: []) && $mediaEntity->getItem()) {
+            $services = $this->getServiceLocator();
+            $config = $services->get('Config');
+            $services->get('ControllerPluginManager')->get('iiifAccessCache')->removeManifests(
+                $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files'),
+                [(int) $mediaEntity->getItem()->getId()]
+            );
+        }
         unset($mediaEntity);
 
         // Counted as "succeeded" only when at least one expected type was

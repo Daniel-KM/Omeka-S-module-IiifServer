@@ -142,6 +142,9 @@ class PresentationController extends AbstractActionController
             ? $this->iiifAccessCache()->accessFilterForVisitor((int) $resource->id())
             : AbstractResourceType::ACCESS_FILTER_ALL;
 
+        $settings = $this->settings();
+        $isCacheEnabled = (bool) $settings->get('iiifserver_manifest_cache', false);
+
         $isViewAll = $this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
 
         // A user that owns a private resource sees it whatever its rights, so
@@ -159,13 +162,40 @@ class PresentationController extends AbstractActionController
             && !$isOwner
             && (!$hasAccessModule || $accessFilter === AbstractResourceType::ACCESS_FILTER_FREE);
         $mtime = $this->manifestMtime($resource);
-        $etag = '"manifest-' . ($version ?: 'auto') . '-' . $resource->id() . '-' . $accessFilter . '-' . $mtime . '"';
+
+        // With the cache, the date is the one of the cached file, that is
+        // removed when the data of a media change (dimensions, tiles), so the
+        // manifest is rebuilt without changing the date of the resources.
+        $filepath = null;
+        $isCacheFresh = false;
+        if ($isCacheEnabled) {
+            $config = $resource->getServiceLocator()->get('Config');
+            $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
+            $filepath = $this->iiifAccessCache()
+                ->filepath($basePath, (string) $version, (int) $resource->id(), $accessFilter);
+            $fileMtime = is_readable($filepath) ? (int) filemtime($filepath) : 0;
+            $isCacheFresh = $fileMtime > $mtime;
+            if ($isCacheFresh) {
+                $mtime = $fileMtime;
+            } else {
+                $canCache304 = false;
+                $mtime = time();
+            }
+        }
+        // Without cache, the jobs update the data of the medias (dimensions,
+        // tiles) without changing their date, so the etag includes them.
+        $etag = '"manifest-' . ($version ?: 'auto') . '-' . $resource->id() . '-' . $accessFilter . '-' . $mtime
+            . ($isCacheEnabled ? '' : '-' . $this->mediaDataFingerprint($resource)) . '"';
         if ($canCache304) {
             $request = $this->getRequest();
             $ifNoneMatch = $request->getHeader('If-None-Match');
             $ifModifiedSince = $request->getHeader('If-Modified-Since');
             $matchesEtag = $ifNoneMatch && trim($ifNoneMatch->getFieldValue()) === $etag;
-            $matchesDate = $ifModifiedSince
+            // The date is checked only without etag, as required by rfc 9110,
+            // and only with the cache, since the date ignores the media data.
+            $matchesDate = !$ifNoneMatch
+                && $isCacheEnabled
+                && $ifModifiedSince
                 && ($since = strtotime($ifModifiedSince->getFieldValue()))
                 && $since >= $mtime;
             if ($matchesEtag || $matchesDate) {
@@ -188,8 +218,6 @@ class PresentationController extends AbstractActionController
         $manifest = null;
         $toCache = false;
 
-        $settings = $this->settings();
-
         // Don't use cache for privileged users: they should see private media
         // in fresh manifests. Cached manifests only contain public media.
         $skipCache = $isViewAll || $isOwner;
@@ -197,7 +225,6 @@ class PresentationController extends AbstractActionController
         // Nevertheless, the cached manifest is the same for them when there is
         // no private data in the item. It is only read: a manifest built with
         // their rights is never written in the shared cache.
-        $isCacheEnabled = (bool) $settings->get('iiifserver_manifest_cache', false);
         $isCacheReadOnly = false;
         if ($skipCache
             && $isCacheEnabled
@@ -209,13 +236,8 @@ class PresentationController extends AbstractActionController
 
         $useCache = !$skipCache && $isCacheEnabled;
         if ($useCache) {
-            $itemId = $resource->id();
-            $config = $resource->getServiceLocator()->get('Config');
-            $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-            $filepath = $this->iiifAccessCache()
-                ->filepath($basePath, (string) $version, (int) $itemId, $accessFilter);
             // A manifest older than the item or one of its medias is rebuilt.
-            if (is_readable($filepath) && filemtime($filepath) > $mtime) {
+            if ($isCacheFresh) {
                 $manifest = file_get_contents($filepath);
                 $manifest = $manifest !== false ? json_decode($manifest, true) : null;
                 if (is_array($manifest)) {
@@ -501,6 +523,21 @@ class PresentationController extends AbstractActionController
             }
         }
         return $result;
+    }
+
+    /**
+     * Fingerprint of the data of the medias of an item (dimensions, tiles).
+     */
+    protected function mediaDataFingerprint($resource): string
+    {
+        if (!method_exists($resource, 'media')) {
+            return '';
+        }
+        $data = [];
+        foreach ($resource->media() as $media) {
+            $data[$media->id()] = $media->mediaData();
+        }
+        return hash('crc32b', serialize($data));
     }
 
     /**

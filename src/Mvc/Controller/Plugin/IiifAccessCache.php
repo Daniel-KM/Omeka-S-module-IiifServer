@@ -192,6 +192,33 @@ class IiifAccessCache extends AbstractPlugin
     }
 
     /**
+     * Remove the cached manifests of items, or all of them when null.
+     *
+     * All variants are removed (see filepath()).
+     */
+    public function removeManifests(string $basePath, ?array $itemIds): void
+    {
+        if ($itemIds === []) {
+            return;
+        }
+        foreach ([2, 3] as $version) {
+            $patterns = $itemIds === null
+                ? ["$basePath/iiif/$version/*.manifest.json"]
+                : array_merge(...array_map(fn ($itemId) => [
+                    "$basePath/iiif/$version/" . (int) $itemId . '.manifest.json',
+                    "$basePath/iiif/$version/" . (int) $itemId . '.*.manifest.json',
+                ], $itemIds));
+            foreach ($patterns as $pattern) {
+                foreach (glob($pattern) ?: [] as $filepath) {
+                    if (is_writeable($filepath)) {
+                        @unlink($filepath);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * The variant to serve to the current visitor.
      *
      * The visitor gets the full manifest when the module Access allows him the

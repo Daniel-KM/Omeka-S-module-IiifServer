@@ -719,23 +719,11 @@ class Module extends AbstractModule
      */
     protected function removeCachedManifests(?array $itemIds): void
     {
-        $config = $this->getServiceLocator()->get('Config');
+        $services = $this->getServiceLocator();
+        $config = $services->get('Config');
         $basePath = $config['file_store']['local']['base_path'] ?: (OMEKA_PATH . '/files');
-        foreach ([2, 3] as $version) {
-            $patterns = $itemIds === null
-                ? ["$basePath/iiif/$version/*.manifest.json"]
-                : array_merge(...array_map(fn ($itemId) => [
-                    "$basePath/iiif/$version/$itemId.manifest.json",
-                    "$basePath/iiif/$version/$itemId.*.manifest.json",
-                ], $itemIds));
-            foreach ($patterns as $pattern) {
-                foreach (glob($pattern) ?: [] as $filepath) {
-                    if (is_writeable($filepath)) {
-                        @unlink($filepath);
-                    }
-                }
-            }
-        }
+        $services->get('ControllerPluginManager')->get('iiifAccessCache')
+            ->removeManifests($basePath, $itemIds);
     }
 
     public function handleEasyAdminJobsForm(Event $event): void
