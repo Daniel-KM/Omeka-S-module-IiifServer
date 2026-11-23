@@ -2017,20 +2017,6 @@ msgstr "Nom de fichier avec extension (tous)"
 msgid "Filename with extension (image only)"
 msgstr "Nom de fichier avec extension (images seules)"
 
-#: src/Form/ConfigForm.php:1193
-msgid "Append \"info.json\" to the image iiif identifier"
-msgstr "Ajouter « info.json » à l’identifiant iiif de l’image"
-
-#: src/Form/ConfigForm.php:1194
-msgid ""
-"May be required with an external image server that doesn’t manage the url "
-"rewriting to /info.json (iiif specification requires a redirection with http "
-"303)."
-msgstr ""
-"Cela peut être nécessaire avec un serveur d’images externe qui ne gère pas "
-"la réécriture d’url vers /info.json (la spécification IIIF exige une "
-"redirection avec un code http 303)."
-
 #: src/Form/ConfigForm.php:1206
 msgid "The server supports non-image files"
 msgstr "Le serveur gère les fichiers hors images"
@@ -2489,3 +2475,30 @@ msgstr "Visionneuse IIIF"
 #~ msgstr ""
 #~ "Les clés obligatoires pour le type de ressource « %s » manquent : "
 #~ "« %2$s » (ressource #%3$d)."
+
+#: Module.php:1018
+msgid ""
+"The option to append \"info.json\" to the image identifier is set, but it is "
+"ignored, because there is no external image server. It may be unset."
+msgstr "L’option qui ajoute « info.json » à l’identifiant de l’image est cochée, mais elle est ignorée, car il n’y a pas de serveur d’images externe. Elle peut être décochée."
+
+#: src/Job/CacheManifests.php:188
+msgid "No manifest could be created: {count} items failed."
+msgstr "Aucun manifeste n’a pu être créé : {count} contenus en échec."
+
+#: src/Job/MediaDimensions.php:244
+msgid "No media could be sized: {count} errors."
+msgstr "Aucune dimension de média n’a pu être calculée : {count} erreurs."
+
+#: src/Form/ConfigForm.php:1193
+msgid ""
+"Append \"info.json\" to the image iiif identifier (external image server "
+"only)"
+msgstr "Ajouter « info.json » à l’identifiant iiif de l’image (serveur d’images externe uniquement)"
+
+#: src/Form/ConfigForm.php:1194
+msgid ""
+"May be required with an external image server that doesn’t manage the url "
+"rewriting to /info.json (iiif specification requires a redirection with http "
+"303). Ignored without the url of an external image server."
+msgstr "Peut être nécessaire avec un serveur d’images externe qui ne gère pas la réécriture des url vers /info.json (la spécification iiif impose une redirection http 303). Ignoré sans l’url d’un serveur d’images externe."

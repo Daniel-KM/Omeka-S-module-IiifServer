@@ -442,6 +442,10 @@ class Module extends AbstractModule
             $form = $formManager->get(\IiifServer\Form\ConfigForm::class);
             $form->init();
             $form->setData($data);
+            // The option is used only with an external image server.
+            if (!$settings->get('iiifserver_media_api_url')) {
+                $form->get('iiifserver_media_api_identifier_infojson')->setAttribute('disabled', 'disabled');
+            }
         }
         $form->prepare();
 
@@ -998,6 +1002,22 @@ class Module extends AbstractModule
         $this->checkManifestCache();
         $this->checkMediaDimensions();
         $this->checkManifestRoute();
+        $this->checkInfoJsonIdentifier();
+    }
+
+    /**
+     * Warn when the option to append "info.json" is set without external server.
+     */
+    protected function checkInfoJsonIdentifier(): void
+    {
+        $settings = $this->getServiceLocator()->get('Omeka\Settings');
+        if ($settings->get('iiifserver_media_api_identifier_infojson')
+            && !$settings->get('iiifserver_media_api_url')
+        ) {
+            $this->getServiceLocator()->get('ControllerPluginManager')->get('messenger')->addWarning(new PsrMessage(
+                'The option to append "info.json" to the image identifier is set, but it is ignored, because there is no external image server. It may be unset.' // @translate
+            ));
+        }
     }
 
     /**

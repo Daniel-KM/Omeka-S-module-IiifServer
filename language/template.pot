@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 00:00+0000\n"
+"POT-Creation-Date: 2026-11-24 06:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,17 +36,17 @@ msgstr ""
 msgid "All checks passed."
 msgstr ""
 
-#: Module.php:459
+#: Module.php:463
 msgid ""
 "The module creates manifests with the properties from each resource (item "
 "set, item and media)."
 msgstr ""
 
-#: Module.php:460
+#: Module.php:464
 msgid "The properties below are used when some metadata are missing."
 msgstr ""
 
-#: Module.php:461
+#: Module.php:465
 msgid "In all cases, empty properties are not set."
 msgstr ""
 
@@ -54,7 +54,7 @@ msgstr ""
 msgid "Download all files as zip"
 msgstr ""
 
-#: src/Iiif/Manifest.php:380 src/View/Helper/IiifManifest2.php:1172
+#: src/Iiif/Manifest.php:380 src/View/Helper/IiifManifest2.php:1248
 msgid "Placeholder image"
 msgstr ""
 
@@ -71,30 +71,30 @@ msgstr ""
 msgid "Dynamic list"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:482
+#: src/View/Helper/IiifManifest2.php:505
 msgid "Download as PDF"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:491
+#: src/View/Helper/IiifManifest2.php:514
 msgid "Download as XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:499
+#: src/View/Helper/IiifManifest2.php:522
 msgid "Download as ALTO XML"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:507
+#: src/View/Helper/IiifManifest2.php:530
 msgid "Download as text"
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1353
+#: src/View/Helper/IiifManifest2.php:1429
 msgid ""
 "Unsupported extension. This manifest is being used as a wrapper for non-IIIF "
 "v2 content (e.g., audio, video) and is unfortunately incompatible with IIIF "
 "v2 viewers."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:1928
+#: src/View/Helper/IiifManifest2.php:2004
 msgid "Text of current page"
 msgstr ""
 
@@ -388,151 +388,157 @@ msgid ""
 "number of heavy jobs running at the same time."
 msgstr ""
 
-#: Module.php:560
+#: Module.php:564
 msgid ""
 "Caching manifests ({link}job #{job_id}{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:569
+#: Module.php:573
 msgid ""
 "Storing dimensions of images, audio and video ({link}job #{job_id}"
 "{link_end}, {link_log}logs{link_end})"
 msgstr ""
 
-#: Module.php:747
+#: Module.php:751
 msgid "Iiif Server: Cache manifests"
 msgstr ""
 
-#: Module.php:748
+#: Module.php:752
 msgid "Iiif Server: Store dimensions of medias"
 msgstr ""
 
-#: Module.php:749
+#: Module.php:753
 msgid ""
 "Iiif Server: Upgrade old tables of contents to new format with four columns "
 "(to do only one time for old external manifests)"
 msgstr ""
 
-#: Module.php:755
+#: Module.php:759
 msgid "IIIF Server: Manifests cache"
 msgstr ""
 
-#: Module.php:756
+#: Module.php:760
 msgid "Pre-build and cache the IIIF presentation manifests."
 msgstr ""
 
-#: Module.php:758 src/Form/ConfigForm.php:100
+#: Module.php:762 src/Form/ConfigForm.php:100
 msgid "Cache"
 msgstr ""
 
-#: Module.php:762
+#: Module.php:766
 msgid "IIIF Server: Media dimensions"
 msgstr ""
 
-#: Module.php:763
+#: Module.php:767
 msgid "Store the dimensions (width and height) of media files."
 msgstr ""
 
-#: Module.php:765
+#: Module.php:769
 msgid "Store"
 msgstr ""
 
-#: Module.php:769
+#: Module.php:773
 msgid "IIIF Server: Tables of contents"
 msgstr ""
 
-#: Module.php:770
+#: Module.php:774
 msgid ""
 "Upgrade old tables of contents to the new four-column format (run once for "
 "old external manifests)."
 msgstr ""
 
-#: Module.php:782
+#: Module.php:786
 msgid "Options to cache manifests"
 msgstr ""
 
-#: Module.php:793
+#: Module.php:797
 msgid "Limit cache of manifests to specific items"
 msgstr ""
 
-#: Module.php:804
+#: Module.php:808
 msgid "Options to store dimensions"
 msgstr ""
 
-#: Module.php:815
+#: Module.php:819
 msgid "Limit storage of dimensions to specific items"
 msgstr ""
 
-#: Module.php:826
+#: Module.php:830
 msgid "Options to upgrade table of contents"
 msgstr ""
 
-#: Module.php:837
+#: Module.php:841
 msgid "Limit upgrade of tables of contents to specific items"
 msgstr ""
 
-#: Module.php:936
+#: Module.php:940
 msgid ""
 "Could not create or write the IIIF cache directory \"{path}\". Cache will "
 "not work unless created manually with proper permissions."
 msgstr ""
 
-#: Module.php:1016
+#: Module.php:1018
+msgid ""
+"The option to append \"info.json\" to the image identifier is set, but it is "
+"ignored, because there is no external image server. It may be unset."
+msgstr ""
+
+#: Module.php:1036
 msgid ""
 "The default IIIF Presentation version is {version}. Version 3 is the current "
 "standard and is recommended."
 msgstr ""
 
-#: Module.php:1059
+#: Module.php:1079
 msgid ""
 "Some items carry more than {threshold} images. Enabling manifest cache is "
 "recommended to avoid slow page loads."
 msgstr ""
 
-#: Module.php:1072
+#: Module.php:1092
 msgid "Manifest cache is enabled but directory \"{dir}\" is not writable."
 msgstr ""
 
-#: Module.php:1085
+#: Module.php:1105
 msgid "Manifest cache is enabled and working."
 msgstr ""
 
-#: Module.php:1089
+#: Module.php:1109
 msgid ""
 "Manifest cache is enabled but write/read test failed. Check directory "
 "permissions and filesystem available space."
 msgstr ""
 
-#: Module.php:1180
+#: Module.php:1200
 msgid "All {total} media (images, audio, video) have stored dimensions."
 msgstr ""
 
-#: Module.php:1186
+#: Module.php:1206
 msgid ""
 "Some media (images, audio, video) have no stored dimensions. Run \"Media "
 "Dimensions\" job to speed up manifest generation. The exact count is not "
 "computed during the audit to keep the page responsive on large installations."
 msgstr ""
 
-#: Module.php:1259
+#: Module.php:1279
 msgid "Manifest route is working (tested item #{id})."
 msgstr ""
 
-#: Module.php:1264
+#: Module.php:1284
 msgid "Could not reach manifest URL: {url}. Check server configuration."
 msgstr ""
 
-#: Module.php:1269
+#: Module.php:1289
 msgid "Manifest URL {url} returned invalid JSON."
 msgstr ""
 
-#: Module.php:1289
+#: Module.php:1309
 msgid ""
 "The cors headers are disabled. You shall enable them to allow other "
 "libraries to access to your manifests."
 msgstr ""
 
-#: Module.php:1296
+#: Module.php:1316
 msgid ""
 "The cors headers are enabled multiple times in the config of the module and "
 "in the config of Apache or in the file .htaccess. Duplicating the cors "
@@ -540,13 +546,13 @@ msgid ""
 "the module, in the Apache config or in the file .htaccess."
 msgstr ""
 
-#: Module.php:1312
+#: Module.php:1332
 msgid ""
 "When cache is enabled, you should recreate it each time the config is "
 "updated."
 msgstr ""
 
-#: Module.php:1396
+#: Module.php:1416
 #, php-format
 msgid ""
 "The server supports encoded slashes (AllowEncodedSlashes). IIIF URLs will "
@@ -554,7 +560,7 @@ msgid ""
 "be changed in the config form."
 msgstr ""
 
-#: Module.php:1403
+#: Module.php:1423
 #, php-format
 msgid ""
 "The server rejects encoded slashes (%%2F) in URLs (Apache default). IIIF "
@@ -564,27 +570,27 @@ msgid ""
 "prefix, or use numeric identifiers."
 msgstr ""
 
-#: Module.php:1625
+#: Module.php:1645
 msgid ""
 "An external IIIF image server was detected ({server_label}). The media "
 "identifier has been set to \"filename with extension (image only)\" for "
 "compatibility. The option can be changed in the config form."
 msgstr ""
 
-#: Module.php:1631
+#: Module.php:1651
 msgid ""
 "An external IIIF image server was detected ({server_label}). The current "
 "media identifier setting \"{identifier}\" is already set and likely "
 "compatible. If images don’t display, check the config form."
 msgstr ""
 
-#: Module.php:1696
+#: Module.php:1716
 msgid ""
 "Item #{item_id} / media #{media_id}: Error getting dimensions for types "
 "\"{types}\"."
 msgstr ""
 
-#: src/View/Helper/IiifManifest2.php:613
+#: src/View/Helper/IiifManifest2.php:636
 msgid "elements"
 msgstr ""
 
@@ -592,37 +598,41 @@ msgstr ""
 msgid "No items selected."
 msgstr ""
 
-#: src/Job/CacheManifests.php:71
+#: src/Job/CacheManifests.php:69
 msgid "Unable to create directory \"{dir}\"."
 msgstr ""
 
-#: src/Job/CacheManifests.php:81
+#: src/Job/CacheManifests.php:80
 msgid "The job was stopped."
 msgstr ""
 
-#: src/Job/CacheManifests.php:113
+#: src/Job/CacheManifests.php:112
 msgid ""
 "Item #{item_id}: Unable to write the file \"{file}\". Manifest version "
 "{version} skipped."
 msgstr ""
 
-#: src/Job/CacheManifests.php:135
+#: src/Job/CacheManifests.php:134
 msgid "Item #{item_id}: Unable to create manifest {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:158
+#: src/Job/CacheManifests.php:157
 msgid "Item #{item_id}: Unable to store the manifest version {version}."
 msgstr ""
 
-#: src/Job/CacheManifests.php:168
+#: src/Job/CacheManifests.php:170
 msgid "Item #{item_id}: iiif manifest created successfully."
 msgstr ""
 
-#: src/Job/CacheManifests.php:173
+#: src/Job/CacheManifests.php:175
 msgid "Item #{item_id}: {count} iiif manifests created successfully."
 msgstr ""
 
-#: src/Job/CacheManifests.php:204
+#: src/Job/CacheManifests.php:188
+msgid "No manifest could be created: {count} items failed."
+msgstr ""
+
+#: src/Job/CacheManifests.php:210
 msgid ""
 "The server url is unknown or local (\"{url}\"), so the manifests would "
 "contain invalid urls. Run the job from the admin interface or via the cli "
@@ -660,7 +670,11 @@ msgid ""
 "already sized (skipped), {count_failed} errors."
 msgstr ""
 
-#: src/Job/MediaDimensions.php:329
+#: src/Job/MediaDimensions.php:244
+msgid "No media could be sized: {count} errors."
+msgstr ""
+
+#: src/Job/MediaDimensions.php:336
 msgid "Media #{media_id}: Error getting dimensions for types \"{types}\"."
 msgstr ""
 
@@ -668,19 +682,19 @@ msgstr ""
 msgid "No property defined for structure."
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:51
+#: src/Job/UpgradeStructures.php:50
 msgid "A query was set but invalid or empty."
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:61
+#: src/Job/UpgradeStructures.php:59
 msgid "A query was set but returned no items."
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:88
+#: src/Job/UpgradeStructures.php:86
 msgid "No structure to process."
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:119
+#: src/Job/UpgradeStructures.php:117
 msgid ""
 "Old structure for item #{item_id}:\n"
 "{toc}\n"
@@ -688,13 +702,13 @@ msgid ""
 "{toc_2}"
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:127
+#: src/Job/UpgradeStructures.php:125
 msgid ""
 "A total of {count}/{total} values in property {term} were converted. "
 "{count_2} were not old table of contents and were skipped."
 msgstr ""
 
-#: src/Job/UpgradeStructures.php:132
+#: src/Job/UpgradeStructures.php:130
 msgid ""
 "A total of {total} tables of contents (values in property {term}) were "
 "converted."
@@ -1702,14 +1716,16 @@ msgid "Filename with extension (image only)"
 msgstr ""
 
 #: src/Form/ConfigForm.php:1193
-msgid "Append \"info.json\" to the image iiif identifier"
+msgid ""
+"Append \"info.json\" to the image iiif identifier (external image server "
+"only)"
 msgstr ""
 
 #: src/Form/ConfigForm.php:1194
 msgid ""
 "May be required with an external image server that doesn’t manage the url "
 "rewriting to /info.json (iiif specification requires a redirection with http "
-"303)."
+"303). Ignored without the url of an external image server."
 msgstr ""
 
 #: src/Form/ConfigForm.php:1206

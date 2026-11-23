@@ -1190,8 +1190,8 @@ class ConfigForm extends Form
                 'type' => CommonElement\OptionalCheckbox::class,
                 'options' => [
                     'tab' => 'image_server',
-                    'label' => 'Append "info.json" to the image iiif identifier', // @translate
-                    'info' => 'May be required with an external image server that doesn’t manage the url rewriting to /info.json (iiif specification requires a redirection with http 303).', // @translate
+                    'label' => 'Append "info.json" to the image iiif identifier (external image server only)', // @translate
+                    'info' => 'May be required with an external image server that doesn’t manage the url rewriting to /info.json (iiif specification requires a redirection with http 303). Ignored without the url of an external image server.', // @translate
                 ],
                 'attributes' => [
                     'id' => 'iiifserver_media_api_identifier_infojson',
