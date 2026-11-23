@@ -387,6 +387,23 @@ class IiifManifest2 extends AbstractHelper
             }
         }
         unset($medias);
+
+        // The pages of a pdf may be displayed as images by the image server, so
+        // a pdf has one canvas by page, like in the manifest v3, when the item
+        // has no image. It is still available for download.
+        $pdfPagesByMedia = [];
+        if (!$images && $this->settings->get('iiifserver_manifest_pdf_pages')) {
+            $pdfPageSizes = $this->view->plugin('pdfPageSizes');
+            foreach ($nonImages as $media) {
+                if ($media->mediaType() === 'application/pdf'
+                    && ($pages = $pdfPageSizes($media))
+                ) {
+                    $pdfPagesByMedia[$media->id()] = $pages;
+                    $images[] = $media;
+                }
+            }
+        }
+
         $totalImages = count($images);
 
         $is3dModel = isset($mediaMain3d);
@@ -433,6 +450,12 @@ class IiifManifest2 extends AbstractHelper
         if (!$is3dModel) {
             $imageNumber = 0;
             foreach ($images as $media) {
+                if (isset($pdfPagesByMedia[$media->id()])) {
+                    foreach ($pdfPagesByMedia[$media->id()] as $pageIndex => $pageSize) {
+                        $canvases[] = $this->_iiifCanvasPdfPage($media, $pageIndex + 1, $pageSize, ++$imageNumber);
+                    }
+                    continue;
+                }
                 $canvas = $this->_iiifCanvasImage($media, ++$imageNumber);
 
                 // TODO Add other content.
@@ -1100,6 +1123,59 @@ class IiifManifest2 extends AbstractHelper
         if ($metadata) {
             $canvas['metadata'] = $metadata;
         }
+
+        return $canvas;
+    }
+
+    /**
+     * Create an IIIF canvas object for a page of a pdf, served as an image.
+     *
+     * The page is an image served by the image server, with the size of the
+     * page in points for the canvas, the same unit than the ocr.
+     *
+     * @see \IiifServer\Iiif\Canvas::pdfPageAnnotationPage()
+     */
+    protected function _iiifCanvasPdfPage(MediaRepresentation $media, int $page, array $pageSize, int $index): array
+    {
+        $canvasUrl = $this->baseUrlIiif . '/canvas/p' . $index;
+        $width = $pageSize['width'] ?? null;
+        $height = $pageSize['height'] ?? null;
+
+        $serviceUrl = $this->view->iiifMediaUrl($media, 'imageserver/id', '2', ['page' => $page]);
+        $contextUri = $this->iiifImageServiceUri('2');
+        $profileUri = $this->iiifImageProfileUri($contextUri, '2');
+
+        $canvas = [
+            '@id' => $canvasUrl,
+            '@type' => 'sc:Canvas',
+            'label' => (string) $page,
+            'width' => $width,
+            'height' => $height,
+        ];
+
+        $seeAlso = $this->seeAlso($media, $index);
+        if ($seeAlso) {
+            $canvas['seeAlso'] = $seeAlso;
+            $otherContent = $this->otherContents($media, $index);
+            if ($otherContent) {
+                $canvas['otherContent'] = $otherContent;
+            }
+        }
+
+        $canvas['images'] = [[
+            '@id' => $this->baseUrlIiif . '/annotation/p' . sprintf('%04d', $index) . '-image',
+            '@type' => 'oa:Annotation',
+            'motivation' => 'sc:painting',
+            'resource' => [
+                '@id' => $serviceUrl . '/full/full/0/default.jpg',
+                '@type' => 'dctypes:Image',
+                'format' => 'image/jpeg',
+                'width' => $width,
+                'height' => $height,
+                'service' => $this->iiifImageService($serviceUrl, $contextUri, $profileUri),
+            ],
+            'on' => $canvasUrl,
+        ]];
 
         return $canvas;
     }
