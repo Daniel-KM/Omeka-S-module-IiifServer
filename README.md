@@ -277,9 +277,9 @@ Image servers:
   vips at the resolution of the option of this module, then processed like an
   image.
 
-Only the manifests v3 are managed for now. A pdf reserved by the module Access
-keeps a single canvas, and the pdf of an item that has images is not displayed,
-but available as a download.
+The manifests v2 and v3 are managed. A pdf reserved by the module Access keeps a
+single canvas, and the pdf of an item that has images is not displayed, but
+available as a download.
 
 
 Theme development
