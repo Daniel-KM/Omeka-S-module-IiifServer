@@ -142,13 +142,22 @@ class PresentationController extends AbstractActionController
             ? $this->iiifAccessCache()->accessFilterForVisitor((int) $resource->id())
             : AbstractResourceType::ACCESS_FILTER_ALL;
 
+        $isViewAll = $this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
+
+        // A user that owns a private resource sees it whatever its rights, so
+        // its manifest cannot be shared with anybody else.
+        $user = $this->identity();
+        $owner = $user ? $resource->owner() : null;
+        $isOwner = $owner && (int) $owner->id() === (int) $user->getId();
+
         // Compute conditional-cache validators (ETag + Last-Modified) from the
         // item modified date and the max modified date of its media. Only the
-        // manifest without reserved medias is the same for everybody, so it is
-        // the only one a shared proxy may store. Skip 304 entirely for
-        // privileged users, whose manifests contain the private medias.
-        $canCache304 = !$this->userIsAllowed('Omeka\Entity\Resource', 'view-all')
-            && $accessFilter === AbstractResourceType::ACCESS_FILTER_FREE;
+        // manifest without private or reserved medias is the same for everybody,
+        // so it is the only one a shared proxy may store. Without module Access,
+        // the filter is always "all", but only the public medias are visible.
+        $canCache304 = !$isViewAll
+            && !$isOwner
+            && (!$hasAccessModule || $accessFilter === AbstractResourceType::ACCESS_FILTER_FREE);
         $mtime = $this->manifestMtime($resource);
         $etag = '"manifest-' . ($version ?: 'auto') . '-' . $resource->id() . '-' . $accessFilter . '-' . $mtime . '"';
         if ($canCache304) {
@@ -183,14 +192,7 @@ class PresentationController extends AbstractActionController
 
         // Don't use cache for privileged users: they should see private media
         // in fresh manifests. Cached manifests only contain public media.
-        $skipCache = $this->userIsAllowed('Omeka\Entity\Resource', 'view-all');
-
-        // A user that owns a private resource sees it whatever its rights, so
-        // its manifest cannot be shared with anybody else.
-        if (!$skipCache && ($user = $this->identity())) {
-            $owner = $resource->owner();
-            $skipCache = $owner && (int) $owner->id() === (int) $user->getId();
-        }
+        $skipCache = $isViewAll || $isOwner;
 
         // Nevertheless, the cached manifest is the same for them when there is
         // no private data in the item. It is only read: a manifest built with
